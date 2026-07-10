@@ -7,8 +7,6 @@ import { getProductsByMaker } from '@/services/products';
 import { getCraftById } from '@/services/crafts';
 import { ProductCard } from '@/components/cards/product-card';
 
-export const dynamicParams = false;
-
 export async function generateStaticParams() {
   const makers = await getPublicMakers();
   return makers.map((maker) => ({ slug: maker.slug }));

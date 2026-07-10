@@ -1,8 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getAllProducts } from '@/services/products';
 
-export const dynamicParams = false;
-
 export async function generateStaticParams() {
   const products = await getAllProducts();
   return products.map((p) => ({ productCode: p.productCode }));

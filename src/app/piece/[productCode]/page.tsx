@@ -9,8 +9,6 @@ import {
 } from '@/components/provenance';
 import { PiecePageClient } from './piece-page-client';
 
-export const dynamicParams = false;
-
 export async function generateStaticParams() {
   const products = await getAllProducts();
   return products.map((p) => ({ productCode: p.productCode }));
