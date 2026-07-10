@@ -1,0 +1,209 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { Mail, Send } from 'lucide-react';
+import { submitContactEnquiry } from '@/services/enquiries';
+import type { ContactReason } from '@/types';
+
+export default function ContactPage() {
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    reason: 'general' as ContactReason,
+    message: '',
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  function validate() {
+    const newErrors: Record<string, string> = {};
+    if (!form.name.trim()) newErrors.name = 'Name is required';
+    if (!form.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    if (!form.message.trim()) newErrors.message = 'Message is required';
+    return newErrors;
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const newErrors = validate();
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
+    setSubmitting(true);
+    await submitContactEnquiry(form);
+    setSubmitting(false);
+    setSubmitted(true);
+  }
+
+  if (submitted) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
+        <div className="max-w-md mx-auto text-center">
+          <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6">
+            <Send className="w-8 h-8 text-success" />
+          </div>
+          <h1 className="font-heading text-2xl font-bold text-deep-blue mb-3">
+            Message sent
+          </h1>
+          <p className="text-warm-gray-600">
+            Thanks for getting in touch. We&apos;ll get back to you as soon as we can.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
+      <h1 className="font-heading text-3xl md:text-4xl font-bold text-deep-blue mb-4">
+        Contact
+      </h1>
+      <p className="text-lg text-warm-gray-600 max-w-2xl leading-relaxed mb-12">
+        Get in touch with the Solomon Islands Arts and Crafts team.
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        {/* Contact Form */}
+        <form onSubmit={handleSubmit} noValidate className="space-y-6">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+              aria-describedby={errors.name ? 'name-error' : undefined}
+              aria-invalid={!!errors.name}
+            />
+            {errors.name && (
+              <p id="name-error" className="text-sm text-error mt-1" aria-live="assertive">
+                {errors.name}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+              aria-describedby={errors.email ? 'email-error' : undefined}
+              aria-invalid={!!errors.email}
+            />
+            {errors.email && (
+              <p id="email-error" className="text-sm text-error mt-1" aria-live="assertive">
+                {errors.email}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="reason" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              Reason for contact
+            </label>
+            <select
+              id="reason"
+              value={form.reason}
+              onChange={(e) => setForm({ ...form, reason: e.target.value as ContactReason })}
+              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+            >
+              <option value="general">General enquiry</option>
+              <option value="media">Media &amp; press</option>
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="message" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              Message
+            </label>
+            <textarea
+              id="message"
+              rows={5}
+              value={form.message}
+              onChange={(e) => setForm({ ...form, message: e.target.value })}
+              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent resize-y"
+              aria-describedby={errors.message ? 'message-error' : undefined}
+              aria-invalid={!!errors.message}
+            />
+            {errors.message && (
+              <p id="message-error" className="text-sm text-error mt-1" aria-live="assertive">
+                {errors.message}
+              </p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="tap-target inline-flex items-center gap-2 px-6 py-3 bg-terracotta hover:bg-terracotta-dark disabled:opacity-50 text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
+          >
+            <Send className="w-4 h-4" />
+            {submitting ? 'Sending...' : 'Send message'}
+          </button>
+        </form>
+
+        {/* Contact Info */}
+        <div className="space-y-8">
+          <div>
+            <h2 className="font-heading text-xl font-bold text-deep-blue mb-3">
+              Email us
+            </h2>
+            <a
+              href="mailto:hello@siac.org.au"
+              className="inline-flex items-center gap-2 text-ocean hover:text-ocean-dark transition-colors"
+            >
+              <Mail className="w-5 h-5" />
+              hello@siac.org.au
+            </a>
+          </div>
+
+          <div>
+            <h2 className="font-heading text-xl font-bold text-deep-blue mb-3">
+              Wholesale enquiries
+            </h2>
+            <p className="text-warm-gray-600 mb-3">
+              Interested in stocking SI Crafts in your museum or gallery shop?
+            </p>
+            <Link
+              href="/wholesale"
+              className="text-ocean hover:text-ocean-dark font-medium transition-colors"
+            >
+              Visit our Wholesale page →
+            </Link>
+          </div>
+
+          <div>
+            <h2 className="font-heading text-xl font-bold text-deep-blue mb-3">
+              Media &amp; press
+            </h2>
+            <p className="text-warm-gray-600">
+              For interview requests, features, or press enquiries, select &ldquo;Media &amp; press&rdquo;
+              in the form and we&apos;ll prioritise your message.
+            </p>
+          </div>
+
+          <div className="bg-sand-light rounded-lg p-6">
+            <p className="text-sm text-warm-gray-600">
+              We&apos;re a small volunteer team based in Melbourne, Australia.
+              We aim to respond to all enquiries within 2–3 business days.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,43 @@
+import type { Stockist } from '@/types';
+
+export const mockStockists: Stockist[] = [
+  {
+    id: 'stockist-1',
+    businessName: 'Pacific Gallery Melbourne',
+    abn: '12345678901',
+    contactName: 'Sarah Chen',
+    email: 'sarah@pacificgallery.com.au',
+    phone: '03 9123 4567',
+    description: 'Contemporary Pacific art gallery in Fitzroy, specialising in Melanesian and Polynesian works.',
+    status: 'approved',
+    passwordHash: 'demo123',
+    createdAt: '2024-02-01T00:00:00Z',
+    updatedAt: '2024-03-01T00:00:00Z',
+  },
+  {
+    id: 'stockist-2',
+    businessName: 'National Museum Gift Shop',
+    abn: '98765432109',
+    contactName: 'David Park',
+    email: 'david@museumshop.org.au',
+    phone: '02 8765 4321',
+    description: 'Gift shop at the National Museum, Canberra. Focus on authentic cultural objects and educational items.',
+    status: 'approved',
+    passwordHash: 'demo456',
+    createdAt: '2024-02-15T00:00:00Z',
+    updatedAt: '2024-03-10T00:00:00Z',
+  },
+  {
+    id: 'stockist-3',
+    businessName: 'Oceanic Treasures Brisbane',
+    abn: '55566677788',
+    contactName: 'Emma Wilson',
+    email: 'emma@oceanictreasures.com.au',
+    phone: '07 3456 7890',
+    description: 'Retail shop in West End specialising in Pacific Islands crafts and homewares.',
+    status: 'pending',
+    passwordHash: 'demo789',
+    createdAt: '2024-05-01T00:00:00Z',
+    updatedAt: '2024-05-01T00:00:00Z',
+  },
+];
