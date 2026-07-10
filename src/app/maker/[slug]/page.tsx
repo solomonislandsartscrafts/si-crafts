@@ -2,10 +2,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
-import { getPublicMakerBySlug } from '@/services/makers';
+import { getPublicMakers, getPublicMakerBySlug } from '@/services/makers';
 import { getProductsByMaker } from '@/services/products';
 import { getCraftById } from '@/services/crafts';
 import { ProductCard } from '@/components/cards/product-card';
+
+export async function generateStaticParams() {
+  const makers = await getPublicMakers();
+  return makers.map((maker) => ({ slug: maker.slug }));
+}
 
 interface MakerPageProps {
   params: Promise<{ slug: string }>;

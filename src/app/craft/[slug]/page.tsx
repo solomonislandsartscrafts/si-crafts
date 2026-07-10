@@ -2,11 +2,16 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
-import { getCraftBySlug } from '@/services/crafts';
+import { getAllCrafts, getCraftBySlug } from '@/services/crafts';
 import { getMakersByCraft } from '@/services/makers';
 import { getPublicProducts } from '@/services/products';
 import { MakerCard } from '@/components/cards/maker-card';
 import { ProductCard } from '@/components/cards/product-card';
+
+export async function generateStaticParams() {
+  const crafts = await getAllCrafts();
+  return crafts.map((craft) => ({ slug: craft.slug }));
+}
 
 interface CraftPageProps {
   params: Promise<{ slug: string }>;

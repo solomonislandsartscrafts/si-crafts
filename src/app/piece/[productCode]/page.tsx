@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { getProductByCode } from '@/services/products';
+import { getAllProducts, getProductByCode } from '@/services/products';
 import { getMakerById } from '@/services/makers';
 import { getCraftById } from '@/services/crafts';
 import {
@@ -8,6 +8,11 @@ import {
   WhereToBuy,
 } from '@/components/provenance';
 import { PiecePageClient } from './piece-page-client';
+
+export async function generateStaticParams() {
+  const products = await getAllProducts();
+  return products.map((p) => ({ productCode: p.productCode }));
+}
 
 interface PiecePageProps {
   params: Promise<{ productCode: string }>;
