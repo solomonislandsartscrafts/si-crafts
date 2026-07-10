@@ -135,7 +135,7 @@ export default function CataloguePage() {
           {Object.entries(grouped).map(([key, groupProducts]) => (
             <section key={key}>
               <h2 className="font-heading text-xl font-bold text-deep-blue mb-4 capitalize">
-                {labels[key] || key}
+                {labels[key as MaterialCategory] || key}
               </h2>
               <ProductGrid products={groupProducts} makers={makers} />
             </section>
