@@ -1,13 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
 import type { Craft } from '@/types';
 import { AdminLayout } from '@/components/admin';
+import { CraftFormModal, type CraftFormData } from '@/components/admin/craft-form-modal';
 
 export default function AdminCraftsPage() {
   const [crafts, setCrafts] = useState<Craft[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingCraft, setEditingCraft] = useState<Craft | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => { loadCrafts(); }, []);
 
@@ -18,15 +21,53 @@ export default function AdminCraftsPage() {
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+    if (!confirm(`Are you sure you want to delete "${name}"? This cannot be undone.`)) return;
     const { deleteCraft } = await import('@/services/crafts');
     await deleteCraft(id);
     loadCrafts();
   }
 
+  function handleEdit(craft: Craft) {
+    setEditingCraft(craft);
+    setShowForm(true);
+  }
+
+  function handleAdd() {
+    setEditingCraft(null);
+    setShowForm(true);
+  }
+
+  async function handleSave(data: CraftFormData) {
+    if (editingCraft) {
+      const { updateCraft } = await import('@/services/crafts');
+      await updateCraft(editingCraft.id, {
+        ...data,
+        culturalContext: data.culturalContext || null,
+      });
+    } else {
+      const { createCraft } = await import('@/services/crafts');
+      await createCraft({
+        ...data,
+        culturalContext: data.culturalContext || null,
+      });
+    }
+    setShowForm(false);
+    setEditingCraft(null);
+    loadCrafts();
+  }
+
   return (
     <AdminLayout>
-      <h1 className="font-heading text-2xl font-bold text-deep-blue mb-6">Crafts</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-heading text-2xl font-bold text-deep-blue">Crafts</h1>
+        <button
+          onClick={handleAdd}
+          className="tap-target inline-flex items-center gap-2 px-4 py-2 bg-ocean hover:bg-ocean-dark text-white rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+        >
+          <Plus className="w-4 h-4" /> Add Craft
+        </button>
+      </div>
+
       {loading ? <p className="text-warm-gray-400">Loading...</p> : (
         <div className="bg-white rounded-lg shadow-card overflow-hidden">
           <table className="w-full text-sm">
@@ -50,8 +91,20 @@ export default function AdminCraftsPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="tap-target p-2 text-warm-gray-400 hover:text-ocean" aria-label={`Edit ${craft.name}`}><Edit className="w-4 h-4" /></button>
-                      <button onClick={() => handleDelete(craft.id, craft.name)} className="tap-target p-2 text-warm-gray-400 hover:text-error" aria-label={`Delete ${craft.name}`}><Trash2 className="w-4 h-4" /></button>
+                      <button
+                        onClick={() => handleEdit(craft)}
+                        className="tap-target p-2 text-warm-gray-400 hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                        aria-label={`Edit ${craft.name}`}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(craft.id, craft.name)}
+                        className="tap-target p-2 text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                        aria-label={`Delete ${craft.name}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -59,6 +112,14 @@ export default function AdminCraftsPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {showForm && (
+        <CraftFormModal
+          craft={editingCraft}
+          onClose={() => { setShowForm(false); setEditingCraft(null); }}
+          onSave={handleSave}
+        />
       )}
     </AdminLayout>
   );

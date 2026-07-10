@@ -1,0 +1,225 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
+import type { Craft, MaterialCategory, CulturalReviewStatus } from '@/types';
+
+interface CraftFormModalProps {
+  craft: Craft | null; // null = create mode
+  onClose: () => void;
+  onSave: (data: CraftFormData) => Promise<void>;
+}
+
+export interface CraftFormData {
+  name: string;
+  slug: string;
+  description: string;
+  materialCategory: MaterialCategory;
+  culturalContext: string;
+  culturalContextReviewFlag: CulturalReviewStatus;
+  processImageUrls: string[];
+}
+
+const MATERIAL_OPTIONS: { value: MaterialCategory; label: string }[] = [
+  { value: 'pandanus', label: 'Pandanus' },
+  { value: 'wood', label: 'Wood' },
+  { value: 'shells', label: 'Shells' },
+];
+
+export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) {
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const [form, setForm] = useState<CraftFormData>({
+    name: craft?.name ?? '',
+    slug: craft?.slug ?? '',
+    description: craft?.description ?? '',
+    materialCategory: craft?.materialCategory ?? 'pandanus',
+    culturalContext: craft?.culturalContext ?? '',
+    culturalContextReviewFlag: craft?.culturalContextReviewFlag ?? 'unreviewed',
+    processImageUrls: craft?.processImageUrls ?? [],
+  });
+
+  // Auto-generate slug from name
+  useEffect(() => {
+    if (!craft) {
+      setForm((prev) => ({
+        ...prev,
+        slug: prev.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, ''),
+      }));
+    }
+  }, [form.name, craft]);
+
+  function validate(): boolean {
+    const errs: Record<string, string> = {};
+    if (!form.name.trim()) errs.name = 'Name is required';
+    if (!form.description.trim()) errs.description = 'Description is required';
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!validate()) return;
+    setSaving(true);
+    await onSave(form);
+    setSaving(false);
+  }
+
+  function handleChange(field: keyof CraftFormData, value: string | string[]) {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50" onClick={onClose}>
+      <div
+        className="bg-white rounded-lg shadow-md w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="craft-form-title"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-sand">
+          <h2 id="craft-form-title" className="font-heading text-xl font-bold text-deep-blue">
+            {craft ? 'Edit Craft' : 'Add Craft'}
+          </h2>
+          <button
+            onClick={onClose}
+            className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+          {/* Name */}
+          <div>
+            <label htmlFor="craft-name" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              Name *
+            </label>
+            <input
+              id="craft-name"
+              type="text"
+              value={form.name}
+              onChange={(e) => handleChange('name', e.target.value)}
+              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+              aria-describedby={errors.name ? 'craft-name-error' : undefined}
+            />
+            {errors.name && <p id="craft-name-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.name}</p>}
+          </div>
+
+          {/* Material Category */}
+          <div>
+            <label htmlFor="craft-material" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              Material Category *
+            </label>
+            <select
+              id="craft-material"
+              value={form.materialCategory}
+              onChange={(e) => handleChange('materialCategory', e.target.value)}
+              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+            >
+              {MATERIAL_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Description */}
+          <div>
+            <label htmlFor="craft-description" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              Description *
+            </label>
+            <textarea
+              id="craft-description"
+              value={form.description}
+              onChange={(e) => handleChange('description', e.target.value)}
+              rows={4}
+              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent resize-y"
+              aria-describedby={errors.description ? 'craft-desc-error' : undefined}
+            />
+            {errors.description && <p id="craft-desc-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.description}</p>}
+          </div>
+
+          {/* Cultural Context */}
+          <div>
+            <label htmlFor="craft-cultural" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              Cultural Context
+            </label>
+            <textarea
+              id="craft-cultural"
+              value={form.culturalContext}
+              onChange={(e) => handleChange('culturalContext', e.target.value)}
+              rows={3}
+              placeholder="Describe the cultural significance of this craft..."
+              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent resize-y"
+            />
+          </div>
+
+          {/* Cultural Review Flag */}
+          <div className="flex items-center gap-3">
+            <input
+              id="craft-cultural-review"
+              type="checkbox"
+              checked={form.culturalContextReviewFlag === 'reviewed'}
+              onChange={(e) =>
+                handleChange('culturalContextReviewFlag', e.target.checked ? 'reviewed' : 'unreviewed')
+              }
+              className="w-4 h-4 rounded border-sand-dark text-ocean focus:ring-ocean"
+            />
+            <label htmlFor="craft-cultural-review" className="text-sm text-warm-gray-800">
+              Cultural context reviewed by cultural partner
+            </label>
+          </div>
+
+          {/* Process Image URL */}
+          <div>
+            <label htmlFor="craft-image" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              Process Image URL
+            </label>
+            <input
+              id="craft-image"
+              type="text"
+              value={form.processImageUrls[0] ?? ''}
+              onChange={(e) => handleChange('processImageUrls', e.target.value ? [e.target.value] : [])}
+              placeholder="/images/craft-process.jpg"
+              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+            />
+            <p className="text-xs text-warm-gray-400 mt-1">Enter image path or URL. Multi-image upload available after CMS integration.</p>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
+            <button
+              type="button"
+              onClick={onClose}
+              className="tap-target px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="tap-target px-6 py-3 bg-terracotta hover:bg-terracotta-dark text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light disabled:opacity-50"
+            >
+              {saving ? 'Saving...' : craft ? 'Update Craft' : 'Create Craft'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

@@ -4,10 +4,13 @@ import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import type { Product } from '@/types';
 import { AdminLayout } from '@/components/admin';
+import { ProductFormModal, type ProductFormData } from '@/components/admin/product-form-modal';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => { loadProducts(); }, []);
 
@@ -25,11 +28,45 @@ export default function AdminProductsPage() {
     loadProducts();
   }
 
+  function handleEdit(product: Product) {
+    setEditingProduct(product);
+    setShowForm(true);
+  }
+
+  function handleAdd() {
+    setEditingProduct(null);
+    setShowForm(true);
+  }
+
+  async function handleSave(data: ProductFormData) {
+    if (editingProduct) {
+      const { updateProduct } = await import('@/services/products');
+      await updateProduct(editingProduct.id, {
+        ...data,
+        dimensions: data.dimensions || null,
+        careNotes: data.careNotes || null,
+      });
+    } else {
+      const { createProduct } = await import('@/services/products');
+      await createProduct({
+        ...data,
+        dimensions: data.dimensions || null,
+        careNotes: data.careNotes || null,
+      });
+    }
+    setShowForm(false);
+    setEditingProduct(null);
+    loadProducts();
+  }
+
   return (
     <AdminLayout>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-heading text-2xl font-bold text-deep-blue">Products</h1>
-        <button className="tap-target inline-flex items-center gap-2 px-4 py-2 bg-ocean hover:bg-ocean-dark text-white rounded-md text-sm font-medium transition-colors">
+        <button
+          onClick={handleAdd}
+          className="tap-target inline-flex items-center gap-2 px-4 py-2 bg-ocean hover:bg-ocean-dark text-white rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+        >
           <Plus className="w-4 h-4" /> Add Product
         </button>
       </div>
@@ -57,11 +94,16 @@ export default function AdminProductsPage() {
                   <td className="px-4 py-3 text-warm-gray-600 hidden lg:table-cell">A${product.wholesalePrice.toFixed(2)}</td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="tap-target p-2 text-warm-gray-400 hover:text-ocean transition-colors" aria-label={`Edit ${product.name}`}>
+                      <button
+                        onClick={() => handleEdit(product)}
+                        className="tap-target p-2 text-warm-gray-400 hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                        aria-label={`Edit ${product.name}`}
+                      >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button onClick={() => handleDelete(product.id, product.name)}
-                        className="tap-target p-2 text-warm-gray-400 hover:text-error transition-colors" aria-label={`Delete ${product.name}`}>
+                        className="tap-target p-2 text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                        aria-label={`Delete ${product.name}`}>
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -71,6 +113,14 @@ export default function AdminProductsPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {showForm && (
+        <ProductFormModal
+          product={editingProduct}
+          onClose={() => { setShowForm(false); setEditingProduct(null); }}
+          onSave={handleSave}
+        />
       )}
     </AdminLayout>
   );
