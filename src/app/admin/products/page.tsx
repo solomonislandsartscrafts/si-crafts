@@ -39,24 +39,28 @@ export default function AdminProductsPage() {
   }
 
   async function handleSave(data: ProductFormData) {
-    if (editingProduct) {
-      const { updateProduct } = await import('@/services/products');
-      await updateProduct(editingProduct.id, {
-        ...data,
-        dimensions: data.dimensions || null,
-        careNotes: data.careNotes || null,
-      });
-    } else {
-      const { createProduct } = await import('@/services/products');
-      await createProduct({
-        ...data,
-        dimensions: data.dimensions || null,
-        careNotes: data.careNotes || null,
-      });
+    try {
+      if (editingProduct) {
+        const { updateProduct } = await import('@/services/products');
+        await updateProduct(editingProduct.id, {
+          ...data,
+          dimensions: data.dimensions || null,
+          careNotes: data.careNotes || null,
+        });
+      } else {
+        const { createProduct } = await import('@/services/products');
+        await createProduct({
+          ...data,
+          dimensions: data.dimensions || null,
+          careNotes: data.careNotes || null,
+        });
+      }
+      setShowForm(false);
+      setEditingProduct(null);
+      loadProducts();
+    } catch (err) {
+      throw err;
     }
-    setShowForm(false);
-    setEditingProduct(null);
-    loadProducts();
   }
 
   return (

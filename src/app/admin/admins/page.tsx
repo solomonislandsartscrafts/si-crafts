@@ -40,7 +40,7 @@ export default function AdminAdminsPage() {
         <h1 className="font-heading text-2xl font-bold text-deep-blue">
           Admin Users
         </h1>
-        <button className="tap-target inline-flex items-center gap-2 px-4 py-2 bg-ocean hover:bg-ocean-dark text-white rounded-md text-sm font-medium">
+        <button className="tap-target inline-flex items-center gap-2 px-4 py-2 bg-ocean hover:bg-ocean-dark text-white rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light">
           <Plus className="w-4 h-4" /> Add Admin
         </button>
       </div>
@@ -91,13 +91,13 @@ export default function AdminAdminsPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="tap-target p-2 text-warm-gray-400 hover:text-ocean" aria-label={`Edit ${admin.name}`}>
+                      <button className="tap-target p-2 text-warm-gray-400 hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean" aria-label={`Edit ${admin.name}`}>
                         <Edit className="w-4 h-4" />
                       </button>
                       {admin.isActive && (
                         <button
                           onClick={() => handleDeactivate(admin.id, admin.name)}
-                          className="tap-target p-2 text-warm-gray-400 hover:text-error"
+                          className="tap-target p-2 text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
                           aria-label={`Deactivate ${admin.name}`}
                         >
                           <Trash2 className="w-4 h-4" />

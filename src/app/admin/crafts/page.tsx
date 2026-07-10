@@ -38,22 +38,26 @@ export default function AdminCraftsPage() {
   }
 
   async function handleSave(data: CraftFormData) {
-    if (editingCraft) {
-      const { updateCraft } = await import('@/services/crafts');
-      await updateCraft(editingCraft.id, {
-        ...data,
-        culturalContext: data.culturalContext || null,
-      });
-    } else {
-      const { createCraft } = await import('@/services/crafts');
-      await createCraft({
-        ...data,
-        culturalContext: data.culturalContext || null,
-      });
+    try {
+      if (editingCraft) {
+        const { updateCraft } = await import('@/services/crafts');
+        await updateCraft(editingCraft.id, {
+          ...data,
+          culturalContext: data.culturalContext || null,
+        });
+      } else {
+        const { createCraft } = await import('@/services/crafts');
+        await createCraft({
+          ...data,
+          culturalContext: data.culturalContext || null,
+        });
+      }
+      setShowForm(false);
+      setEditingCraft(null);
+      loadCrafts();
+    } catch (err) {
+      throw err; // Re-throw so the modal's try/catch surfaces the error
     }
-    setShowForm(false);
-    setEditingCraft(null);
-    loadCrafts();
   }
 
   return (

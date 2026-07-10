@@ -46,24 +46,28 @@ export default function AdminMakersPage() {
   }
 
   async function handleSave(data: MakerFormData) {
-    if (editingMaker) {
-      const { updateMaker } = await import('@/services/makers');
-      await updateMaker(editingMaker.id, {
-        ...data,
-        portraitUrl: data.portraitUrl || null,
-        story: data.story || null,
-      });
-    } else {
-      const { createMaker } = await import('@/services/makers');
-      await createMaker({
-        ...data,
-        portraitUrl: data.portraitUrl || null,
-        story: data.story || null,
-      });
+    try {
+      if (editingMaker) {
+        const { updateMaker } = await import('@/services/makers');
+        await updateMaker(editingMaker.id, {
+          ...data,
+          portraitUrl: data.portraitUrl || null,
+          story: data.story || null,
+        });
+      } else {
+        const { createMaker } = await import('@/services/makers');
+        await createMaker({
+          ...data,
+          portraitUrl: data.portraitUrl || null,
+          story: data.story || null,
+        });
+      }
+      setShowForm(false);
+      setEditingMaker(null);
+      loadMakers();
+    } catch (err) {
+      throw err;
     }
-    setShowForm(false);
-    setEditingMaker(null);
-    loadMakers();
   }
 
   return (

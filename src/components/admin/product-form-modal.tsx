@@ -48,6 +48,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
   const [makers, setMakers] = useState<Maker[]>([]);
   const [crafts, setCrafts] = useState<Craft[]>([]);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [form, setForm] = useState<ProductFormData>({
@@ -66,8 +67,18 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
   });
 
   useEffect(() => {
-    getAllMakers().then(setMakers);
-    getAllCrafts().then(setCrafts);
+    let mounted = true;
+    Promise.all([getAllMakers(), getAllCrafts()])
+      .then(([makersData, craftsData]) => {
+        if (mounted) {
+          setMakers(makersData);
+          setCrafts(craftsData);
+        }
+      })
+      .catch((err) => {
+        if (mounted) setSaveError(`Failed to load form data: ${err instanceof Error ? err.message : 'unknown error'}`);
+      });
+    return () => { mounted = false; };
   }, []);
 
   // Auto-generate slug from name
@@ -103,8 +114,14 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
     e.preventDefault();
     if (!validate()) return;
     setSaving(true);
-    await onSave(form);
-    setSaving(false);
+    setSaveError(null);
+    try {
+      await onSave(form);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Failed to save. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   }
 
   function handleChange(field: keyof ProductFormData, value: string | number | string[]) {
@@ -118,8 +135,12 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
     }
   }
 
+  function handleDismiss() {
+    if (!saving) onClose();
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50" onClick={handleDismiss}>
       <div
         className="bg-white rounded-lg shadow-md w-full max-w-2xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
@@ -133,8 +154,9 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
             {product ? 'Edit Product' : 'Add Product'}
           </h2>
           <button
-            onClick={onClose}
-            className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+            onClick={handleDismiss}
+            disabled={saving}
+            className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-50"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -143,6 +165,13 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+          {/* Save error banner */}
+          {saveError && (
+            <div className="bg-error/10 border border-error/20 text-error text-sm rounded-md p-3" role="alert" aria-live="assertive">
+              {saveError}
+            </div>
+          )}
+
           {/* Product Code */}
           <div>
             <label htmlFor="product-code" className="block text-sm font-medium text-warm-gray-800 mb-1">
@@ -338,8 +367,9 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
             <button
               type="button"
-              onClick={onClose}
-              className="tap-target px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+              onClick={handleDismiss}
+              disabled={saving}
+              className="tap-target px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light disabled:opacity-50"
             >
               Cancel
             </button>

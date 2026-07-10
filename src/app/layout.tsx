@@ -3,6 +3,7 @@ import { Header, Footer, SkipLink } from '@/components/layout';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://solomonislandsartsandcrafts.com.au'),
   title: {
     default: 'Solomon Islands Arts and Crafts',
     template: '%s | SI Crafts',
