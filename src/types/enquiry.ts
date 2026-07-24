@@ -37,7 +37,7 @@ export interface StockistRequest {
 }
 
 // --- Contact Enquiry ---
-export type ContactReason = 'general' | 'media';
+export type ContactReason = 'general' | 'wholesale' | 'custom-order' | 'media' | 'other';
 
 export interface ContactEnquiry {
   id: string;

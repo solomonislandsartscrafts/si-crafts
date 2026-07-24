@@ -20,7 +20,7 @@ const FOOTER_LINKS = [
 
 export function Footer() {
   return (
-    <footer className="bg-footer-bg text-white mt-section-lg">
+    <footer className="bg-footer-bg text-white mt-section-lg" role="contentinfo" aria-label="Site footer">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Three content boxes */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
@@ -33,7 +33,7 @@ export function Footer() {
               <h3 className="font-heading text-lg font-semibold text-sand-light group-hover:text-white mb-2">
                 {link.title}
               </h3>
-              <p className="text-sm text-sand/80 leading-relaxed">
+              <p className="text-base text-sand/90 leading-relaxed">
                 {link.description}
               </p>
             </Link>
@@ -42,13 +42,13 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4 text-sm text-sand/60">
+          <div className="flex items-center gap-4 text-base text-sand/80">
             <p>&copy; {new Date().getFullYear()} Solomon Islands Arts and Crafts.</p>
-            <Link href="/for-makers" className="text-sand/80 hover:text-white transition-colors">
+            <Link href="/for-makers" className="text-sand hover:text-white transition-colors underline underline-offset-2">
               For Makers
             </Link>
           </div>
-          <p className="text-xs text-sand/40">
+          <p className="text-sm text-sand/70">
             Crafts belong to Solomon Islands peoples and communities. SIAC is a conduit, not an owner.
           </p>
         </div>

@@ -90,7 +90,7 @@ export default async function CraftPage({ params }: CraftPageProps) {
       )}
 
       {/* Makers who practise this craft */}
-      <section className="mb-16">
+      <section className="mb-16 border-t border-sand pt-12">
         <h2 className="font-heading text-2xl font-bold text-deep-blue mb-6">
           Makers
         </h2>

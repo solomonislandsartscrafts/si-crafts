@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import type { Maker, ConsentStatus, CulturalReviewStatus } from '@/types';
 import { getAllCrafts } from '@/services/crafts';
 import type { Craft } from '@/types';
+import { ImageUpload } from './image-upload';
 
 interface MakerFormModalProps {
   maker: Maker | null; // null = create mode
@@ -222,21 +223,15 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
             {errors.craftId && <p id="maker-craft-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.craftId}</p>}
           </div>
 
-          {/* Portrait URL */}
-          <div>
-            <label htmlFor="maker-portrait" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Portrait URL
-            </label>
-            <input
-              id="maker-portrait"
-              type="text"
-              value={form.portraitUrl}
-              onChange={(e) => handleChange('portraitUrl', e.target.value)}
-              placeholder="/images/maker-portrait.jpg"
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-            />
-            <p className="text-xs text-warm-gray-400 mt-1">Enter image path or URL. File upload available after CMS integration.</p>
-          </div>
+          {/* Portrait */}
+          <ImageUpload
+            value={form.portraitUrl}
+            onChange={(url) => handleChange('portraitUrl', url)}
+            label="Portrait Photo"
+            aspectHint="3:4 portrait orientation"
+            maxWidth={800}
+            quality={0.82}
+          />
 
           {/* Story */}
           <div>

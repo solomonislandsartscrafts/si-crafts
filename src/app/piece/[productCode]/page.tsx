@@ -1,12 +1,8 @@
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { getAllProducts, getProductByCode } from '@/services/products';
 import { getMakerById } from '@/services/makers';
 import { getCraftById } from '@/services/crafts';
-import {
-  MakerSection,
-  WhereToBuy,
-} from '@/components/provenance';
 import { PiecePageClient } from './piece-page-client';
 
 export async function generateStaticParams() {
@@ -42,32 +38,44 @@ export default async function PiecePage({ params }: PiecePageProps) {
     );
   }
 
-  const [maker, craft] = await Promise.all([
+  const [maker, craft, allProducts] = await Promise.all([
     getMakerById(product.makerId),
     getCraftById(product.craftId),
+    getAllProducts(),
   ]);
 
   const publishedMaker = maker?.publishedFlag ? maker : null;
 
+  // Find next product for navigation
+  const currentIndex = allProducts.findIndex((p) => p.productCode === productCode);
+  const nextProduct = currentIndex >= 0 && currentIndex < allProducts.length - 1
+    ? allProducts[currentIndex + 1]
+    : null;
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
-      {/* Back link */}
-      <Link
-        href="/catalogue"
-        className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark mb-8 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to catalogue
-      </Link>
-
-      {/* Top section: Gallery + Product Info + Tabs */}
-      <PiecePageClient product={product} />
-
-      {/* Maker + Where to Buy */}
-      <div className="mt-12 max-w-2xl">
-        <MakerSection maker={publishedMaker} craft={craft} />
-        <WhereToBuy />
+      {/* Navigation */}
+      <div className="flex items-center justify-between mb-8">
+        <Link
+          href="/catalogue"
+          className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to catalogue
+        </Link>
+        {nextProduct && (
+          <Link
+            href={`/piece/${nextProduct.productCode}`}
+            className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark transition-colors"
+          >
+            Next item
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        )}
       </div>
+
+      {/* Top section: Gallery + Product Info + Maker */}
+      <PiecePageClient product={product} craftName={craft?.name} craftSlug={craft?.slug} maker={publishedMaker} craft={craft} />
     </div>
   );
 }

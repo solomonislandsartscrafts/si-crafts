@@ -47,16 +47,61 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
 
   return (
     <>
-      {/* Gallery: thumbnails left, main image right */}
-      <div className="flex gap-3">
-        {/* Vertical thumbnails */}
+      {/* Gallery: main image on top, thumbnails below */}
+      <div className="flex flex-col gap-3">
+        {/* Main image with navigation arrows */}
+        <div className="relative w-full aspect-square overflow-hidden bg-sand-light">
+          <button
+            onClick={() => setFullscreen(true)}
+            className="w-full h-full relative cursor-zoom-in focus:outline-none focus:ring-2 focus:ring-ocean"
+            aria-label="View fullscreen"
+          >
+            <Image
+              src={images[activeIndex]}
+              alt={`${alt} - image ${activeIndex + 1}`}
+              fill
+              className="object-contain p-4"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              priority
+            />
+          </button>
+
+          {/* Left/Right arrows */}
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={goPrev}
+                className="absolute left-2 top-1/2 -translate-y-1/2 tap-target w-10 h-10 flex items-center justify-center rounded-full bg-white/80 hover:bg-white text-deep-blue shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                aria-label="Previous image"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={goNext}
+                className="absolute right-2 top-1/2 -translate-y-1/2 tap-target w-10 h-10 flex items-center justify-center rounded-full bg-white/80 hover:bg-white text-deep-blue shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                aria-label="Next image"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </>
+          )}
+
+          {/* Image counter */}
+          {images.length > 1 && (
+            <span className="absolute bottom-3 right-3 bg-deep-blue/70 text-white text-xs px-2 py-1 rounded">
+              {activeIndex + 1} / {images.length}
+            </span>
+          )}
+        </div>
+
+        {/* Horizontal thumbnails below */}
         {images.length > 1 && (
-          <div className="flex flex-col gap-2 overflow-y-auto max-h-[400px] sm:max-h-[500px]">
+          <div className="flex gap-2 overflow-x-auto">
             {images.map((img, idx) => (
               <button
                 key={idx}
                 onClick={() => setActiveIndex(idx)}
-                className={`tap-target flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 relative rounded-md overflow-hidden transition-all ${
+                className={`tap-target flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 relative overflow-hidden bg-sand-light transition-all ${
                   idx === activeIndex
                     ? 'ring-2 ring-ocean opacity-100'
                     : 'opacity-50 hover:opacity-100'
@@ -67,31 +112,13 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
                   src={img}
                   alt={`${alt} thumbnail ${idx + 1}`}
                   fill
-                  className="object-cover"
-                  sizes="64px"
+                  className="object-contain p-1"
+                  sizes="80px"
                 />
               </button>
             ))}
           </div>
         )}
-
-        {/* Main image — click to fullscreen */}
-        <div className="flex-1">
-          <button
-            onClick={() => setFullscreen(true)}
-            className="w-full aspect-square relative rounded-xl overflow-hidden bg-sand-light shadow-sm cursor-zoom-in focus:outline-none focus:ring-2 focus:ring-ocean"
-            aria-label="View fullscreen"
-          >
-            <Image
-              src={images[activeIndex]}
-              alt={`${alt} - image ${activeIndex + 1}`}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-              priority
-            />
-          </button>
-        </div>
       </div>
 
       {/* Fullscreen lightbox */}

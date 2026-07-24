@@ -12,11 +12,25 @@ export default function AdminDashboardPage() {
       const { getAllMakers } = await import('@/services/makers');
       const { getAllProducts } = await import('@/services/products');
       const { getAllCrafts } = await import('@/services/crafts');
-      const { getAllStockists } = await import('@/services/stockists');
       const { getAllOrders } = await import('@/services/orders');
       const { listEnquiries } = await import('@/services/enquiries');
-      const [m, p, c, s, o, e] = await Promise.all([getAllMakers(), getAllProducts(), getAllCrafts(), getAllStockists(), getAllOrders(), listEnquiries()]);
-      setStats({ makers: m.length, products: p.length, crafts: c.length, stockists: s.length, orders: o.length, enquiries: e.filter((i) => !i.data.handled).length });
+
+      let stockistCount = 0;
+      try {
+        const token = localStorage.getItem('admin_session');
+        const stockistsRes = await fetch('/api/stockists', {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (stockistsRes.ok) {
+          const stockists = await stockistsRes.json();
+          if (Array.isArray(stockists)) stockistCount = stockists.length;
+        }
+      } catch {
+        // Stockist fetch failed — use fallback 0
+      }
+
+      const [m, p, c, o, e] = await Promise.all([getAllMakers(), getAllProducts(), getAllCrafts(), getAllOrders(), listEnquiries()]);
+      setStats({ makers: m.length, products: p.length, crafts: c.length, stockists: stockistCount, orders: o.length, enquiries: e.filter((i: { data: { handled: boolean } }) => !i.data.handled).length });
     }
     load();
   }, []);

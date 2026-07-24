@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Send, CheckCircle } from 'lucide-react';
-import { validateStockistSession } from '@/services/auth';
+import { ArrowLeft, CheckCircle } from 'lucide-react';
+import { validateStockistSession } from '@/lib/auth-client';
 import { submitStockistRequest } from '@/services/enquiries';
 import type { ReplacementTagRequest, CustomBulkRequest } from '@/types';
 
@@ -33,9 +33,9 @@ export default function StockistRequestsPage() {
   useEffect(() => {
     async function checkAuth() {
       const token = localStorage.getItem('stockist_session');
-      if (!token) { router.push('/stockist/login'); return; }
+      if (!token) { router.push('/login'); return; }
       const stockist = await validateStockistSession(token);
-      if (!stockist) { localStorage.removeItem('stockist_session'); router.push('/stockist/login'); return; }
+      if (!stockist) { localStorage.removeItem('stockist_session'); router.push('/login'); return; }
       setStockistId(stockist.id);
       setAuthenticated(true);
       setLoading(false);
@@ -183,7 +183,6 @@ export default function StockistRequestsPage() {
 
         <button type="submit" disabled={submitting}
           className="tap-target inline-flex items-center gap-2 px-6 py-3 bg-terracotta hover:bg-terracotta-dark disabled:opacity-50 text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light">
-          <Send className="w-4 h-4" />
           {submitting ? 'Submitting...' : 'Submit request'}
         </button>
       </form>

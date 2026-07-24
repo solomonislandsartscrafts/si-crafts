@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { LogOut } from 'lucide-react';
 import type { AdminUser } from '@/types';
 import { AdminSidebar } from './admin-sidebar';
-import { validateAdminSession, logoutAdmin } from '@/services/auth';
+import { validateAdminSession } from '@/lib/auth-client';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -39,12 +39,19 @@ export function AdminLayout({ children, requiredRole = null }: AdminLayoutProps)
   }, [router, requiredRole]);
 
   async function handleLogout() {
-    const token = localStorage.getItem('admin_session');
-    if (token) {
-      await logoutAdmin(token);
+    try {
+      const token = localStorage.getItem('admin_session');
+      if (token) {
+        await fetch('/api/auth/admin/logout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        });
+      }
+    } finally {
+      localStorage.removeItem('admin_session');
+      router.push('/admin/login');
     }
-    localStorage.removeItem('admin_session');
-    router.push('/admin/login');
   }
 
   if (loading) {
@@ -68,18 +75,9 @@ export function AdminLayout({ children, requiredRole = null }: AdminLayoutProps)
   if (!admin) return null;
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)]">
-      <AdminSidebar role={admin.role} />
+    <div className="flex min-h-screen">
+      <AdminSidebar role={admin.role} adminName={admin.name} onLogout={handleLogout} />
       <div className="flex-1 flex flex-col">
-        <div className="flex items-center justify-between px-6 py-3 border-b border-sand bg-white">
-          <p className="text-sm text-warm-gray-600">
-            Logged in as <strong>{admin.name}</strong> ({admin.role === 'super_admin' ? 'Super Admin' : 'Editor'})
-          </p>
-          <button onClick={handleLogout}
-            className="tap-target inline-flex items-center gap-2 px-3 py-2 text-sm text-warm-gray-600 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded-md">
-            <LogOut className="w-4 h-4" /> Logout
-          </button>
-        </div>
         <div className="flex-1 p-6 bg-warm-gray-100 overflow-auto">
           {children}
         </div>

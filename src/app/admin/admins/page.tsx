@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react';
 import { Plus, Trash2, Shield, Edit } from 'lucide-react';
 import type { AdminUser } from '@/types';
 import { AdminLayout } from '@/components/admin';
-import { getAllAdmins, deactivateAdmin } from '@/services/admins';
-import { validateAdminSession } from '@/services/auth';
 
 export default function AdminAdminsPage() {
   const [admins, setAdmins] = useState<AdminUser[]>([]);
@@ -14,8 +12,19 @@ export default function AdminAdminsPage() {
   useEffect(() => { loadAdmins(); }, []);
 
   async function loadAdmins() {
-    setAdmins(await getAllAdmins());
-    setLoading(false);
+    try {
+      const token = localStorage.getItem('admin_session');
+      const res = await fetch('/api/admins', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error('Failed to load admins');
+      const data = await res.json();
+      if (Array.isArray(data)) setAdmins(data);
+    } catch (err) {
+      console.error('[admins] Load failed:', err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleDeactivate(id: string, name: string) {
@@ -23,10 +32,13 @@ export default function AdminAdminsPage() {
     if (!confirm(msg)) return;
     const token = localStorage.getItem('admin_session');
     if (!token) return;
-    const me = await validateAdminSession(token);
-    if (!me) return;
 
-    const result = await deactivateAdmin(id, me.id);
+    const res = await fetch('/api/admins/deactivate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, token }),
+    });
+    const result = await res.json();
     if (!result) {
       alert('Cannot deactivate this account.');
       return;

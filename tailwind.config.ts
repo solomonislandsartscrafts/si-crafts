@@ -22,8 +22,8 @@ const config: Config = {
         'warm-gray': {
           100: '#F7F5F2',
           200: '#EDE9E3',
-          400: '#B8AFA3',
-          600: '#7A7067',
+          400: '#8C8277',
+          600: '#5C5349',
           800: '#4A433B',
         },
         ocean: {
@@ -45,19 +45,19 @@ const config: Config = {
         'footer-bg': '#1B3A4B',
       },
       fontFamily: {
-        body: ['Inter', 'system-ui', 'sans-serif'],
-        heading: ['Playfair Display', 'Georgia', 'serif'],
+        body: ['DM Sans', 'system-ui', 'sans-serif'],
+        heading: ['DM Sans', 'system-ui', 'sans-serif'],
       },
       fontSize: {
-        xs: '0.75rem',
-        sm: '0.875rem',
-        base: '1rem',
-        lg: '1.125rem',
-        xl: '1.25rem',
-        '2xl': '1.5rem',
-        '3xl': '1.875rem',
-        '4xl': '2.25rem',
-        '5xl': '3rem',
+        xs: '0.8125rem',
+        sm: '0.9375rem',
+        base: '1.125rem',
+        lg: '1.25rem',
+        xl: '1.375rem',
+        '2xl': '1.625rem',
+        '3xl': '2rem',
+        '4xl': '2.5rem',
+        '5xl': '3.25rem',
       },
       lineHeight: {
         body: '1.6',
@@ -65,8 +65,8 @@ const config: Config = {
         relaxed: '1.75',
       },
       spacing: {
-        section: '24px',
-        'section-lg': '48px',
+        section: '32px',
+        'section-lg': '64px',
       },
       boxShadow: {
         card: '0 2px 8px rgba(0, 0, 0, 0.06)',

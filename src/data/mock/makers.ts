@@ -8,7 +8,7 @@ export const mockMakers: Maker[] = [
     village: 'Atori',
     province: 'Guadalcanal Province',
     island: 'Guadalcanal',
-    portraitUrl: '/images/M1.png',
+    portraitUrl: '/images/pandanus/Lancy holding pandans bag resized.jpg',
     story:
       'I learned to weave from my mother when I was eight years old, sitting beside her on the veranda in Atori. She showed me how to split the pandanus leaf just right — too thick and the weave looks rough, too thin and it tears. Every bag I make carries that patience she taught me. I weave early in the morning when the air is cool and my hands are steady. My patterns come from our family — the zigzag border is something my grandmother created, and I keep it alive in every piece.',
     storyCulturalReviewFlag: 'reviewed',
@@ -25,7 +25,7 @@ export const mockMakers: Maker[] = [
     village: 'Munda',
     province: 'Western Province',
     island: 'New Georgia',
-    portraitUrl: '/images/M2.png',
+    portraitUrl: '/images/uncategorised/Rex outside his stall.jpg',
     story:
       `I carve because my father carved, and his father before him. In Munda we have always worked with kerosene wood — it is hard and beautiful when you finish it smooth. I make bowls and trays that people use every day. I like that something I shape with my hands ends up on someone's table far away. Each piece takes me about a week. I choose the wood carefully, looking for straight grain and no cracks. Then I shape it slowly, a little more each day.`,
     storyCulturalReviewFlag: 'reviewed',
@@ -42,7 +42,7 @@ export const mockMakers: Maker[] = [
     village: 'Auki',
     province: 'Malaita Province',
     island: 'Malaita',
-    portraitUrl: '/images/M3.png',
+    portraitUrl: '/images/uncategorised/Malaitan man and woman.jpg',
     story:
       'I make shell-money jewellery in Auki. My family has worked with shells for as long as anyone can remember. I collect the shells myself from the reef, then grind and drill each tiny disc by hand. A single necklace can take me three weeks. I love the sound the shells make when you run them through your fingers — like rain on a roof. Every piece I send overseas carries a bit of Malaita with it.',
     storyCulturalReviewFlag: 'reviewed',
@@ -59,7 +59,7 @@ export const mockMakers: Maker[] = [
     village: 'Gizo',
     province: 'Western Province',
     island: 'Ghizo',
-    portraitUrl: '/images/M4.png',
+    portraitUrl: '/images/pandanus/Samson with bag.jpg',
     story:
       'I weave fans and baskets in Gizo. The pandanus here grows differently from other islands — the leaves are broader, which gives my weave a different texture. I started selling my work at the Gizo market when I was sixteen. Now my daughters help me prepare the leaves. We sit together and weave while the kids play. It is good work — peaceful and productive.',
     storyCulturalReviewFlag: 'reviewed',
@@ -76,7 +76,7 @@ export const mockMakers: Maker[] = [
     village: 'Tulagi',
     province: 'Central Province',
     island: 'Tulagi',
-    portraitUrl: '/images/M5.png',
+    portraitUrl: '/images/uncategorised/Rex holding a nguzunguzu.jpg',
     story:
       'I carve small ornamental pieces — fish, dolphins, birds — from ebony and rosewood. In Tulagi we are surrounded by the sea, so marine life is what I know and what I carve. I learned from my uncle who used to carve for tourists visiting the war memorials. Now I carve for shops in Australia. It makes me proud that people on the other side of the ocean want to hold something I made with my hands.',
     storyCulturalReviewFlag: 'reviewed',

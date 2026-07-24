@@ -3,11 +3,13 @@
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { X } from 'lucide-react';
+import { X, LogIn, User, Shield } from 'lucide-react';
 
 const NAV_LINKS = [
   { href: '/catalogue', label: 'Catalogue' },
   { href: '/makers', label: 'Makers' },
+  { href: '/crafts-and-techniques', label: 'Crafts' },
+  { href: '/news', label: 'News' },
   { href: '/about', label: 'About' },
   { href: '/wholesale', label: 'Wholesale' },
   { href: '/contact', label: 'Contact' },
@@ -16,9 +18,10 @@ const NAV_LINKS = [
 interface MobileNavProps {
   isOpen: boolean;
   onClose: () => void;
+  authState: 'none' | 'stockist' | 'admin';
 }
 
-export function MobileNav({ isOpen, onClose }: MobileNavProps) {
+export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
   const navRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
@@ -109,6 +112,36 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
             {link.label}
           </Link>
         ))}
+        {authState === 'admin' && (
+          <Link
+            href="/admin/dashboard"
+            onClick={onClose}
+            className="tap-target inline-flex items-center justify-center gap-2 w-full max-w-xs mt-4 px-4 py-4 bg-deep-blue hover:bg-deep-blue/90 text-white rounded-md text-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+          >
+            <Shield className="w-5 h-5" />
+            Admin Dashboard
+          </Link>
+        )}
+        {authState === 'stockist' && (
+          <Link
+            href="/stockist/catalogue"
+            onClick={onClose}
+            className="tap-target inline-flex items-center justify-center gap-2 w-full max-w-xs mt-4 px-4 py-4 bg-ocean hover:bg-ocean-dark text-white rounded-md text-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+          >
+            <User className="w-5 h-5" />
+            My Account
+          </Link>
+        )}
+        {authState === 'none' && (
+          <Link
+            href="/login"
+            onClick={onClose}
+            className="tap-target inline-flex items-center justify-center gap-2 w-full max-w-xs mt-4 px-4 py-4 bg-terracotta hover:bg-terracotta-dark text-white rounded-md text-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
+          >
+            <LogIn className="w-5 h-5" />
+            Login
+          </Link>
+        )}
       </nav>
     </div>
   );

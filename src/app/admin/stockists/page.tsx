@@ -18,21 +18,49 @@ export default function AdminStockistsPage() {
   useEffect(() => { loadStockists(); }, []);
 
   async function loadStockists() {
-    const { getAllStockists } = await import('@/services/stockists');
-    setStockists(await getAllStockists());
-    setLoading(false);
+    try {
+      const token = localStorage.getItem('admin_session');
+      const res = await fetch('/api/stockists', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error('Failed to load stockists');
+      const data = await res.json();
+      if (Array.isArray(data)) setStockists(data);
+    } catch (err) {
+      console.error('[stockists] Load failed:', err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleApprove(id: string) {
-    const { approveStockist } = await import('@/services/stockists');
-    await approveStockist(id);
-    loadStockists();
+    try {
+      const token = localStorage.getItem('admin_session');
+      const res = await fetch('/api/stockists', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ id, action: 'approve' }),
+      });
+      if (!res.ok) { alert('Failed to approve stockist.'); return; }
+      loadStockists();
+    } catch {
+      alert('Failed to approve stockist.');
+    }
   }
 
   async function handleReject(id: string) {
-    const { rejectStockist } = await import('@/services/stockists');
-    await rejectStockist(id);
-    loadStockists();
+    try {
+      const token = localStorage.getItem('admin_session');
+      const res = await fetch('/api/stockists', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ id, action: 'reject' }),
+      });
+      if (!res.ok) { alert('Failed to reject stockist.'); return; }
+      loadStockists();
+    } catch {
+      alert('Failed to reject stockist.');
+    }
   }
 
   return (

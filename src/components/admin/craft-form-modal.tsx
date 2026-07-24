@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import type { Craft, MaterialCategory, CulturalReviewStatus } from '@/types';
+import { ImageUpload } from './image-upload';
 
 interface CraftFormModalProps {
   craft: Craft | null; // null = create mode
@@ -204,21 +205,18 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
             </label>
           </div>
 
-          {/* Process Image URL */}
-          <div>
-            <label htmlFor="craft-image" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Process Image URL
-            </label>
-            <input
-              id="craft-image"
-              type="text"
-              value={form.processImageUrls[0] ?? ''}
-              onChange={(e) => handleChange('processImageUrls', e.target.value ? [e.target.value] : [])}
-              placeholder="/images/craft-process.jpg"
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-            />
-            <p className="text-xs text-warm-gray-400 mt-1">Enter image path or URL. Multi-image upload available after CMS integration.</p>
-          </div>
+          {/* Process Image */}
+          <ImageUpload
+            value={form.processImageUrls[0] ?? ''}
+            onChange={(url) => {
+              const rest = form.processImageUrls.slice(1);
+              handleChange('processImageUrls', url ? [url, ...rest] : rest);
+            }}
+            label="Process Photo"
+            aspectHint="4:3 landscape"
+            maxWidth={1200}
+            quality={0.8}
+          />
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">

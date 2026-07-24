@@ -7,11 +7,13 @@ import type { Product, Maker, MaterialCategory } from '@/types';
 import { MakerFilter } from '@/components/catalogue/maker-filter';
 import { SearchInput } from '@/components/catalogue/search-input';
 import { ProductGrid } from '@/components/catalogue/product-grid';
+import { StockistProductGrid } from '@/components/catalogue/stockist-product-grid';
 
 const MATERIAL_LABELS: Record<MaterialCategory, string> = {
   pandanus: 'Pandanus',
   wood: 'Wood',
   shells: 'Shells',
+  'bush-twine': 'Bush-twine',
 };
 
 export default function CataloguePage() {
@@ -20,8 +22,12 @@ export default function CataloguePage() {
   const [selectedMaker, setSelectedMaker] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isStockist, setIsStockist] = useState(false);
 
   useEffect(() => {
+    // Check if stockist is logged in
+    setIsStockist(!!localStorage.getItem('stockist_session'));
+
     async function loadData() {
       const { getPublicProducts } = await import('@/services/products');
       const { getPublicMakers } = await import('@/services/makers');
@@ -36,7 +42,16 @@ export default function CataloguePage() {
     loadData();
   }, []);
 
-  // Filter products
+  // Build a maker name lookup for search
+  const makerNameMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    makers.forEach((m) => {
+      map[m.id] = m.name.toLowerCase();
+    });
+    return map;
+  }, [makers]);
+
+  // Filter products in real time as user types
   const filteredProducts = useMemo(() => {
     let result = products;
 
@@ -49,12 +64,16 @@ export default function CataloguePage() {
       result = result.filter(
         (p) =>
           p.name.toLowerCase().includes(term) ||
-          p.description.toLowerCase().includes(term)
+          p.description.toLowerCase().includes(term) ||
+          p.productCode.toLowerCase().includes(term) ||
+          p.materialCategory.toLowerCase().includes(term) ||
+          p.productType.toLowerCase().includes(term) ||
+          (makerNameMap[p.makerId] || '').includes(term)
       );
     }
 
     return result;
-  }, [products, selectedMaker, searchQuery]);
+  }, [products, selectedMaker, searchQuery, makerNameMap]);
 
   // Group products by material
   const grouped = useMemo(() => {
@@ -83,22 +102,24 @@ export default function CataloguePage() {
         Catalogue
       </h1>
       <p className="text-warm-gray-600 mb-8">
-        Browse our full collection of Solomon Islands handicrafts.
+        Browse our full collection of Solomon Islands handicrafts. All items are made from renewable, natural resources that are locally-sourced and sustainable.
       </p>
 
-      {/* Login prompt */}
-      <div className="bg-ocean/5 border border-ocean/20 rounded-lg p-4 mb-8 flex items-center gap-3">
-        <Lock className="w-5 h-5 text-ocean flex-shrink-0" />
-        <p className="text-sm text-warm-gray-600">
-          <Link href="/stockist/login" className="text-ocean font-medium hover:underline">
-            Log in as a stockist
-          </Link>{' '}
-          to view wholesale pricing.
-        </p>
-      </div>
+      {/* Login prompt — only show when NOT logged in */}
+      {!isStockist && (
+        <div className="mb-8 flex items-center gap-2 text-sm">
+          <Lock className="w-4 h-4 text-ocean flex-shrink-0" />
+          <p className="text-warm-gray-600">
+            <Link href="/login" className="text-ocean font-medium hover:underline">
+              Log in as a stockist
+            </Link>{' '}
+            to view wholesale pricing.
+          </p>
+        </div>
+      )}
 
       {/* Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-10">
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <MakerFilter
             makers={makers}
@@ -108,11 +129,6 @@ export default function CataloguePage() {
           <SearchInput value={searchQuery} onChange={setSearchQuery} />
         </div>
       </div>
-
-      {/* Results count */}
-      <p className="text-sm text-warm-gray-400 mb-6" aria-live="polite">
-        {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} found
-      </p>
 
       {/* Product groups */}
       {filteredProducts.length === 0 ? (
@@ -131,13 +147,17 @@ export default function CataloguePage() {
           </button>
         </div>
       ) : (
-        <div className="space-y-12">
+        <div className="space-y-16">
           {Object.entries(grouped).map(([key, groupProducts]) => (
             <section key={key}>
-              <h2 className="font-heading text-xl font-bold text-deep-blue mb-4 capitalize">
+              <h2 className="font-heading text-xl font-bold text-deep-blue mb-4 capitalize border-l-2 border-terracotta pl-3">
                 {labels[key as MaterialCategory] || key}
               </h2>
-              <ProductGrid products={groupProducts} makers={makers} />
+              {isStockist ? (
+                <StockistProductGrid products={groupProducts} makers={makers} />
+              ) : (
+                <ProductGrid products={groupProducts} makers={makers} />
+              )}
             </section>
           ))}
         </div>

@@ -85,6 +85,7 @@ export default function AdminProductsPage() {
                 <th className="text-left px-4 py-3 font-medium text-warm-gray-600 hidden md:table-cell">Material</th>
                 <th className="text-left px-4 py-3 font-medium text-warm-gray-600 hidden md:table-cell">Type</th>
                 <th className="text-left px-4 py-3 font-medium text-warm-gray-600 hidden lg:table-cell">Price</th>
+                <th className="text-left px-4 py-3 font-medium text-warm-gray-600 hidden lg:table-cell">Created</th>
                 <th className="text-right px-4 py-3 font-medium text-warm-gray-600">Actions</th>
               </tr>
             </thead>
@@ -95,7 +96,10 @@ export default function AdminProductsPage() {
                   <td className="px-4 py-3 font-medium text-warm-gray-800">{product.name}</td>
                   <td className="px-4 py-3 text-warm-gray-600 capitalize hidden md:table-cell">{product.materialCategory}</td>
                   <td className="px-4 py-3 text-warm-gray-600 capitalize hidden md:table-cell">{product.productType}</td>
-                  <td className="px-4 py-3 text-warm-gray-600 hidden lg:table-cell">A${product.wholesalePrice.toFixed(2)}</td>
+                  <td className="px-4 py-3 text-warm-gray-600 hidden lg:table-cell">A${Math.round(product.wholesalePrice)}</td>
+                  <td className="px-4 py-3 text-warm-gray-400 text-xs hidden lg:table-cell">
+                    {new Date(product.createdAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button

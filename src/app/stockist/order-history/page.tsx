@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Package } from 'lucide-react';
 import type { OrderRequest } from '@/types';
-import { validateStockistSession } from '@/services/auth';
+import { validateStockistSession } from '@/lib/auth-client';
 import { getOrdersByStockist } from '@/services/orders';
 
 const STATUS_STYLES: Record<string, string> = {
@@ -22,9 +22,9 @@ export default function OrderHistoryPage() {
   useEffect(() => {
     async function load() {
       const token = localStorage.getItem('stockist_session');
-      if (!token) { router.push('/stockist/login'); return; }
+      if (!token) { router.push('/login'); return; }
       const stockist = await validateStockistSession(token);
-      if (!stockist) { localStorage.removeItem('stockist_session'); router.push('/stockist/login'); return; }
+      if (!stockist) { localStorage.removeItem('stockist_session'); router.push('/login'); return; }
 
       const result = await getOrdersByStockist(stockist.id);
       setOrders(result);
@@ -34,11 +34,11 @@ export default function OrderHistoryPage() {
   }, [router]);
 
   if (loading) {
-    return <div className="max-w-3xl mx-auto px-4 py-section-lg"><p className="text-warm-gray-400">Loading...</p></div>;
+    return <div className="max-w-7xl mx-auto px-4 py-section-lg"><p className="text-warm-gray-400">Loading...</p></div>;
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-section-lg">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-section-lg">
       <Link href="/stockist/catalogue" className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark mb-6 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back to catalogue
       </Link>

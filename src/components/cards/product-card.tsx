@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Product } from '@/types';
+import { formatPrice } from '@/lib/price';
 
 interface ProductCardProps {
   product: Product;
@@ -33,8 +34,7 @@ export function ProductCard({ product, makerName, showPrice = false }: ProductCa
         <h3 className="font-heading text-sm font-semibold text-deep-blue group-hover:text-ocean transition-colors line-clamp-2">
           {product.name}
         </h3>
-        <p className="text-xs text-warm-gray-400 mt-1">{product.productCode}</p>
-        <div className="flex items-center gap-2 mt-2 text-xs text-warm-gray-600">
+        <div className="flex items-center gap-2 mt-1 text-xs text-warm-gray-600">
           <span className="capitalize">{product.materialCategory}</span>
           <span>·</span>
           <span className="capitalize">{product.productType}</span>
@@ -44,7 +44,7 @@ export function ProductCard({ product, makerName, showPrice = false }: ProductCa
         )}
         {showPrice && (
           <p className="text-sm font-semibold text-deep-blue mt-2">
-            A${product.wholesalePrice.toFixed(2)}
+            {formatPrice(product.wholesalePrice)}
           </p>
         )}
       </div>

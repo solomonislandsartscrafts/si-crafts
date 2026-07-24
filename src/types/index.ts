@@ -17,3 +17,5 @@ export type {
   EnquiryType,
   AnyEnquiry,
 } from './enquiry';
+export type { Article } from './article';
+export type { RetailStockist } from './retail-stockist';

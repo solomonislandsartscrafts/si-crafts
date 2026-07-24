@@ -13,32 +13,54 @@
     scroll-behavior: smooth;
   }
 
-  /* Global focus-visible fallback: ensures all focusable elements get a visible ring */
-  :focus-visible {
-    outline: 2px solid #2E7D8C;
-    outline-offset: 2px;
-  }
-
   body {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'DM Sans', system-ui, sans-serif;
     background-color: var(--page-bg);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M0 0 L40 40 M40 0 L0 40' stroke='%23e8e8e8' stroke-width='0.25' fill='none'/%3E%3C/svg%3E");
-    background-size: 60px 60px;
     color: #4A433B;
-    line-height: 1.6;
+    font-size: 1.125rem;
+    line-height: 1.7;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'DM Sans', system-ui, sans-serif;
     line-height: 1.2;
+    letter-spacing: -0.02em;
     color: #1B3A4B;
+  }
+
+  /* Ensure links are always distinguishable (not just by color) */
+  a:not([class]) {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+
+  /* Styled links (with class) still need a non-color indicator on focus */
+  a[class]:focus-visible {
+    text-decoration: underline;
+  }
+
+  /* Improved focus-visible for all interactive elements */
+  :focus-visible {
+    outline: 3px solid #2E7D8C;
+    outline-offset: 3px;
+    border-radius: 4px;
   }
 }
 
 @layer utilities {
   .tap-target {
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 48px;
+    min-height: 48px;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 
   .bg-weave-pattern {
@@ -57,4 +79,220 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* High contrast mode: ensures focus rings and borders are visible */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 3px solid LinkText;
+  }
+
+  .tap-target {
+    border: 1px solid ButtonText;
+  }
+}
+
+/* Users who prefer more contrast */
+@media (prefers-contrast: more) {
+  body {
+    color: #2A2520;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: #0D1F29;
+  }
+
+  a:not([class]) {
+    text-decoration-thickness: 2px;
+  }
+
+  :focus-visible {
+    outline-width: 4px;
+  }
+}
+
+/* Rich text editor content styles */
+[contenteditable] h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.25rem;
+  color: #1B3A4B;
+}
+
+[contenteditable] h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+  color: #4A433B;
+}
+
+[contenteditable] ul,
+[contenteditable] ol {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+[contenteditable] ul {
+  list-style-type: disc;
+}
+
+[contenteditable] ol {
+  list-style-type: decimal;
+}
+
+[contenteditable] li {
+  margin-bottom: 0.25rem;
+}
+
+[contenteditable]:empty::before {
+  content: attr(data-placeholder);
+  color: #B8AFA3;
+  pointer-events: none;
+}
+
+/* Article content — Medium-style prose */
+.article-content {
+  font-size: 1.1875rem;
+  line-height: 1.85;
+  color: #4A433B;
+}
+
+.article-content p {
+  margin-bottom: 1.5rem;
+}
+
+.article-content h2 {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1B3A4B;
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.article-content h3 {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1B3A4B;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.article-content ul,
+.article-content ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.article-content ul {
+  list-style-type: disc;
+}
+
+.article-content ol {
+  list-style-type: decimal;
+}
+
+.article-content li {
+  margin-bottom: 0.5rem;
+}
+
+.article-content strong {
+  font-weight: 600;
+  color: #1B3A4B;
+}
+
+.article-content a {
+  color: #2E7D8C;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.article-content a:hover {
+  color: #1A5C6A;
+}
+
+.article-content blockquote {
+  border-left: 3px solid #C06A3A;
+  padding-left: 1.25rem;
+  margin: 2rem 0;
+  font-style: italic;
+  color: #5C5349;
+}
+
+.article-content img {
+  width: 100%;
+  border-radius: 0.5rem;
+  margin: 2rem 0;
+}
+
+/* Accessibility widget overrides */
+.a11y-high-contrast body,
+.a11y-high-contrast {
+  color: #000 !important;
+}
+
+.a11y-high-contrast h1,
+.a11y-high-contrast h2,
+.a11y-high-contrast h3,
+.a11y-high-contrast h4,
+.a11y-high-contrast h5,
+.a11y-high-contrast h6 {
+  color: #000 !important;
+}
+
+.a11y-high-contrast a {
+  color: #0000EE !important;
+  text-decoration: underline !important;
+}
+
+.a11y-high-contrast button,
+.a11y-high-contrast [role="button"] {
+  border: 2px solid currentColor !important;
+}
+
+.a11y-reduced-motion *,
+.a11y-reduced-motion *::before,
+.a11y-reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+.a11y-underline-links a {
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+}
+
+/* Colorblind simulation modes — CSS filters that adjust hues */
+/* Protanopia (red-blind): shift reds toward blue/yellow */
+.a11y-protanopia {
+  filter: url('#a11y-protanopia-filter');
+}
+
+/* Deuteranopia (green-blind): shift greens toward blue/yellow */
+.a11y-deuteranopia {
+  filter: url('#a11y-deuteranopia-filter');
+}
+
+/* Tritanopia (blue-blind): shift blues toward red/green */
+.a11y-tritanopia {
+  filter: url('#a11y-tritanopia-filter');
+}
+
+/* Ensure the filters don't apply to the accessibility widget itself */
+.a11y-protanopia [aria-label="Accessibility settings"],
+.a11y-deuteranopia [aria-label="Accessibility settings"],
+.a11y-tritanopia [aria-label="Accessibility settings"],
+.a11y-protanopia [aria-label="Accessibility options"],
+.a11y-deuteranopia [aria-label="Accessibility options"],
+.a11y-tritanopia [aria-label="Accessibility options"] {
+  filter: none;
 }

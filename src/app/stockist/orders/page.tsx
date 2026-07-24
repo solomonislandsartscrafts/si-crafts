@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Trash2, Minus, Plus, AlertTriangle, ArrowLeft, Send } from 'lucide-react';
 import type { CartItem } from '@/types';
 import { getCart, updateQuantity, removeFromCart, clearCart, getCartTotal, GST_THRESHOLD } from '@/lib/cart';
-import { validateStockistSession } from '@/services/auth';
+import { validateStockistSession } from '@/lib/auth-client';
 import { createOrderRequest } from '@/services/orders';
 
 export default function StockistOrdersPage() {
@@ -19,9 +19,9 @@ export default function StockistOrdersPage() {
   useEffect(() => {
     async function checkAuth() {
       const token = localStorage.getItem('stockist_session');
-      if (!token) { router.push('/stockist/login'); return; }
+      if (!token) { router.push('/login'); return; }
       const stockist = await validateStockistSession(token);
-      if (!stockist) { localStorage.removeItem('stockist_session'); router.push('/stockist/login'); return; }
+      if (!stockist) { localStorage.removeItem('stockist_session'); router.push('/login'); return; }
       setAuthenticated(true);
       setCart(getCart());
       setLoading(false);
@@ -30,7 +30,8 @@ export default function StockistOrdersPage() {
   }, [router]);
 
   const total = getCartTotal(cart);
-  const showGstWarning = total > GST_THRESHOLD;
+  const totalAud = Math.round(total / 5);
+  const showGstWarning = totalAud > GST_THRESHOLD;
 
   function handleQuantityChange(productId: string, qty: number) {
     const updated = updateQuantity(productId, qty);
@@ -54,7 +55,7 @@ export default function StockistOrdersPage() {
   }
 
   if (!authenticated || loading) {
-    return <div className="max-w-3xl mx-auto px-4 py-section-lg"><p className="text-warm-gray-400">Loading...</p></div>;
+    return <div className="max-w-7xl mx-auto px-4 py-section-lg"><p className="text-warm-gray-400">Loading...</p></div>;
   }
 
   if (submitted) {
@@ -84,7 +85,7 @@ export default function StockistOrdersPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-section-lg">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-section-lg">
       <Link href="/stockist/catalogue" className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark mb-6 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back to catalogue
       </Link>
@@ -107,7 +108,7 @@ export default function StockistOrdersPage() {
               <div key={item.productId} className="flex items-center gap-4 py-4">
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-warm-gray-800 truncate">{item.productName}</p>
-                  <p className="text-xs text-warm-gray-400">{item.productCode} · A${item.unitPrice.toFixed(2)} each</p>
+                  <p className="text-xs text-warm-gray-400">{item.productCode} · A${Math.round(item.unitPrice / 5)} each</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
@@ -125,7 +126,7 @@ export default function StockistOrdersPage() {
                   </button>
                 </div>
                 <p className="w-20 text-right font-medium text-warm-gray-800">
-                  A${(item.quantity * item.unitPrice).toFixed(2)}
+                  A${Math.round(item.quantity * item.unitPrice / 5)}
                 </p>
                 <button onClick={() => handleRemove(item.productId)}
                   className="tap-target p-2 text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
@@ -139,7 +140,7 @@ export default function StockistOrdersPage() {
           {/* Total */}
           <div className="flex justify-between items-center py-4 border-t-2 border-deep-blue mb-4">
             <span className="font-heading font-bold text-deep-blue text-lg">Total (ex. GST)</span>
-            <span className="font-heading font-bold text-deep-blue text-lg">A${total.toFixed(2)}</span>
+            <span className="font-heading font-bold text-deep-blue text-lg">A${Math.round(total / 5)}</span>
           </div>
 
           {/* GST Warning */}
@@ -157,7 +158,6 @@ export default function StockistOrdersPage() {
 
           <button onClick={handleSubmit}
             className="tap-target w-full flex items-center justify-center gap-2 px-6 py-3 bg-terracotta hover:bg-terracotta-dark text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light">
-            <Send className="w-4 h-4" />
             Submit order request
           </button>
         </>

@@ -19,7 +19,7 @@ function isMakerPublished(makerId: string): boolean {
 
 // Product code validation: {P|W|S}-{A-Z+}-{positive integer}
 export function validateProductCode(code: string): boolean {
-  return /^[PWS]-[A-Z]+-\d+$/.test(code);
+  return /^[PWSB]-[A-Z]+-\d+$/.test(code);
 }
 
 function applyFilters(products: Product[], filters?: ProductFilters): Product[] {

@@ -3,16 +3,16 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { LogOut, Download, ShoppingCart } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import type { Product, Maker } from '@/types';
 import { MakerFilter } from '@/components/catalogue/maker-filter';
 import { SearchInput } from '@/components/catalogue/search-input';
-import { ProductGrid } from '@/components/catalogue/product-grid';
-import { validateStockistSession, logoutStockist } from '@/services/auth';
+import { StockistProductGrid } from '@/components/catalogue/stockist-product-grid';
+import { validateStockistSession } from '@/lib/auth-client';
 import { getWholesaleProducts } from '@/services/products';
 import { getPublicMakers } from '@/services/makers';
 
-const MATERIAL_LABELS: Record<string, string> = { pandanus: 'Pandanus', wood: 'Wood', shells: 'Shells' };
+const MATERIAL_LABELS: Record<string, string> = { pandanus: 'Pandanus', wood: 'Wood', shells: 'Shells', 'bush-twine': 'Bush-twine' };
 
 export default function StockistCataloguePage() {
   const router = useRouter();
@@ -26,10 +26,10 @@ export default function StockistCataloguePage() {
   useEffect(() => {
     async function checkAuth() {
       const token = localStorage.getItem('stockist_session');
-      if (!token) { router.push('/stockist/login'); return; }
+      if (!token) { router.push('/login'); return; }
 
       const stockist = await validateStockistSession(token);
-      if (!stockist) { localStorage.removeItem('stockist_session'); router.push('/stockist/login'); return; }
+      if (!stockist) { localStorage.removeItem('stockist_session'); router.push('/login'); return; }
 
       setAuthenticated(true);
       const [prods, mkrs] = await Promise.all([getWholesaleProducts(), getPublicMakers()]);
@@ -41,12 +41,19 @@ export default function StockistCataloguePage() {
   }, [router]);
 
   async function handleLogout() {
-    const token = localStorage.getItem('stockist_session');
-    if (token) {
-      await logoutStockist(token);
+    try {
+      const token = localStorage.getItem('stockist_session');
+      if (token) {
+        await fetch('/api/auth/stockist/logout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        });
+      }
+    } finally {
+      localStorage.removeItem('stockist_session');
+      router.push('/wholesale');
     }
-    localStorage.removeItem('stockist_session');
-    router.push('/wholesale');
   }
 
   const filteredProducts = useMemo(() => {
@@ -96,10 +103,10 @@ export default function StockistCataloguePage() {
           </Link>
           <Link href="/stockist/orders"
             className="tap-target inline-flex items-center gap-2 px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light">
-            <ShoppingCart className="w-4 h-4" /> Order
+            Order
           </Link>
           <button className="tap-target inline-flex items-center gap-2 px-4 py-2 border border-sand-dark text-warm-gray-600 hover:bg-sand-light rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean">
-            <Download className="w-4 h-4" /> Price List
+            Price List
           </button>
           <button onClick={handleLogout}
             className="tap-target inline-flex items-center gap-2 px-4 py-2 text-sm text-warm-gray-600 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean">
@@ -133,7 +140,7 @@ export default function StockistCataloguePage() {
               <h2 className="font-heading text-xl font-bold text-deep-blue mb-4 capitalize">
                 {labels[key] || key}
               </h2>
-              <ProductGrid products={groupProducts} makers={makers} showPrice={true} />
+              <StockistProductGrid products={groupProducts} makers={makers} />
             </section>
           ))}
         </div>

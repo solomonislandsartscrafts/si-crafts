@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Send, CheckCircle } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { submitMakerEnquiry } from '@/services/enquiries';
 
 export default function ForMakersPage() {
@@ -58,13 +58,13 @@ export default function ForMakersPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
       <h1 className="font-heading text-3xl md:text-4xl font-bold text-deep-blue mb-4">
         For Makers
       </h1>
       <p className="text-lg text-warm-gray-600 max-w-2xl leading-relaxed mb-12">
-        If you make crafts in Solomon Islands and would like to sell your work through SIAC,
-        this page explains how it works and how to get in touch.
+        If you make crafts in Solomon Islands and would like to sell your work through
+        Solomon Islands Arts and Crafts (SIAC), this page explains how it works and how to get in touch.
       </p>
 
       {/* How we source */}
@@ -74,14 +74,20 @@ export default function ForMakersPage() {
         </h2>
         <div className="space-y-4 text-warm-gray-600 leading-relaxed">
           <p>
-            We buy handmade crafts — pandanus weaving, wood carving, and shell-money jewellery —
-            directly from makers in Solomon Islands. We sell them wholesale to museum and gallery
-            shops in Australia.
+            We buy handmade crafts — pandanus weaving, wood carving, kusa and trays made from
+            bush-twine, and shell-money jewellery — directly from makers in Solomon Islands. We
+            sell them wholesale to museum and gallery shops in Australia.
           </p>
           <p>
-            We visit communities, meet makers in person, and purchase work at the price
-            the maker sets. We pay upfront — not on consignment.
-            <span className="text-warm-gray-400 italic text-sm"> [NEEDS REVIEW — confirm sourcing process details]</span>
+            We know the sort of items that will appeal to customers in Australia. We look for
+            items that are unique to Solomon Islands and part of its craft tradition, but will
+            also sell in Australia.
+          </p>
+          <p>
+            We visit communities, meet makers in person, and purchase work at the price the
+            maker sets. We pay upfront — not on consignment. We want makers to receive a fair
+            price but we also try to keep prices reasonable so that museum and gallery shops
+            will buy them.
           </p>
         </div>
       </section>
@@ -223,7 +229,6 @@ export default function ForMakersPage() {
             disabled={submitting}
             className="tap-target inline-flex items-center gap-2 px-6 py-3 bg-terracotta hover:bg-terracotta-dark disabled:opacity-50 text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
           >
-            <Send className="w-4 h-4" />
             {submitting ? 'Sending...' : 'Send'}
           </button>
         </form>
