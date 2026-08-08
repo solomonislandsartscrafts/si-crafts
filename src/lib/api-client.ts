@@ -3,7 +3,10 @@
  * All service layer functions use this instead of importing mock data.
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.WAGTAIL_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.WAGTAIL_API_URL || '';
+
+/** True when no real backend URL is configured */
+const isBackendConfigured = API_URL.length > 0 && !API_URL.includes('localhost');
 
 export class ApiError extends Error {
   status: number;
@@ -29,6 +32,17 @@ interface RequestOptions {
  */
 export async function apiFetch<T = unknown>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, token, headers: extraHeaders, noContent } = options;
+
+  // If no backend URL is configured, return empty data for reads, throw for writes
+  if (!isBackendConfigured) {
+    if (method === 'GET') {
+      if (path.includes('/api/v2/')) {
+        return { items: [], meta: { total_count: 0 } } as unknown as T;
+      }
+      return [] as unknown as T;
+    }
+    throw new ApiError('Backend not configured', 0);
+  }
 
   const headers: Record<string, string> = {
     ...extraHeaders,
