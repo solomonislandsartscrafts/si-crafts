@@ -6,3 +6,4 @@ export { mockAdmins } from './admins';
 export { mockOrders } from './orders';
 export { mockContacts } from './contacts';
 export { mockMakerEnquiries, mockStockistRequests, mockContactEnquiries } from './enquiries';
+export { mockArticles } from './articles';

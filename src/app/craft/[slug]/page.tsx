@@ -1,12 +1,17 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
-import { getCraftBySlug } from '@/services/crafts';
+import { getAllCrafts, getCraftBySlug } from '@/services/crafts';
 import { getMakersByCraft } from '@/services/makers';
 import { getPublicProducts } from '@/services/products';
 import { MakerCard } from '@/components/cards/maker-card';
 import { ProductCard } from '@/components/cards/product-card';
+import { SafeImage } from '@/components/ui/safe-image';
+
+export async function generateStaticParams() {
+  const crafts = await getAllCrafts();
+  return crafts.map((craft) => ({ slug: craft.slug }));
+}
 
 interface CraftPageProps {
   params: Promise<{ slug: string }>;
@@ -26,7 +31,7 @@ export default async function CraftPage({ params }: CraftPageProps) {
   ]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
       {/* Back link */}
       <Link
         href="/crafts-and-techniques"
@@ -37,36 +42,30 @@ export default async function CraftPage({ params }: CraftPageProps) {
       </Link>
 
       {/* Header with image */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mb-16">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center mb-12 lg:mb-16">
         <div>
-          <h1 className="font-heading text-3xl md:text-4xl font-bold text-deep-blue mb-6">
+          <h1 className="font-heading text-3xl md:text-4xl font-medium text-deep-blue mb-6">
             {craft.name}
           </h1>
           <div className="text-warm-gray-600 leading-relaxed space-y-4">
             <p>{craft.description}</p>
           </div>
         </div>
-        <div className="aspect-[4/3] relative rounded-lg overflow-hidden bg-sand">
-          {craft.processImageUrls.length > 0 ? (
-            <Image
-              src={craft.processImageUrls[0]}
-              alt={`${craft.name} process`}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-warm-gray-400 text-sm">Process image coming soon</span>
-            </div>
-          )}
+        <div className="aspect-[4/3] relative rounded-lg overflow-hidden">
+          <SafeImage
+            src={craft.processImageUrls[0] || null}
+            alt={`${craft.name} process`}
+            fill
+            className="object-contain p-4 rounded-lg"
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
         </div>
       </div>
 
       {/* Cultural context — only show if reviewed */}
       {craft.culturalContext && craft.culturalContextReviewFlag === 'reviewed' && (
-        <section className="mb-16 bg-sand-light rounded-lg p-6 md:p-8">
-          <h2 className="font-heading text-xl font-bold text-deep-blue mb-3">
+        <section className="mb-12 lg:mb-16 bg-sand-light rounded-lg p-6 md:p-8">
+          <h2 className="font-heading text-xl font-medium text-deep-blue mb-3">
             Cultural Context
           </h2>
           <p className="text-warm-gray-600 leading-relaxed">{craft.culturalContext}</p>
@@ -74,8 +73,8 @@ export default async function CraftPage({ params }: CraftPageProps) {
       )}
 
       {craft.culturalContext && craft.culturalContextReviewFlag === 'unreviewed' && (
-        <section className="mb-16 bg-sand-light rounded-lg p-6 md:p-8">
-          <h2 className="font-heading text-xl font-bold text-deep-blue mb-3">
+        <section className="mb-12 lg:mb-16 bg-sand-light rounded-lg p-6 md:p-8">
+          <h2 className="font-heading text-xl font-medium text-deep-blue mb-3">
             Cultural Context
           </h2>
           <p className="text-warm-gray-400 italic">
@@ -85,8 +84,8 @@ export default async function CraftPage({ params }: CraftPageProps) {
       )}
 
       {/* Makers who practise this craft */}
-      <section className="mb-16">
-        <h2 className="font-heading text-2xl font-bold text-deep-blue mb-6">
+      <section className="mb-12 lg:mb-16 border-t border-sand pt-10 lg:pt-12">
+        <h2 className="font-heading text-2xl font-medium text-deep-blue mb-6">
           Makers
         </h2>
         {makers.length > 0 ? (
@@ -104,7 +103,7 @@ export default async function CraftPage({ params }: CraftPageProps) {
 
       {/* Products in this material category */}
       <section>
-        <h2 className="font-heading text-2xl font-bold text-deep-blue mb-6">
+        <h2 className="font-heading text-2xl font-medium text-deep-blue mb-6">
           Products
         </h2>
         {products.length > 0 ? (

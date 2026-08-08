@@ -7,6 +7,7 @@ export interface Craft {
   name: string;
   description: string;
   processImageUrls: string[];
+  processImageAlt: string;
   culturalContext: string | null;
   culturalContextReviewFlag: CulturalReviewStatus;
   materialCategory: MaterialCategory;

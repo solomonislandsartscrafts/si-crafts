@@ -1,49 +1,223 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Users, Package, Palette, Store, ClipboardList, Inbox } from 'lucide-react';
+import Link from 'next/link';
+import {
+  Inbox,
+  ClipboardList,
+  Store,
+  Users,
+  Package,
+  Newspaper,
+  Plus,
+  BookOpen,
+  ExternalLink,
+} from 'lucide-react';
 import { AdminLayout } from '@/components/admin';
+import { AttentionPanel } from '@/components/admin/attention-panel';
+import { ActivityFeed } from '@/components/admin/activity-feed';
+import { SetupProgressCard } from '@/components/admin/setup-progress-card';
+import { getDashboardSummary } from '@/services/dashboard';
+import type { DashboardSummary } from '@/types';
+
+const EMPTY_SUMMARY: DashboardSummary = {
+  counts: {
+    makers: 0, makersPublished: 0, products: 0, productsPublished: 0,
+    crafts: 0, categories: 0, articles: 0, articlesPublished: 0,
+    stockists: 0, stockistsApproved: 0, stockistsPending: 0,
+    orders: 0, ordersToAction: 0, openEnquiries: 0,
+  },
+  setup: { categories: 0, crafts: 0, makers: 0, products: 0, articles: 0, siteImages: 0 },
+  attention: [],
+  activity: [],
+};
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState({ makers: 0, products: 0, crafts: 0, stockists: 0, orders: 0, enquiries: 0 });
+  const [summary, setSummary] = useState<DashboardSummary>(EMPTY_SUMMARY);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function load() {
-      const { getAllMakers } = await import('@/services/makers');
-      const { getAllProducts } = await import('@/services/products');
-      const { getAllCrafts } = await import('@/services/crafts');
-      const { getAllStockists } = await import('@/services/stockists');
-      const { getAllOrders } = await import('@/services/orders');
-      const { listEnquiries } = await import('@/services/enquiries');
-      const [m, p, c, s, o, e] = await Promise.all([getAllMakers(), getAllProducts(), getAllCrafts(), getAllStockists(), getAllOrders(), listEnquiries()]);
-      setStats({ makers: m.length, products: p.length, crafts: c.length, stockists: s.length, orders: o.length, enquiries: e.filter((i) => !i.data.handled).length });
-    }
-    load();
+    getDashboardSummary()
+      .then(setSummary)
+      .catch(() => setSummary(EMPTY_SUMMARY))
+      .finally(() => setLoading(false));
   }, []);
+
+  const { counts, setup, attention, activity } = summary;
 
   return (
     <AdminLayout>
-      <h1 className="font-heading text-2xl font-bold text-deep-blue mb-8">Dashboard</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <StatCard icon={Inbox} label="Open Enquiries" value={stats.enquiries} />
-        <StatCard icon={Users} label="Makers" value={stats.makers} />
-        <StatCard icon={Package} label="Products" value={stats.products} />
-        <StatCard icon={Palette} label="Crafts" value={stats.crafts} />
-        <StatCard icon={Store} label="Stockists" value={stats.stockists} />
-        <StatCard icon={ClipboardList} label="Orders" value={stats.orders} />
+      {/* Header */}
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+        <div>
+          <h1 className="font-heading text-2xl font-medium text-deep-blue">Dashboard</h1>
+          <p className="text-sm text-warm-gray-600 mt-1">
+            What needs your attention, and what changed recently.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/admin/getting-started"
+            className="tap-target inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border-2 border-ocean text-ocean rounded-md hover:bg-ocean hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+          >
+            <BookOpen className="w-4 h-4" aria-hidden="true" />
+            Getting started
+          </Link>
+          <Link
+            href="/"
+            className="tap-target inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-ocean hover:text-ocean-dark transition-colors"
+          >
+            <ExternalLink className="w-4 h-4" aria-hidden="true" />
+            View site
+          </Link>
+        </div>
       </div>
+
+      {loading ? (
+        <LoadingState />
+      ) : (
+        <>
+          {/* Metrics — actionable numbers first */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+            <StatCard
+              icon={Inbox}
+              label="Open enquiries"
+              value={counts.openEnquiries}
+              hint="Awaiting a reply"
+              href="/admin/inbox"
+              urgent={counts.openEnquiries > 0}
+            />
+            <StatCard
+              icon={ClipboardList}
+              label="Orders to action"
+              value={counts.ordersToAction}
+              hint={`${counts.orders} total`}
+              href="/admin/orders"
+              urgent={counts.ordersToAction > 0}
+            />
+            <StatCard
+              icon={Store}
+              label="Stockist applications"
+              value={counts.stockistsPending}
+              hint={`${counts.stockistsApproved} approved`}
+              href="/admin/stockists"
+              urgent={counts.stockistsPending > 0}
+            />
+            <StatCard
+              icon={Users}
+              label="Makers live"
+              value={counts.makersPublished}
+              hint={`of ${counts.makers} profiles`}
+              href="/admin/makers"
+            />
+            <StatCard
+              icon={Package}
+              label="Products live"
+              value={counts.productsPublished}
+              hint={`of ${counts.products} products`}
+              href="/admin/products"
+            />
+            <StatCard
+              icon={Newspaper}
+              label="Articles live"
+              value={counts.articlesPublished}
+              hint={`of ${counts.articles} written`}
+              href="/admin/news"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main column */}
+            <div className="lg:col-span-2 space-y-6">
+              <AttentionPanel items={attention} />
+              <QuickActions />
+            </div>
+
+            {/* Side column */}
+            <div className="space-y-6">
+              <SetupProgressCard progress={setup} />
+              <ActivityFeed items={activity} />
+            </div>
+          </div>
+        </>
+      )}
     </AdminLayout>
   );
 }
 
-function StatCard({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>; label: string; value: number }) {
+// --- Pieces ------------------------------------------------------------------
+
+interface StatCardProps {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: number;
+  hint: string;
+  href: string;
+  urgent?: boolean;
+}
+
+function StatCard({ icon: Icon, label, value, hint, href, urgent = false }: StatCardProps) {
   return (
-    <div className="bg-white rounded-lg p-5 shadow-card">
-      <div className="flex items-center gap-3 mb-2">
-        <Icon className="w-5 h-5 text-ocean" />
-        <span className="text-sm text-warm-gray-600">{label}</span>
+    <Link
+      href={href}
+      className={`block rounded-lg p-4 shadow-card transition-shadow hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ocean ${
+        urgent ? 'bg-white border-l-4 border-accent-gold' : 'bg-card-bg'
+      }`}
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <Icon className="w-4 h-4 text-ocean flex-shrink-0" aria-hidden="true" />
+        <span className="text-xs text-warm-gray-600 leading-snug">{label}</span>
       </div>
-      <p className="text-2xl font-bold text-deep-blue">{value}</p>
+      <p className="text-2xl font-bold text-deep-blue leading-none">{value}</p>
+      <p className="text-xs text-warm-gray-400 mt-1">{hint}</p>
+    </Link>
+  );
+}
+
+const QUICK_ACTIONS = [
+  { href: '/admin/products', label: 'Add a product', icon: Package },
+  { href: '/admin/makers', label: 'Add a maker', icon: Users },
+  { href: '/admin/news', label: 'Write an article', icon: Newspaper },
+  { href: '/admin/stockists', label: 'Manage stockists', icon: Store },
+];
+
+function QuickActions() {
+  return (
+    <section className="bg-card-bg rounded-lg shadow-card p-5">
+      <h2 className="font-heading text-lg font-semibold text-deep-blue mb-3">Quick actions</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {QUICK_ACTIONS.map(({ href, label, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            className="tap-target flex items-center gap-3 px-4 py-3 rounded-md border border-sand hover:border-ocean hover:bg-sand-light transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+          >
+            <Icon className="w-4 h-4 text-ocean flex-shrink-0" aria-hidden="true" />
+            <span className="text-sm font-medium text-warm-gray-800">{label}</span>
+            <Plus className="w-4 h-4 ml-auto text-warm-gray-400" aria-hidden="true" />
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function LoadingState() {
+  return (
+    <div className="space-y-6" aria-live="polite" aria-busy="true">
+      <p className="sr-only">Loading dashboard</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="bg-card-bg rounded-lg p-4 shadow-card">
+            <div className="h-3 w-2/3 bg-sand rounded mb-3" />
+            <div className="h-6 w-10 bg-sand rounded" />
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 bg-card-bg rounded-lg shadow-card h-64" />
+        <div className="bg-card-bg rounded-lg shadow-card h-64" />
+      </div>
     </div>
   );
 }

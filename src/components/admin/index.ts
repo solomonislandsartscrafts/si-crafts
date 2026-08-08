@@ -1,2 +1,10 @@
 export { AdminSidebar } from './admin-sidebar';
 export { AdminLayout } from './admin-layout';
+export { MakerFormModal } from './maker-form-modal';
+export { ProductFormModal } from './product-form-modal';
+export { CraftFormModal } from './craft-form-modal';
+export { AttentionPanel } from './attention-panel';
+export { ActivityFeed } from './activity-feed';
+export { SetupProgressCard } from './setup-progress-card';
+export { SetupWizard } from './setup-wizard';
+export { AdminGuide, GUIDE_SECTIONS } from './admin-guide';

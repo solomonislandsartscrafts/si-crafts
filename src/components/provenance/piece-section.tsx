@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/safe-image';
 import type { Product } from '@/types';
 
 interface PieceSectionProps {
@@ -8,24 +8,18 @@ interface PieceSectionProps {
 export function PieceSection({ product }: PieceSectionProps) {
   return (
     <section className="mb-10">
-      <h2 className="font-heading text-xl font-bold text-deep-blue mb-4">This Piece</h2>
+      <h2 className="font-heading text-xl font-medium text-deep-blue mb-4">This Piece</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Image */}
         <div className="aspect-square relative rounded-lg overflow-hidden bg-sand">
-          {product.imageUrls.length > 0 ? (
-            <Image
-              src={product.imageUrls[0]}
-              alt={product.name}
-              fill
-              className="object-cover"
-              sizes="(max-width: 640px) 100vw, 50vw"
-              priority
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-warm-gray-400 text-sm">Image coming soon</span>
-            </div>
-          )}
+          <SafeImage
+            src={product.imageUrls[0] || null}
+            alt={product.name}
+            fill
+            className="object-contain p-4"
+            sizes="(max-width: 640px) 100vw, 50vw"
+            priority
+          />
         </div>
 
         {/* Details */}

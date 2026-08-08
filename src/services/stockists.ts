@@ -1,21 +1,58 @@
-import { mockStockists } from '@/data/mock';
+import { apiGet, apiPost, apiDelete, getAdminToken } from '@/lib/api-client';
 import type { Stockist } from '@/types';
 
-const delay = () => new Promise((r) => setTimeout(r, 0));
+interface StockistResponse {
+  id: number;
+  business_name: string;
+  abn: string;
+  contact_name: string;
+  email: string;
+  phone: string;
+  description: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+function mapStockist(raw: StockistResponse): Stockist {
+  return {
+    id: String(raw.id),
+    businessName: raw.business_name,
+    abn: raw.abn,
+    contactName: raw.contact_name,
+    email: raw.email,
+    phone: raw.phone,
+    description: raw.description,
+    status: raw.status as Stockist['status'],
+    passwordHash: '',
+    createdAt: raw.created_at,
+    updatedAt: raw.updated_at,
+  };
+}
 
 export async function getStockistById(id: string): Promise<Stockist | null> {
-  await delay();
-  return mockStockists.find((s) => s.id === id) ?? null;
+  try {
+    const token = getAdminToken();
+    const raw = await apiGet<StockistResponse>(`/api/stockists/${id}/`, token);
+    return mapStockist(raw);
+  } catch {
+    return null;
+  }
 }
 
 export async function getStockistByEmail(email: string): Promise<Stockist | null> {
-  await delay();
-  return mockStockists.find((s) => s.email === email) ?? null;
+  const token = getAdminToken();
+  const data = await apiGet<{ results: StockistResponse[] } | StockistResponse[]>(`/api/stockists/?email=${encodeURIComponent(email)}`, token);
+  const items = Array.isArray(data) ? data : data.results ?? [];
+  if (items.length === 0) return null;
+  return mapStockist(items[0]);
 }
 
-export async function getAllStockists(): Promise<Stockist[]> {
-  await delay();
-  return [...mockStockists];
+export async function getAllStockists(token?: string): Promise<Stockist[]> {
+  const authToken = token || getAdminToken();
+  const data = await apiGet<{ results: StockistResponse[] } | StockistResponse[]>('/api/stockists/', authToken);
+  const items = Array.isArray(data) ? data : data.results ?? [];
+  return items.map(mapStockist);
 }
 
 export interface StockistApplicationInput {
@@ -28,31 +65,47 @@ export interface StockistApplicationInput {
 }
 
 export async function createApplication(data: StockistApplicationInput): Promise<Stockist> {
-  await delay();
-  const stockist: Stockist = {
-    ...data,
-    id: `stockist-${Date.now()}`,
-    status: 'pending',
-    passwordHash: '',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  mockStockists.push(stockist);
-  return stockist;
+  const raw = await apiPost<StockistResponse>('/api/stockists/apply/', {
+    business_name: data.businessName,
+    abn: data.abn,
+    contact_name: data.contactName,
+    email: data.email,
+    phone: data.phone,
+    description: data.description,
+  });
+  return mapStockist(raw);
 }
 
-export async function approveStockist(id: string): Promise<Stockist | null> {
-  await delay();
-  const index = mockStockists.findIndex((s) => s.id === id);
-  if (index === -1) return null;
-  mockStockists[index] = { ...mockStockists[index], status: 'approved', updatedAt: new Date().toISOString() };
-  return mockStockists[index];
+export async function approveStockist(id: string, token?: string): Promise<Stockist | null> {
+  const authToken = token || getAdminToken();
+  const raw = await apiPost<StockistResponse>(`/api/stockists/${id}/approve/`, {}, authToken);
+  return mapStockist(raw);
 }
 
-export async function rejectStockist(id: string): Promise<Stockist | null> {
-  await delay();
-  const index = mockStockists.findIndex((s) => s.id === id);
-  if (index === -1) return null;
-  mockStockists[index] = { ...mockStockists[index], status: 'rejected', updatedAt: new Date().toISOString() };
-  return mockStockists[index];
+export async function rejectStockist(id: string, token?: string): Promise<Stockist | null> {
+  const authToken = token || getAdminToken();
+  const raw = await apiPost<StockistResponse>(`/api/stockists/${id}/reject/`, {}, authToken);
+  return mapStockist(raw);
+}
+
+export async function suspendStockist(id: string, token?: string): Promise<Stockist | null> {
+  const authToken = token || getAdminToken();
+  const raw = await apiPost<StockistResponse>(`/api/stockists/${id}/suspend/`, {}, authToken);
+  return mapStockist(raw);
+}
+
+export async function enableStockist(id: string, token?: string): Promise<Stockist | null> {
+  const authToken = token || getAdminToken();
+  const raw = await apiPost<StockistResponse>(`/api/stockists/${id}/enable/`, {}, authToken);
+  return mapStockist(raw);
+}
+
+export async function deleteStockist(id: string, token?: string): Promise<boolean> {
+  const authToken = token || getAdminToken();
+  try {
+    await apiDelete(`/api/stockists/${id}/`, authToken);
+    return true;
+  } catch {
+    return false;
+  }
 }

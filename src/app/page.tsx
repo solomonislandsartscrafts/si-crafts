@@ -1,10 +1,13 @@
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
 import { generatePageMetadata } from '@/lib/metadata';
 import { getPublicProducts } from '@/services/products';
 import { getPublicMakers } from '@/services/makers';
+import { getPublishedArticles } from '@/services/articles';
 import { ProductCard } from '@/components/cards/product-card';
-import { PieceLookup } from '@/components/shared/piece-lookup';
+import { HeroCodeToggle } from '@/components/shared/hero-code-toggle';
+import { HeroSlideshow } from '@/components/shared/hero-slideshow';
+import { AnimatedStats } from '@/components/shared/animated-stats';
+import { SafeImage } from '@/components/ui/safe-image';
 
 export const metadata = generatePageMetadata({
   title: 'Solomon Islands Arts and Crafts',
@@ -14,76 +17,174 @@ export const metadata = generatePageMetadata({
 });
 
 export default async function HomePage() {
-  const [products, makers] = await Promise.all([
+  const [products, makers, articles] = await Promise.all([
     getPublicProducts(),
     getPublicMakers(),
+    getPublishedArticles(),
   ]);
 
-  const featuredProducts = products.slice(0, 6);
+  const featuredProducts = products.slice(0, 4);
   const sampleProductCode = products[0]?.productCode;
+  const latestArticles = articles.slice(0, 3);
+  const featuredMakers = makers.slice(0, 3);
+
+  // Hero gallery — show 3 products rotating. Prefer one per material category
+  // so the rotation shows the range of crafts. Products without images still
+  // appear with the placeholder.
+  const seenCategories = new Set<string>();
+  const heroProducts: (typeof products)[number][] = [];
+
+  // First pass: one product per category
+  for (const product of products) {
+    if (heroProducts.length >= 3) break;
+    if (!seenCategories.has(product.materialCategory)) {
+      seenCategories.add(product.materialCategory);
+      heroProducts.push(product);
+    }
+  }
+
+  // Second pass: fill remaining slots from any category
+  if (heroProducts.length < 3) {
+    for (const product of products) {
+      if (heroProducts.length >= 3) break;
+      if (!heroProducts.includes(product)) {
+        heroProducts.push(product);
+      }
+    }
+  }
+
+  const heroSlides = heroProducts.map((product) => {
+    const maker = makers.find((m) => m.id === product.makerId);
+    return {
+      imageUrl: product.imageUrls[0] ?? '',
+      name: product.name,
+      makerName: maker?.name,
+      place: maker ? `${maker.village}, ${maker.province}` : undefined,
+    };
+  });
 
   return (
     <div className="flex flex-col">
-      {/* Hero Section — split layout: text left, image right */}
-      <section className="bg-transparent">
+      {/* Hero + stats fill the first viewport on desktop, so nothing below
+          is visible until the user scrolls. Offset = header (80px) + flag divider (14px). */}
+      <div className="lg:flex lg:flex-col lg:min-h-[calc(100vh-94px)]">
+        {/* Hero — Flag theme: gold accent + serif heading + split layout */}
+        <section className="bg-page-bg lg:flex-1 lg:flex lg:items-center">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-10 items-center py-12 lg:py-10">
+              {/* Left: Text content */}
+              <div className="order-2 lg:order-1 lg:col-span-2">
+                {/* Gold accent line + subtitle */}
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="w-8 h-0.5 bg-ocean" aria-hidden="true" />
+                  <span className="text-xs font-bold uppercase tracking-widest text-ocean">
+                    Handmade in Solomon Islands
+                  </span>
+                </div>
+
+                <h1 className="font-heading text-[1.875rem] sm:text-4xl lg:text-[2.75rem] xl:text-5xl font-medium text-deep-blue leading-tight">
+                  Meet the Makers Behind Every Piece
+                </h1>
+
+                <p className="mt-5 text-base text-warm-gray-600 leading-relaxed max-w-md">
+                  Every product is handmade. When you buy from us, you invest directly in Solomon Islands artisans, their communities, their traditions, and their futures.
+                </p>
+
+                <div className="mt-7 flex flex-wrap items-center gap-3">
+                  <Link
+                    href="/catalogue"
+                    className="tap-target inline-flex items-center px-6 py-3 btn-primary"
+                  >
+                    Browse Catalogue
+                  </Link>
+                  <Link
+                    href="/about"
+                    className="tap-target inline-flex items-center px-6 py-3 border-2 border-deep-blue text-deep-blue hover:bg-deep-blue hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+                  >
+                    Our Story
+                  </Link>
+                </div>
+
+                <div className="mt-4">
+                  <HeroCodeToggle />
+                </div>
+              </div>
+
+              {/* Right: Hero gallery — coverflow carousel */}
+              <div className="order-1 lg:order-2 lg:col-span-3 w-full">
+                <HeroSlideshow items={heroSlides} interval={5000} />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Stats strip */}
+        <section className="bg-white border-y border-sand lg:flex-shrink-0">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <AnimatedStats variant="light" stats={[
+              { value: 'EST. 2026', label: 'Volunteer-Run' },
+              { value: String(makers.length), label: 'Solomon Islands Makers' },
+              { value: '100% HANDMADE', label: 'In Solomon Islands' },
+              { value: 'AVAILABLE IN', label: 'Australia' },
+            ]} />
+          </div>
+        </section>
+      </div>
+
+      {/* Featured Makers */}
+      <section className="section-y">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-12 md:py-20 lg:py-28">
-            {/* Left: Text + CTA */}
-            <div>
-              <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl font-bold text-deep-blue leading-heading">
-                Solomon Islands<br />Arts &amp; Crafts
-              </h1>
-
-              <p className="mt-6 text-lg md:text-xl text-warm-gray-800 font-medium uppercase tracking-wide">
-                Behind every piece, a story. Find yours.
-              </p>
-
-              {/* Code input — the distinctive feature */}
-              <div className="mt-6 max-w-xs">
-                <PieceLookup />
-              </div>
-
-              {/* Buttons below */}
-              <div className="mt-6 flex items-center gap-4">
-                <Link
-                  href="/catalogue"
-                  className="tap-target inline-flex items-center gap-2 px-6 py-3 bg-terracotta hover:bg-terracotta-dark text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
-                >
-                  Browse Catalogue
-                </Link>
-                <Link
-                  href="/makers"
-                  className="tap-target inline-flex items-center gap-2 px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
-                >
-                  Meet the Makers
-                </Link>
-              </div>
-            </div>
-
-            {/* Right: Cover image — circular mask */}
-            <div className="hidden md:flex items-center justify-center">
-              <div className="w-[450px] h-[450px] rounded-full overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/images/Cover.png"
-                  alt="Solomon Islands handcraft"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
+          <div className="text-center mb-10">
+            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
+              The people behind the pieces
+            </h2>
+            <p className="text-warm-gray-600 mt-2 max-w-lg mx-auto">
+              Every piece you see here was made by hand, by a named maker, in Solomon Islands.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredMakers.map((maker, index) => (
+              <Link key={maker.id} href={`/maker/${maker.slug}`} className={`group flex h-full flex-col rounded-lg overflow-hidden border border-sand hover:border-ocean/30 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ocean ${index === 1 ? 'hidden sm:flex lg:flex' : ''} ${index === 2 ? 'hidden lg:flex' : ''}`}>
+                <div className="aspect-[3/4] relative bg-sand-light overflow-hidden">
+                  <SafeImage
+                    src={maker.portraitUrl}
+                    alt={maker.name}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                </div>
+                <div className="flex flex-1 flex-col p-4 bg-warm-gray-100">
+                  <h3 className="font-heading text-sm font-semibold text-deep-blue group-hover:text-ocean transition-colors">
+                    {maker.name}
+                  </h3>
+                  <p className="text-xs text-warm-gray-600 mt-1">
+                    {maker.village}, {maker.province}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link
+              href="/makers"
+              className="tap-target inline-flex items-center gap-2 px-6 py-3 border-2 border-deep-blue text-deep-blue hover:bg-deep-blue hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+            >
+              Meet all makers
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Featured Products — full width background */}
-      <section className="w-full py-section-lg">
+      {/* Featured Products */}
+      <section className="section-y bg-card-bg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between mb-8">
             <div>
-              <h2 className="font-heading text-2xl md:text-3xl font-bold text-deep-blue">
+              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
                 Featured Crafts
               </h2>
-              <p className="text-warm-gray-600 mt-2">
+              <p className="text-warm-gray-600 mt-1">
                 Handmade pieces from across Solomon Islands.
               </p>
             </div>
@@ -91,12 +192,10 @@ export default async function HomePage() {
               href="/catalogue"
               className="hidden sm:inline-flex items-center gap-1 text-sm font-medium text-ocean hover:text-ocean-dark transition-colors"
             >
-              View all <ArrowRight className="w-4 h-4" />
+              View all
             </Link>
           </div>
-        </div>
-        <div className="px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {featuredProducts.map((product) => {
               const maker = makers.find((m) => m.id === product.makerId);
               return (
@@ -108,61 +207,118 @@ export default async function HomePage() {
               );
             })}
           </div>
-        </div>
-        <div className="sm:hidden mt-6 text-center">
-          <Link
-            href="/catalogue"
-            className="inline-flex items-center gap-1 text-sm font-medium text-ocean"
-          >
-            View all products <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="sm:hidden mt-6 text-center">
+            <Link href="/catalogue" className="inline-flex items-center gap-1 text-sm font-medium text-ocean">
+              View all products
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Provenance Teaser + Wholesale CTA */}
-      <section className="border-t border-ocean/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            {/* Provenance teaser */}
-            <div>
-              <h2 className="font-heading text-2xl md:text-3xl font-bold text-deep-blue mb-4">
+      {/* Every tag tells a story */}
+      <section className="section-y">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            <div className="hidden md:block relative aspect-[4/5] overflow-hidden rounded-lg bg-sand-light">
+              <SafeImage
+                src={featuredMakers[0]?.portraitUrl}
+                alt={featuredMakers[0]?.name || 'Maker'}
+                fill
+                className="object-contain p-4"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+            </div>
+            <div className="max-w-md">
+              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
                 Every tag tells a story
               </h2>
-              <p className="text-warm-gray-600 leading-relaxed mb-6">
-                Scan the QR code on any product tag to meet the maker — see who made your piece, 
+              <p className="text-warm-gray-600 leading-relaxed mb-4">
+                Scan the QR code on any product tag to meet the maker — see who made your piece,
                 how it was made, and where it comes from. No app needed, no login required.
+              </p>
+              <p className="text-warm-gray-600 leading-relaxed mb-6">
+                We work directly with makers in Solomon Islands. Every piece carries the artisan&apos;s name,
+                village, and story — connecting you to the person and place behind your purchase.
               </p>
               {sampleProductCode && (
                 <Link
                   href={`/piece/${sampleProductCode}`}
-                  className="tap-target inline-flex items-center gap-2 px-5 py-3 bg-ocean hover:bg-ocean-dark text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+                  className="tap-target inline-flex items-center gap-2 px-5 py-3 btn-primary"
                 >
                   See an example tag
-                  <ArrowRight className="w-4 h-4" />
                 </Link>
               )}
-            </div>
-
-            {/* Wholesale CTA */}
-            <div className="bg-card-bg rounded-lg p-8 shadow-card">
-              <h3 className="font-heading text-xl font-bold text-deep-blue mb-3">
-                Stock SI Crafts in your shop
-              </h3>
-              <p className="text-warm-gray-600 mb-6">
-                We supply museum shops and galleries across Australia with authentic 
-                Solomon Islands handicrafts at wholesale prices.
-              </p>
-              <Link
-                href="/wholesale"
-                className="tap-target inline-flex items-center gap-2 px-5 py-3 border-2 border-terracotta text-terracotta hover:bg-terracotta hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
-              >
-                Learn about wholesale
-                <ArrowRight className="w-4 h-4" />
-              </Link>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Wholesale CTA */}
+      <section className="section-y bg-warm-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-3">
+            Stock SI Crafts in your shop
+          </h2>
+          <p className="text-warm-gray-600 leading-relaxed mb-6 max-w-xl mx-auto">
+            We supply museum shops and galleries in Australia with authentic
+            Solomon Islands handicrafts at wholesale prices.
+          </p>
+          <Link
+            href="/wholesale"
+            className="tap-target inline-flex items-center gap-2 px-8 py-4 btn-primary text-lg"
+          >
+            Learn about wholesale
+          </Link>
+        </div>
+      </section>
+
+      {/* Latest News */}
+      {latestArticles.length > 0 && (
+        <section className="section-y">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-end justify-between mb-8">
+              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
+                Latest news
+              </h2>
+              <Link
+                href="/news"
+                className="hidden sm:inline-flex items-center gap-1 text-sm font-medium text-ocean hover:text-ocean-dark transition-colors"
+              >
+                All articles
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {latestArticles.map((article) => (
+                <Link key={article.id} href={`/news/${article.slug}`} className="group block">
+                  <div className="aspect-[3/2] relative overflow-hidden rounded-lg mb-3">
+                    <SafeImage
+                      src={article.coverImageUrl}
+                      alt={article.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                  </div>
+                  <p className="text-xs text-warm-gray-400 mb-1">
+                    {new Date(article.publishedAt || article.createdAt).toLocaleDateString('en-AU', {
+                      day: 'numeric', month: 'long', year: 'numeric',
+                    })}
+                  </p>
+                  <h3 className="font-heading text-lg font-semibold text-deep-blue group-hover:text-ocean transition-colors mb-1 line-clamp-2">
+                    {article.title}
+                  </h3>
+                  <p className="text-sm text-warm-gray-600 line-clamp-2 leading-relaxed mb-2">
+                    {article.excerpt}
+                  </p>
+                  <span className="text-sm font-medium text-ocean group-hover:text-ocean-dark transition-colors">
+                    Read more
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

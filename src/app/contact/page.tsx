@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { Mail, Send } from 'lucide-react';
 import { submitContactEnquiry } from '@/services/enquiries';
 import type { ContactReason } from '@/types';
+import { PageHeader } from '@/components/layout/page-header';
 
 export default function ContactPage() {
   const [form, setForm] = useState({
     name: '',
     email: '',
+    phone: '',
     reason: 'general' as ContactReason,
     message: '',
   });
@@ -43,12 +45,12 @@ export default function ContactPage() {
 
   if (submitted) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
         <div className="max-w-md mx-auto text-center">
           <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6">
             <Send className="w-8 h-8 text-success" />
           </div>
-          <h1 className="font-heading text-2xl font-bold text-deep-blue mb-3">
+          <h1 className="font-heading text-2xl font-medium text-deep-blue mb-3">
             Message sent
           </h1>
           <p className="text-warm-gray-600">
@@ -60,15 +62,13 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
-      <h1 className="font-heading text-3xl md:text-4xl font-bold text-deep-blue mb-4">
-        Contact
-      </h1>
-      <p className="text-lg text-warm-gray-600 max-w-2xl leading-relaxed mb-12">
-        Get in touch with the Solomon Islands Arts and Crafts team.
-      </p>
+    <div>
+      <PageHeader
+        title="Contact"
+        intro="Get in touch with the Solomon Islands Arts and Crafts team."
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16 grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-12">
         {/* Contact Form */}
         <form onSubmit={handleSubmit} noValidate className="space-y-6">
           <div>
@@ -112,6 +112,19 @@ export default function ContactPage() {
           </div>
 
           <div>
+            <label htmlFor="phone" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              Phone <span className="text-warm-gray-400 font-normal">(optional)</span>
+            </label>
+            <input
+              id="phone"
+              type="tel"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+            />
+          </div>
+
+          <div>
             <label htmlFor="reason" className="block text-sm font-medium text-warm-gray-800 mb-1">
               Reason for contact
             </label>
@@ -122,7 +135,10 @@ export default function ContactPage() {
               className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
             >
               <option value="general">General enquiry</option>
+              <option value="wholesale">Wholesale enquiry</option>
+              <option value="custom-order">Custom or bulk order</option>
               <option value="media">Media &amp; press</option>
+              <option value="other">Other</option>
             </select>
           </div>
 
@@ -149,9 +165,8 @@ export default function ContactPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="tap-target inline-flex items-center gap-2 px-6 py-3 bg-terracotta hover:bg-terracotta-dark disabled:opacity-50 text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
+            className="tap-target inline-flex items-center gap-2 px-6 py-3 btn-primary"
           >
-            <Send className="w-4 h-4" />
             {submitting ? 'Sending...' : 'Send message'}
           </button>
         </form>
@@ -159,47 +174,44 @@ export default function ContactPage() {
         {/* Contact Info */}
         <div className="space-y-8">
           <div>
-            <h2 className="font-heading text-xl font-bold text-deep-blue mb-3">
+            <h2 className="font-heading text-xl font-medium text-deep-blue mb-3">
               Email us
             </h2>
             <a
-              href="mailto:hello@siac.org.au"
+              href="mailto:hello@siac.com.au"
               className="inline-flex items-center gap-2 text-ocean hover:text-ocean-dark transition-colors"
             >
               <Mail className="w-5 h-5" />
-              hello@siac.org.au
+              hello@siac.com.au
             </a>
+            <p className="text-sm text-warm-gray-400 mt-2">ABN 82 103 383 042</p>
           </div>
 
           <div>
-            <h2 className="font-heading text-xl font-bold text-deep-blue mb-3">
-              Wholesale enquiries
-            </h2>
-            <p className="text-warm-gray-600 mb-3">
-              Interested in stocking SI Crafts in your museum or gallery shop?
+            <h3 className="font-heading font-semibold text-deep-blue mb-2">Wholesale enquiries</h3>
+            <p className="text-sm text-warm-gray-600">
+              Interested in stocking Solomon Islands Arts and Crafts in your museum or gallery shop?{' '}
+              <Link href="/wholesale" className="text-ocean hover:text-ocean-dark font-medium">Visit our Wholesale page →</Link>
             </p>
-            <Link
-              href="/wholesale"
-              className="text-ocean hover:text-ocean-dark font-medium transition-colors"
-            >
-              Visit our Wholesale page →
-            </Link>
           </div>
 
           <div>
-            <h2 className="font-heading text-xl font-bold text-deep-blue mb-3">
-              Media &amp; press
-            </h2>
-            <p className="text-warm-gray-600">
-              For interview requests, features, or press enquiries, select &ldquo;Media &amp; press&rdquo;
-              in the form and we&apos;ll prioritise your message.
+            <h3 className="font-heading font-semibold text-deep-blue mb-2">Media &amp; press</h3>
+            <p className="text-sm text-warm-gray-600">
+              For interview requests, features, or press enquiries, select &ldquo;Media &amp; press&rdquo; in the form and we&apos;ll prioritise your message.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-heading font-semibold text-deep-blue mb-2">Customised or bulk orders</h3>
+            <p className="text-sm text-warm-gray-600">
+              For personalised or bulk orders, select &ldquo;Custom or bulk order&rdquo; in the form and we&apos;ll get in touch.
             </p>
           </div>
 
           <div className="bg-sand-light rounded-lg p-6">
             <p className="text-sm text-warm-gray-600">
-              We&apos;re a small volunteer team based in Melbourne, Australia.
-              We aim to respond to all enquiries within 2–3 business days.
+              We&apos;re a small volunteer team based in Sydney, Australia and Dunedin, New Zealand. We aim to respond to all enquiries within 2–3 business days.
             </p>
           </div>
         </div>

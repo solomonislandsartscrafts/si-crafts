@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LogIn } from 'lucide-react';
-import { loginAdmin } from '@/services/auth';
+import { loginAdmin } from '@/lib/auth-client';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -33,7 +32,7 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-warm-gray-100 px-4">
       <div className="w-full max-w-sm bg-white rounded-lg shadow-md p-8">
-        <h1 className="font-heading text-2xl font-bold text-deep-blue mb-6 text-center">
+        <h1 className="font-heading text-2xl font-medium text-deep-blue mb-6 text-center">
           Admin Login
         </h1>
 
@@ -58,7 +57,6 @@ export default function AdminLoginPage() {
 
           <button type="submit" disabled={loading}
             className="tap-target w-full flex items-center justify-center gap-2 px-6 py-3 bg-deep-blue hover:bg-deep-blue/90 disabled:opacity-50 text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean">
-            <LogIn className="w-4 h-4" />
             {loading ? 'Logging in...' : 'Log in'}
           </button>
         </form>

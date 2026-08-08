@@ -1,5 +1,6 @@
-import { Heart, Shield, Eye, Users, DollarSign, HelpCircle } from 'lucide-react';
+import { IconAuthenticity, IconHandHeart, IconCulturalEye, IconCommunity, IconShellMoney, IconWovenQuestion } from '@/components/icons/craft-icons';
 import { generatePageMetadata } from '@/lib/metadata';
+import { PageHeader } from '@/components/layout';
 
 export const metadata = generatePageMetadata({
   title: 'Our Promise',
@@ -10,27 +11,25 @@ export const metadata = generatePageMetadata({
 
 export default function OurPromisePage() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
-      <h1 className="font-heading text-3xl md:text-4xl font-bold text-deep-blue mb-4">
-        Our Promise
-      </h1>
-      <p className="text-lg text-warm-gray-600 max-w-2xl leading-relaxed mb-12">
-        Every relationship we build — with makers, stockists, and customers — is grounded
-        in these commitments.
-      </p>
+    <div>
+      <PageHeader
+        title="Our Promise"
+        intro="Every relationship we build — with makers, stockists, and customers — is grounded in these commitments."
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 mb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 mb-12 lg:mb-16">
         {/* Authenticity */}
         <div className="flex gap-4">
           <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-terracotta/10 flex items-center justify-center">
-            <Shield className="w-6 h-6 text-terracotta" />
+            <IconAuthenticity className="w-6 h-6 text-terracotta" />
           </div>
           <div>
-            <h2 className="font-heading text-xl font-bold text-deep-blue mb-2">
+            <h2 className="font-heading text-lg font-semibold text-deep-blue mb-2">
               Authenticity
             </h2>
             <p className="text-warm-gray-600 leading-relaxed">
-              Every piece we sell is genuinely handmade by a named maker in Solomon Islands.
+              Every piece we sell is genuinely handmade by a known, named maker in Solomon Islands.
               We never sell mass-produced imitations. Every product tag links to the maker&apos;s
               story so you can verify provenance with a scan.
             </p>
@@ -40,15 +39,16 @@ export default function OurPromisePage() {
         {/* Fair Payment */}
         <div className="flex gap-4">
           <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-terracotta/10 flex items-center justify-center">
-            <Heart className="w-6 h-6 text-terracotta" />
+            <IconHandHeart className="w-6 h-6 text-terracotta" />
           </div>
           <div>
-            <h2 className="font-heading text-xl font-bold text-deep-blue mb-2">
+            <h2 className="font-heading text-lg font-semibold text-deep-blue mb-2">
               Fair Payment
             </h2>
             <p className="text-warm-gray-600 leading-relaxed">
               Makers set their own prices. We pay upfront — not on consignment, not on commission.
-              Our wholesale margin covers shipping, documentation, and distribution only.
+              Our wholesale margin covers shipping, documentation, and distribution only. The team
+              behind Solomon Islands Arts and Crafts donate their time and expertise.
             </p>
           </div>
         </div>
@@ -56,14 +56,14 @@ export default function OurPromisePage() {
         {/* Cultural Respect */}
         <div className="flex gap-4">
           <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-terracotta/10 flex items-center justify-center">
-            <Eye className="w-6 h-6 text-terracotta" />
+            <IconCulturalEye className="w-6 h-6 text-terracotta" />
           </div>
           <div>
-            <h2 className="font-heading text-xl font-bold text-deep-blue mb-2">
+            <h2 className="font-heading text-lg font-semibold text-deep-blue mb-2">
               Cultural Respect
             </h2>
             <p className="text-warm-gray-600 leading-relaxed">
-              These crafts belong to Solomon Islands peoples and communities. We are a conduit,
+              These crafts belong to Solomon Islands&apos; peoples and communities. We are a conduit,
               not an owner. We never publish a maker&apos;s story or image without their signed consent,
               and we work with cultural partners to ensure descriptions are accurate and respectful.
             </p>
@@ -73,10 +73,10 @@ export default function OurPromisePage() {
         {/* Consent & Transparency */}
         <div className="flex gap-4">
           <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-terracotta/10 flex items-center justify-center">
-            <Users className="w-6 h-6 text-terracotta" />
+            <IconCommunity className="w-6 h-6 text-terracotta" />
           </div>
           <div>
-            <h2 className="font-heading text-xl font-bold text-deep-blue mb-2">
+            <h2 className="font-heading text-lg font-semibold text-deep-blue mb-2">
               Consent & Transparency
             </h2>
             <p className="text-warm-gray-600 leading-relaxed">
@@ -89,13 +89,13 @@ export default function OurPromisePage() {
       </div>
 
       {/* WHERE THE MONEY GOES */}
-      <section className="border-t border-sand pt-12 mb-16">
+      <section className="border-t border-sand pt-10 lg:pt-12 mb-12 lg:mb-16">
         <div className="flex gap-4 mb-6">
           <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-ocean/10 flex items-center justify-center">
-            <DollarSign className="w-6 h-6 text-ocean" />
+            <IconShellMoney className="w-6 h-6 text-ocean" />
           </div>
           <div>
-            <h2 className="font-heading text-2xl font-bold text-deep-blue mb-2">
+            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-2">
               Where the money goes
             </h2>
             <p className="text-sm text-warm-gray-400 italic">
@@ -109,15 +109,13 @@ export default function OurPromisePage() {
           </p>
           <ul className="list-disc pl-6 space-y-2">
             <li>
-              <strong>The maker receives the price they set</strong> — paid upfront at the point of purchase in Solomon Islands, before the piece reaches Australia.
-              <span className="text-warm-gray-400 italic text-sm"> [NEEDS REVIEW — confirm payment timing and method]</span>
+              <strong>The maker receives the price they set</strong> — paid upfront in Solomon Islands Dollars ($SBD) at the point of purchase in Solomon Islands, before the piece reaches Australia.
             </li>
             <li>
               <strong>SIAC&apos;s margin covers operations</strong> — international freight, import documentation, photography, provenance tagging, warehousing, and distribution to stockists.
-              <span className="text-warm-gray-400 italic text-sm"> [NEEDS REVIEW — confirm margin % or range]</span>
             </li>
             <li>
-              <strong>No middlemen, no agents</strong> — we buy directly from makers or maker cooperatives. There is no third-party supply chain taking a cut.
+              <strong>No middlemen, no agents</strong> — we buy directly from makers or maker cooperatives. There is no third-party supply chain taking a cut. The logistics and website team behind Solomon Islands Arts and Crafts donate their time and expertise. Only the makers are paid at the price they set.
             </li>
           </ul>
           <p>
@@ -131,10 +129,10 @@ export default function OurPromisePage() {
       <section className="border-t border-sand pt-12">
         <div className="flex gap-4 mb-6">
           <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-ocean/10 flex items-center justify-center">
-            <HelpCircle className="w-6 h-6 text-ocean" />
+            <IconWovenQuestion className="w-6 h-6 text-ocean" />
           </div>
           <div>
-            <h2 className="font-heading text-2xl font-bold text-deep-blue">
+            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
               &ldquo;Are you exploiting makers?&rdquo;
             </h2>
           </div>
@@ -145,7 +143,7 @@ export default function OurPromisePage() {
           </p>
           <ul className="list-disc pl-6 space-y-2">
             <li>
-              <strong>Makers set their own prices.</strong> We do not negotiate down. If a maker says a bag costs SBD 500, that&apos;s what we pay.
+              <strong>Makers set their own prices.</strong> We do not negotiate down. If a maker says a bag costs $500 SBD, that&apos;s what we pay.
             </li>
             <li>
               <strong>Consent is non-negotiable.</strong> No maker&apos;s name, image, or story appears on this site without their written, signed consent. They can withdraw at any time.
@@ -165,6 +163,7 @@ export default function OurPromisePage() {
           </p>
         </div>
       </section>
+      </div>
     </div>
   );
 }

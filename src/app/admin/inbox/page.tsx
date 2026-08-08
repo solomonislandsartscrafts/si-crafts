@@ -35,7 +35,7 @@ export default function AdminInboxPage() {
 
   return (
     <AdminLayout>
-      <h1 className="font-heading text-2xl font-bold text-deep-blue mb-6">Inbox</h1>
+      <h1 className="font-heading text-2xl font-medium text-deep-blue mb-6">Inbox</h1>
 
       {/* Type filter */}
       <div className="flex flex-wrap gap-2 mb-6">
@@ -157,7 +157,7 @@ function TypeBadge({ type }: { type: EnquiryType }) {
     'maker-enquiry': 'bg-terracotta/10 text-terracotta',
     'stockist-request': 'bg-ocean/10 text-ocean',
     'contact': 'bg-warm-gray-200 text-warm-gray-600',
-    'media': 'bg-warning/10 text-warning',
+    'media': 'bg-warning/10 text-warning-text',
   };
   const labels: Record<EnquiryType, string> = {
     'maker-enquiry': 'Maker',

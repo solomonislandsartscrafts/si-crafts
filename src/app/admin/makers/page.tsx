@@ -4,10 +4,15 @@ import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
 import type { Maker } from '@/types';
 import { AdminLayout } from '@/components/admin';
+import { MakerFormModal, type MakerFormData } from '@/components/admin/maker-form-modal';
+import { useToast } from '@/components/ui/toast';
 
 export default function AdminMakersPage() {
   const [makers, setMakers] = useState<Maker[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingMaker, setEditingMaker] = useState<Maker | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const { success: toastSuccess, error: toastError } = useToast();
 
   useEffect(() => { loadMakers(); }, []);
 
@@ -27,16 +32,62 @@ export default function AdminMakersPage() {
 
   async function handleDelete(id: string, name: string) {
     if (!confirm(`Are you sure you want to delete "${name}"? This cannot be undone.`)) return;
-    const { deleteMaker } = await import('@/services/makers');
-    await deleteMaker(id);
-    loadMakers();
+    try {
+      const { deleteMaker } = await import('@/services/makers');
+      await deleteMaker(id);
+      toastSuccess(`"${name}" deleted.`);
+      loadMakers();
+    } catch {
+      toastError(`Failed to delete "${name}". Please try again.`);
+    }
+  }
+
+  function handleEdit(maker: Maker) {
+    setEditingMaker(maker);
+    setShowForm(true);
+  }
+
+  function handleAdd() {
+    setEditingMaker(null);
+    setShowForm(true);
+  }
+
+  async function handleSave(data: MakerFormData) {
+    try {
+      if (editingMaker) {
+        const { updateMaker } = await import('@/services/makers');
+        await updateMaker(editingMaker.id, {
+          ...data,
+          portraitUrl: data.portraitUrl || null,
+          story: data.story || null,
+        });
+        toastSuccess(`"${data.name}" updated.`);
+      } else {
+        const { createMaker } = await import('@/services/makers');
+        await createMaker({
+          ...data,
+          portraitUrl: data.portraitUrl || null,
+          story: data.story || null,
+          pieceCount: null,
+        });
+        toastSuccess(`"${data.name}" created.`);
+      }
+      setShowForm(false);
+      setEditingMaker(null);
+      loadMakers();
+    } catch (err) {
+      throw err;
+    }
   }
 
   return (
     <AdminLayout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-heading text-2xl font-bold text-deep-blue">Makers</h1>
-        <button className="tap-target inline-flex items-center gap-2 px-4 py-2 bg-ocean hover:bg-ocean-dark text-white rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light">
+        <h1 className="font-heading text-2xl font-medium text-deep-blue">Makers</h1>
+        <button
+          onClick={handleAdd}
+          className="tap-target inline-flex items-center gap-2 px-4 py-2 btn-primary text-sm"
+        >
           <Plus className="w-4 h-4" /> Add Maker
         </button>
       </div>
@@ -69,11 +120,16 @@ export default function AdminMakersPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="tap-target p-2 text-warm-gray-400 hover:text-ocean transition-colors" aria-label={`Edit ${maker.name}`}>
+                      <button
+                        onClick={() => handleEdit(maker)}
+                        className="tap-target p-2 text-warm-gray-400 hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                        aria-label={`Edit ${maker.name}`}
+                      >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button onClick={() => handleDelete(maker.id, maker.name)}
-                        className="tap-target p-2 text-warm-gray-400 hover:text-error transition-colors" aria-label={`Delete ${maker.name}`}>
+                        className="tap-target p-2 text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                        aria-label={`Delete ${maker.name}`}>
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -83,6 +139,14 @@ export default function AdminMakersPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {showForm && (
+        <MakerFormModal
+          maker={editingMaker}
+          onClose={() => { setShowForm(false); setEditingMaker(null); }}
+          onSave={handleSave}
+        />
       )}
     </AdminLayout>
   );

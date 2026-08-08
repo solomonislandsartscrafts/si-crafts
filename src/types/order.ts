@@ -6,6 +6,7 @@ export interface CartItem {
   productName: string;
   quantity: number;
   unitPrice: number;
+  note?: string;
 }
 
 export interface OrderRequest {

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/safe-image';
 import type { Maker } from '@/types';
 
 interface MakerCardProps {
@@ -11,28 +11,25 @@ export function MakerCard({ maker, craftName }: MakerCardProps) {
   return (
     <Link
       href={`/maker/${maker.slug}`}
-      className="group block rounded-lg overflow-hidden bg-card-bg shadow-card hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-ocean"
+      className="group flex h-full flex-col rounded-lg overflow-hidden border border-sand hover:border-ocean/30 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ocean"
     >
-      <div className="aspect-[3/4] relative bg-sand-light bg-weave-pattern">
-        {maker.portraitUrl ? (
-          <Image
-            src={maker.portraitUrl}
-            alt={`${maker.name}, ${craftName || 'maker'} from ${maker.village}`}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-sand">
-            <span className="text-warm-gray-400 text-sm">Photo coming soon</span>
-          </div>
-        )}
+      {/* Image area */}
+      <div className="aspect-[3/4] relative bg-sand-light overflow-hidden">
+        <SafeImage
+          src={maker.portraitUrl}
+          alt={`${maker.name}, ${craftName || 'maker'} from ${maker.village}`}
+          fill
+          className="object-cover group-hover:scale-105 transition-transform duration-300"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        />
       </div>
-      <div className="p-4">
-        <h3 className="font-heading font-semibold text-deep-blue group-hover:text-ocean transition-colors">
+
+      {/* Info area — grey background, matches product cards */}
+      <div className="flex flex-1 flex-col p-4 bg-warm-gray-100">
+        <h3 className="font-heading text-sm font-semibold text-deep-blue group-hover:text-ocean transition-colors">
           {maker.name}
         </h3>
-        <p className="text-sm text-warm-gray-600 mt-1">
+        <p className="text-xs text-warm-gray-600 mt-1">
           {maker.village}, {maker.province}
         </p>
         {craftName && (

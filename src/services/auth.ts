@@ -1,5 +1,4 @@
-import { getStockistByEmail, getStockistById } from './stockists';
-import { getAdminByEmail, getAdminById, incrementFailedLogin, resetFailedLogin } from './admins';
+import { apiPost, apiGet } from '@/lib/api-client';
 import type { Stockist, AdminUser } from '@/types';
 
 export interface AuthResult {
@@ -9,121 +8,101 @@ export interface AuthResult {
   lockedUntil?: string;
 }
 
-/**
- * Mock auth — sessions stored in localStorage as JSON so they persist
- * across page navigations in the browser. In production this would be
- * HTTP-only cookies validated at the edge.
- */
-
-interface SessionData {
-  userId: string;
-  type: 'stockist' | 'admin';
-  expiresAt: number;
-}
-
-const SESSIONS_KEY = 'si_crafts_sessions';
-
-function getSessions(): Record<string, SessionData> {
-  if (typeof window === 'undefined') return {};
-  try {
-    const raw = localStorage.getItem(SESSIONS_KEY);
-    return raw ? JSON.parse(raw) : {};
-  } catch {
-    return {};
-  }
-}
-
-function saveSessions(sessions: Record<string, SessionData>): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
-}
-
-function generateToken(): string {
-  return `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
-
 // --- Stockist Auth ---
 
 export async function loginStockist(email: string, password: string): Promise<AuthResult> {
-  const stockist = await getStockistByEmail(email);
-
-  if (!stockist || stockist.passwordHash !== password || stockist.status !== 'approved') {
-    return { success: false, error: 'Invalid email or password' };
+  try {
+    const data = await apiPost<{ success: boolean; sessionToken: string; user: unknown }>('/api/auth/stockist/login/', { email, password });
+    return { success: true, sessionToken: data.sessionToken };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Invalid email or password';
+    return { success: false, error: message };
   }
-
-  const token = generateToken();
-  const expiresAt = Date.now() + 8 * 60 * 60 * 1000; // 8 hours
-  const sessions = getSessions();
-  sessions[token] = { userId: stockist.id, type: 'stockist', expiresAt };
-  saveSessions(sessions);
-
-  return { success: true, sessionToken: token };
 }
 
 export async function logoutStockist(sessionToken: string): Promise<void> {
-  const sessions = getSessions();
-  delete sessions[sessionToken];
-  saveSessions(sessions);
+  try {
+    await apiPost('/api/auth/stockist/logout/', { refresh: sessionToken }, sessionToken);
+  } catch {
+    // Ignore errors on logout
+  }
 }
 
 export async function validateStockistSession(sessionToken: string): Promise<Stockist | null> {
-  const sessions = getSessions();
-  const session = sessions[sessionToken];
-  if (!session || session.type !== 'stockist' || session.expiresAt < Date.now()) {
-    if (session) {
-      delete sessions[sessionToken];
-      saveSessions(sessions);
-    }
+  try {
+    const data = await apiGet<{
+      id: number;
+      email: string;
+      businessName: string;
+      contactName: string;
+    }>('/api/auth/stockist/verify/', sessionToken);
+    return {
+      id: String(data.id),
+      businessName: data.businessName,
+      abn: '',
+      contactName: data.contactName,
+      email: data.email,
+      phone: '',
+      description: '',
+      status: 'approved',
+      passwordHash: '',
+      createdAt: '',
+      updatedAt: '',
+    };
+  } catch {
     return null;
   }
-  return getStockistById(session.userId);
 }
 
 // --- Admin Auth ---
 
 export async function loginAdmin(email: string, password: string): Promise<AuthResult> {
-  const admin = await getAdminByEmail(email);
-
-  if (!admin || !admin.isActive) {
-    return { success: false, error: 'Invalid email or password' };
+  try {
+    const data = await apiPost<{ success?: boolean; sessionToken?: string; error?: string }>('/api/auth/admin/login/', { email, password });
+    if (data.success && data.sessionToken) {
+      return { success: true, sessionToken: data.sessionToken };
+    }
+    return { success: false, error: data.error || 'Invalid email or password' };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Invalid email or password';
+    if (message.includes('locked')) {
+      return { success: false, error: message, lockedUntil: '' };
+    }
+    return { success: false, error: message };
   }
-
-  // Check lockout
-  if (admin.lockedUntil && new Date(admin.lockedUntil).getTime() > Date.now()) {
-    return { success: false, error: 'Account temporarily locked', lockedUntil: admin.lockedUntil };
-  }
-
-  if (admin.passwordHash !== password) {
-    await incrementFailedLogin(admin.id);
-    return { success: false, error: 'Invalid email or password' };
-  }
-
-  await resetFailedLogin(admin.id);
-
-  const token = generateToken();
-  const expiresAt = Date.now() + 60 * 60 * 1000; // 60 minutes
-  const sessions = getSessions();
-  sessions[token] = { userId: admin.id, type: 'admin', expiresAt };
-  saveSessions(sessions);
-
-  return { success: true, sessionToken: token };
 }
 
 export async function logoutAdmin(sessionToken: string): Promise<void> {
-  const sessions = getSessions();
-  delete sessions[sessionToken];
-  saveSessions(sessions);
+  try {
+    await apiPost('/api/auth/admin/logout/', { refresh: sessionToken }, sessionToken);
+  } catch {
+    // Ignore errors on logout
+  }
 }
 
 export async function validateAdminSession(sessionToken: string): Promise<AdminUser | null> {
-  const sessions = getSessions();
-  const session = sessions[sessionToken];
-  if (!session || session.type !== 'admin' || session.expiresAt < Date.now()) {
-    if (session) {
-      delete sessions[sessionToken];
-      saveSessions(sessions);
-    }
+  try {
+    const data = await apiGet<{
+      id: number;
+      email: string;
+      name: string;
+      role: string;
+    }>('/api/auth/admin/verify/', sessionToken);
+    return {
+      id: String(data.id),
+      name: data.name,
+      email: data.email,
+      role: data.role as AdminUser['role'],
+      passwordHash: '',
+      isActive: true,
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: '',
+      updatedAt: '',
+    };
+  } catch {
     return null;
   }
-  return getAdminById(session.userId);
 }
+
+

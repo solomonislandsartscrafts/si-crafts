@@ -17,3 +17,14 @@ export type {
   EnquiryType,
   AnyEnquiry,
 } from './enquiry';
+export type { Article } from './article';
+export type { RetailStockist } from './retail-stockist';
+export type { SiteContent } from './site-content';
+export type {
+  AttentionSeverity,
+  AttentionItem,
+  ActivityItem,
+  SetupProgress,
+  DashboardCounts,
+  DashboardSummary,
+} from './dashboard';

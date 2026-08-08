@@ -51,8 +51,44 @@ All data access is in `/src/services/`. Replace mock imports with `fetch()` call
 |----------|----------|--------|
 | `loginStockist(email, password)` | `/api/auth/stockist/login/` | POST |
 | `validateStockistSession(token)` | `/api/auth/stockist/verify/` | GET |
+| `logoutStockist(token)` | `/api/auth/stockist/logout/` | POST |
 | `loginAdmin(email, password)` | `/api/auth/admin/login/` | POST |
 | `validateAdminSession(token)` | `/api/auth/admin/verify/` | GET |
+| `logoutAdmin(token)` | `/api/auth/admin/logout/` | POST |
+
+### Admins (`/src/services/admins.ts`)
+
+| Function | Endpoint | Method | Notes |
+|----------|----------|--------|-------|
+| `getAdminById(id)` | `/api/admins/{id}/` | GET | |
+| `getAdminByEmail(email)` | `/api/admins/?email={email}` | GET | |
+| `getAllAdmins()` | `/api/admins/` | GET | Super Admin only |
+| `createAdmin(data)` | `/api/admins/` | POST | Super Admin only |
+| `updateAdmin(id, data)` | `/api/admins/{id}/` | PATCH | |
+| `deactivateAdmin(id, requestingId)` | `/api/admins/{id}/deactivate/` | POST | Prevents self-deactivation |
+| `incrementFailedLogin(id)` | Server-side only | — | Django signal on failed auth |
+| `resetFailedLogin(id)` | Server-side only | — | Django signal on success |
+
+### Stockists (`/src/services/stockists.ts`)
+
+| Function | Endpoint | Method | Notes |
+|----------|----------|--------|-------|
+| `getStockistById(id)` | `/api/stockists/{id}/` | GET | |
+| `getStockistByEmail(email)` | `/api/stockists/?email={email}` | GET | |
+| `getAllStockists()` | `/api/stockists/` | GET | Admin only |
+| `createApplication(data)` | `/api/stockists/apply/` | POST | Public endpoint |
+| `approveStockist(id)` | `/api/stockists/{id}/approve/` | POST | Admin only |
+| `rejectStockist(id)` | `/api/stockists/{id}/reject/` | POST | Admin only |
+
+### Enquiries (`/src/services/enquiries.ts`)
+
+| Function | Endpoint | Method | Notes |
+|----------|----------|--------|-------|
+| `submitMakerEnquiry(data)` | `/api/enquiries/maker/` | POST | Public (from For Makers page) |
+| `submitStockistRequest(data)` | `/api/enquiries/stockist-request/` | POST | Authenticated stockist |
+| `submitContactEnquiry(data)` | `/api/enquiries/contact/` | POST | Public (from Contact page) |
+| `listEnquiries(filter?)` | `/api/enquiries/?type={filter}` | GET | Admin only |
+| `markHandled(type, id)` | `/api/enquiries/{id}/handled/` | POST | Admin only |
 
 ## Wagtail Content Models
 
@@ -124,6 +160,52 @@ class OrderRequest(models.Model):
     submitted_at = models.DateTimeField(auto_now_add=True)
     notes = models.TextField(blank=True, null=True)
     # Items via related OrderItem model
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(OrderRequest, related_name='items')
+    product = models.ForeignKey('ProductPage')
+    product_code = models.CharField(max_length=20)
+    product_name = models.CharField(max_length=300)
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+```
+
+### AdminUser (Django User + Profile)
+```python
+# Uses Django's built-in User model with a profile extension
+class AdminProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    role = models.CharField(choices=['super_admin', 'editor'])
+    is_active = models.BooleanField(default=True)
+    failed_login_attempts = models.IntegerField(default=0)
+    locked_until = models.DateTimeField(null=True, blank=True)
+```
+
+### Enquiries (Django models)
+```python
+class MakerEnquiry(models.Model):
+    name = models.CharField(max_length=200)
+    village = models.CharField(max_length=200)
+    province = models.CharField(max_length=200)
+    craft = models.CharField(max_length=200)
+    message = models.TextField()
+    contact = models.CharField(max_length=200)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    handled = models.BooleanField(default=False)
+
+class StockistRequest(models.Model):
+    stockist = models.ForeignKey(Stockist)
+    request_data = models.JSONField()  # {kind, productCode, quantity} or {kind, description}
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    handled = models.BooleanField(default=False)
+
+class ContactEnquiry(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    reason = models.CharField(choices=['general', 'wholesale', 'media', 'other'])
+    message = models.TextField()
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    handled = models.BooleanField(default=False)
 ```
 
 ## Authentication Integration
@@ -185,3 +267,77 @@ class OrderRequest(models.Model):
 | Cultural review flags | ✅ Wagtail page fields | — |
 
 Most admin functionality maps to native Wagtail. Only stockist approval and order management need custom views (which can be Wagtail ModelAdmin or standalone Django views served at a subpath).
+
+## Service Layer Swap Process
+
+When ready to connect real data:
+
+### Step 1: Environment setup
+```bash
+# .env.local
+WAGTAIL_API_URL=https://api.solomonislandsartsandcrafts.com.au
+```
+
+### Step 2: Create API client utility
+```typescript
+// src/lib/api-client.ts
+const API_URL = process.env.WAGTAIL_API_URL || 'http://localhost:8000';
+
+export async function apiGet<T>(path: string, token?: string): Promise<T> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${API_URL}${path}`, { headers });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+```
+
+### Step 3: Replace mock imports in each service file
+Each service file currently imports from `@/data/mock`. Replace with API calls:
+
+```typescript
+// Before (mock):
+import { mockMakers } from '@/data/mock';
+export async function getPublicMakers() {
+  return mockMakers.filter(m => m.consentStatus === 'Signed');
+}
+
+// After (real):
+import { apiGet } from '@/lib/api-client';
+export async function getPublicMakers() {
+  return apiGet<Maker[]>('/api/v2/pages/?type=makers.MakerPage&consent_status=Signed&fields=*');
+}
+```
+
+### Step 4: Order of migration
+1. **Crafts** (simplest, 3 records, read-only for public)
+2. **Makers** (read + consent gating)
+3. **Products** (depends on makers being migrated)
+4. **Auth** (stockist + admin login/session)
+5. **Orders** (depends on auth)
+6. **Stockists** (depends on auth)
+7. **Enquiries** (independent, low priority)
+
+### What does NOT change
+- Pages and components — they call service functions, not data directly
+- Types in `/src/types/` — Wagtail API responses map to these same shapes
+- Cart logic in `/src/lib/cart.ts` — client-side localStorage, no API needed
+- `validateProductCode()` — client-side regex, no API needed
+
+### Neon Database Connection
+Your Neon PostgreSQL database will be configured in the Wagtail/Django settings:
+
+```python
+# settings.py
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'si_crafts',
+        'USER': 'your_user',
+        'PASSWORD': 'your_password',
+        'HOST': 'ep-xxxxx.region.aws.neon.tech',
+        'PORT': '5432',
+        'OPTIONS': {'sslmode': 'require'},
+    }
+}
+```

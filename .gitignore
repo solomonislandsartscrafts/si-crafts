@@ -25,7 +25,22 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files
+.env
 .env*.local
+.dev.vars
+backend/.env
+
+# OpenNext / Cloudflare build output
+.open-next
+
+# backend
+backend/db.sqlite3
+backend/media/
+backend/staticfiles/
+backend/__pycache__/
+
+# uploads (user-uploaded images)
+/public/uploads
 
 # vercel
 .vercel

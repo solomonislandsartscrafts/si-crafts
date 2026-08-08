@@ -30,7 +30,7 @@ export default function AdminOrdersPage() {
 
   return (
     <AdminLayout>
-      <h1 className="font-heading text-2xl font-bold text-deep-blue mb-6">Orders</h1>
+      <h1 className="font-heading text-2xl font-medium text-deep-blue mb-6">Orders</h1>
       {loading ? <p className="text-warm-gray-400">Loading...</p> : (
         <div className="bg-white rounded-lg shadow-card overflow-x-auto">
           <table className="w-full text-sm">
@@ -53,6 +53,9 @@ export default function AdminOrdersPage() {
                   <td className="px-4 py-3 text-warm-gray-800">A${order.totalAud.toFixed(2)}</td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-1 rounded text-xs font-medium ${STATUS_STYLES[order.status] || ''}`}>{order.status}</span>
+                    {order.notes && (
+                      <p className="text-xs text-warm-gray-400 mt-1 max-w-xs whitespace-pre-line">{order.notes}</p>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <select value={order.status} onChange={(e) => handleStatusChange(order.id, e.target.value)}

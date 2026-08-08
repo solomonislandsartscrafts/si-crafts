@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import type { Maker } from '@/types';
 import { SolomonIslandsProvinceMap } from '@/components/map/province-map';
+import { PageHeader } from '@/components/layout/page-header';
 
 interface MakerWithCraft extends Maker {
   craftName?: string;
@@ -49,15 +50,17 @@ export default function FindAMakerPage() {
     : 'ALL PROVINCES';
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
-      <h1 className="font-heading text-3xl md:text-4xl font-bold text-deep-blue mb-12 uppercase tracking-wide">
-        Find a Maker
-      </h1>
+    <div>
+      <PageHeader
+        title="Find a Maker"
+        intro="Explore the provinces of Solomon Islands to see who makes what, and where."
+      />
 
-      {loading ? (
-        <p className="text-warm-gray-400">Loading...</p>
-      ) : (
-        <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">
+        {loading ? (
+          <p className="text-warm-gray-400">Loading...</p>
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
           {/* Left column: Map */}
           <div className="w-full lg:w-[45%] flex-shrink-0">
             <SolomonIslandsProvinceMap
@@ -94,6 +97,7 @@ export default function FindAMakerPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

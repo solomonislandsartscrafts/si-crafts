@@ -2,181 +2,199 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Store, Truck, ShieldCheck, Info } from 'lucide-react';
 import type { Product } from '@/types';
 
 interface ProductTabsProps {
   product: Product;
+  craftName?: string;
+  craftSlug?: string;
 }
 
-type TabId = 'details' | 'ordering' | 'care';
+const TAB_IDS = ['specifications', 'authenticity', 'how-its-made', 'how-to-buy'] as const;
+type TabId = (typeof TAB_IDS)[number];
 
-const TABS: { id: TabId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { id: 'details', label: 'Details', icon: Info },
-  { id: 'ordering', label: 'How to Buy', icon: Store },
-  { id: 'care', label: 'Care & Shipping', icon: Truck },
-];
+const TAB_LABELS: Record<TabId, string> = {
+  specifications: 'Specifications',
+  authenticity: 'Authenticity',
+  'how-its-made': 'How it\u2019s made',
+  'how-to-buy': 'How to buy',
+};
 
-export function ProductTabs({ product }: ProductTabsProps) {
-  const [activeTab, setActiveTab] = useState<TabId>('details');
+export function ProductTabs({ product, craftName, craftSlug }: ProductTabsProps) {
+  const [activeTab, setActiveTab] = useState<TabId>('specifications');
 
   return (
-    <div className="mt-8">
-      {/* Tab headers */}
-      <div className="flex border-b-2 border-sand" role="tablist">
-        {TABS.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              role="tab"
-              aria-selected={isActive}
-              aria-controls={`panel-${tab.id}`}
-              onClick={() => setActiveTab(tab.id)}
-              className={`tap-target flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 -mb-[2px] transition-colors ${
-                isActive
-                  ? 'border-terracotta text-deep-blue bg-sand-light rounded-t-md'
-                  : 'border-transparent text-warm-gray-400 hover:text-deep-blue hover:border-sand-dark'
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
+    <div>
+      {/* Tab bar */}
+      <div className="flex flex-wrap gap-2 mb-3" role="tablist">
+        {TAB_IDS.map((id) => (
+          <button
+            key={id}
+            role="tab"
+            aria-selected={activeTab === id}
+            aria-controls={`panel-${id}`}
+            id={`tab-${id}`}
+            onClick={() => setActiveTab(id)}
+            className={`tap-target whitespace-nowrap px-4 py-2 text-sm font-medium rounded-md border transition-colors ${
+              activeTab === id
+                ? 'bg-deep-blue text-white border-deep-blue'
+                : 'bg-white text-warm-gray-800 border-sand-dark hover:border-deep-blue hover:text-deep-blue'
+            }`}
+          >
+            {TAB_LABELS[id]}
+          </button>
+        ))}
       </div>
 
       {/* Tab panels */}
-      <div className="py-6">
-        {activeTab === 'details' && (
-          <div id="panel-details" role="tabpanel">
-            <DetailsPanel product={product} />
-          </div>
-        )}
-        {activeTab === 'ordering' && (
-          <div id="panel-ordering" role="tabpanel">
-            <OrderingPanel />
-          </div>
-        )}
-        {activeTab === 'care' && (
-          <div id="panel-care" role="tabpanel">
-            <CarePanel product={product} />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function DetailsPanel({ product }: { product: Product }) {
-  return (
-    <div className="space-y-4">
-      <p className="text-warm-gray-600 leading-relaxed">{product.description}</p>
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-        <div className="bg-sand-light rounded-lg p-4">
-          <dt className="text-xs text-warm-gray-400 uppercase tracking-wide">Material</dt>
-          <dd className="text-warm-gray-800 font-medium capitalize mt-1">{product.materialCategory}</dd>
-        </div>
-        <div className="bg-sand-light rounded-lg p-4">
-          <dt className="text-xs text-warm-gray-400 uppercase tracking-wide">Type</dt>
-          <dd className="text-warm-gray-800 font-medium capitalize mt-1">{product.productType}</dd>
-        </div>
-        {product.dimensions && (
-          <div className="bg-sand-light rounded-lg p-4">
-            <dt className="text-xs text-warm-gray-400 uppercase tracking-wide">Dimensions</dt>
-            <dd className="text-warm-gray-800 font-medium mt-1">{product.dimensions}</dd>
-          </div>
-        )}
-        <div className="bg-sand-light rounded-lg p-4">
-          <dt className="text-xs text-warm-gray-400 uppercase tracking-wide">Piece Code</dt>
-          <dd className="text-warm-gray-800 font-mono font-bold mt-1">{product.productCode}</dd>
-        </div>
-      </dl>
-    </div>
-  );
-}
-
-function OrderingPanel() {
-  return (
-    <div className="space-y-5">
-      <div className="flex gap-3 items-start">
-        <div className="w-8 h-8 rounded-lg bg-ocean/10 flex items-center justify-center flex-shrink-0">
-          <ShieldCheck className="w-4 h-4 text-ocean" />
-        </div>
-        <div>
-          <h4 className="font-medium text-deep-blue text-sm">Wholesale Only</h4>
-          <p className="text-sm text-warm-gray-600 mt-0.5">
-            This piece is available to approved wholesale stockists — museum shops, galleries, and retail stores across Australia.
-          </p>
-        </div>
-      </div>
-      <div className="flex gap-3 items-start">
-        <div className="w-8 h-8 rounded-lg bg-ocean/10 flex items-center justify-center flex-shrink-0">
-          <Store className="w-4 h-4 text-ocean" />
-        </div>
-        <div>
-          <h4 className="font-medium text-deep-blue text-sm">How to Order</h4>
-          <p className="text-sm text-warm-gray-600 mt-0.5">
-            Apply for a stockist account, browse wholesale pricing, and submit an order request. Payment is by bank transfer.
-          </p>
-        </div>
-      </div>
-      <div className="flex gap-3 items-start">
-        <div className="w-8 h-8 rounded-lg bg-ocean/10 flex items-center justify-center flex-shrink-0">
-          <Truck className="w-4 h-4 text-ocean" />
-        </div>
-        <div>
-          <h4 className="font-medium text-deep-blue text-sm">Availability</h4>
-          <p className="text-sm text-warm-gray-600 mt-0.5">
-            Each piece is handmade — stock is limited. We confirm availability after you submit your order request.
-          </p>
-        </div>
-      </div>
-      <div className="pt-2 flex flex-wrap gap-3">
-        <Link
-          href="/wholesale"
-          className="tap-target inline-flex items-center gap-2 px-5 py-2.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
+      <div className="rounded-lg bg-warm-gray-100 p-5">
+        <div
+          role="tabpanel"
+          id="panel-specifications"
+          aria-labelledby="tab-specifications"
+          hidden={activeTab !== 'specifications'}
         >
-          Learn about wholesale
-        </Link>
-        <Link
-          href="/stockist/login"
-          className="tap-target inline-flex items-center gap-2 px-5 py-2.5 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+          <SpecificationsContent product={product} />
+        </div>
+
+        <div
+          role="tabpanel"
+          id="panel-authenticity"
+          aria-labelledby="tab-authenticity"
+          hidden={activeTab !== 'authenticity'}
         >
-          Stockist login
-        </Link>
+          <AuthenticityContent />
+        </div>
+
+        <div
+          role="tabpanel"
+          id="panel-how-its-made"
+          aria-labelledby="tab-how-its-made"
+          hidden={activeTab !== 'how-its-made'}
+        >
+          <ProcessContent
+            materialCategory={product.materialCategory}
+            craftName={craftName}
+            craftSlug={craftSlug}
+          />
+        </div>
+
+        <div
+          role="tabpanel"
+          id="panel-how-to-buy"
+          aria-labelledby="tab-how-to-buy"
+          hidden={activeTab !== 'how-to-buy'}
+        >
+          <HowToBuyContent />
+        </div>
       </div>
     </div>
   );
 }
 
-function CarePanel({ product }: { product: Product }) {
+function SpecificationsContent({ product }: { product: Product }) {
   return (
-    <div className="space-y-5">
-      {product.careNotes && (
+    <dl className="grid grid-cols-2 gap-y-5 gap-x-8">
+      <div>
+        <dt className="text-xs text-ocean uppercase tracking-wider font-semibold mb-1">Material</dt>
+        <dd className="text-sm text-warm-gray-800 capitalize">{product.materialCategory}</dd>
+      </div>
+      <div>
+        <dt className="text-xs text-ocean uppercase tracking-wider font-semibold mb-1">Type</dt>
+        <dd className="text-sm text-warm-gray-800 capitalize">{product.productType}</dd>
+      </div>
+      {product.dimensions && (
         <div>
-          <h4 className="font-medium text-deep-blue text-sm mb-2">Care Instructions</h4>
-          <p className="text-sm text-warm-gray-600 leading-relaxed">{product.careNotes}</p>
+          <dt className="text-xs text-ocean uppercase tracking-wider font-semibold mb-1">Dimensions</dt>
+          <dd className="text-sm text-warm-gray-800">{product.dimensions}</dd>
         </div>
       )}
       <div>
-        <h4 className="font-medium text-deep-blue text-sm mb-2">Shipping</h4>
-        <p className="text-sm text-warm-gray-600 leading-relaxed">
-          We ship from our Melbourne warehouse within 3–5 business days of receiving payment. All pieces are carefully wrapped to prevent damage in transit.
-        </p>
+        <dt className="text-xs text-ocean uppercase tracking-wider font-semibold mb-1">Reference</dt>
+        <dd className="text-sm font-mono font-bold text-warm-gray-800">{product.productCode}</dd>
       </div>
-      <div>
-        <h4 className="font-medium text-deep-blue text-sm mb-2">Returns</h4>
-        <p className="text-sm text-warm-gray-600 leading-relaxed">
-          We accept returns for damage in transit within 7 days of delivery. Because each piece is handmade, no two are identical — we cannot accept returns for change of mind.
-        </p>
-      </div>
-      <div>
-        <h4 className="font-medium text-deep-blue text-sm mb-2">Authenticity</h4>
-        <p className="text-sm text-warm-gray-600 leading-relaxed">
-          Every piece comes with a product tag linking to this provenance page — your guarantee that it was handmade by the named maker in Solomon Islands.
-        </p>
+    </dl>
+  );
+}
+
+function AuthenticityContent() {
+  return (
+    <div className="space-y-3 text-sm text-warm-gray-600 leading-relaxed">
+      <p>
+        Every piece comes with a product tag stating the maker&apos;s name and province in
+        Solomon Islands, linking to this provenance page — your guarantee it was handmade by the
+        named maker.
+      </p>
+      <p>
+        For more information see{' '}
+        <Link href="/our-promise" className="text-ocean hover:text-ocean-dark font-medium">
+          Our Promise
+        </Link>
+        .
+      </p>
+    </div>
+  );
+}
+
+function ProcessContent({
+  materialCategory,
+  craftName,
+  craftSlug,
+}: {
+  materialCategory: string;
+  craftName?: string;
+  craftSlug?: string;
+}) {
+  const PROCESS_TEXT: Record<string, string> = {
+    pandanus:
+      'The leaves of the pandanus tree are soaked in water with coconut husks for about a week to make them soft and pliable, then hung up to dry in the sun for several weeks and cut into strips using a special tool. The handles are made from the bark of the Wa\u2019ai tree. Black pandanus is made by boiling with leaves of the Talisay (Indian almond) tree for 2\u20133 hours before drying. The fine diagonal weaving takes days or weeks to complete.',
+    wood: 'Each piece is hand-carved from a single block of \u2018kerosene wood\u2019 (Cordia subcordata) or Pacific Rosewood (Thespesia populnea). The carver shapes the wood with hand tools, then inlays pearl shell and/or contrasting wood into the design. The finished piece is polished and sealed with lacquer.',
+    shells:
+      'Shells are collected and fashioned by hand into very small discs about 3\u20135mm in diameter. A hole is drilled in the centre and the discs are threaded on nylon (traditionally bush twine) to form strands. Different coloured shells have different values \u2014 red-orange shells are the most expensive because they need to be baked to achieve their colour. A single necklace can take weeks to produce.',
+    'bush-twine':
+      '\u2018Bush-twine\u2019 is made by combining the strands and fibres of two locally-grown vines (including the Asa vine) into a single cord that is very strong. It has traditionally been used to make shields, baskets and trays. The Kusa bag is knotted from bush twine with a wide shoulder strap that has no joins \u2014 made entirely from natural resources, it is eco-friendly and very durable.',
+  };
+
+  const processText =
+    PROCESS_TEXT[materialCategory] ||
+    'This piece is made using traditional techniques passed down through generations.';
+
+  return (
+    <div className="space-y-3 text-sm text-warm-gray-600 leading-relaxed">
+      <p>{processText}</p>
+      {craftSlug && craftName && (
+        <Link
+          href={`/craft/${craftSlug}`}
+          className="inline-flex text-ocean hover:text-ocean-dark font-medium transition-colors"
+        >
+          Read more about {craftName} →
+        </Link>
+      )}
+    </div>
+  );
+}
+
+function HowToBuyContent() {
+  return (
+    <div className="space-y-4 text-sm text-warm-gray-600 leading-relaxed">
+      <p>
+        Available exclusively to approved wholesale stockists. Apply for an account
+        to place orders. This piece is sold to approved stockists only. Retail
+        customers can find it through one of our stores.
+      </p>
+      <div className="flex flex-wrap gap-3">
+        <Link
+          href="/stockist/apply"
+          className="tap-target inline-flex items-center px-5 py-2.5 bg-terracotta hover:bg-terracotta-dark text-white text-sm font-medium rounded-md transition-colors"
+        >
+          Apply for stockist account
+        </Link>
+        <Link
+          href="/stockists"
+          className="tap-target inline-flex items-center px-5 py-2.5 border border-sand-dark text-warm-gray-800 text-sm font-medium rounded-md hover:border-deep-blue hover:text-deep-blue transition-colors"
+        >
+          Find a stockist
+        </Link>
       </div>
     </div>
   );
