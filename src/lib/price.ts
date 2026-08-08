@@ -5,7 +5,7 @@
  * Rate: 1 AUD = 5 SBD
  */
 
-const SBD_TO_AUD_RATE = 5; // 5 SBD = 1 AUD
+export const SBD_TO_AUD_RATE = 5; // 5 SBD = 1 AUD
 
 /**
  * Format price as "A$X (SBD $Y)" — converts stored SBD to AUD

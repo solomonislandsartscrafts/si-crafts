@@ -34,22 +34,23 @@ This document defines the exact design system for the SI Crafts website. All new
 
 | Element | Font | Size | Weight | Line-height | Class |
 |---------|------|------|--------|-------------|-------|
-| Page title (h1) | Playfair Display | 2.25–3rem | Bold (700) | 1.2 | `font-heading text-3xl md:text-4xl font-bold` |
-| Section heading (h2) | Playfair Display | 1.5–1.875rem | Bold (700) | 1.2 | `font-heading text-2xl md:text-3xl font-bold` |
-| Card/subsection heading (h3) | Playfair Display | 1–1.25rem | Semibold (600) | 1.2 | `font-heading text-sm font-semibold` or `text-lg font-semibold` |
+| Page title (h1) | Fraunces | 2.25–3rem | Medium (500) | 1.2 | `font-heading text-3xl md:text-4xl font-medium` |
+| Section heading (h2) | Fraunces | 1.5–1.875rem | Medium (500) | 1.2 | `font-heading text-2xl md:text-3xl font-medium` |
+| Card/subsection heading (h3) | Fraunces | 1–1.25rem | Semibold (600) | 1.2 | `font-heading text-sm font-semibold` or `text-lg font-semibold` |
 | Body text | Inter | 1rem | Normal (400) | 1.6 | `text-base leading-body` |
 | Small/secondary text | Inter | 0.875rem | Normal (400) | 1.6 | `text-sm text-warm-gray-600` |
 | Tiny labels | Inter | 0.75rem | Normal (400) | 1.6 | `text-xs text-warm-gray-400` |
 | Monospace (codes) | System mono | 0.875rem | Bold (700) | — | `font-mono font-bold` |
 
 **RULES:**
-- Headings ALWAYS use `font-heading` (Playfair Display)
+- Headings ALWAYS use `font-heading` (Fraunces)
 - Body text ALWAYS uses `font-body` (Inter) — this is the default, no class needed
 - Body text colour is `warm-gray-800` (`#4A433B`)
 - Heading colour is `deep-blue` (`#1B3A4B`)
-- Never use decorative or display fonts beyond Playfair Display
+- Never use decorative or display fonts beyond Fraunces
 - Minimum body font size: 16px (1rem)
 - Line-height for body: 1.6 minimum
+- Fraunces reads heavier than most serifs — use Medium (500) for h1/h2, not Bold (700)
 
 ## Spacing (LOCKED)
 
@@ -146,7 +147,7 @@ className="text-sm text-error mt-1" aria-live="assertive"
 ## DO NOT
 
 - Introduce new colour values not listed above
-- Use fonts other than Inter (body) and Playfair Display (headings)
+- Use fonts other than Inter (body) and Fraunces (headings)
 - Add new CSS animation libraries
 - Use inline styles for colours or fonts
 - Create components that don't follow the card/button/input patterns above

@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { ArrowLeft, Clock } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import sanitizeHtml from 'sanitize-html';
@@ -7,6 +6,7 @@ import { getArticleBySlug, getPublishedArticles } from '@/services/articles';
 import { generatePageMetadata } from '@/lib/metadata';
 import { ShareButtons } from '@/components/shared/share-buttons';
 import { NewsSidebar } from '@/components/news/news-sidebar';
+import { SafeImage } from '@/components/ui/safe-image';
 
 export async function generateStaticParams() {
   const articles = await getPublishedArticles();
@@ -33,11 +33,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   // All tags for topic chips
   const allTags = Array.from(
-    new Set(allArticles.flatMap((a) => a.tags))
+    new Set(allArticles.flatMap((a) => a.tags ?? []))
   ).slice(0, 8);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
       {/* Grid: sidebar (left, desktop only) | article content */}
       <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8 lg:gap-12">
         {/* Sidebar — shows other articles to read */}
@@ -58,7 +58,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           <header className="mb-10">
             {/* Tags */}
             <div className="flex flex-wrap items-center gap-2 mb-4">
-              {article.tags.map((tag) => (
+              {(article.tags ?? []).map((tag) => (
                 <span key={tag} className="text-xs font-medium text-ocean bg-ocean/10 px-2 py-1 rounded">
                   {tag}
                 </span>
@@ -66,7 +66,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             </div>
 
             {/* Title */}
-            <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-deep-blue leading-tight mb-6">
+            <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-medium text-deep-blue leading-tight mb-6">
               {article.title}
             </h1>
 
@@ -93,8 +93,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
           {/* Cover image */}
           {article.coverImageUrl && (
-            <div className="aspect-[2/1] relative overflow-hidden rounded-lg bg-sand-light mb-12">
-              <Image
+            <div className="aspect-[2/1] relative overflow-hidden rounded-lg mb-12">
+              <SafeImage
                 src={article.coverImageUrl}
                 alt={article.title}
                 fill
@@ -127,7 +127,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           />
 
           {/* Footer */}
-          <div className="border-t border-sand mt-16 pt-8">
+          <div className="border-t border-sand mt-12 lg:mt-16 pt-8">
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium text-deep-blue">{article.authorName}</p>

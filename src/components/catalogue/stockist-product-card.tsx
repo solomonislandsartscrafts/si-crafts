@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { ShoppingCart, Check } from 'lucide-react';
 import type { Product } from '@/types';
 import { addToCart } from '@/lib/cart';
 import { formatPrice } from '@/lib/price';
+import { SafeImage } from '@/components/ui/safe-image';
 
 interface StockistProductCardProps {
   product: Product;
@@ -25,6 +25,7 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
       productCode: product.productCode,
       productName: product.name,
       unitPrice: product.wholesalePrice,
+      note: notes.trim() || undefined,
     }, qty);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
@@ -34,28 +35,22 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
   }
 
   return (
-    <div className="rounded-lg overflow-hidden bg-white shadow-card hover:shadow-md transition-shadow">
+    <div className="flex h-full flex-col rounded-lg overflow-hidden bg-white shadow-card hover:shadow-md transition-shadow">
       {/* Image — links to piece page */}
       <Link href={`/piece/${product.productCode}`} className="block">
         <div className="aspect-square relative bg-sand-light">
-          {product.imageUrls.length > 0 ? (
-            <Image
-              src={product.imageUrls[0]}
-              alt={`${product.name}${makerName ? ` by ${makerName}` : ''}`}
-              fill
-              className="object-contain p-3"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-warm-gray-400 text-sm">Image coming soon</span>
-            </div>
-          )}
+          <SafeImage
+            src={product.imageUrls[0] || null}
+            alt={`${product.name}${makerName ? ` by ${makerName}` : ''}`}
+            fill
+            className="object-contain p-3"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          />
         </div>
       </Link>
 
       {/* Info */}
-      <div className="p-4">
+      <div className="flex flex-1 flex-col p-4">
         <Link href={`/piece/${product.productCode}`}>
           <h3 className="font-heading text-sm font-semibold text-deep-blue hover:text-ocean transition-colors line-clamp-2">
             {product.name}
@@ -71,7 +66,7 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
         )}
 
         {/* Price */}
-        <p className="text-base font-bold text-deep-blue mt-2">
+        <p className="text-base font-bold text-deep-blue mt-auto pt-2">
           {formatPrice(product.wholesalePrice)}
         </p>
 
@@ -117,10 +112,10 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
             <button
               onClick={handleAddToCart}
               disabled={added}
-              className={`tap-target flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean ${
+              className={`tap-target flex-1 px-4 py-2.5 text-sm ${
                 added
-                  ? 'bg-success/10 text-success'
-                  : 'bg-ocean hover:bg-ocean-dark text-white'
+                  ? 'inline-flex items-center justify-center gap-2 rounded-md font-medium bg-success/10 text-success'
+                  : 'btn-primary'
               }`}
             >
               {added ? (

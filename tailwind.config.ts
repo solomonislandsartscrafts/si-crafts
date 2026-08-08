@@ -8,45 +8,87 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        sand: {
-          light: '#F5F0E8',
-          DEFAULT: '#E8DFD0',
-          dark: '#C4B8A5',
-        },
-        terracotta: {
-          light: '#D4845A',
-          DEFAULT: '#C06A3A',
-          dark: '#9C4F28',
-        },
-        cream: '#FFFDF8',
-        'warm-gray': {
-          100: '#F7F5F2',
-          200: '#EDE9E3',
-          400: '#8C8277',
-          600: '#5C5349',
-          800: '#4A433B',
-        },
-        ocean: {
-          light: '#5B9EAF',
-          DEFAULT: '#2E7D8C',
-          dark: '#1A5C6A',
-        },
-        teal: {
-          light: '#7EC8C8',
-          DEFAULT: '#4AA8A8',
-          dark: '#2D7A7A',
-        },
+        // -- Flag Theme palette --
+        // Primary ink (headings, footer bg, nav background)
         'deep-blue': '#1B3A4B',
-        success: '#2D7A4F',
-        warning: '#C4882A',
-        error: '#B83A3A',
-        'page-bg': '#FFFDF8',
+
+        // Primary accent (links, focus rings, info badges)
+        ocean: {
+          light: '#3D7AC4',
+          DEFAULT: '#1E5AA8',
+          dark: '#154A8C',
+        },
+
+        // Secondary accent — brand green (primary CTA buttons, "My Account" pill)
+        'brand-green': {
+          light: '#28994D',
+          DEFAULT: '#1E7A3D',
+          dark: '#166B30',
+        },
+
+        // Tertiary highlight — accent gold (gold accent line, stat strip bg, ribbons)
+        'accent-gold': {
+          light: '#F7C555',
+          DEFAULT: '#F4B728',
+          dark: '#D89412',
+        },
+
+        // Rare accent — error states only
+        'crest-red': '#C0392B',
+
+        // Backgrounds & surfaces
+        cream: '#FFFFFF',
+        'page-bg': '#FFFFFF',
         'card-bg': '#FFFFFF',
         'footer-bg': '#1B3A4B',
+
+        // Sand/parchment tones (borders, dividers, light bg)
+        sand: {
+          light: '#F0F0F0',
+          DEFAULT: '#E5E5E5',
+          dark: '#D4D4D4',
+        },
+
+        // Neutral text scale
+        'warm-gray': {
+          100: '#FAFAFA',
+          200: '#F0F0F0',
+          400: '#736B62',
+          600: '#5C5648',
+          800: '#3D362E',
+        },
+
+        // --- Aliases (preserve existing call sites) ---
+        // "terracotta" is a legacy alias for brand-green
+        terracotta: {
+          light: '#28994D',
+          DEFAULT: '#1E7A3D',
+          dark: '#166B30',
+        },
+
+        // "teal" is a legacy alias for ocean
+        teal: {
+          light: '#3D7AC4',
+          DEFAULT: '#1E5AA8',
+          dark: '#154A8C',
+        },
+
+        // "motto-gold" is a legacy alias for accent-gold
+        'motto-gold': {
+          light: '#F7C555',
+          DEFAULT: '#F4B728',
+          dark: '#D89412',
+        },
+
+        // Semantic states
+        success: '#1E7A3D',
+        warning: '#F4B728',
+        'warning-text': '#92650A',
+        error: '#C0392B',
       },
       fontFamily: {
         body: ['DM Sans', 'system-ui', 'sans-serif'],
-        heading: ['DM Sans', 'system-ui', 'sans-serif'],
+        heading: ['Fraunces', 'Georgia', 'serif'],
       },
       fontSize: {
         xs: '0.8125rem',
@@ -65,6 +107,9 @@ const config: Config = {
         relaxed: '1.75',
       },
       spacing: {
+        // Vertical page/section rhythm lives in the .page-y and .section-y
+        // utilities in globals.css, which scale across breakpoints. These
+        // fixed tokens remain only for one-off use.
         section: '32px',
         'section-lg': '64px',
       },
@@ -76,6 +121,15 @@ const config: Config = {
         md: '8px',
         lg: '12px',
         xl: '16px',
+      },
+      keyframes: {
+        'slide-up': {
+          '0%': { opacity: '0', transform: 'translateY(12px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        'slide-up': 'slide-up 0.25s ease-out',
       },
     },
   },

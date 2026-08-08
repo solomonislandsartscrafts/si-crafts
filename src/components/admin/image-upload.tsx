@@ -3,74 +3,24 @@
 import { useState, useRef } from 'react';
 import { Upload, X, Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import { compressImage } from '@/lib/compress-image';
 
 interface ImageUploadProps {
   value: string; // current image URL/path
   onChange: (url: string) => void;
+  altText?: string; // current alt text
+  onAltTextChange?: (alt: string) => void;
   label?: string;
-  aspectHint?: string; // e.g. "3:4 portrait" or "16:9 landscape"
+  aspectHint?: string; // e.g. "1:1 square" or "16:9 landscape"
   maxWidth?: number; // max compressed width in px (default 1200)
   quality?: number; // 0-1 compression quality (default 0.8)
-}
-
-/**
- * Compresses an image file using Canvas API.
- * Resizes to maxWidth (preserving aspect ratio) and outputs as WebP or JPEG.
- */
-async function compressImage(
-  file: File,
-  maxWidth: number,
-  quality: number
-): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    const img = document.createElement('img');
-    img.onload = () => {
-      let { width, height } = img;
-
-      // Scale down if wider than maxWidth
-      if (width > maxWidth) {
-        height = Math.round((height * maxWidth) / width);
-        width = maxWidth;
-      }
-
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-
-      const ctx = canvas.getContext('2d');
-      if (!ctx) { reject(new Error('Canvas not supported')); return; }
-
-      ctx.drawImage(img, 0, 0, width, height);
-
-      // Try WebP first (smaller), fall back to JPEG
-      canvas.toBlob(
-        (blob) => {
-          if (blob) {
-            resolve(blob);
-          } else {
-            // WebP failed — retry with JPEG
-            canvas.toBlob(
-              (jpegBlob) => {
-                if (jpegBlob) resolve(jpegBlob);
-                else reject(new Error('Compression failed'));
-              },
-              'image/jpeg',
-              quality
-            );
-          }
-        },
-        'image/webp',
-        quality
-      );
-    };
-    img.onerror = () => reject(new Error('Failed to load image'));
-    img.src = URL.createObjectURL(file);
-  });
 }
 
 export function ImageUpload({
   value,
   onChange,
+  altText = '',
+  onAltTextChange,
   label = 'Image',
   aspectHint,
   maxWidth = 1200,
@@ -135,6 +85,7 @@ export function ImageUpload({
 
   function handleRemove() {
     onChange('');
+    onAltTextChange?.('');
   }
 
   return (
@@ -148,7 +99,7 @@ export function ImageUpload({
           <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-sand bg-sand-light">
             <Image
               src={value}
-              alt="Uploaded preview"
+              alt={altText || 'Uploaded preview'}
               fill
               className="object-cover"
               sizes="128px"
@@ -192,6 +143,32 @@ export function ImageUpload({
 
       {aspectHint && !value && (
         <p className="text-xs text-warm-gray-400 mt-1">Recommended: {aspectHint}</p>
+      )}
+
+      {/* Alt text input — shown when an image is uploaded or when handler is provided */}
+      {onAltTextChange && (
+        <div className="mt-3">
+          <label className="block text-xs font-medium text-warm-gray-600 mb-1">
+            Alt text <span className="text-error">*</span>
+            <span className="font-normal text-warm-gray-400 ml-1">(describes the image for accessibility)</span>
+          </label>
+          <input
+            type="text"
+            value={altText}
+            onChange={(e) => onAltTextChange(e.target.value)}
+            placeholder="Describe what this image shows"
+            required
+            aria-invalid={Boolean(value) && !altText.trim()}
+            className={`w-full px-3 py-2 text-sm rounded-md border bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent ${
+              value && !altText.trim() ? 'border-error' : 'border-sand-dark'
+            }`}
+          />
+          {value && !altText.trim() && (
+            <p className="text-sm text-error mt-1" aria-live="assertive">
+              Alt text is required. You cannot save until this image is described.
+            </p>
+          )}
+        </div>
       )}
 
       {error && (

@@ -77,16 +77,16 @@ export default function StockistRequestsPage() {
   }
 
   if (!authenticated || loading) {
-    return <div className="max-w-2xl mx-auto px-4 py-section-lg"><p className="text-warm-gray-400">Loading...</p></div>;
+    return <div className="max-w-2xl mx-auto px-4 page-y"><p className="text-warm-gray-400">Loading...</p></div>;
   }
 
   if (submitted) {
     return (
-      <div className="max-w-md mx-auto px-4 sm:px-6 py-section-lg text-center">
+      <div className="max-w-md mx-auto px-4 sm:px-6 page-y text-center">
         <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6">
           <CheckCircle className="w-8 h-8 text-success" />
         </div>
-        <h1 className="font-heading text-2xl font-bold text-deep-blue mb-3">Request submitted</h1>
+        <h1 className="font-heading text-2xl font-medium text-deep-blue mb-3">Request submitted</h1>
         <p className="text-warm-gray-600 mb-6">
           {kind === 'replacement-tag'
             ? 'We\'ll post your replacement tags shortly.'
@@ -100,12 +100,12 @@ export default function StockistRequestsPage() {
   }
 
   return (
-    <div className="max-w-lg mx-auto px-4 sm:px-6 py-section-lg">
+    <div className="max-w-lg mx-auto px-4 sm:px-6 page-y">
       <Link href="/stockist/catalogue" className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark mb-8 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back to catalogue
       </Link>
 
-      <h1 className="font-heading text-2xl md:text-3xl font-bold text-deep-blue mb-2">
+      <h1 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-2">
         Requests
       </h1>
       <p className="text-sm text-warm-gray-600 mb-8">
@@ -182,7 +182,7 @@ export default function StockistRequestsPage() {
         )}
 
         <button type="submit" disabled={submitting}
-          className="tap-target inline-flex items-center gap-2 px-6 py-3 bg-terracotta hover:bg-terracotta-dark disabled:opacity-50 text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light">
+          className="tap-target inline-flex items-center gap-2 px-6 py-3 btn-primary">
           {submitting ? 'Submitting...' : 'Submit request'}
         </button>
       </form>

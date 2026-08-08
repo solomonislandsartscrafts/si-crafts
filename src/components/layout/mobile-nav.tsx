@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { X, LogIn, User, Shield } from 'lucide-react';
 
 const NAV_LINKS = [
+  { href: '/', label: 'Home' },
   { href: '/catalogue', label: 'Catalogue' },
   { href: '/makers', label: 'Makers' },
   { href: '/crafts-and-techniques', label: 'Crafts' },
@@ -25,18 +26,33 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
   const navRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
+  const [animating, setAnimating] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   function isActive(href: string) {
     if (href === '/') return pathname === '/';
     return pathname.startsWith(href);
   }
 
+  // Handle mount/unmount with animation
+  useEffect(() => {
+    if (isOpen) {
+      setMounted(true);
+      // Trigger animation on next frame
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setAnimating(true));
+      });
+    } else {
+      setAnimating(false);
+      const timer = setTimeout(() => setMounted(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (!isOpen) return;
 
     closeButtonRef.current?.focus();
-
-    // Lock body scroll
     document.body.style.overflow = 'hidden';
 
     function handleKeyDown(e: KeyboardEvent) {
@@ -69,7 +85,7 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!mounted) return null;
 
   return (
     <div
@@ -77,13 +93,15 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
       role="dialog"
       aria-modal="true"
       aria-label="Navigation menu"
-      className="fixed inset-0 md:hidden flex flex-col"
-      style={{ zIndex: 9999, backgroundColor: '#FFFDF8' }}
+      className={`fixed inset-0 md:hidden flex flex-col bg-white transition-all duration-300 ease-out ${
+        animating ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+      }`}
+      style={{ zIndex: 9999 }}
     >
-      {/* Top bar — close button in same position as hamburger (top-right) */}
-      <div className="flex items-center justify-between h-16 px-4 sm:px-6">
-        <span className="font-heading text-xl font-bold text-deep-blue">
-          SI Crafts
+      {/* Top bar */}
+      <div className="flex items-center justify-between h-20 px-4 sm:px-6">
+        <span className="font-heading text-xl font-semibold text-deep-blue">
+          SIAC
         </span>
         <button
           ref={closeButtonRef}
@@ -95,18 +113,19 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
         </button>
       </div>
 
-      {/* Centered nav links */}
+      {/* Nav links with staggered fade-in */}
       <nav className="flex-1 flex flex-col items-center justify-center gap-2 px-4 pb-16">
-        {NAV_LINKS.map((link) => (
+        {NAV_LINKS.map((link, i) => (
           <Link
             key={link.href}
             href={link.href}
             onClick={onClose}
-            className={`tap-target flex items-center justify-center w-full max-w-xs px-4 py-4 rounded-md text-xl font-heading font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ocean ${
+            className={`tap-target flex items-center justify-center w-full max-w-xs px-4 py-4 rounded-md text-xl font-heading font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-ocean ${
               isActive(link.href)
                 ? 'text-ocean bg-ocean/5'
                 : 'text-deep-blue hover:text-ocean hover:bg-sand-light'
-            }`}
+            } ${animating ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}
+            style={{ transitionDelay: `${(i + 1) * 50}ms` }}
             aria-current={isActive(link.href) ? 'page' : undefined}
           >
             {link.label}
@@ -116,7 +135,10 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
           <Link
             href="/admin/dashboard"
             onClick={onClose}
-            className="tap-target inline-flex items-center justify-center gap-2 w-full max-w-xs mt-4 px-4 py-4 bg-deep-blue hover:bg-deep-blue/90 text-white rounded-md text-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+            className={`tap-target inline-flex items-center justify-center gap-2 w-full max-w-xs mt-4 px-4 py-4 btn-admin text-lg transition-all duration-300 ${
+              animating ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+            }`}
+            style={{ transitionDelay: `${(NAV_LINKS.length + 1) * 50}ms` }}
           >
             <Shield className="w-5 h-5" />
             Admin Dashboard
@@ -126,7 +148,10 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
           <Link
             href="/stockist/catalogue"
             onClick={onClose}
-            className="tap-target inline-flex items-center justify-center gap-2 w-full max-w-xs mt-4 px-4 py-4 bg-ocean hover:bg-ocean-dark text-white rounded-md text-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+            className={`tap-target inline-flex items-center justify-center gap-2 w-full max-w-xs mt-4 px-4 py-4 btn-primary text-lg transition-all duration-300 ${
+              animating ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+            }`}
+            style={{ transitionDelay: `${(NAV_LINKS.length + 1) * 50}ms` }}
           >
             <User className="w-5 h-5" />
             My Account
@@ -136,7 +161,10 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
           <Link
             href="/login"
             onClick={onClose}
-            className="tap-target inline-flex items-center justify-center gap-2 w-full max-w-xs mt-4 px-4 py-4 bg-terracotta hover:bg-terracotta-dark text-white rounded-md text-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
+            className={`tap-target inline-flex items-center justify-center gap-2 w-full max-w-xs mt-4 px-4 py-4 btn-primary text-lg transition-all duration-300 ${
+              animating ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+            }`}
+            style={{ transitionDelay: `${(NAV_LINKS.length + 1) * 50}ms` }}
           >
             <LogIn className="w-5 h-5" />
             Login

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Mail, Send } from 'lucide-react';
 import { submitContactEnquiry } from '@/services/enquiries';
 import type { ContactReason } from '@/types';
+import { PageHeader } from '@/components/layout/page-header';
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -44,12 +45,12 @@ export default function ContactPage() {
 
   if (submitted) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
         <div className="max-w-md mx-auto text-center">
           <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6">
             <Send className="w-8 h-8 text-success" />
           </div>
-          <h1 className="font-heading text-2xl font-bold text-deep-blue mb-3">
+          <h1 className="font-heading text-2xl font-medium text-deep-blue mb-3">
             Message sent
           </h1>
           <p className="text-warm-gray-600">
@@ -61,15 +62,13 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
-      <h1 className="font-heading text-3xl md:text-4xl font-bold text-deep-blue mb-4">
-        Contact
-      </h1>
-      <p className="text-lg text-warm-gray-600 max-w-2xl leading-relaxed mb-12">
-        Get in touch with the Solomon Islands Arts and Crafts team.
-      </p>
+    <div>
+      <PageHeader
+        title="Contact"
+        intro="Get in touch with the Solomon Islands Arts and Crafts team."
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16 grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-12">
         {/* Contact Form */}
         <form onSubmit={handleSubmit} noValidate className="space-y-6">
           <div>
@@ -166,7 +165,7 @@ export default function ContactPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="tap-target inline-flex items-center gap-2 px-6 py-3 bg-terracotta hover:bg-terracotta-dark disabled:opacity-50 text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
+            className="tap-target inline-flex items-center gap-2 px-6 py-3 btn-primary"
           >
             {submitting ? 'Sending...' : 'Send message'}
           </button>
@@ -175,7 +174,7 @@ export default function ContactPage() {
         {/* Contact Info */}
         <div className="space-y-8">
           <div>
-            <h2 className="font-heading text-xl font-bold text-deep-blue mb-3">
+            <h2 className="font-heading text-xl font-medium text-deep-blue mb-3">
               Email us
             </h2>
             <a

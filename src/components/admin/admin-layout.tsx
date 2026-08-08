@@ -50,7 +50,7 @@ export function AdminLayout({ children, requiredRole = null }: AdminLayoutProps)
       }
     } finally {
       localStorage.removeItem('admin_session');
-      router.push('/admin/login');
+      router.push('/');
     }
   }
 
@@ -62,7 +62,7 @@ export function AdminLayout({ children, requiredRole = null }: AdminLayoutProps)
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="font-heading text-xl font-bold text-deep-blue mb-2">Insufficient Permissions</h1>
+          <h1 className="font-heading text-xl font-medium text-deep-blue mb-2">Insufficient Permissions</h1>
           <p className="text-warm-gray-600 mb-4">You don&apos;t have access to this section.</p>
           <button onClick={() => router.push('/admin/dashboard')} className="text-ocean hover:underline font-medium">
             Return to dashboard

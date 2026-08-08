@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { MapPin, Phone, Mail, Clock, ExternalLink } from 'lucide-react';
 import { generatePageMetadata } from '@/lib/metadata';
+import { PageHeader } from '@/components/layout';
 import { getRetailStockists } from '@/services/retail-stockists';
 
 export const metadata = generatePageMetadata({
@@ -13,15 +14,13 @@ export default async function StockistsPage() {
   const stockists = await getRetailStockists();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
-      <h1 className="font-heading text-3xl md:text-4xl font-bold text-deep-blue mb-4">
-        Stockists
-      </h1>
-      <p className="text-lg text-warm-gray-600 max-w-2xl leading-relaxed mb-12">
-        Find Solomon Islands Arts and Crafts in these museum and gallery shops. Visit in person or
-        contact them to ask about availability.
-      </p>
+    <div>
+      <PageHeader
+        title="Stockists"
+        intro="Find Solomon Islands Arts and Crafts in these museum and gallery shops. Visit in person or contact them to ask about availability."
+      />
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">
       <div className="space-y-8">
         {stockists.map((stockist) => (
           <div key={stockist.name} className="bg-card-bg rounded-lg shadow-card p-6 md:p-8">
@@ -30,7 +29,7 @@ export default async function StockistsPage() {
                 <p className="text-xs font-medium text-ocean uppercase tracking-wide mb-1">
                   {stockist.city}
                 </p>
-                <h2 className="font-heading text-xl font-bold text-deep-blue">
+                <h2 className="font-heading text-lg font-semibold text-deep-blue">
                   {stockist.name}
                 </h2>
               </div>
@@ -81,10 +80,11 @@ export default async function StockistsPage() {
         </p>
         <Link
           href="/wholesale"
-          className="tap-target inline-flex items-center gap-2 px-5 py-3 bg-terracotta hover:bg-terracotta-dark text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
+          className="tap-target inline-flex items-center gap-2 px-5 py-3 btn-primary"
         >
           Learn about wholesale
         </Link>
+      </div>
       </div>
     </div>
   );

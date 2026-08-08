@@ -1,47 +1,58 @@
-import { sql } from '@/lib/db';
+import { apiGet, apiPost, apiDelete, getAdminToken } from '@/lib/api-client';
 import type { Stockist } from '@/types';
 
-function rowToStockist(row: Record<string, unknown>): Stockist {
+interface StockistResponse {
+  id: number;
+  business_name: string;
+  abn: string;
+  contact_name: string;
+  email: string;
+  phone: string;
+  description: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+function mapStockist(raw: StockistResponse): Stockist {
   return {
-    id: row.id as string,
-    businessName: row.business_name as string,
-    abn: row.abn as string,
-    contactName: row.contact_name as string,
-    email: row.email as string,
-    phone: row.phone as string,
-    description: row.description as string,
-    status: row.status as Stockist['status'],
-    passwordHash: row.password_hash as string,
-    createdAt: row.created_at as string,
-    updatedAt: row.updated_at as string,
+    id: String(raw.id),
+    businessName: raw.business_name,
+    abn: raw.abn,
+    contactName: raw.contact_name,
+    email: raw.email,
+    phone: raw.phone,
+    description: raw.description,
+    status: raw.status as Stockist['status'],
+    passwordHash: '',
+    createdAt: raw.created_at,
+    updatedAt: raw.updated_at,
   };
 }
 
 export async function getStockistById(id: string): Promise<Stockist | null> {
-  const rows = await sql`
-    SELECT id, business_name, abn, contact_name, email, phone, description,
-           status, password_hash, created_at, updated_at
-    FROM stockists WHERE id = ${id}
-  `;
-  return rows[0] ? rowToStockist(rows[0]) : null;
+  try {
+    const token = getAdminToken();
+    const raw = await apiGet<StockistResponse>(`/api/stockists/${id}/`, token);
+    return mapStockist(raw);
+  } catch {
+    return null;
+  }
 }
 
 export async function getStockistByEmail(email: string): Promise<Stockist | null> {
-  const rows = await sql`
-    SELECT id, business_name, abn, contact_name, email, phone, description,
-           status, password_hash, created_at, updated_at
-    FROM stockists WHERE email = ${email}
-  `;
-  return rows[0] ? rowToStockist(rows[0]) : null;
+  const token = getAdminToken();
+  const data = await apiGet<{ results: StockistResponse[] } | StockistResponse[]>(`/api/stockists/?email=${encodeURIComponent(email)}`, token);
+  const items = Array.isArray(data) ? data : data.results ?? [];
+  if (items.length === 0) return null;
+  return mapStockist(items[0]);
 }
 
-export async function getAllStockists(): Promise<Stockist[]> {
-  const rows = await sql`
-    SELECT id, business_name, abn, contact_name, email, phone, description,
-           status, password_hash, created_at, updated_at
-    FROM stockists ORDER BY created_at DESC
-  `;
-  return rows.map(rowToStockist);
+export async function getAllStockists(token?: string): Promise<Stockist[]> {
+  const authToken = token || getAdminToken();
+  const data = await apiGet<{ results: StockistResponse[] } | StockistResponse[]>('/api/stockists/', authToken);
+  const items = Array.isArray(data) ? data : data.results ?? [];
+  return items.map(mapStockist);
 }
 
 export interface StockistApplicationInput {
@@ -54,31 +65,47 @@ export interface StockistApplicationInput {
 }
 
 export async function createApplication(data: StockistApplicationInput): Promise<Stockist> {
-  const rows = await sql`
-    INSERT INTO stockists (business_name, abn, contact_name, email, phone, description, status, password_hash)
-    VALUES (${data.businessName}, ${data.abn}, ${data.contactName}, ${data.email}, ${data.phone}, ${data.description}, 'pending', '')
-    RETURNING id, business_name, abn, contact_name, email, phone, description,
-              status, password_hash, created_at, updated_at
-  `;
-  return rowToStockist(rows[0]);
+  const raw = await apiPost<StockistResponse>('/api/stockists/apply/', {
+    business_name: data.businessName,
+    abn: data.abn,
+    contact_name: data.contactName,
+    email: data.email,
+    phone: data.phone,
+    description: data.description,
+  });
+  return mapStockist(raw);
 }
 
-export async function approveStockist(id: string): Promise<Stockist | null> {
-  const rows = await sql`
-    UPDATE stockists SET status = 'approved', updated_at = now()
-    WHERE id = ${id}
-    RETURNING id, business_name, abn, contact_name, email, phone, description,
-              status, password_hash, created_at, updated_at
-  `;
-  return rows[0] ? rowToStockist(rows[0]) : null;
+export async function approveStockist(id: string, token?: string): Promise<Stockist | null> {
+  const authToken = token || getAdminToken();
+  const raw = await apiPost<StockistResponse>(`/api/stockists/${id}/approve/`, {}, authToken);
+  return mapStockist(raw);
 }
 
-export async function rejectStockist(id: string): Promise<Stockist | null> {
-  const rows = await sql`
-    UPDATE stockists SET status = 'rejected', updated_at = now()
-    WHERE id = ${id}
-    RETURNING id, business_name, abn, contact_name, email, phone, description,
-              status, password_hash, created_at, updated_at
-  `;
-  return rows[0] ? rowToStockist(rows[0]) : null;
+export async function rejectStockist(id: string, token?: string): Promise<Stockist | null> {
+  const authToken = token || getAdminToken();
+  const raw = await apiPost<StockistResponse>(`/api/stockists/${id}/reject/`, {}, authToken);
+  return mapStockist(raw);
+}
+
+export async function suspendStockist(id: string, token?: string): Promise<Stockist | null> {
+  const authToken = token || getAdminToken();
+  const raw = await apiPost<StockistResponse>(`/api/stockists/${id}/suspend/`, {}, authToken);
+  return mapStockist(raw);
+}
+
+export async function enableStockist(id: string, token?: string): Promise<Stockist | null> {
+  const authToken = token || getAdminToken();
+  const raw = await apiPost<StockistResponse>(`/api/stockists/${id}/enable/`, {}, authToken);
+  return mapStockist(raw);
+}
+
+export async function deleteStockist(id: string, token?: string): Promise<boolean> {
+  const authToken = token || getAdminToken();
+  try {
+    await apiDelete(`/api/stockists/${id}/`, authToken);
+    return true;
+  } catch {
+    return false;
+  }
 }

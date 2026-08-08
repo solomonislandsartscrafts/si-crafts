@@ -29,7 +29,7 @@ export function NewsSidebar({ tags, otherArticles }: NewsSidebarProps) {
         {/* Recommended tags */}
         {tags.length > 0 && (
           <div>
-            <h2 className="font-heading text-sm font-bold text-deep-blue uppercase tracking-wide mb-3">
+            <h2 className="font-heading text-sm font-medium text-deep-blue uppercase tracking-wide mb-3">
               Topics
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -48,7 +48,7 @@ export function NewsSidebar({ tags, otherArticles }: NewsSidebarProps) {
         {/* Other articles to read — title-only links */}
         {otherArticles.length > 0 && (
           <div className="border-t border-sand pt-6">
-            <h2 className="font-heading text-sm font-bold text-deep-blue uppercase tracking-wide mb-4">
+            <h2 className="font-heading text-sm font-medium text-deep-blue uppercase tracking-wide mb-4">
               More to read
             </h2>
             <div className="space-y-4">

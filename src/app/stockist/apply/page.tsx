@@ -68,11 +68,11 @@ export default function StockistApplyPage() {
 
   if (submitted) {
     return (
-      <div className="max-w-md mx-auto px-4 sm:px-6 py-section-lg text-center">
+      <div className="max-w-md mx-auto px-4 sm:px-6 page-y text-center">
         <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6">
           <Send className="w-8 h-8 text-success" />
         </div>
-        <h1 className="font-heading text-2xl font-bold text-deep-blue mb-3">Application received</h1>
+        <h1 className="font-heading text-2xl font-medium text-deep-blue mb-3">Application received</h1>
         <p className="text-warm-gray-600">
           Thanks for applying. We&apos;ll review your application and get back to you within a few business days.
         </p>
@@ -81,8 +81,8 @@ export default function StockistApplyPage() {
   }
 
   return (
-    <div className="max-w-lg mx-auto px-4 sm:px-6 py-section-lg">
-      <h1 className="font-heading text-2xl md:text-3xl font-bold text-deep-blue mb-2">
+    <div className="max-w-lg mx-auto px-4 sm:px-6 page-y">
+      <h1 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-2">
         Apply to Become a Stockist
       </h1>
       <p className="text-warm-gray-600 mb-8">
@@ -146,7 +146,7 @@ export default function StockistApplyPage() {
         )}
 
         <button type="submit"
-          className="tap-target w-full flex items-center justify-center gap-2 px-6 py-3 bg-ocean hover:bg-ocean-dark text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light">
+          className="tap-target w-full flex items-center justify-center gap-2 px-6 py-3 btn-primary">
           Submit application
         </button>
       </form>

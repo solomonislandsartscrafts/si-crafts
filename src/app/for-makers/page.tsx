@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle } from 'lucide-react';
 import { submitMakerEnquiry } from '@/services/enquiries';
+import { PageHeader } from '@/components/layout/page-header';
 
 export default function ForMakersPage() {
   const [form, setForm] = useState({
@@ -13,6 +14,7 @@ export default function ForMakersPage() {
     craft: '',
     message: '',
     contact: '',
+    whatsapp: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -42,11 +44,11 @@ export default function ForMakersPage() {
 
   if (submitted) {
     return (
-      <div className="max-w-md mx-auto px-4 sm:px-6 py-section-lg text-center">
+      <div className="max-w-md mx-auto px-4 sm:px-6 page-y text-center">
         <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6">
           <CheckCircle className="w-8 h-8 text-success" />
         </div>
-        <h1 className="font-heading text-2xl font-bold text-deep-blue mb-3">
+        <h1 className="font-heading text-2xl font-medium text-deep-blue mb-3">
           Thank you
         </h1>
         <p className="text-warm-gray-600">
@@ -58,18 +60,17 @@ export default function ForMakersPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
-      <h1 className="font-heading text-3xl md:text-4xl font-bold text-deep-blue mb-4">
-        For Makers
-      </h1>
-      <p className="text-lg text-warm-gray-600 max-w-2xl leading-relaxed mb-12">
-        If you make crafts in Solomon Islands and would like to sell your work through
-        Solomon Islands Arts and Crafts (SIAC), this page explains how it works and how to get in touch.
-      </p>
+    <div>
+      <PageHeader
+        title="For Makers"
+        intro="If you make crafts in Solomon Islands and would like to sell your work through Solomon Islands Arts and Crafts (SIAC), this page explains how it works and how to get in touch."
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">
 
       {/* How we source */}
       <section className="mb-12">
-        <h2 className="font-heading text-xl font-bold text-deep-blue mb-4">
+        <h2 className="font-heading text-xl font-medium text-deep-blue mb-4">
           How SIAC sources crafts
         </h2>
         <div className="space-y-4 text-warm-gray-600 leading-relaxed">
@@ -94,7 +95,7 @@ export default function ForMakersPage() {
 
       {/* Selection process */}
       <section className="mb-12">
-        <h2 className="font-heading text-xl font-bold text-deep-blue mb-4">
+        <h2 className="font-heading text-xl font-medium text-deep-blue mb-4">
           Why not everyone at once
         </h2>
         <div className="space-y-4 text-warm-gray-600 leading-relaxed">
@@ -114,7 +115,7 @@ export default function ForMakersPage() {
 
       {/* Fair pay + consent */}
       <section className="mb-12">
-        <h2 className="font-heading text-xl font-bold text-deep-blue mb-4">
+        <h2 className="font-heading text-xl font-medium text-deep-blue mb-4">
           What we promise makers
         </h2>
         <ul className="space-y-3 text-warm-gray-600">
@@ -143,7 +144,7 @@ export default function ForMakersPage() {
 
       {/* Expression of interest form */}
       <section className="border-t border-sand pt-12">
-        <h2 className="font-heading text-xl font-bold text-deep-blue mb-2">
+        <h2 className="font-heading text-xl font-medium text-deep-blue mb-2">
           Get in touch
         </h2>
         <p className="text-sm text-warm-gray-600 mb-8">
@@ -214,6 +215,17 @@ export default function ForMakersPage() {
             />
           </Field>
 
+          <Field label="WhatsApp number (optional)" id="whatsapp" error={errors.whatsapp}>
+            <input
+              id="whatsapp"
+              type="text"
+              placeholder="e.g. +677 7412345"
+              value={form.whatsapp}
+              onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
+              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 placeholder:text-warm-gray-400 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+            />
+          </Field>
+
           <Field label="Message (optional)" id="message" error={errors.message}>
             <textarea
               id="message"
@@ -227,12 +239,23 @@ export default function ForMakersPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="tap-target inline-flex items-center gap-2 px-6 py-3 bg-terracotta hover:bg-terracotta-dark disabled:opacity-50 text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
+            className="tap-target inline-flex items-center gap-2 px-6 py-3 btn-primary"
           >
             {submitting ? 'Sending...' : 'Send'}
           </button>
         </form>
       </section>
+
+      {/* Back to home */}
+      <div className="mt-12 border-t border-sand pt-8">
+        <Link
+          href="/"
+          className="tap-target inline-flex items-center gap-2 px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+        >
+          ← Back to home
+        </Link>
+      </div>
+      </div>
     </div>
   );
 }

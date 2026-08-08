@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Package, Palette, Store, ClipboardList, Shield, Inbox, Newspaper, LogOut, ExternalLink } from 'lucide-react';
+import { LayoutDashboard, Users, Package, Palette, Store, ClipboardList, Shield, Inbox, Newspaper, LogOut, ExternalLink, ImageIcon, Tags, BookOpen } from 'lucide-react';
 import type { AdminRole } from '@/types';
 
 interface AdminSidebarProps {
@@ -11,7 +11,16 @@ interface AdminSidebarProps {
   onLogout?: () => void;
 }
 
-const NAV_ITEMS = [
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  roles: AdminRole[];
+  /** Draws a separator above the item */
+  divider?: boolean;
+}
+
+const NAV_ITEMS: NavItem[] = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['super_admin', 'editor'] },
   { href: '/admin/inbox', label: 'Inbox', icon: Inbox, roles: ['super_admin', 'editor'] },
   { href: '/admin/news', label: 'News', icon: Newspaper, roles: ['super_admin', 'editor'] },
@@ -20,7 +29,11 @@ const NAV_ITEMS = [
   { href: '/admin/crafts', label: 'Crafts', icon: Palette, roles: ['super_admin', 'editor'] },
   { href: '/admin/stockists', label: 'Stockists', icon: Store, roles: ['super_admin', 'editor'] },
   { href: '/admin/orders', label: 'Orders', icon: ClipboardList, roles: ['super_admin', 'editor'] },
+  { href: '/admin/site-content', label: 'Site Content', icon: ImageIcon, roles: ['super_admin', 'editor'] },
+  { href: '/admin/categories', label: 'Categories', icon: Tags, roles: ['super_admin', 'editor'] },
   { href: '/admin/admins', label: 'Admin Users', icon: Shield, roles: ['super_admin'] },
+  // Help sits apart from the content sections
+  { href: '/admin/getting-started', label: 'Getting Started', icon: BookOpen, roles: ['super_admin', 'editor'], divider: true },
 ];
 
 export function AdminSidebar({ role, adminName, onLogout }: AdminSidebarProps) {
@@ -32,8 +45,8 @@ export function AdminSidebar({ role, adminName, onLogout }: AdminSidebarProps) {
     <aside className="w-56 flex-shrink-0 bg-deep-blue text-white min-h-screen flex flex-col">
       {/* Logo */}
       <div className="px-4 py-5 border-b border-white/10">
-        <Link href="/" className="font-heading text-lg font-bold text-white hover:text-white/80 transition-colors">
-          SI Crafts
+        <Link href="/" className="font-heading text-lg font-semibold text-white hover:text-white/80 transition-colors">
+          SIAC
         </Link>
         <p className="text-xs text-white/40 mt-0.5">Admin Panel</p>
       </div>
@@ -44,16 +57,17 @@ export function AdminSidebar({ role, adminName, onLogout }: AdminSidebarProps) {
           const active = pathname === item.href;
           const Icon = item.icon;
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`tap-target flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
-                active ? 'bg-white/10 text-white' : 'text-sand/70 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              {item.label}
-            </Link>
+            <div key={item.href} className={item.divider ? 'mt-3 pt-3 border-t border-white/10' : undefined}>
+              <Link
+                href={item.href}
+                className={`tap-target flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
+                  active ? 'bg-white/10 text-white' : 'text-sand/70 hover:bg-white/5 hover:text-white'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {item.label}
+              </Link>
+            </div>
           );
         })}
       </nav>

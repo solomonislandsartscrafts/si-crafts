@@ -1,11 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import type { Maker, ConsentStatus, CulturalReviewStatus } from '@/types';
 import { getAllCrafts } from '@/services/crafts';
 import type { Craft } from '@/types';
 import { ImageUpload } from './image-upload';
+import { singleAltError } from '@/lib/image-alt';
+import { scrollToFirstError } from '@/lib/scroll-to-error';
+import { useModalA11y } from '@/lib/use-modal-a11y';
+import { useToast } from '@/components/ui/toast';
 
 interface MakerFormModalProps {
   maker: Maker | null; // null = create mode
@@ -20,17 +24,23 @@ export interface MakerFormData {
   province: string;
   island: string;
   portraitUrl: string;
+  portraitAlt: string;
   story: string;
   storyCulturalReviewFlag: CulturalReviewStatus;
   craftId: string;
   consentStatus: ConsentStatus;
+  age: number | null;
+  yearsActive: number | null;
 }
 
 export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) {
   const [crafts, setCrafts] = useState<Craft[]>([]);
   const [saving, setSaving] = useState(false);
+  const modalRef = useModalA11y(true, onClose);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const formRef = useRef<HTMLFormElement>(null);
+  const { error: toastError } = useToast();
 
   const [form, setForm] = useState<MakerFormData>({
     name: maker?.name ?? '',
@@ -39,10 +49,13 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
     province: maker?.province ?? '',
     island: maker?.island ?? '',
     portraitUrl: maker?.portraitUrl ?? '',
+    portraitAlt: maker?.portraitAlt ?? '',
     story: maker?.story ?? '',
     storyCulturalReviewFlag: maker?.storyCulturalReviewFlag ?? 'unreviewed',
     craftId: maker?.craftId ?? '',
     consentStatus: maker?.consentStatus ?? 'Not Signed',
+    age: maker?.age ?? null,
+    yearsActive: maker?.yearsActive ?? null,
   });
 
   useEffect(() => {
@@ -73,13 +86,22 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
     if (!form.province.trim()) errs.province = 'Province is required';
     if (!form.island.trim()) errs.island = 'Island is required';
     if (!form.craftId) errs.craftId = 'Craft is required';
+
+    // A portrait cannot be saved without alt text.
+    const portraitAltError = singleAltError(form.portraitUrl, form.portraitAlt, 'portrait photo');
+    if (portraitAltError) errs.portraitAlt = portraitAltError;
+
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validate()) {
+      toastError('Please fix the highlighted fields before saving.');
+      scrollToFirstError(formRef.current);
+      return;
+    }
     setSaving(true);
     setSaveError(null);
     try {
@@ -92,7 +114,14 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
   }
 
   function handleChange(field: keyof MakerFormData, value: string) {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    let parsedValue: string | number | null = value;
+    
+    // Parse number fields
+    if (field === 'age' || field === 'yearsActive') {
+      parsedValue = value.trim() === '' ? null : parseInt(value, 10);
+    }
+    
+    setForm((prev) => ({ ...prev, [field]: parsedValue }));
     if (errors[field]) {
       setErrors((prev) => {
         const next = { ...prev };
@@ -109,6 +138,7 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50" onClick={handleDismiss}>
       <div
+        ref={modalRef}
         className="bg-white rounded-lg shadow-md w-full max-w-2xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
@@ -117,7 +147,7 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-sand">
-          <h2 id="maker-form-title" className="font-heading text-xl font-bold text-deep-blue">
+          <h2 id="maker-form-title" className="font-heading text-xl font-medium text-deep-blue">
             {maker ? 'Edit Maker' : 'Add Maker'}
           </h2>
           <button
@@ -131,7 +161,7 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
           {/* Save error banner */}
           {saveError && (
             <div className="bg-error/10 border border-error/20 text-error text-sm rounded-md p-3" role="alert" aria-live="assertive">
@@ -223,15 +253,56 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
             {errors.craftId && <p id="maker-craft-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.craftId}</p>}
           </div>
 
+          {/* Age + Years Active (row) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="maker-age" className="block text-sm font-medium text-warm-gray-800 mb-1">
+                Age
+              </label>
+              <input
+                id="maker-age"
+                type="number"
+                min="0"
+                max="120"
+                value={form.age ?? ''}
+                onChange={(e) => handleChange('age', e.target.value)}
+                placeholder="e.g. 42"
+                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label htmlFor="maker-years-active" className="block text-sm font-medium text-warm-gray-800 mb-1">
+                Years Crafting
+              </label>
+              <input
+                id="maker-years-active"
+                type="number"
+                min="0"
+                max="100"
+                value={form.yearsActive ?? ''}
+                onChange={(e) => handleChange('yearsActive', e.target.value)}
+                placeholder="e.g. 34"
+                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+              />
+            </div>
+          </div>
+
           {/* Portrait */}
-          <ImageUpload
-            value={form.portraitUrl}
-            onChange={(url) => handleChange('portraitUrl', url)}
-            label="Portrait Photo"
-            aspectHint="3:4 portrait orientation"
-            maxWidth={800}
-            quality={0.82}
-          />
+          <div>
+            <ImageUpload
+              value={form.portraitUrl}
+              onChange={(url) => handleChange('portraitUrl', url)}
+              altText={form.portraitAlt}
+              onAltTextChange={(alt) => handleChange('portraitAlt', alt)}
+              label="Portrait Photo"
+              aspectHint="3:4 portrait orientation"
+              maxWidth={800}
+              quality={0.82}
+            />
+            {errors.portraitAlt && (
+              <p className="text-sm text-error mt-1" aria-live="assertive">{errors.portraitAlt}</p>
+            )}
+          </div>
 
           {/* Story */}
           <div>
@@ -296,7 +367,7 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
             <button
               type="submit"
               disabled={saving}
-              className="tap-target px-6 py-3 bg-terracotta hover:bg-terracotta-dark text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light disabled:opacity-50"
+              className="tap-target px-6 py-3 btn-primary"
             >
               {saving ? 'Saving...' : maker ? 'Update Maker' : 'Create Maker'}
             </button>

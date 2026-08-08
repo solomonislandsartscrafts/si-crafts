@@ -9,8 +9,8 @@ export const metadata = generatePageMetadata({
 
 export default function PieceLookupPage() {
   return (
-    <div className="max-w-md mx-auto px-4 sm:px-6 py-section-lg text-center">
-      <h1 className="font-heading text-2xl md:text-3xl font-bold text-deep-blue mb-3">
+    <div className="max-w-md mx-auto px-4 sm:px-6 page-y text-center">
+      <h1 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-3">
         Find your piece
       </h1>
       <p className="text-warm-gray-600 mb-8">

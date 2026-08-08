@@ -5,12 +5,14 @@ import { Plus, Edit, Trash2 } from 'lucide-react';
 import type { Craft } from '@/types';
 import { AdminLayout } from '@/components/admin';
 import { CraftFormModal, type CraftFormData } from '@/components/admin/craft-form-modal';
+import { useToast } from '@/components/ui/toast';
 
 export default function AdminCraftsPage() {
   const [crafts, setCrafts] = useState<Craft[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingCraft, setEditingCraft] = useState<Craft | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const { success: toastSuccess, error: toastError } = useToast();
 
   useEffect(() => { loadCrafts(); }, []);
 
@@ -22,9 +24,14 @@ export default function AdminCraftsPage() {
 
   async function handleDelete(id: string, name: string) {
     if (!confirm(`Are you sure you want to delete "${name}"? This cannot be undone.`)) return;
-    const { deleteCraft } = await import('@/services/crafts');
-    await deleteCraft(id);
-    loadCrafts();
+    try {
+      const { deleteCraft } = await import('@/services/crafts');
+      await deleteCraft(id);
+      toastSuccess(`"${name}" deleted.`);
+      loadCrafts();
+    } catch {
+      toastError(`Failed to delete "${name}". Please try again.`);
+    }
   }
 
   function handleEdit(craft: Craft) {
@@ -45,12 +52,14 @@ export default function AdminCraftsPage() {
           ...data,
           culturalContext: data.culturalContext || null,
         });
+        toastSuccess(`"${data.name}" updated.`);
       } else {
         const { createCraft } = await import('@/services/crafts');
         await createCraft({
           ...data,
           culturalContext: data.culturalContext || null,
         });
+        toastSuccess(`"${data.name}" created.`);
       }
       setShowForm(false);
       setEditingCraft(null);
@@ -63,10 +72,10 @@ export default function AdminCraftsPage() {
   return (
     <AdminLayout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-heading text-2xl font-bold text-deep-blue">Crafts</h1>
+        <h1 className="font-heading text-2xl font-medium text-deep-blue">Crafts</h1>
         <button
           onClick={handleAdd}
-          className="tap-target inline-flex items-center gap-2 px-4 py-2 bg-ocean hover:bg-ocean-dark text-white rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+          className="tap-target inline-flex items-center gap-2 px-4 py-2 btn-primary text-sm"
         >
           <Plus className="w-4 h-4" /> Add Craft
         </button>
@@ -89,7 +98,7 @@ export default function AdminCraftsPage() {
                   <td className="px-4 py-3 font-medium text-warm-gray-800">{craft.name}</td>
                   <td className="px-4 py-3 text-warm-gray-600 capitalize hidden sm:table-cell">{craft.materialCategory}</td>
                   <td className="px-4 py-3 hidden md:table-cell">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${craft.culturalContextReviewFlag === 'reviewed' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${craft.culturalContextReviewFlag === 'reviewed' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning-text'}`}>
                       {craft.culturalContextReviewFlag}
                     </span>
                   </td>

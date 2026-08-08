@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import type { Article } from '@/types';
 import { getPublishedArticles, getAllArticles } from '@/services/articles';
 import { ImageUpload } from './image-upload';
 import { RichTextEditor } from './rich-text-editor';
-
+import { singleAltError, htmlHasImageMissingAlt } from '@/lib/image-alt';
+import { scrollToFirstError } from '@/lib/scroll-to-error';
+import { useToast } from '@/components/ui/toast';
+import { useModalA11y } from '@/lib/use-modal-a11y';
 interface ArticleEditorModalProps {
   article: Article | null;
   onClose: () => void;
@@ -17,6 +20,9 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [existingArticles, setExistingArticles] = useState<Article[]>([]);
+  const formRef = useRef<HTMLFormElement>(null);
+  const { error: toastError } = useToast();
+  const modalRef = useModalA11y(true, onClose);
 
   useEffect(() => {
     getAllArticles().then(setExistingArticles).catch(() => {});
@@ -28,6 +34,7 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
     excerpt: article?.excerpt ?? '',
     content: article?.content ?? '',
     coverImageUrl: article?.coverImageUrl ?? '',
+    coverImageAlt: article?.coverImageAlt ?? '',
     authorName: article?.authorName ?? '',
     authorRole: article?.authorRole ?? 'Editor',
     tags: article?.tags?.join(', ') ?? '',
@@ -53,6 +60,22 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
     e.preventDefault();
     if (!form.title.trim() || !form.content.trim()) {
       setSaveError('Title and content are required.');
+      toastError('Please fix the highlighted fields before saving.');
+      scrollToFirstError(formRef.current);
+      return;
+    }
+    const coverAltError = singleAltError(form.coverImageUrl, form.coverImageAlt, 'cover image');
+    if (coverAltError) {
+      setSaveError(coverAltError);
+      toastError(coverAltError);
+      scrollToFirstError(formRef.current);
+      return;
+    }
+    if (htmlHasImageMissingAlt(form.content)) {
+      const msg = 'An image in the article content has no alt text. Remove it or re-insert it with a description.';
+      setSaveError(msg);
+      toastError(msg);
+      scrollToFirstError(formRef.current);
       return;
     }
     // Validate slug uniqueness (exclude current article during edits)
@@ -60,7 +83,10 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
       (a) => a.slug === form.slug && a.id !== article?.id
     );
     if (slugDuplicate) {
-      setSaveError(`Slug "${form.slug}" is already used by another article. Please change it.`);
+      const msg = `Slug "${form.slug}" is already used by another article. Please change it.`;
+      setSaveError(msg);
+      toastError(msg);
+      scrollToFirstError(formRef.current);
       return;
     }
     setSaving(true);
@@ -72,6 +98,7 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
         excerpt: form.excerpt,
         content: form.content,
         coverImageUrl: form.coverImageUrl || null,
+        coverImageAlt: form.coverImageAlt || '',
         authorName: form.authorName || 'Editor',
         authorRole: form.authorRole || 'Editor',
         tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
@@ -94,6 +121,7 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-deep-blue/50 overflow-y-auto" onClick={handleDismiss}>
       <div
+        ref={modalRef}
         className="bg-white rounded-lg shadow-md w-full max-w-4xl my-8"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
@@ -102,7 +130,7 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-sand">
-          <h2 id="article-editor-title" className="font-heading text-xl font-bold text-deep-blue">
+          <h2 id="article-editor-title" className="font-heading text-xl font-medium text-deep-blue">
             {article ? 'Edit Article' : 'New Article'}
           </h2>
           <button
@@ -116,7 +144,7 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
+        <form ref={formRef} onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
           {saveError && (
             <div className="bg-error/10 border border-error/20 text-error text-sm rounded-md p-3" role="alert">
               {saveError}
@@ -153,6 +181,8 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
           <ImageUpload
             value={form.coverImageUrl}
             onChange={(url) => setForm({ ...form, coverImageUrl: url })}
+            altText={form.coverImageAlt}
+            onAltTextChange={(alt) => setForm({ ...form, coverImageAlt: alt })}
             label="Cover Image"
             aspectHint="16:9 landscape"
             maxWidth={1400}
@@ -250,7 +280,7 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
             <button
               type="submit"
               disabled={saving}
-              className="tap-target px-6 py-3 bg-terracotta hover:bg-terracotta-dark text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light disabled:opacity-50"
+              className="tap-target px-6 py-3 btn-primary"
             >
               {saving ? 'Saving...' : article ? 'Update Article' : 'Publish Article'}
             </button>

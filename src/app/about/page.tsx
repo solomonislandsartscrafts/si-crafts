@@ -1,6 +1,9 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import { ExternalLink } from 'lucide-react';
 import { generatePageMetadata } from '@/lib/metadata';
+import { AcknowledgementOfCountry, PageHeader } from '@/components/layout';
+import { SafeImage } from '@/components/ui/safe-image';
+import { getSiteContent } from '@/services/site-content';
 
 export const metadata = generatePageMetadata({
   title: 'About',
@@ -9,36 +12,34 @@ export const metadata = generatePageMetadata({
   path: '/about',
 });
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const siteContent = await getSiteContent();
+
   return (
     <div>
-      {/* Page header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-section-lg pb-8">
-        <h1 className="font-heading text-3xl md:text-4xl font-bold text-deep-blue mb-4">
-          About
-        </h1>
-        <p className="text-lg text-warm-gray-600 max-w-2xl leading-relaxed">
-          Solomon Islands Arts and Crafts connects makers in Solomon Islands with
-          museum and gallery shops in Australia — telling authentic stories and
-          building respectful trade relationships.
-        </p>
-      </div>
+      <PageHeader
+        title="About"
+        intro="Solomon Islands Arts and Crafts connects makers in Solomon Islands with museum and gallery shops in Australia — telling authentic stories and building respectful trade relationships."
+      />
 
       {/* Section 1: About Solomon Islands — image LEFT */}
-      <section className="py-section-lg" id="solomon-islands">
+      <section className="section-y" id="solomon-islands">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-start">
-            <div className="lg:col-span-2 relative aspect-[16/9] md:aspect-[4/5] rounded-lg overflow-hidden bg-sand-light shadow-card">
-              <Image
-                src="/images/A1_About Solomon Islands.jpg"
-                alt="Solomon Islands landscape"
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 40vw"
-              />
-            </div>
+            <figure className="lg:col-span-2">
+              <div className="relative aspect-square rounded-lg overflow-hidden bg-sand-light shadow-card">
+                <SafeImage
+                  src={siteContent.aboutSolomonIslandsImage}
+                  alt={siteContent.aboutSolomonIslandsImageAlt || "Solomon Islands landscape"}
+                  fill
+                  priority
+                  className="object-contain p-4"
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                />
+              </div>
+            </figure>
             <div className="lg:col-span-3">
-              <h2 className="font-heading text-2xl md:text-3xl font-bold text-deep-blue mb-4">
+              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
                 About Solomon Islands
               </h2>
               <div className="space-y-4 text-warm-gray-600 leading-relaxed">
@@ -60,6 +61,18 @@ export default function AboutPage() {
                   living practices passed through families and communities, not museum artefacts.
                   They carry stories of place, kinship, and identity.
                 </p>
+                <p className="pt-2">
+                  <a
+                    href="https://en.wikipedia.org/wiki/Solomon_Islands"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-ocean hover:text-ocean-dark font-medium transition-colors"
+                  >
+                    Find out more about Solomon Islands
+                    <ExternalLink className="w-4 h-4" aria-hidden="true" />
+                    <span className="sr-only">(opens in a new tab)</span>
+                  </a>
+                </p>
               </div>
             </div>
           </div>
@@ -67,11 +80,11 @@ export default function AboutPage() {
       </section>
 
       {/* Section 2: About the SIAC Team — image RIGHT (alternated) */}
-      <section className="py-section-lg bg-sand-light" id="team">
+      <section className="section-y bg-sand-light" id="team">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-start">
             <div className="lg:col-span-3 order-2 lg:order-1">
-              <h2 className="font-heading text-2xl md:text-3xl font-bold text-deep-blue mb-4">
+              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
                 About the Solomon Islands Arts and Crafts (SIAC) Team
               </h2>
               <div className="space-y-4 text-warm-gray-600 leading-relaxed">
@@ -99,34 +112,38 @@ export default function AboutPage() {
                 </p>
               </div>
             </div>
-            <div className="lg:col-span-2 relative aspect-[16/9] md:aspect-[4/5] rounded-lg overflow-hidden bg-sand shadow-card order-1 lg:order-2">
-              <Image
-                src="/images/A2_bout the Solomon Islands Arts and Crafts.jpg"
-                alt="The SIAC volunteer team"
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 40vw"
-              />
-            </div>
+            <figure className="lg:col-span-2 order-1 lg:order-2">
+              <div className="relative aspect-square rounded-lg overflow-hidden bg-sand shadow-card">
+                <SafeImage
+                  src={siteContent.aboutTeamImage}
+                  alt={siteContent.aboutTeamImageAlt || "The SIAC volunteer team"}
+                  fill
+                  className="object-contain p-4"
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                />
+              </div>
+            </figure>
           </div>
         </div>
       </section>
 
       {/* Section 3: Why We're Doing This — image LEFT */}
-      <section className="py-section-lg" id="mission">
+      <section className="section-y" id="mission">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-start">
-            <div className="lg:col-span-2 relative aspect-[16/9] md:aspect-[4/5] rounded-lg overflow-hidden bg-sand-light shadow-card">
-              <Image
-                src="/images/A3_whywedoingthis.jpg"
-                alt="Solomon Islands maker at work"
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 40vw"
-              />
-            </div>
+            <figure className="lg:col-span-2">
+              <div className="relative aspect-square rounded-lg overflow-hidden bg-sand-light shadow-card">
+                <SafeImage
+                  src={siteContent.whyWeDoThisImage}
+                  alt={siteContent.whyWeDoThisImageAlt || "Solomon Islands maker at work"}
+                  fill
+                  className="object-contain p-4"
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                />
+              </div>
+            </figure>
             <div className="lg:col-span-3">
-              <h2 className="font-heading text-2xl md:text-3xl font-bold text-deep-blue mb-4">
+              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
                 Why We&apos;re Doing This
               </h2>
               <div className="space-y-4 text-warm-gray-600 leading-relaxed">
@@ -164,6 +181,9 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      {/* Section 4: Acknowledgement of Country */}
+      <AcknowledgementOfCountry />
     </div>
   );
 }

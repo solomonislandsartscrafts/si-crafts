@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --page-bg: #FFFDF8;
+    --page-bg: #FFFFFF;
     --card-bg: #FFFFFF;
     --footer-bg: #1B3A4B;
   }
@@ -16,15 +16,15 @@
   body {
     font-family: 'DM Sans', system-ui, sans-serif;
     background-color: var(--page-bg);
-    color: #4A433B;
+    color: #3D362E;
     font-size: 1.125rem;
     line-height: 1.7;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Playfair Display', Georgia, serif;
     line-height: 1.2;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
     color: #1B3A4B;
   }
 
@@ -42,9 +42,203 @@
 
   /* Improved focus-visible for all interactive elements */
   :focus-visible {
-    outline: 3px solid #2E7D8C;
+    outline: 3px solid #1E5AA8;
     outline-offset: 3px;
-    border-radius: 4px;
+  }
+}
+
+/* Hero gallery progress bar — fills across each slide's interval. */
+@keyframes hero-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@layer components {
+  /* --- Vertical rhythm -------------------------------------------------
+     Two responsive steps, so spacing scales with viewport instead of
+     sitting at one fixed value on every device.
+
+     .page-y     top/bottom padding for a whole page's content
+     .section-y  padding for a band/section within a page
+     -------------------------------------------------------------------- */
+  .page-y {
+    padding-top: 2.5rem;    /* 40px — mobile */
+    padding-bottom: 2.5rem;
+  }
+
+  .section-y {
+    padding-top: 3rem;      /* 48px — mobile */
+    padding-bottom: 3rem;
+  }
+
+  @media (min-width: 640px) {
+    .page-y {
+      padding-top: 3rem;    /* 48px — tablet */
+      padding-bottom: 3rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .section-y {
+      padding-top: 4rem;    /* 64px — tablet */
+      padding-bottom: 4rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .page-y {
+      padding-top: 4rem;    /* 64px — desktop */
+      padding-bottom: 4rem;
+    }
+
+    .section-y {
+      padding-top: 5rem;    /* 80px — desktop */
+      padding-bottom: 5rem;
+    }
+  }
+
+  /* Solomon Islands flag divider — flag-blue base, diagonal white, gold, then green.
+     Decorative accent used below the header and between page sections. */
+  .flag-divider {
+    position: relative;
+    height: 14px;
+    overflow: hidden;
+    background-color: #0051A5;
+  }
+
+  .flag-divider::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      115deg,
+      transparent 46.5%,
+      #FFFFFF 46.5%,
+      #FFFFFF 49%,
+      #F4B728 49%,
+      #F4B728 54%,
+      #1E7A3D 54%
+    );
+  }
+
+  /* Hairline — same motif at 3px. Caps the top edge of dark bands so they
+     read as deliberate blocks. Quiet enough to repeat a few times per page. */
+  .flag-hairline {
+    position: relative;
+    height: 3px;
+    overflow: hidden;
+    background-color: #0051A5;
+  }
+
+  .flag-hairline::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      115deg,
+      transparent 46.5%,
+      #FFFFFF 46.5%,
+      #FFFFFF 49%,
+      #F4B728 49%,
+      #F4B728 54%,
+      #1E7A3D 54%
+    );
+  }
+
+  /* Mark — a 64px stub of the stripe, used under page titles on interior
+     pages so they carry the motif without a full-bleed rule. */
+  .flag-mark {
+    position: relative;
+    width: 64px;
+    height: 4px;
+    overflow: hidden;
+    border-radius: 2px;
+    background-color: #0051A5;
+  }
+
+  .flag-mark::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      115deg,
+      transparent 34%,
+      #FFFFFF 34%,
+      #FFFFFF 42%,
+      #F4B728 42%,
+      #F4B728 62%,
+      #1E7A3D 62%
+    );
+  }
+
+  /* Single source of truth for the primary CTA.
+     Green fill + gold bottom border. Used on every page. */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    /* Slightly tighter on phones so two buttons can sit side by side at
+       320px without wrapping; tap-target still guarantees 48px height. */
+    padding: 0.6875rem 1.25rem;
+    background-color: #1E7A3D;
+    color: #FFFFFF;
+    font-weight: 500;
+    border-radius: 8px;
+    border-bottom: 3px solid #F4B728;
+    transition: background-color 0.2s ease;
+  }
+
+  @media (min-width: 640px) {
+    .btn-primary {
+      padding: 0.75rem 1.5rem;
+    }
+  }
+
+  .btn-primary:hover {
+    background-color: #166B30;
+  }
+
+  .btn-primary:active {
+    background-color: #125726;
+  }
+
+  .btn-primary:focus-visible {
+    outline: 3px solid #28994D;
+    outline-offset: 2px;
+  }
+
+  .btn-primary:disabled,
+  .btn-primary[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Admin CTA — deep-blue fill. Used for admin dashboard links. */
+  .btn-admin {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #1B3A4B;
+    color: #FFFFFF;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+  }
+
+  .btn-admin:hover {
+    background-color: rgba(27, 58, 75, 0.9);
+  }
+
+  .btn-admin:focus-visible {
+    outline: 3px solid #3D7AC4;
+    outline-offset: 2px;
   }
 }
 
@@ -52,6 +246,11 @@
   .tap-target {
     min-width: 48px;
     min-height: 48px;
+    transition: transform 0.1s ease;
+  }
+
+  .tap-target:active {
+    transform: scale(0.98);
   }
 
   .scrollbar-hide {
@@ -64,7 +263,7 @@
   }
 
   .bg-weave-pattern {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M0 0 L40 40 M40 0 L0 40' stroke='%23E8DFD0' stroke-width='0.5' fill='none'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M0 0 L40 40 M40 0 L0 40' stroke='%23E5E5E5' stroke-width='0.5' fill='none'/%3E%3C/svg%3E");
     background-size: 20px 20px;
   }
 }
@@ -95,7 +294,7 @@
 /* Users who prefer more contrast */
 @media (prefers-contrast: more) {
   body {
-    color: #2A2520;
+    color: #1B3A4B;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -125,7 +324,7 @@
   font-weight: 600;
   margin-top: 0.75rem;
   margin-bottom: 0.25rem;
-  color: #4A433B;
+  color: #3D362E;
 }
 
 [contenteditable] ul,
@@ -148,7 +347,7 @@
 
 [contenteditable]:empty::before {
   content: attr(data-placeholder);
-  color: #B8AFA3;
+  color: #8C8277;
   pointer-events: none;
 }
 
@@ -156,7 +355,7 @@
 .article-content {
   font-size: 1.1875rem;
   line-height: 1.85;
-  color: #4A433B;
+  color: #3D362E;
 }
 
 .article-content p {
@@ -164,18 +363,18 @@
 }
 
 .article-content h2 {
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: 'Playfair Display', Georgia, serif;
   font-size: 1.5rem;
   font-weight: 700;
   color: #1B3A4B;
   margin-top: 2.5rem;
   margin-bottom: 0.75rem;
   line-height: 1.2;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 
 .article-content h3 {
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: 'Playfair Display', Georgia, serif;
   font-size: 1.25rem;
   font-weight: 600;
   color: #1B3A4B;
@@ -209,21 +408,21 @@
 }
 
 .article-content a {
-  color: #2E7D8C;
+  color: #1E5AA8;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
 .article-content a:hover {
-  color: #1A5C6A;
+  color: #154A8C;
 }
 
 .article-content blockquote {
-  border-left: 3px solid #C06A3A;
+  border-left: 3px solid #1E7A3D;
   padding-left: 1.25rem;
   margin: 2rem 0;
   font-style: italic;
-  color: #5C5349;
+  color: #5C5648;
 }
 
 .article-content img {
@@ -236,6 +435,16 @@
 .a11y-high-contrast body,
 .a11y-high-contrast {
   color: #000 !important;
+}
+
+.a11y-high-contrast p,
+.a11y-high-contrast li,
+.a11y-high-contrast span,
+.a11y-high-contrast td,
+.a11y-high-contrast dt,
+.a11y-high-contrast dd {
+  color: #000 !important;
+  background-color: transparent !important;
 }
 
 .a11y-high-contrast h1,
@@ -273,26 +482,16 @@
 
 /* Colorblind simulation modes — CSS filters that adjust hues */
 /* Protanopia (red-blind): shift reds toward blue/yellow */
-.a11y-protanopia {
+.a11y-protanopia .a11y-filter-scope {
   filter: url('#a11y-protanopia-filter');
 }
 
 /* Deuteranopia (green-blind): shift greens toward blue/yellow */
-.a11y-deuteranopia {
+.a11y-deuteranopia .a11y-filter-scope {
   filter: url('#a11y-deuteranopia-filter');
 }
 
 /* Tritanopia (blue-blind): shift blues toward red/green */
-.a11y-tritanopia {
+.a11y-tritanopia .a11y-filter-scope {
   filter: url('#a11y-tritanopia-filter');
-}
-
-/* Ensure the filters don't apply to the accessibility widget itself */
-.a11y-protanopia [aria-label="Accessibility settings"],
-.a11y-deuteranopia [aria-label="Accessibility settings"],
-.a11y-tritanopia [aria-label="Accessibility settings"],
-.a11y-protanopia [aria-label="Accessibility options"],
-.a11y-deuteranopia [aria-label="Accessibility options"],
-.a11y-tritanopia [aria-label="Accessibility options"] {
-  filter: none;
 }

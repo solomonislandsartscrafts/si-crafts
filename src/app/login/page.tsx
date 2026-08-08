@@ -44,8 +44,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto px-4 sm:px-6 py-section-lg">
-      <h1 className="font-heading text-2xl md:text-3xl font-bold text-deep-blue mb-2">
+    <div className="max-w-md mx-auto px-4 sm:px-6 page-y">
+      <h1 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-2">
         Log in
       </h1>
       <p className="text-warm-gray-600 mb-8">
@@ -90,7 +90,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="tap-target w-full flex items-center justify-center px-6 py-3 bg-ocean hover:bg-ocean-dark disabled:bg-ocean/50 text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+          className="tap-target w-full flex items-center justify-center px-6 py-3 btn-primary"
         >
           {loading ? 'Logging in...' : 'Log in'}
         </button>
@@ -100,6 +100,11 @@ export default function LoginPage() {
         Not a stockist yet?{' '}
         <Link href="/stockist/apply" className="text-ocean hover:underline font-medium">
           Apply for an account
+        </Link>
+      </p>
+      <p className="text-sm text-warm-gray-400 mt-2 text-center">
+        <Link href="/stockist/forgot-password" className="text-ocean hover:underline">
+          Forgot your password?
         </Link>
       </p>
     </div>

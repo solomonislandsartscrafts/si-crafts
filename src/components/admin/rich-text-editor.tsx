@@ -6,6 +6,8 @@ import {
   ImagePlus, Link2, Quote, Minus, Type, Undo2, Redo2,
 } from 'lucide-react';
 
+import { compressImage } from '@/lib/compress-image';
+
 interface RichTextEditorProps {
   value: string; // HTML string
   onChange: (html: string) => void;
@@ -78,13 +80,28 @@ export function RichTextEditor({
   }
 
   async function insertImageFile(file: File) {
+    // Alt text is mandatory — ask before uploading, and abort without it.
+    const altText = window.prompt(
+      'Describe this image for screen readers (alt text). This is required.'
+    );
+    if (altText === null || !altText.trim()) {
+      alert('Image not inserted. Alt text is required for every image.');
+      return;
+    }
+    const safeAlt = altText
+      .trim()
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
     // Capture the current selection/range before async work
     const selection = window.getSelection();
     const savedRange = selection && selection.rangeCount > 0 ? selection.getRangeAt(0).cloneRange() : null;
 
     // Compress and upload via the upload API
     try {
-      const compressed = await compressForInline(file);
+      const compressed = await compressImage(file, 1000, 0.8);
       const formData = new FormData();
       const filename = `${Date.now()}-${file.name.replace(/\.[^.]+$/, '')}.webp`;
       formData.append('file', compressed, filename);
@@ -110,7 +127,7 @@ export function RichTextEditor({
 
       // Insert image HTML at cursor
       document.execCommand('insertHTML', false,
-        `<figure><img src="${url}" alt="" style="width:100%;border-radius:0.5rem;margin:1rem 0;" /><figcaption style="text-align:center;font-size:0.875rem;color:#7A7067;margin-top:0.5rem;">Add a caption</figcaption></figure><p><br></p>`
+        `<figure><img src="${url}" alt="${safeAlt}" style="width:100%;border-radius:0.5rem;margin:1rem 0;" /><figcaption style="text-align:center;font-size:0.875rem;color:#7A7067;margin-top:0.5rem;">Add a caption</figcaption></figure><p><br></p>`
       );
       syncContent();
     } catch {
@@ -252,7 +269,7 @@ export function RichTextEditor({
             onChange={(e) => setLinkUrl(e.target.value)}
             onKeyDown={handleLinkKeyDown}
             placeholder="Paste URL and press Enter"
-            className="flex-1 px-2 py-1 text-sm bg-transparent text-warm-gray-800 focus:outline-none"
+            className="flex-1 px-2 py-1 text-sm bg-transparent text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-ocean"
             autoFocus
           />
           <button
@@ -303,32 +320,4 @@ export function RichTextEditor({
   );
 }
 
-/**
- * Compress an image for inline article use (max 1000px wide, 80% quality WebP)
- */
-async function compressForInline(file: File): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    const img = document.createElement('img');
-    img.onload = () => {
-      let { width, height } = img;
-      const maxWidth = 1000;
-      if (width > maxWidth) {
-        height = Math.round((height * maxWidth) / width);
-        width = maxWidth;
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) { reject(new Error('Canvas not supported')); return; }
-      ctx.drawImage(img, 0, 0, width, height);
-      canvas.toBlob(
-        (blob) => { if (blob) resolve(blob); else reject(new Error('Compression failed')); },
-        'image/webp',
-        0.8
-      );
-    };
-    img.onerror = () => reject(new Error('Failed to load image'));
-    img.src = URL.createObjectURL(file);
-  });
-}
+

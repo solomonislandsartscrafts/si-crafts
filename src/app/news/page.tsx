@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { generatePageMetadata } from '@/lib/metadata';
 import { getPublishedArticles } from '@/services/articles';
-import { NewsSidebar } from '@/components/news/news-sidebar';
+import { PageHeader } from '@/components/layout/page-header';
+import { SafeImage } from '@/components/ui/safe-image';
 import type { Article } from '@/types';
 
 export const metadata = generatePageMetadata({
@@ -11,16 +11,9 @@ export const metadata = generatePageMetadata({
   path: '/news',
 });
 
-/** Extract unique tags from all articles */
-function getAllTags(articles: Article[]): string[] {
-  const tagSet = new Set<string>();
-  articles.forEach((a) => a.tags.forEach((t) => tagSet.add(t)));
-  return Array.from(tagSet).slice(0, 8);
-}
-
 /** Format relative time */
 function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
+  const diff = Math.max(0, Date.now() - new Date(dateStr).getTime());
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   if (days === 0) return 'Today';
   if (days === 1) return '1 day ago';
@@ -32,29 +25,16 @@ function timeAgo(dateStr: string): string {
   return years === 1 ? '1 year ago' : `${years} years ago`;
 }
 
-/** Distribute articles across three columns */
-function distributeArticles(articles: Article[]): { col1: Article[]; col2: Article[]; col3: Article[] } {
-  const col1: Article[] = [];
-  const col2: Article[] = [];
-  const col3: Article[] = [];
-  articles.forEach((article, i) => {
-    if (i % 3 === 0) col1.push(article);
-    else if (i % 3 === 1) col2.push(article);
-    else col3.push(article);
-  });
-  return { col1, col2, col3 };
-}
-
 function ArticleCard({ article }: { article: Article }) {
   const date = article.publishedAt || article.createdAt;
-  const tag = article.tags[0];
+  const tag = article.tags?.[0];
 
   return (
     <Link href={`/news/${article.slug}`} className="group block">
       <article>
         {article.coverImageUrl && (
-          <div className="aspect-[4/3] relative overflow-hidden rounded-md bg-sand-light mb-3">
-            <Image
+          <div className="aspect-[3/2] relative overflow-hidden rounded-md mb-3">
+            <SafeImage
               src={article.coverImageUrl}
               alt={article.title}
               fill
@@ -63,7 +43,7 @@ function ArticleCard({ article }: { article: Article }) {
             />
           </div>
         )}
-        <h3 className="font-heading text-base sm:text-lg font-bold text-deep-blue group-hover:text-ocean transition-colors leading-snug mb-1">
+        <h3 className="font-heading text-base sm:text-lg font-semibold text-deep-blue group-hover:text-ocean transition-colors leading-snug mb-1">
           {article.title}
         </h3>
         <p className="text-xs text-warm-gray-400 mb-2">
@@ -84,45 +64,32 @@ function ArticleCard({ article }: { article: Article }) {
 
 export default async function NewsPage() {
   const articles = await getPublishedArticles();
-  const allTags = getAllTags(articles);
-  const { col1, col2, col3 } = distributeArticles(articles);
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
-      {/* Grid: sidebar (left, desktop only) | 3 article columns */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[220px_1fr_1fr_1fr] gap-8 lg:gap-10">
-        {/* Sidebar — tags only on index */}
-        <NewsSidebar tags={allTags} otherArticles={[]} />
-
-        {/* Article column 1 */}
-        <div className="space-y-10">
-          {col1.map((article) => (
-            <ArticleCard key={article.id} article={article} />
-          ))}
-        </div>
-
-        {/* Article column 2 */}
-        <div className="space-y-10">
-          {col2.map((article) => (
-            <ArticleCard key={article.id} article={article} />
-          ))}
-        </div>
-
-        {/* Article column 3 */}
-        <div className="space-y-10">
-          {col3.map((article) => (
-            <ArticleCard key={article.id} article={article} />
-          ))}
+  if (articles.length === 0) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
+        <div className="text-center py-12">
+          <h1 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">News</h1>
+          <p className="text-warm-gray-600">No articles published yet. Check back soon for stories and updates from Solomon Islands Arts and Crafts.</p>
         </div>
       </div>
+    );
+  }
 
-      {/* Load More */}
-      <div className="mt-14 text-center border-t border-sand pt-8">
-        <button
-          className="tap-target inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-warm-gray-800 border border-sand-dark rounded-full hover:bg-sand-light transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
-        >
-          + Load More
-        </button>
+  return (
+    <div>
+      <PageHeader
+        title="News"
+        intro="Stories and updates from Solomon Islands Arts and Crafts — makers, crafts, and the people we work with."
+      />
+
+      {/* Articles grid — left-aligned */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+          {articles.map((article) => (
+            <ArticleCard key={article.id} article={article} />
+          ))}
+        </div>
       </div>
     </div>
   );

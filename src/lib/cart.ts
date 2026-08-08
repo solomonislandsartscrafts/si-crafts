@@ -11,6 +11,8 @@ export function getCart(): CartItem[] {
 
 export function saveCart(items: CartItem[]): void {
   localStorage.setItem(CART_KEY, JSON.stringify(items));
+  // Dispatch custom event so UI (e.g. cart badge) updates instantly
+  window.dispatchEvent(new CustomEvent('cart-updated'));
 }
 
 export function addToCart(item: Omit<CartItem, 'quantity'>, quantity = 1): CartItem[] {
@@ -18,6 +20,10 @@ export function addToCart(item: Omit<CartItem, 'quantity'>, quantity = 1): CartI
   const existing = cart.find((i) => i.productId === item.productId);
   if (existing) {
     existing.quantity = Math.min(999, existing.quantity + quantity);
+    // Append note if provided
+    if (item.note) {
+      existing.note = existing.note ? `${existing.note}; ${item.note}` : item.note;
+    }
   } else {
     cart.push({ ...item, quantity: Math.min(999, Math.max(1, quantity)) });
   }
@@ -35,6 +41,16 @@ export function updateQuantity(productId: string, quantity: number): CartItem[] 
   return cart;
 }
 
+export function updateNote(productId: string, note: string): CartItem[] {
+  const cart = getCart();
+  const item = cart.find((i) => i.productId === productId);
+  if (item) {
+    item.note = note;
+  }
+  saveCart(cart);
+  return cart;
+}
+
 export function removeFromCart(productId: string): CartItem[] {
   const cart = getCart().filter((i) => i.productId !== productId);
   saveCart(cart);
@@ -43,6 +59,7 @@ export function removeFromCart(productId: string): CartItem[] {
 
 export function clearCart(): void {
   localStorage.removeItem(CART_KEY);
+  window.dispatchEvent(new CustomEvent('cart-updated'));
 }
 
 export function getCartTotal(items: CartItem[]): number {

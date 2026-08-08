@@ -32,7 +32,7 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-warm-gray-100 px-4">
       <div className="w-full max-w-sm bg-white rounded-lg shadow-md p-8">
-        <h1 className="font-heading text-2xl font-bold text-deep-blue mb-6 text-center">
+        <h1 className="font-heading text-2xl font-medium text-deep-blue mb-6 text-center">
           Admin Login
         </h1>
 

@@ -31,13 +31,13 @@ export function PieceLookup() {
           placeholder="ENTER CODE HERE"
           value={code}
           onChange={(e) => { setCode(e.target.value); setError(''); }}
-          className="flex-1 px-3 py-2 text-xs font-mono uppercase text-center text-warm-gray-800 placeholder:text-warm-gray-400 bg-white focus:outline-none"
+          className="flex-1 px-3 py-2 text-xs font-mono uppercase text-center text-warm-gray-800 placeholder:text-warm-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-ocean"
           aria-describedby={error ? 'piece-code-hero-error' : undefined}
           aria-invalid={!!error}
         />
         <button
           type="submit"
-          className="tap-target px-4 py-2 bg-ocean text-white text-xs font-bold uppercase tracking-wider hover:bg-ocean-dark transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+          className="tap-target px-4 py-2 bg-terracotta text-white text-xs font-bold uppercase tracking-wider hover:bg-terracotta-dark transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
         >
           GO
         </button>

@@ -52,7 +52,7 @@ export default function StockistCataloguePage() {
       }
     } finally {
       localStorage.removeItem('stockist_session');
-      router.push('/wholesale');
+      router.push('/');
     }
   }
 
@@ -80,18 +80,18 @@ export default function StockistCataloguePage() {
 
   if (!authenticated || loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
         <p className="text-warm-gray-400">Loading wholesale catalogue...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="font-heading text-2xl md:text-3xl font-bold text-deep-blue">
+          <h1 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
             Wholesale Catalogue
           </h1>
           <p className="text-sm text-warm-gray-600 mt-1">Pricing shown in AUD (ex. GST)</p>
@@ -102,7 +102,7 @@ export default function StockistCataloguePage() {
             Requests
           </Link>
           <Link href="/stockist/orders"
-            className="tap-target inline-flex items-center gap-2 px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light">
+            className="tap-target inline-flex items-center gap-2 px-4 py-2 btn-primary text-sm">
             Order
           </Link>
           <button className="tap-target inline-flex items-center gap-2 px-4 py-2 border border-sand-dark text-warm-gray-600 hover:bg-sand-light rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean">
@@ -137,7 +137,7 @@ export default function StockistCataloguePage() {
         <div className="space-y-12">
           {Object.entries(grouped).map(([key, groupProducts]) => (
             <section key={key}>
-              <h2 className="font-heading text-xl font-bold text-deep-blue mb-4 capitalize">
+              <h2 className="font-heading text-xl font-medium text-deep-blue mb-4 capitalize">
                 {labels[key] || key}
               </h2>
               <StockistProductGrid products={groupProducts} makers={makers} />

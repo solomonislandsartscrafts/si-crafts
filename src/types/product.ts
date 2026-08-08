@@ -1,5 +1,5 @@
-export type MaterialCategory = 'pandanus' | 'wood' | 'shells' | 'bush-twine';
-export type ProductType = 'bags' | 'jewellery' | 'trays' | 'fans' | 'bowls' | 'ornaments' | 'baskets' | 'brooches' | 'carvings' | 'kits' | 'purses';
+export type MaterialCategory = string;
+export type ProductType = string;
 
 export interface Product {
   id: string;
@@ -12,6 +12,7 @@ export interface Product {
   makerId: string;
   craftId: string;
   imageUrls: string[];
+  imageAlts: string[];
   dimensions: string | null;
   careNotes: string | null;
   wholesalePrice: number;

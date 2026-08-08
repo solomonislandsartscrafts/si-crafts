@@ -1,11 +1,11 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { ArrowLeft, Store } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { getPublicMakers, getPublicMakerBySlug } from '@/services/makers';
 import { getProductsByMaker } from '@/services/products';
 import { getCraftById } from '@/services/crafts';
 import { ProductCard } from '@/components/cards/product-card';
+import { SafeImage } from '@/components/ui/safe-image';
 import type { Product } from '@/types';
 
 export async function generateStaticParams() {
@@ -46,7 +46,7 @@ export default async function MakerPage({ params }: MakerPageProps) {
   const productGroups = groupProductsByType(products);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
       {/* Back link */}
       <Link
         href="/makers"
@@ -57,28 +57,22 @@ export default async function MakerPage({ params }: MakerPageProps) {
       </Link>
 
       {/* Maker profile */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mb-16">
-        {/* Portrait — shorter on mobile so name/story stays visible */}
-        <div className="aspect-square md:aspect-[3/4] relative rounded-lg overflow-hidden bg-sand">
-          {maker.portraitUrl ? (
-            <Image
-              src={maker.portraitUrl}
-              alt={`${maker.name} from ${maker.village}, ${maker.province}`}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-              priority
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-warm-gray-400 text-sm">Photo coming soon</span>
-            </div>
-          )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mb-12 lg:mb-16">
+        {/* Portrait */}
+        <div className="aspect-[4/5] relative rounded-lg overflow-hidden">
+          <SafeImage
+            src={maker.portraitUrl}
+            alt={`${maker.name} from ${maker.village}, ${maker.province}`}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 50vw"
+            priority
+          />
         </div>
 
-        {/* Info — wrapped in subtle card for visual grouping */}
-        <div className="flex flex-col justify-center bg-sand-light rounded-xl p-6 md:p-8">
-          <h1 className="font-heading text-3xl md:text-4xl font-bold text-deep-blue mb-2">
+        {/* Info */}
+        <div className="flex flex-col justify-center p-6 md:p-8">
+          <h1 className="font-heading text-3xl md:text-4xl font-medium text-deep-blue mb-2">
             {maker.name}
           </h1>
           <p className="text-lg text-warm-gray-600 mb-3">
@@ -110,7 +104,7 @@ export default async function MakerPage({ params }: MakerPageProps) {
           {products.length > 0 && (
             <a href="#pieces" className="inline-flex items-center gap-1.5 mt-8 text-sm text-ocean hover:text-ocean-dark transition-colors">
               <span>View pieces by {maker.name}</span>
-              <svg className="w-4 h-4 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-4 h-4 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </a>
@@ -120,9 +114,9 @@ export default async function MakerPage({ params }: MakerPageProps) {
 
       {/* Products section */}
       {products.length > 0 && (
-        <section id="pieces" className="border-t border-sand pt-12 mt-16 scroll-mt-24">
+        <section id="pieces" className="border-t border-sand pt-12 mt-12 lg:mt-16 scroll-mt-24">
           {/* Heading with count */}
-          <h2 className="font-heading text-2xl font-bold text-deep-blue mb-8">
+          <h2 className="font-heading text-2xl font-medium text-deep-blue mb-8">
             Pieces by {maker.name}
             <span className="text-base font-normal text-warm-gray-600 ml-2">
               ({products.length})

@@ -1,11 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import type { Craft, MaterialCategory, CulturalReviewStatus } from '@/types';
 import { ImageUpload } from './image-upload';
-
-interface CraftFormModalProps {
+import { getMaterialCategories, type MaterialCategoryOption } from '@/services/categories';
+import { singleAltError } from '@/lib/image-alt';
+import { scrollToFirstError } from '@/lib/scroll-to-error';
+import { useToast } from '@/components/ui/toast';
+import { useModalA11y } from '@/lib/use-modal-a11y';interface CraftFormModalProps {
   craft: Craft | null; // null = create mode
   onClose: () => void;
   onSave: (data: CraftFormData) => Promise<void>;
@@ -19,18 +22,21 @@ export interface CraftFormData {
   culturalContext: string;
   culturalContextReviewFlag: CulturalReviewStatus;
   processImageUrls: string[];
+  processImageAlt: string;
 }
-
-const MATERIAL_OPTIONS: { value: MaterialCategory; label: string }[] = [
-  { value: 'pandanus', label: 'Pandanus' },
-  { value: 'wood', label: 'Wood' },
-  { value: 'shells', label: 'Shells' },
-];
 
 export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const formRef = useRef<HTMLFormElement>(null);
+  const { error: toastError } = useToast();
+  const modalRef = useModalA11y(true, onClose);
+  const [materialOptions, setMaterialOptions] = useState<MaterialCategoryOption[]>([]);
+
+  useEffect(() => {
+    getMaterialCategories().then(setMaterialOptions);
+  }, []);
 
   const [form, setForm] = useState<CraftFormData>({
     name: craft?.name ?? '',
@@ -40,6 +46,7 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
     culturalContext: craft?.culturalContext ?? '',
     culturalContextReviewFlag: craft?.culturalContextReviewFlag ?? 'unreviewed',
     processImageUrls: craft?.processImageUrls ?? [],
+    processImageAlt: craft?.processImageAlt ?? '',
   });
 
   // Auto-generate slug from name
@@ -59,13 +66,26 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
     const errs: Record<string, string> = {};
     if (!form.name.trim()) errs.name = 'Name is required';
     if (!form.description.trim()) errs.description = 'Description is required';
+
+    // The process photo cannot be saved without alt text.
+    const processAltError = singleAltError(
+      form.processImageUrls[0] ?? '',
+      form.processImageAlt,
+      'process photo'
+    );
+    if (processAltError) errs.processImageAlt = processAltError;
+
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validate()) {
+      toastError('Please fix the highlighted fields before saving.');
+      scrollToFirstError(formRef.current);
+      return;
+    }
     setSaving(true);
     setSaveError(null);
     try {
@@ -95,6 +115,7 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50" onClick={handleDismiss}>
       <div
+        ref={modalRef}
         className="bg-white rounded-lg shadow-md w-full max-w-2xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
@@ -103,7 +124,7 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-sand">
-          <h2 id="craft-form-title" className="font-heading text-xl font-bold text-deep-blue">
+          <h2 id="craft-form-title" className="font-heading text-xl font-medium text-deep-blue">
             {craft ? 'Edit Craft' : 'Add Craft'}
           </h2>
           <button
@@ -117,7 +138,7 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
           {/* Save error banner */}
           {saveError && (
             <div className="bg-error/10 border border-error/20 text-error text-sm rounded-md p-3" role="alert" aria-live="assertive">
@@ -152,7 +173,7 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
               onChange={(e) => handleChange('materialCategory', e.target.value)}
               className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
             >
-              {MATERIAL_OPTIONS.map((opt) => (
+              {materialOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
@@ -206,17 +227,24 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
           </div>
 
           {/* Process Image */}
-          <ImageUpload
-            value={form.processImageUrls[0] ?? ''}
-            onChange={(url) => {
-              const rest = form.processImageUrls.slice(1);
-              handleChange('processImageUrls', url ? [url, ...rest] : rest);
-            }}
-            label="Process Photo"
-            aspectHint="4:3 landscape"
-            maxWidth={1200}
-            quality={0.8}
-          />
+          <div>
+            <ImageUpload
+              value={form.processImageUrls[0] ?? ''}
+              onChange={(url) => {
+                const rest = form.processImageUrls.slice(1);
+                handleChange('processImageUrls', url ? [url, ...rest] : rest);
+              }}
+              altText={form.processImageAlt}
+              onAltTextChange={(alt) => handleChange('processImageAlt', alt)}
+              label="Process Photo"
+              aspectHint="4:3 landscape"
+              maxWidth={1200}
+              quality={0.8}
+            />
+            {errors.processImageAlt && (
+              <p className="text-sm text-error mt-1" aria-live="assertive">{errors.processImageAlt}</p>
+            )}
+          </div>
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
@@ -231,7 +259,7 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
             <button
               type="submit"
               disabled={saving}
-              className="tap-target px-6 py-3 bg-terracotta hover:bg-terracotta-dark text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light disabled:opacity-50"
+              className="tap-target px-6 py-3 btn-primary"
             >
               {saving ? 'Saving...' : craft ? 'Update Craft' : 'Create Craft'}
             </button>

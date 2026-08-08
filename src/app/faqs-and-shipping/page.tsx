@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
+import { PageHeader } from '@/components/layout';
 
 const FAQS = [
   {
@@ -11,7 +12,7 @@ const FAQS = [
   },
   {
     q: 'How long does delivery take?',
-    a: 'We ship from our Melbourne warehouse within 3–5 business days of receiving payment. Delivery within Australia is typically 2–5 business days depending on your location. Within Australia, we use tracked shipping on all orders. In 2026 when we started this small business, we made one shopping trip to purchase orders directly from the makers in Solomon Islands. We intend to do this each year while also exploring a reliable and cost-effective freight service between Honiara and Australia.',
+    a: 'We ship from our Melbourne warehouse within 3–5 business days of receiving payment. Delivery within Australia is typically 2–5 business days depending on your location. Within Australia, we use tracked shipping on all orders. In 2026 when we started this small business, we made one shopping trip to purchase orders directly from the makers in Solomon Islands. We intend to do this each year while also exploring a reliable and cost-effective freight and customs service between Honiara and Australia.',
   },
   {
     q: 'What is your returns policy?',
@@ -43,7 +44,7 @@ const FAQS = [
   },
   {
     q: 'How much of the price goes back to the maker?',
-    a: 'Makers set their own prices and are paid upfront when we purchase the work — before it reaches Australia. SIAC\'s margin covers international freight, documentation, liaising with the makers and distribution. No one at SIAC draws a salary from craft sales. See our Our Promise page for more detail.',
+    a: 'Makers set their own prices and are paid upfront when we purchase the work — before it reaches Australia. SIAC\'s margin covers international freight, documentation, liaising with the makers and distribution. No one at SIAC draws a salary from craft sales. See the Our Promise page for more detail.',
   },
   {
     q: 'How do I become a stockist?',
@@ -61,21 +62,26 @@ const FAQS = [
 
 export default function FaqsAndShippingPage() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
-      <h1 className="font-heading text-3xl md:text-4xl font-bold text-deep-blue mb-12">FAQs & Shipping</h1>
+    <div>
+      <PageHeader
+        title="FAQs & Shipping"
+        intro="Ordering, delivery, returns, and the questions stockists ask us most often."
+      />
 
-      <h2 className="sr-only">Frequently asked questions</h2>
-      <div className="space-y-2">
-        {FAQS.map((faq, i) => (
-          <FaqItem key={i} question={faq.q} answer={faq.a} />
-        ))}
-      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">
+        <h2 className="sr-only">Frequently asked questions</h2>
+        <div className="max-w-3xl mx-auto space-y-2">
+          {FAQS.map((faq, i) => (
+            <FaqItem key={i} question={faq.q} answer={faq.a} />
+          ))}
+        </div>
 
-      <div className="mt-12 bg-sand-light rounded-lg p-6">
-        <p className="text-warm-gray-600">
-          Have a question we haven&apos;t answered?{' '}
-          <Link href="/contact" className="text-ocean hover:underline font-medium">Get in touch</Link> and we&apos;ll help.
-        </p>
+        <div className="mt-12 bg-sand-light rounded-lg p-6">
+          <p className="text-warm-gray-600 leading-relaxed">
+            Have a question we haven&apos;t answered?{' '}
+            <Link href="/contact" className="text-ocean hover:underline font-medium">Get in touch</Link> and we&apos;ll help.
+          </p>
+        </div>
       </div>
     </div>
   );

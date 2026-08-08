@@ -5,12 +5,14 @@ import { Plus, Edit, Trash2, Eye, EyeOff, Star } from 'lucide-react';
 import type { Article } from '@/types';
 import { AdminLayout } from '@/components/admin';
 import { ArticleEditorModal } from '@/components/admin/article-editor-modal';
+import { useToast } from '@/components/ui/toast';
 
 export default function AdminNewsPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [showEditor, setShowEditor] = useState(false);
+  const { success: toastSuccess, error: toastError } = useToast();
 
   useEffect(() => { loadArticles(); }, []);
 
@@ -22,18 +24,28 @@ export default function AdminNewsPage() {
 
   async function handleDelete(id: string, title: string) {
     if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-    const { deleteArticle } = await import('@/services/articles');
-    await deleteArticle(id);
-    loadArticles();
+    try {
+      const { deleteArticle } = await import('@/services/articles');
+      await deleteArticle(id);
+      toastSuccess(`"${title}" deleted.`);
+      loadArticles();
+    } catch {
+      toastError(`Failed to delete "${title}". Please try again.`);
+    }
   }
 
   async function handleTogglePublish(id: string, currentState: boolean) {
-    const { updateArticle } = await import('@/services/articles');
-    await updateArticle(id, {
-      published: !currentState,
-      publishedAt: !currentState ? new Date().toISOString() : null,
-    });
-    loadArticles();
+    try {
+      const { updateArticle } = await import('@/services/articles');
+      await updateArticle(id, {
+        published: !currentState,
+        publishedAt: !currentState ? new Date().toISOString() : null,
+      });
+      toastSuccess(!currentState ? 'Article published.' : 'Article unpublished.');
+      loadArticles();
+    } catch {
+      toastError('Failed to update publish state. Please try again.');
+    }
   }
 
   function handleEdit(article: Article) {
@@ -50,9 +62,11 @@ export default function AdminNewsPage() {
     if (editingArticle) {
       const { updateArticle } = await import('@/services/articles');
       await updateArticle(editingArticle.id, data);
+      toastSuccess(`"${data.title || editingArticle.title}" updated.`);
     } else {
       const { createArticle } = await import('@/services/articles');
       await createArticle(data as Omit<Article, 'id' | 'createdAt' | 'updatedAt'>);
+      toastSuccess(`"${data.title}" created.`);
     }
     setShowEditor(false);
     setEditingArticle(null);
@@ -62,10 +76,10 @@ export default function AdminNewsPage() {
   return (
     <AdminLayout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-heading text-2xl font-bold text-deep-blue">News & Articles</h1>
+        <h1 className="font-heading text-2xl font-medium text-deep-blue">News & Articles</h1>
         <button
           onClick={handleAdd}
-          className="tap-target inline-flex items-center gap-2 px-4 py-2 bg-ocean hover:bg-ocean-dark text-white rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+          className="tap-target inline-flex items-center gap-2 px-4 py-2 btn-primary text-sm"
         >
           <Plus className="w-4 h-4" /> New Article
         </button>

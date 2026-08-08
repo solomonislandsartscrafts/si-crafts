@@ -1,0 +1,49 @@
+# Render Blueprint — SI Crafts Django/Wagtail Backend
+# https://render.com/docs/blueprint-spec
+
+databases:
+  - name: siac-db
+    plan: free
+    databaseName: siac
+    user: siac
+
+services:
+  - type: web
+    name: siac-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: ./build.sh
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: postgresql://siac:somepassword@dpg-dpg-d9rbvcon74is73eg62e0-a.singapore-postgres.render.com/siac
+
+        fromDatabase:
+          name: siac-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://solomonislandsartsandcrafts.pages.dev"
+      - key: FRONTEND_URL
+        value: "https://solomonislandsartsandcrafts.pages.dev"
+      - key: SITE_URL
+        value: "https://solomonislandsartsandcrafts.pages.dev"
+      - key: PYTHON_VERSION
+        value: "3.12.2"
+      - key: EMAIL_BACKEND
+        value: "django.core.mail.backends.smtp.EmailBackend"
+      - key: EMAIL_HOST
+        value: "smtp.gmail.com"
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USE_TLS
+        value: "True"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false

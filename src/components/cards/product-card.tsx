@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/safe-image';
 import type { Product } from '@/types';
 import { formatPrice } from '@/lib/price';
 
@@ -13,24 +13,21 @@ export function ProductCard({ product, makerName, showPrice = false }: ProductCa
   return (
     <Link
       href={`/piece/${product.productCode}`}
-      className="group block rounded-lg overflow-hidden bg-card-bg shadow-card hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-ocean"
+      className="group flex h-full flex-col rounded-lg overflow-hidden border border-sand hover:border-ocean/30 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ocean"
     >
-      <div className="aspect-square relative bg-sand-light bg-weave-pattern">
-        {product.imageUrls.length > 0 ? (
-          <Image
-            src={product.imageUrls[0]}
-            alt={`${product.name}${makerName ? ` by ${makerName}` : ''}`}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-sand">
-            <span className="text-warm-gray-400 text-sm">Image coming soon</span>
-          </div>
-        )}
+      {/* Image area — white background */}
+      <div className="aspect-square relative bg-white overflow-hidden">
+        <SafeImage
+          src={product.imageUrls[0] || null}
+          alt={`${product.name}${makerName ? ` by ${makerName}` : ''}`}
+          fill
+          className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+        />
       </div>
-      <div className="p-4">
+
+      {/* Info area — grey background */}
+      <div className="flex flex-1 flex-col p-4 bg-warm-gray-100">
         <h3 className="font-heading text-sm font-semibold text-deep-blue group-hover:text-ocean transition-colors line-clamp-2">
           {product.name}
         </h3>
@@ -43,7 +40,7 @@ export function ProductCard({ product, makerName, showPrice = false }: ProductCa
           <p className="text-xs text-ocean mt-1">by {makerName}</p>
         )}
         {showPrice && (
-          <p className="text-sm font-semibold text-deep-blue mt-2">
+          <p className="text-sm font-semibold text-deep-blue mt-auto pt-2">
             {formatPrice(product.wholesalePrice)}
           </p>
         )}

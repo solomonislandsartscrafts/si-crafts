@@ -40,7 +40,7 @@ export function MakersWithMap({ makers }: Props) {
       )}
 
       {/* Map below cards */}
-      <div className="mt-16 border-t border-sand pt-12">
+      <div className="mt-12 lg:mt-16 border-t border-sand pt-12">
         <SolomonIslandsProvinceMap
           selectedProvince={selectedProvince}
           onProvinceSelect={setSelectedProvince}

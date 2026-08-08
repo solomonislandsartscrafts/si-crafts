@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/safe-image';
 
 interface FullScreenHeroProps {
   images: string[];
@@ -37,11 +37,11 @@ export function FullScreenHero({ images, interval = 5000 }: FullScreenHeroProps)
           }`}
           aria-hidden={index !== current}
         >
-          <Image
+          <SafeImage
             src={img}
             alt=""
             fill
-            className="object-cover"
+            className="object-contain p-4"
             sizes="100vw"
             priority={index === 0}
           />

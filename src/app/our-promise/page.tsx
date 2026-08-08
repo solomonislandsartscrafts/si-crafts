@@ -1,5 +1,6 @@
 import { IconAuthenticity, IconHandHeart, IconCulturalEye, IconCommunity, IconShellMoney, IconWovenQuestion } from '@/components/icons/craft-icons';
 import { generatePageMetadata } from '@/lib/metadata';
+import { PageHeader } from '@/components/layout';
 
 export const metadata = generatePageMetadata({
   title: 'Our Promise',
@@ -10,27 +11,25 @@ export const metadata = generatePageMetadata({
 
 export default function OurPromisePage() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-section-lg">
-      <h1 className="font-heading text-3xl md:text-4xl font-bold text-deep-blue mb-4">
-        Our Promise
-      </h1>
-      <p className="text-lg text-warm-gray-600 max-w-2xl leading-relaxed mb-12">
-        Every relationship we build — with makers, stockists, and customers — is grounded
-        in these commitments.
-      </p>
+    <div>
+      <PageHeader
+        title="Our Promise"
+        intro="Every relationship we build — with makers, stockists, and customers — is grounded in these commitments."
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 mb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 mb-12 lg:mb-16">
         {/* Authenticity */}
         <div className="flex gap-4">
           <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-terracotta/10 flex items-center justify-center">
             <IconAuthenticity className="w-6 h-6 text-terracotta" />
           </div>
           <div>
-            <h2 className="font-heading text-xl font-bold text-deep-blue mb-2">
+            <h2 className="font-heading text-lg font-semibold text-deep-blue mb-2">
               Authenticity
             </h2>
             <p className="text-warm-gray-600 leading-relaxed">
-              Every piece we sell is genuinely handmade by a known named maker in Solomon Islands.
+              Every piece we sell is genuinely handmade by a known, named maker in Solomon Islands.
               We never sell mass-produced imitations. Every product tag links to the maker&apos;s
               story so you can verify provenance with a scan.
             </p>
@@ -43,7 +42,7 @@ export default function OurPromisePage() {
             <IconHandHeart className="w-6 h-6 text-terracotta" />
           </div>
           <div>
-            <h2 className="font-heading text-xl font-bold text-deep-blue mb-2">
+            <h2 className="font-heading text-lg font-semibold text-deep-blue mb-2">
               Fair Payment
             </h2>
             <p className="text-warm-gray-600 leading-relaxed">
@@ -60,7 +59,7 @@ export default function OurPromisePage() {
             <IconCulturalEye className="w-6 h-6 text-terracotta" />
           </div>
           <div>
-            <h2 className="font-heading text-xl font-bold text-deep-blue mb-2">
+            <h2 className="font-heading text-lg font-semibold text-deep-blue mb-2">
               Cultural Respect
             </h2>
             <p className="text-warm-gray-600 leading-relaxed">
@@ -77,7 +76,7 @@ export default function OurPromisePage() {
             <IconCommunity className="w-6 h-6 text-terracotta" />
           </div>
           <div>
-            <h2 className="font-heading text-xl font-bold text-deep-blue mb-2">
+            <h2 className="font-heading text-lg font-semibold text-deep-blue mb-2">
               Consent & Transparency
             </h2>
             <p className="text-warm-gray-600 leading-relaxed">
@@ -90,13 +89,13 @@ export default function OurPromisePage() {
       </div>
 
       {/* WHERE THE MONEY GOES */}
-      <section className="border-t border-sand pt-12 mb-16">
+      <section className="border-t border-sand pt-10 lg:pt-12 mb-12 lg:mb-16">
         <div className="flex gap-4 mb-6">
           <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-ocean/10 flex items-center justify-center">
             <IconShellMoney className="w-6 h-6 text-ocean" />
           </div>
           <div>
-            <h2 className="font-heading text-2xl font-bold text-deep-blue mb-2">
+            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-2">
               Where the money goes
             </h2>
             <p className="text-sm text-warm-gray-400 italic">
@@ -133,7 +132,7 @@ export default function OurPromisePage() {
             <IconWovenQuestion className="w-6 h-6 text-ocean" />
           </div>
           <div>
-            <h2 className="font-heading text-2xl font-bold text-deep-blue">
+            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
               &ldquo;Are you exploiting makers?&rdquo;
             </h2>
           </div>
@@ -164,6 +163,7 @@ export default function OurPromisePage() {
           </p>
         </div>
       </section>
+      </div>
     </div>
   );
 }

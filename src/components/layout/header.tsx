@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, User, Shield, ShoppingCart } from 'lucide-react';
 import { MobileNav } from './mobile-nav';
+import { getCart } from '@/lib/cart';
 
 const NAV_LINKS = [
+  { href: '/', label: 'Home' },
   { href: '/catalogue', label: 'Catalogue' },
   { href: '/makers', label: 'Makers' },
   { href: '/crafts-and-techniques', label: 'Crafts' },
@@ -40,19 +42,16 @@ export function Header() {
     return pathname.startsWith(href);
   }
 
-  const isHome = pathname === '/';
-  const showDark = true; // Always use dark text on header now
-
   return (
     <>
-      <header className="sticky top-0 z-30 bg-deep-blue transition-all duration-300">
+      <header className="sticky top-0 z-40 bg-white transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-20">
             <Link
               href="/"
-              className="font-heading text-xl font-bold text-white hover:text-white/80 transition-colors"
+              className="font-heading text-xl font-semibold text-deep-blue hover:text-ocean transition-colors"
             >
-              SI Crafts
+              SIAC
             </Link>
 
             <nav className="hidden md:flex items-center gap-2" aria-label="Primary">
@@ -60,10 +59,10 @@ export function Header() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`tap-target flex items-center px-3 py-2 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded-md ${
+                  className={`tap-target flex items-center px-3 py-2 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-ocean border-b-[3px] rounded-none ${
                     isActive(link.href)
-                      ? 'text-white border-b-2 border-white'
-                      : 'text-white/70 hover:text-white'
+                      ? 'text-deep-blue border-ocean'
+                      : 'text-warm-gray-600 border-transparent hover:text-deep-blue hover:border-ocean'
                   }`}
                   aria-current={isActive(link.href) ? 'page' : undefined}
                 >
@@ -75,7 +74,7 @@ export function Header() {
               {authState === 'admin' && (
                 <Link
                   href="/admin/dashboard"
-                  className="tap-target inline-flex items-center gap-1.5 ml-2 px-4 py-2 bg-deep-blue hover:bg-deep-blue/90 text-white rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+                  className="tap-target inline-flex items-center gap-1.5 ml-2 px-4 py-2 btn-admin text-sm"
                 >
                   <Shield className="w-4 h-4" />
                   Admin
@@ -85,7 +84,7 @@ export function Header() {
                 <>
                   <Link
                     href="/stockist/orders"
-                    className="tap-target relative ml-2 p-2 text-white/70 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                    className="tap-target relative ml-2 p-2 text-warm-gray-600 hover:text-deep-blue transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
                     aria-label="View order"
                   >
                     <ShoppingCart className="w-5 h-5" />
@@ -93,7 +92,7 @@ export function Header() {
                   </Link>
                   <Link
                     href="/stockist/account"
-                    className="tap-target inline-flex items-center gap-1.5 ml-1 px-4 py-2 bg-ocean hover:bg-ocean-dark text-white rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+                    className="tap-target inline-flex items-center gap-1.5 ml-1 px-5 py-2 btn-primary text-sm"
                   >
                     My Account
                   </Link>
@@ -102,7 +101,7 @@ export function Header() {
               {authState === 'none' && (
                 <Link
                   href="/login"
-                  className="tap-target inline-flex items-center ml-2 px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light bg-terracotta hover:bg-terracotta-dark text-white"
+                  className="tap-target inline-flex items-center ml-2 px-5 py-2 btn-primary text-sm"
                 >
                   Login
                 </Link>
@@ -111,7 +110,7 @@ export function Header() {
 
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="md:hidden tap-target relative flex items-center justify-center p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ocean text-white hover:bg-white/10"
+              className="md:hidden tap-target relative flex items-center justify-center p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ocean text-warm-gray-800 hover:bg-sand-light"
               aria-label="Menu"
               aria-expanded={mobileMenuOpen}
             >
@@ -122,6 +121,8 @@ export function Header() {
             </button>
           </div>
         </div>
+        {/* Flag stripe — scrolls with the header */}
+        <div className="flag-divider" aria-hidden="true" />
       </header>
 
       <MobileNav
@@ -138,23 +139,16 @@ function CartBadge() {
 
   useEffect(() => {
     function updateCount() {
-      try {
-        const raw = localStorage.getItem('si_crafts_cart');
-        if (raw) {
-          const items = JSON.parse(raw);
-          setCount(items.reduce((sum: number, i: { quantity: number }) => sum + i.quantity, 0));
-        } else {
-          setCount(0);
-        }
-      } catch { setCount(0); }
+      const items = getCart();
+      setCount(items.reduce((sum, i) => sum + i.quantity, 0));
     }
     updateCount();
-    // Listen for storage changes (other tabs or same-tab updates)
+    // Listen for storage changes (other tabs) and custom cart-updated event (same tab)
     window.addEventListener('storage', updateCount);
-    const interval = setInterval(updateCount, 1000);
+    window.addEventListener('cart-updated', updateCount);
     return () => {
       window.removeEventListener('storage', updateCount);
-      clearInterval(interval);
+      window.removeEventListener('cart-updated', updateCount);
     };
   }, []);
 

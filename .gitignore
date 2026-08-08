@@ -25,7 +25,15 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files
+.env
 .env*.local
+backend/.env
+
+# backend
+backend/db.sqlite3
+backend/media/
+backend/staticfiles/
+backend/__pycache__/
 
 # uploads (user-uploaded images)
 /public/uploads

@@ -1,8 +1,4 @@
-import {
-  mockMakerEnquiries,
-  mockStockistRequests,
-  mockContactEnquiries,
-} from '@/data/mock';
+import { apiGet, apiPost, getAdminToken } from '@/lib/api-client';
 import type {
   MakerEnquiry,
   StockistRequest,
@@ -14,7 +10,12 @@ import type {
   EnquiryType,
 } from '@/types';
 
-const delay = () => new Promise((r) => setTimeout(r, 0));
+/** Extract items from DRF paginated or plain array response */
+function extractItems<T>(data: unknown): T[] {
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === 'object' && 'results' in data) return (data as { results: T[] }).results;
+  return [];
+}
 
 // --- Maker Enquiry ---
 
@@ -28,15 +29,21 @@ export interface SubmitMakerEnquiryInput {
 }
 
 export async function submitMakerEnquiry(data: SubmitMakerEnquiryInput): Promise<MakerEnquiry> {
-  await delay();
-  const enquiry: MakerEnquiry = {
-    ...data,
-    id: `menq-${Date.now()}`,
-    submittedAt: new Date().toISOString(),
-    handled: false,
+  const raw = await apiPost<{
+    id: number; name: string; village: string; province: string;
+    craft: string; message: string; contact: string; submitted_at: string; handled: boolean;
+  }>('/api/enquiries/maker/', data);
+  return {
+    id: String(raw.id),
+    name: raw.name,
+    village: raw.village,
+    province: raw.province,
+    craft: raw.craft,
+    message: raw.message,
+    contact: raw.contact,
+    submittedAt: raw.submitted_at,
+    handled: raw.handled,
   };
-  mockMakerEnquiries.push(enquiry);
-  return enquiry;
 }
 
 // --- Stockist Request ---
@@ -47,16 +54,20 @@ export interface SubmitStockistRequestInput {
 }
 
 export async function submitStockistRequest(data: SubmitStockistRequestInput): Promise<StockistRequest> {
-  await delay();
-  const req: StockistRequest = {
-    id: `sreq-${Date.now()}`,
-    stockistId: data.stockistId,
-    request: data.request,
-    submittedAt: new Date().toISOString(),
-    handled: false,
+  const token = getAdminToken();
+  const raw = await apiPost<{
+    id: number; stockist: number; request_data: unknown; submitted_at: string; handled: boolean;
+  }>('/api/enquiries/stockist-request/', {
+    stockist: parseInt(data.stockistId),
+    request_data: data.request,
+  }, token);
+  return {
+    id: String(raw.id),
+    stockistId: String(raw.stockist),
+    request: raw.request_data as ReplacementTagRequest | CustomBulkRequest,
+    submittedAt: raw.submitted_at,
+    handled: raw.handled,
   };
-  mockStockistRequests.push(req);
-  return req;
 }
 
 // --- Contact Enquiry ---
@@ -69,60 +80,88 @@ export interface SubmitContactEnquiryInput {
 }
 
 export async function submitContactEnquiry(data: SubmitContactEnquiryInput): Promise<ContactEnquiry> {
-  await delay();
-  const enquiry: ContactEnquiry = {
-    ...data,
-    id: `cenq-${Date.now()}`,
-    submittedAt: new Date().toISOString(),
-    handled: false,
+  const raw = await apiPost<{
+    id: number; name: string; email: string; reason: string; message: string;
+    submitted_at: string; handled: boolean;
+  }>('/api/enquiries/contact/', data);
+  return {
+    id: String(raw.id),
+    name: raw.name,
+    email: raw.email,
+    reason: raw.reason as ContactReason,
+    message: raw.message,
+    submittedAt: raw.submitted_at,
+    handled: raw.handled,
   };
-  mockContactEnquiries.push(enquiry);
-  return enquiry;
 }
 
 // --- Admin: list all enquiries + mark handled ---
 
 export async function listEnquiries(filter?: EnquiryType): Promise<AnyEnquiry[]> {
-  await delay();
-  const all: AnyEnquiry[] = [
-    ...mockMakerEnquiries.map((d) => ({ type: 'maker-enquiry' as const, data: d })),
-    ...mockStockistRequests.map((d) => ({ type: 'stockist-request' as const, data: d })),
-    ...mockContactEnquiries
-      .filter((d) => d.reason === 'general')
-      .map((d) => ({ type: 'contact' as const, data: d })),
-    ...mockContactEnquiries
-      .filter((d) => d.reason === 'media')
-      .map((d) => ({ type: 'media' as const, data: d })),
-  ];
+  const token = getAdminToken();
+  const all: AnyEnquiry[] = [];
 
-  const filtered = filter ? all.filter((e) => e.type === filter) : all;
+  // Fetch all types in parallel
+  const [makersRaw, stockistReqsRaw, contactsRaw] = await Promise.all([
+    (!filter || filter === 'maker-enquiry')
+      ? apiGet<unknown>('/api/enquiries/maker/', token)
+      : Promise.resolve([]),
+    (!filter || filter === 'stockist-request')
+      ? apiGet<unknown>('/api/enquiries/stockist-request/', token)
+      : Promise.resolve([]),
+    (!filter || filter === 'contact' || filter === 'media')
+      ? apiGet<unknown>('/api/enquiries/contact/', token)
+      : Promise.resolve([]),
+  ]);
 
-  // Sort newest first
-  return filtered.sort(
-    (a, b) => new Date(b.data.submittedAt).getTime() - new Date(a.data.submittedAt).getTime()
-  );
+  const makers = extractItems<{ id: number; name: string; village: string; province: string; craft: string; message: string; contact: string; submitted_at: string; handled: boolean }>(makersRaw);
+  const stockistReqs = extractItems<{ id: number; stockist: number; request_data: unknown; submitted_at: string; handled: boolean }>(stockistReqsRaw);
+  const contacts = extractItems<{ id: number; name: string; email: string; reason: string; message: string; submitted_at: string; handled: boolean }>(contactsRaw);
+
+  for (const raw of makers) {
+    all.push({
+      type: 'maker-enquiry',
+      data: { id: String(raw.id), name: raw.name, village: raw.village, province: raw.province, craft: raw.craft, message: raw.message, contact: raw.contact, submittedAt: raw.submitted_at, handled: raw.handled },
+    });
+  }
+
+  for (const raw of stockistReqs) {
+    all.push({
+      type: 'stockist-request',
+      data: { id: String(raw.id), stockistId: String(raw.stockist), request: raw.request_data as ReplacementTagRequest | CustomBulkRequest, submittedAt: raw.submitted_at, handled: raw.handled },
+    });
+  }
+
+  for (const raw of contacts) {
+    const type = raw.reason === 'media' ? 'media' : 'contact';
+    if (filter && filter !== type) continue;
+    all.push({
+      type: type as 'contact' | 'media',
+      data: { id: String(raw.id), name: raw.name, email: raw.email, reason: raw.reason as ContactReason, message: raw.message, submittedAt: raw.submitted_at, handled: raw.handled },
+    });
+  }
+
+  return all.sort((a, b) => new Date(b.data.submittedAt).getTime() - new Date(a.data.submittedAt).getTime());
 }
 
 export async function markHandled(type: EnquiryType, id: string): Promise<boolean> {
-  await delay();
-  switch (type) {
-    case 'maker-enquiry': {
-      const item = mockMakerEnquiries.find((e) => e.id === id);
-      if (item) { item.handled = true; return true; }
-      return false;
+  const token = getAdminToken();
+  try {
+    switch (type) {
+      case 'maker-enquiry':
+        await apiPost(`/api/enquiries/maker/${id}/handled/`, {}, token);
+        return true;
+      case 'stockist-request':
+        await apiPost(`/api/enquiries/stockist-request/${id}/handled/`, {}, token);
+        return true;
+      case 'contact':
+      case 'media':
+        await apiPost(`/api/enquiries/contact/${id}/handled/`, {}, token);
+        return true;
+      default:
+        return false;
     }
-    case 'stockist-request': {
-      const item = mockStockistRequests.find((e) => e.id === id);
-      if (item) { item.handled = true; return true; }
-      return false;
-    }
-    case 'contact':
-    case 'media': {
-      const item = mockContactEnquiries.find((e) => e.id === id);
-      if (item) { item.handled = true; return true; }
-      return false;
-    }
-    default:
-      return false;
+  } catch {
+    return false;
   }
 }

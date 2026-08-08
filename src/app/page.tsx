@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { generatePageMetadata } from '@/lib/metadata';
 import { getPublicProducts } from '@/services/products';
 import { getPublicMakers } from '@/services/makers';
@@ -8,6 +7,7 @@ import { ProductCard } from '@/components/cards/product-card';
 import { HeroCodeToggle } from '@/components/shared/hero-code-toggle';
 import { HeroSlideshow } from '@/components/shared/hero-slideshow';
 import { AnimatedStats } from '@/components/shared/animated-stats';
+import { SafeImage } from '@/components/ui/safe-image';
 
 export const metadata = generatePageMetadata({
   title: 'Solomon Islands Arts and Crafts',
@@ -28,73 +28,114 @@ export default async function HomePage() {
   const latestArticles = articles.slice(0, 3);
   const featuredMakers = makers.slice(0, 3);
 
-  // Slideshow images for hero
-  const heroSlides = [
-    { imageUrl: '/images/pandanus/shoulder bag natural dye.jpg', name: 'Shoulder Bag' },
-    { imageUrl: '/images/shell/intricate necklace modelled.jpg', name: 'Intricate Necklace' },
-    { imageUrl: '/images/wood/Bowl long Percy.jpg', name: 'Oval Bowl with Inlay' },
-    { imageUrl: '/images/pandanus/woven fans.jpg', name: 'Woven Fans' },
-    { imageUrl: '/images/bushtwine/tray small 40cm.jpg', name: 'Bush-Twine Tray' },
-  ];
+  // Hero gallery — show 3 products rotating. Prefer one per material category
+  // so the rotation shows the range of crafts. Products without images still
+  // appear with the placeholder.
+  const seenCategories = new Set<string>();
+  const heroProducts: (typeof products)[number][] = [];
+
+  // First pass: one product per category
+  for (const product of products) {
+    if (heroProducts.length >= 3) break;
+    if (!seenCategories.has(product.materialCategory)) {
+      seenCategories.add(product.materialCategory);
+      heroProducts.push(product);
+    }
+  }
+
+  // Second pass: fill remaining slots from any category
+  if (heroProducts.length < 3) {
+    for (const product of products) {
+      if (heroProducts.length >= 3) break;
+      if (!heroProducts.includes(product)) {
+        heroProducts.push(product);
+      }
+    }
+  }
+
+  const heroSlides = heroProducts.map((product) => {
+    const maker = makers.find((m) => m.id === product.makerId);
+    return {
+      imageUrl: product.imageUrls[0] ?? '',
+      name: product.name,
+      makerName: maker?.name,
+      place: maker ? `${maker.village}, ${maker.province}` : undefined,
+    };
+  });
 
   return (
     <div className="flex flex-col">
-      {/* Hero — Split layout: text left, image right */}
-      <section className="bg-sand-light">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center py-12 lg:py-20">
-            {/* Left: Text content */}
-            <div className="order-2 lg:order-1">
-              <h1 className="font-heading text-3xl sm:text-4xl lg:text-[2.75rem] xl:text-5xl font-bold text-deep-blue leading-tight uppercase tracking-wide">
-                Meet the Makers Behind<br className="hidden sm:block" /> Every Piece
-              </h1>
-              <p className="mt-4 text-base sm:text-lg text-warm-gray-600 leading-relaxed max-w-md">
-                Every product is handmade. When you buy from us, you invest directly in Solomon Islands artisans, their communities, their traditions, and their futures.
-              </p>
-              <div className="mt-6 flex flex-wrap items-center gap-3">
-                <Link
-                  href="/catalogue"
-                  className="tap-target inline-flex items-center px-6 py-3 bg-terracotta hover:bg-terracotta-dark text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
-                >
-                  Browse Catalogue
-                </Link>
-                <Link
-                  href="/about"
-                  className="tap-target inline-flex items-center px-6 py-3 border-2 border-warm-gray-800 text-warm-gray-800 hover:bg-warm-gray-800 hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
-                >
-                  Our Story
-                </Link>
-              </div>
-              <div className="mt-4">
-                <HeroCodeToggle />
-              </div>
-            </div>
+      {/* Hero + stats fill the first viewport on desktop, so nothing below
+          is visible until the user scrolls. Offset = header (80px) + flag divider (14px). */}
+      <div className="lg:flex lg:flex-col lg:min-h-[calc(100vh-94px)]">
+        {/* Hero — Flag theme: gold accent + serif heading + split layout */}
+        <section className="bg-page-bg lg:flex-1 lg:flex lg:items-center">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-10 items-center py-12 lg:py-10">
+              {/* Left: Text content */}
+              <div className="order-2 lg:order-1 lg:col-span-2">
+                {/* Gold accent line + subtitle */}
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="w-8 h-0.5 bg-ocean" aria-hidden="true" />
+                  <span className="text-xs font-bold uppercase tracking-widest text-ocean">
+                    Handmade in Solomon Islands
+                  </span>
+                </div>
 
-            {/* Right: Product slideshow */}
-            <div className="relative aspect-[4/3] overflow-hidden rounded-lg order-1 lg:order-2">
-              <HeroSlideshow items={heroSlides} interval={4000} />
+                <h1 className="font-heading text-[1.875rem] sm:text-4xl lg:text-[2.75rem] xl:text-5xl font-medium text-deep-blue leading-tight">
+                  Meet the Makers Behind Every Piece
+                </h1>
+
+                <p className="mt-5 text-base text-warm-gray-600 leading-relaxed max-w-md">
+                  Every product is handmade. When you buy from us, you invest directly in Solomon Islands artisans, their communities, their traditions, and their futures.
+                </p>
+
+                <div className="mt-7 flex flex-wrap items-center gap-3">
+                  <Link
+                    href="/catalogue"
+                    className="tap-target inline-flex items-center px-6 py-3 btn-primary"
+                  >
+                    Browse Catalogue
+                  </Link>
+                  <Link
+                    href="/about"
+                    className="tap-target inline-flex items-center px-6 py-3 border-2 border-deep-blue text-deep-blue hover:bg-deep-blue hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+                  >
+                    Our Story
+                  </Link>
+                </div>
+
+                <div className="mt-4">
+                  <HeroCodeToggle />
+                </div>
+              </div>
+
+              {/* Right: Hero gallery — coverflow carousel */}
+              <div className="order-1 lg:order-2 lg:col-span-3 w-full">
+                <HeroSlideshow items={heroSlides} interval={5000} />
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Stats bar — animated on scroll */}
-        <div className="bg-sand-light border-t border-sand">
+        {/* Stats strip */}
+        <section className="bg-white border-y border-sand lg:flex-shrink-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <AnimatedStats stats={[
+            <AnimatedStats variant="light" stats={[
               { value: 'EST. 2026', label: 'Volunteer-Run' },
               { value: String(makers.length), label: 'Solomon Islands Makers' },
               { value: '100% HANDMADE', label: 'In Solomon Islands' },
               { value: 'AVAILABLE IN', label: 'Australia' },
             ]} />
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
-      {/* Featured Makers — the emotional hook */}
-      <section className="py-10 md:py-20">
+      {/* Featured Makers */}
+      <section className="section-y">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="font-heading text-2xl md:text-3xl font-bold text-deep-blue">
+            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
               The people behind the pieces
             </h2>
             <p className="text-warm-gray-600 mt-2 max-w-lg mx-auto">
@@ -103,27 +144,23 @@ export default async function HomePage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredMakers.map((maker, index) => (
-              <Link key={maker.id} href={`/maker/${maker.slug}`} className={`group block ${index > 0 ? 'hidden sm:block' : ''} ${index > 1 ? 'sm:hidden lg:block' : ''}`}>
-                <div className="aspect-[4/5] relative overflow-hidden rounded-lg bg-sand-light">
-                  {maker.portraitUrl && (
-                    <Image
-                      src={maker.portraitUrl}
-                      alt={maker.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                  )}
-                  {/* Gradient overlay at bottom for text readability */}
-                  <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <h3 className="font-heading text-lg font-bold text-white">
-                      {maker.name}
-                    </h3>
-                    <p className="text-sm text-white/80">
-                      {maker.village}, {maker.province}
-                    </p>
-                  </div>
+              <Link key={maker.id} href={`/maker/${maker.slug}`} className={`group flex h-full flex-col rounded-lg overflow-hidden border border-sand hover:border-ocean/30 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ocean ${index === 1 ? 'hidden sm:flex lg:flex' : ''} ${index === 2 ? 'hidden lg:flex' : ''}`}>
+                <div className="aspect-[3/4] relative bg-sand-light overflow-hidden">
+                  <SafeImage
+                    src={maker.portraitUrl}
+                    alt={maker.name}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                </div>
+                <div className="flex flex-1 flex-col p-4 bg-warm-gray-100">
+                  <h3 className="font-heading text-sm font-semibold text-deep-blue group-hover:text-ocean transition-colors">
+                    {maker.name}
+                  </h3>
+                  <p className="text-xs text-warm-gray-600 mt-1">
+                    {maker.village}, {maker.province}
+                  </p>
                 </div>
               </Link>
             ))}
@@ -131,7 +168,7 @@ export default async function HomePage() {
           <div className="text-center mt-8">
             <Link
               href="/makers"
-              className="tap-target inline-flex items-center gap-2 px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+              className="tap-target inline-flex items-center gap-2 px-6 py-3 border-2 border-deep-blue text-deep-blue hover:bg-deep-blue hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
             >
               Meet all makers
             </Link>
@@ -140,11 +177,11 @@ export default async function HomePage() {
       </section>
 
       {/* Featured Products */}
-      <section className="py-10 md:py-20 bg-sand-light/50">
+      <section className="section-y bg-card-bg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between mb-8">
             <div>
-              <h2 className="font-heading text-2xl md:text-3xl font-bold text-deep-blue">
+              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
                 Featured Crafts
               </h2>
               <p className="text-warm-gray-600 mt-1">
@@ -178,23 +215,21 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Every tag tells a story — split image + text */}
-      <section className="py-10 md:py-20">
+      {/* Every tag tells a story */}
+      <section className="section-y">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-            <div className="hidden md:block relative aspect-[3/4] sm:aspect-[4/5] lg:aspect-[3/4] overflow-hidden rounded-lg bg-sand-light">
-              {featuredMakers[0]?.portraitUrl && (
-                <Image
-                  src={featuredMakers[0].portraitUrl}
-                  alt={featuredMakers[0].name}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
-              )}
+            <div className="hidden md:block relative aspect-[4/5] overflow-hidden rounded-lg bg-sand-light">
+              <SafeImage
+                src={featuredMakers[0]?.portraitUrl}
+                alt={featuredMakers[0]?.name || 'Maker'}
+                fill
+                className="object-contain p-4"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
             </div>
             <div className="max-w-md">
-              <h2 className="font-heading text-2xl md:text-3xl font-bold text-deep-blue mb-4">
+              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
                 Every tag tells a story
               </h2>
               <p className="text-warm-gray-600 leading-relaxed mb-4">
@@ -208,7 +243,7 @@ export default async function HomePage() {
               {sampleProductCode && (
                 <Link
                   href={`/piece/${sampleProductCode}`}
-                  className="tap-target inline-flex items-center gap-2 px-5 py-3 bg-ocean hover:bg-ocean-dark text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+                  className="tap-target inline-flex items-center gap-2 px-5 py-3 btn-primary"
                 >
                   See an example tag
                 </Link>
@@ -218,29 +253,19 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Wholesale CTA — with background image */}
-      <section className="relative py-12 md:py-20 overflow-hidden">
-        <div className="absolute inset-0">
-          <Image
-            src="/images/P4.png"
-            alt=""
-            fill
-            className="object-cover"
-            sizes="100vw"
-          />
-          <div className="absolute inset-0 bg-deep-blue/85" />
-        </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="font-heading text-2xl md:text-3xl font-bold text-white mb-3">
+      {/* Wholesale CTA */}
+      <section className="section-y bg-warm-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-3">
             Stock SI Crafts in your shop
           </h2>
-          <p className="text-white/70 leading-relaxed mb-6 max-w-xl mx-auto">
+          <p className="text-warm-gray-600 leading-relaxed mb-6 max-w-xl mx-auto">
             We supply museum shops and galleries in Australia with authentic
             Solomon Islands handicrafts at wholesale prices.
           </p>
           <Link
             href="/wholesale"
-            className="tap-target inline-flex items-center gap-2 px-8 py-4 bg-terracotta hover:bg-terracotta-dark text-white rounded-md font-medium text-lg transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
+            className="tap-target inline-flex items-center gap-2 px-8 py-4 btn-primary text-lg"
           >
             Learn about wholesale
           </Link>
@@ -249,10 +274,10 @@ export default async function HomePage() {
 
       {/* Latest News */}
       {latestArticles.length > 0 && (
-        <section className="py-10 md:py-20">
+        <section className="section-y">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-8">
-              <h2 className="font-heading text-2xl md:text-3xl font-bold text-deep-blue">
+              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
                 Latest news
               </h2>
               <Link
@@ -265,28 +290,29 @@ export default async function HomePage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {latestArticles.map((article) => (
                 <Link key={article.id} href={`/news/${article.slug}`} className="group block">
-                  {article.coverImageUrl && (
-                    <div className="aspect-[3/2] relative overflow-hidden rounded-lg bg-sand-light mb-3">
-                      <Image
-                        src={article.coverImageUrl}
-                        alt={article.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                      />
-                    </div>
-                  )}
+                  <div className="aspect-[3/2] relative overflow-hidden rounded-lg mb-3">
+                    <SafeImage
+                      src={article.coverImageUrl}
+                      alt={article.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                  </div>
                   <p className="text-xs text-warm-gray-400 mb-1">
                     {new Date(article.publishedAt || article.createdAt).toLocaleDateString('en-AU', {
                       day: 'numeric', month: 'long', year: 'numeric',
                     })}
                   </p>
-                  <h3 className="font-heading text-lg font-bold text-deep-blue group-hover:text-ocean transition-colors mb-1 line-clamp-2">
+                  <h3 className="font-heading text-lg font-semibold text-deep-blue group-hover:text-ocean transition-colors mb-1 line-clamp-2">
                     {article.title}
                   </h3>
-                  <p className="text-sm text-warm-gray-600 line-clamp-2 leading-relaxed">
+                  <p className="text-sm text-warm-gray-600 line-clamp-2 leading-relaxed mb-2">
                     {article.excerpt}
                   </p>
+                  <span className="text-sm font-medium text-ocean group-hover:text-ocean-dark transition-colors">
+                    Read more
+                  </span>
                 </Link>
               ))}
             </div>

@@ -1,4 +1,4 @@
-export type StockistStatus = 'pending' | 'approved' | 'rejected';
+export type StockistStatus = 'pending' | 'approved' | 'suspended' | 'rejected';
 
 export interface Stockist {
   id: string;

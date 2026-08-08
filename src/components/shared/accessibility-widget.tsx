@@ -99,6 +99,16 @@ export function AccessibilityWidget() {
     };
   }, []);
 
+  // Close panel on Escape key
+  useEffect(() => {
+    if (!open) return;
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [open]);
+
   function resetAll() {
     setFontSize(100);
     setHighContrast(false);
@@ -114,7 +124,7 @@ export function AccessibilityWidget() {
       {/* Floating button */}
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-ocean hover:bg-ocean-dark text-white rounded-full shadow-lg flex items-center justify-center transition-colors focus:outline-none focus:ring-4 focus:ring-ocean-light"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-terracotta hover:bg-terracotta-dark text-white rounded-full shadow-lg flex items-center justify-center transition-colors focus:outline-none focus:ring-4 focus:ring-terracotta-light"
         aria-label="Accessibility options"
         aria-expanded={open}
       >
@@ -133,7 +143,7 @@ export function AccessibilityWidget() {
           aria-label="Accessibility settings"
         >
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-heading text-lg font-bold text-deep-blue">Accessibility</h2>
+            <h2 className="font-heading text-lg font-medium text-deep-blue">Accessibility</h2>
             <button
               onClick={() => setOpen(false)}
               className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded-md"

@@ -15,7 +15,8 @@ export const mockArticles: Article[] = [
 <h2>What we brought back</h2>
 <p>We returned to Australia with 47 pieces — pandanus bags and purses, bush-twine trays, shell-money jewellery, and carved wooden bowls. Each one tagged with a product code linking to its maker's story on this website.</p>
 <p>This was just the beginning. We're already planning our next trip and exploring freight options so we can work with more makers throughout 2027.</p>`,
-    coverImageUrl: '/images/pandanus/Lancy holding pandans bag resized.jpg',
+    coverImageUrl: '',
+    coverImageAlt: 'Our first shopping trip to Honiara',
     authorName: 'Alison Wishart',
     authorRole: 'Founder',
     tags: ['Behind the scenes', 'Solomon Islands', 'Makers'],
@@ -39,7 +40,8 @@ export const mockArticles: Article[] = [
 <h2>Stringing</h2>
 <p>The finished discs are threaded onto nylon (traditionally bush twine) in patterns determined by the maker. A single-strand necklace might contain hundreds of individual discs, each one hand-processed.</p>
 <p>This is why shell-money jewellery carries the price it does. Every piece represents weeks of skilled, careful work.</p>`,
-    coverImageUrl: '/images/shell/necklaces chief.jpg',
+    coverImageUrl: '',
+    coverImageAlt: 'How shell-money jewellery is made',
     authorName: 'Alison Wishart',
     authorRole: 'Founder',
     tags: ['Craft process', 'Shell-money', 'Makers'],
@@ -62,7 +64,8 @@ export const mockArticles: Article[] = [
 <p>The initial range includes pandanus shoulder bags and clutch purses by Julie Mone, shell-money earrings and necklaces by Agnes Rini, and carved wooden bowls by Peter Kera. Each piece comes with a product tag linking to the maker's profile on our website.</p>
 <h2>Visit them</h2>
 <p>QAGOMA Store is open daily 10am–5pm at Stanley Place, South Brisbane. If you're in Brisbane, pop in and see the crafts in person — and scan a tag to meet the maker.</p>`,
-    coverImageUrl: '/images/pandanus/woven cross body bags colours.jpg',
+    coverImageUrl: '',
+    coverImageAlt: 'QAGOMA gallery shop partnership announcement',
     authorName: 'Alison Wishart',
     authorRole: 'Founder',
     tags: ['Stockists', 'Announcement', 'Brisbane'],
@@ -87,7 +90,8 @@ export const mockArticles: Article[] = [
 <p>Brush gently with a soft dry brush to remove dust. For marks, try a barely-damp cloth and blot dry immediately. Never soak, machine wash, or use chemical cleaners.</p>
 <h2>Sunlight</h2>
 <p>Prolonged direct sunlight can fade synthetic dyes over time. Natural (undyed) pandanus develops a beautiful golden patina with age — this is normal and desirable.</p>`,
-    coverImageUrl: '/images/pandanus/Pandanus tree.jpg',
+    coverImageUrl: '',
+    coverImageAlt: 'How to care for your pandanus piece',
     authorName: 'Alison Wishart',
     authorRole: 'Founder',
     tags: ['Care guide', 'Pandanus'],

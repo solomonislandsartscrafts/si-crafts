@@ -1,13 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import type { Product, MaterialCategory, ProductType, Maker, Craft } from '@/types';
 import { getAllMakers } from '@/services/makers';
 import { getAllCrafts } from '@/services/crafts';
 import { getAllProducts, validateProductCode } from '@/services/products';
-import { ImageUpload } from './image-upload';
+import { getMaterialCategories, getProductTypes, type MaterialCategoryOption, type ProductTypeOption } from '@/services/categories';
+import { MultiImageUpload } from './multi-image-upload';
 import { RichTextEditor } from './rich-text-editor';
+import { altTextError, htmlHasImageMissingAlt } from '@/lib/image-alt';
+import { scrollToFirstError } from '@/lib/scroll-to-error';
+import { useToast } from '@/components/ui/toast';
+import { useModalA11y } from '@/lib/use-modal-a11y';
 
 interface ProductFormModalProps {
   product: Product | null; // null = create mode
@@ -25,60 +30,33 @@ export interface ProductFormData {
   makerId: string;
   craftId: string;
   imageUrls: string[];
+  imageAlts: string[];
   dimensions: string;
   careNotes: string;
   wholesalePrice: number;
 }
 
-const MATERIAL_OPTIONS: { value: MaterialCategory; label: string }[] = [
-  { value: 'pandanus', label: 'Pandanus' },
-  { value: 'wood', label: 'Wood' },
-  { value: 'shells', label: 'Shells' },
-  { value: 'bush-twine', label: 'Bush-twine' },
-];
-
-const MATERIAL_INITIALS: Record<MaterialCategory, string> = {
-  pandanus: 'P',
-  wood: 'W',
-  shells: 'S',
-  'bush-twine': 'B',
-};
-
-const PRODUCT_TYPE_OPTIONS: { value: ProductType; label: string }[] = [
-  { value: 'bags', label: 'Bags' },
-  { value: 'purses', label: 'Purses' },
-  { value: 'jewellery', label: 'Jewellery' },
-  { value: 'trays', label: 'Trays' },
-  { value: 'fans', label: 'Fans' },
-  { value: 'bowls', label: 'Bowls' },
-  { value: 'ornaments', label: 'Ornaments' },
-  { value: 'carvings', label: 'Carvings' },
-  { value: 'baskets', label: 'Baskets' },
-  { value: 'brooches', label: 'Brooches' },
-  { value: 'kits', label: 'Kits' },
-];
-
 /**
  * Generate the next product code for a given material + maker combo.
- * Pattern: {P|W|S}-{MAKER_INITIAL}-{next_number}
+ * Pattern: {INITIAL}-{MAKER_INITIAL}-{next_number}
  */
 function generateNextCode(
   materialCategory: MaterialCategory,
   makerId: string,
   makers: Maker[],
-  existingProducts: Product[]
+  existingProducts: Product[],
+  materialCategories: MaterialCategoryOption[]
 ): string {
-  const materialInit = MATERIAL_INITIALS[materialCategory];
+  const cat = materialCategories.find((c) => c.value === materialCategory);
+  const materialInit = cat?.codeInitial ?? materialCategory[0]?.toUpperCase() ?? 'X';
   const maker = makers.find((m) => m.id === makerId);
   if (!maker) return '';
 
-  // Get maker initial(s) — first letter of surname (last word in name)
   const nameParts = maker.name.split(' ');
   const makerInit = nameParts[nameParts.length - 1][0].toUpperCase();
 
   const prefix = `${materialInit}-${makerInit}-`;
 
-  // Find highest existing number for this prefix
   const existingNumbers = existingProducts
     .filter((p) => p.productCode.startsWith(prefix))
     .map((p) => {
@@ -94,9 +72,14 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
   const [makers, setMakers] = useState<Maker[]>([]);
   const [crafts, setCrafts] = useState<Craft[]>([]);
   const [existingProducts, setExistingProducts] = useState<Product[]>([]);
+  const [materialCategories, setMaterialCategories] = useState<MaterialCategoryOption[]>([]);
+  const [productTypeOptions, setProductTypeOptions] = useState<ProductTypeOption[]>([]);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const formRef = useRef<HTMLFormElement>(null);
+  const { error: toastError } = useToast();
+  const modalRef = useModalA11y(true, onClose);
 
   const [form, setForm] = useState<ProductFormData>({
     productCode: product?.productCode ?? '',
@@ -108,6 +91,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
     makerId: product?.makerId ?? '',
     craftId: product?.craftId ?? '',
     imageUrls: product?.imageUrls ?? [],
+    imageAlts: product?.imageAlts ?? [],
     dimensions: product?.dimensions ?? '',
     careNotes: product?.careNotes ?? '',
     wholesalePrice: product?.wholesalePrice ?? 0,
@@ -115,12 +99,14 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
 
   useEffect(() => {
     let mounted = true;
-    Promise.all([getAllMakers(), getAllCrafts(), getAllProducts()])
-      .then(([makersData, craftsData, productsData]) => {
+    Promise.all([getAllMakers(), getAllCrafts(), getAllProducts(), getMaterialCategories(), getProductTypes()])
+      .then(([makersData, craftsData, productsData, matCats, prodTypes]) => {
         if (mounted) {
           setMakers(makersData);
           setCrafts(craftsData);
           setExistingProducts(productsData);
+          setMaterialCategories(matCats);
+          setProductTypeOptions(prodTypes);
         }
       })
       .catch((err) => {
@@ -131,13 +117,13 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
 
   // Auto-generate product code when material or maker changes (create mode only)
   useEffect(() => {
-    if (!product && form.makerId && form.materialCategory && makers.length > 0) {
-      const nextCode = generateNextCode(form.materialCategory, form.makerId, makers, existingProducts);
+    if (!product && form.makerId && form.materialCategory && makers.length > 0 && materialCategories.length > 0) {
+      const nextCode = generateNextCode(form.materialCategory, form.makerId, makers, existingProducts, materialCategories);
       if (nextCode) {
         setForm((prev) => ({ ...prev, productCode: nextCode }));
       }
     }
-  }, [form.materialCategory, form.makerId, makers, existingProducts, product]);
+  }, [form.materialCategory, form.makerId, makers, existingProducts, product, materialCategories]);
 
   // Auto-generate slug from name
   useEffect(() => {
@@ -175,13 +161,25 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
     if (!form.makerId) errs.makerId = 'Maker is required';
     if (!form.craftId) errs.craftId = 'Craft is required';
     if (form.wholesalePrice <= 0) errs.wholesalePrice = 'Price must be greater than 0';
+
+    // Every photo must have alt text before anything is saved.
+    const altError = altTextError(form.imageUrls, form.imageAlts);
+    if (altError) errs.imageAlts = altError;
+    if (htmlHasImageMissingAlt(form.careNotes)) {
+      errs.careNotes = 'An image in Care Notes has no alt text. Remove it or re-insert it with a description.';
+    }
+
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validate()) {
+      toastError('Please fix the highlighted fields before saving.');
+      scrollToFirstError(formRef.current);
+      return;
+    }
     setSaving(true);
     setSaveError(null);
     try {
@@ -211,6 +209,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50" onClick={handleDismiss}>
       <div
+        ref={modalRef}
         className="bg-white rounded-lg shadow-md w-full max-w-2xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
@@ -219,7 +218,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-sand">
-          <h2 id="product-form-title" className="font-heading text-xl font-bold text-deep-blue">
+          <h2 id="product-form-title" className="font-heading text-xl font-medium text-deep-blue">
             {product ? 'Edit Product' : 'Add Product'}
           </h2>
           <button
@@ -233,7 +232,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
           {/* Save error banner */}
           {saveError && (
             <div className="bg-error/10 border border-error/20 text-error text-sm rounded-md p-3" role="alert" aria-live="assertive">
@@ -253,7 +252,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
                 onChange={(e) => handleChange('materialCategory', e.target.value)}
                 className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
               >
-                {MATERIAL_OPTIONS.map((opt) => (
+                {materialCategories.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
@@ -345,7 +344,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
                 onChange={(e) => handleChange('productType', e.target.value)}
                 className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
               >
-                {PRODUCT_TYPE_OPTIONS.map((opt) => (
+                {productTypeOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
@@ -404,26 +403,34 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
           </div>
 
           {/* Care Notes — rich text */}
-          <RichTextEditor
-            value={form.careNotes}
-            onChange={(html) => handleChange('careNotes', html)}
-            label="Care Notes"
-            placeholder="How should the owner care for this piece?"
-            minRows={5}
-          />
+          <div>
+            <RichTextEditor
+              value={form.careNotes}
+              onChange={(html) => handleChange('careNotes', html)}
+              label="Care Notes"
+              placeholder="How should the owner care for this piece?"
+              minRows={5}
+            />
+            {errors.careNotes && (
+              <p className="text-sm text-error mt-1" aria-live="assertive">{errors.careNotes}</p>
+            )}
+          </div>
 
-          {/* Product Image */}
-          <ImageUpload
-            value={form.imageUrls[0] ?? ''}
-            onChange={(url) => {
-              const rest = form.imageUrls.slice(1);
-              handleChange('imageUrls', url ? [url, ...rest] : rest);
-            }}
-            label="Product Photo"
-            aspectHint="1:1 square"
-            maxWidth={1200}
-            quality={0.8}
-          />
+          {/* Product Images — multi-image gallery */}
+          <div>
+            <MultiImageUpload
+              value={form.imageUrls}
+              onChange={(urls) => handleChange('imageUrls', urls)}
+              altTexts={form.imageAlts}
+              onAltTextsChange={(alts) => handleChange('imageAlts', alts)}
+              label="Product Photos"
+              maxWidth={1200}
+              quality={0.8}
+            />
+            {errors.imageAlts && (
+              <p className="text-sm text-error mt-1" aria-live="assertive">{errors.imageAlts}</p>
+            )}
+          </div>
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
@@ -438,7 +445,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
             <button
               type="submit"
               disabled={saving}
-              className="tap-target px-6 py-3 bg-terracotta hover:bg-terracotta-dark text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light disabled:opacity-50"
+              className="tap-target px-6 py-3 btn-primary"
             >
               {saving ? 'Saving...' : product ? 'Update Product' : 'Create Product'}
             </button>
