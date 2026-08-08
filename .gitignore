@@ -27,7 +27,11 @@ yarn-error.log*
 # env files
 .env
 .env*.local
+.dev.vars
 backend/.env
+
+# OpenNext / Cloudflare build output
+.open-next
 
 # backend
 backend/db.sqlite3
