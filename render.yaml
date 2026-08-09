@@ -34,6 +34,8 @@ services:
         value: "https://solomonislandsartsandcrafts.pages.dev"
       - key: PYTHON_VERSION
         value: "3.12.2"
+      - key: WAGTAILADMIN_BASE_URL
+        value: "https://si-crafts.onrender.com"
       - key: EMAIL_BACKEND
         value: "django.core.mail.backends.smtp.EmailBackend"
       - key: EMAIL_HOST
@@ -45,4 +47,10 @@ services:
       - key: EMAIL_HOST_USER
         sync: false
       - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DJANGO_SUPERUSER_USERNAME
+        value: "admin"
+      - key: DJANGO_SUPERUSER_EMAIL
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
         sync: false

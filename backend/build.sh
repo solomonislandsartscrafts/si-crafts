@@ -7,3 +7,8 @@ pip install -r requirements.txt
 
 python manage.py collectstatic --noinput
 python manage.py migrate
+
+# Create superuser if none exists (uses env vars DJANGO_SUPERUSER_*)
+if [ -n "$DJANGO_SUPERUSER_EMAIL" ]; then
+  python manage.py createsuperuser --noinput || true
+fi
