@@ -9,7 +9,7 @@ databases:
 
 services:
   - type: web
-    name: siac-backend
+    name: si-crafts
     runtime: python
     plan: free
     rootDir: backend

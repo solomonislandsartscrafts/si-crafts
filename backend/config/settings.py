@@ -90,7 +90,10 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database — defaults to SQLite for local dev, use DATABASE_URL for production
 DATABASES = {
     "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+        conn_health_checks=True,
+        ssl_require=not DEBUG,
     )
 }
 
