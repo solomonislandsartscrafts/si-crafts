@@ -9,15 +9,14 @@ databases:
 
 services:
   - type: web
-    name: siac-backend
+    name: si-crafts
     runtime: python
     plan: free
     rootDir: backend
     buildCommand: ./build.sh
     startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
-      - key: postgresql://siac:somepassword@dpg-dpg-d9rbvcon74is73eg62e0-a.singapore-postgres.render.com/siac
-
+      - key: DATABASE_URL
         fromDatabase:
           name: siac-db
           property: connectionString
