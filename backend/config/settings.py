@@ -196,7 +196,8 @@ if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = "DENY"
-    # CSRF_TRUSTED_ORIGINS must include both the frontend AND the backend's own domain
-    CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS + [
-        os.environ.get("WAGTAILADMIN_BASE_URL", "https://si-crafts.onrender.com"),
-    ]
+    # CSRF_TRUSTED_ORIGINS — must include the backend's own domain for admin access
+    CSRF_TRUSTED_ORIGINS = os.environ.get(
+        "CSRF_TRUSTED_ORIGINS",
+        "https://si-crafts.onrender.com,https://solomonislandsartsandcrafts.pages.dev"
+    ).split(",")
