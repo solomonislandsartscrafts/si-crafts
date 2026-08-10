@@ -199,5 +199,5 @@ if not DEBUG:
     # CSRF_TRUSTED_ORIGINS — must include the backend's own domain for admin access
     CSRF_TRUSTED_ORIGINS = os.environ.get(
         "CSRF_TRUSTED_ORIGINS",
-        "https://si-crafts.onrender.com,https://solomonislandsartsandcrafts.pages.dev"
+        "https://si-crafts.onrender.com,https://si-crafts.isaactekulu.workers.dev"
     ).split(",")
