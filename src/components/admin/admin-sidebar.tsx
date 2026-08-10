@@ -22,18 +22,21 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['super_admin', 'editor'] },
-  { href: '/admin/inbox', label: 'Inbox', icon: Inbox, roles: ['super_admin', 'editor'] },
-  { href: '/admin/news', label: 'News', icon: Newspaper, roles: ['super_admin', 'editor'] },
+  // Content creation flow (top-to-bottom dependency order)
+  { href: '/admin/categories', label: 'Categories', icon: Tags, roles: ['super_admin', 'editor'] },
+  { href: '/admin/crafts', label: 'Crafts', icon: Palette, roles: ['super_admin', 'editor'] },
   { href: '/admin/makers', label: 'Makers', icon: Users, roles: ['super_admin', 'editor'] },
   { href: '/admin/products', label: 'Products', icon: Package, roles: ['super_admin', 'editor'] },
-  { href: '/admin/crafts', label: 'Crafts', icon: Palette, roles: ['super_admin', 'editor'] },
-  { href: '/admin/stockists', label: 'Stockists', icon: Store, roles: ['super_admin', 'editor'] },
+  // Operations & sales
+  { href: '/admin/stockists', label: 'Stockists', icon: Store, roles: ['super_admin', 'editor'], divider: true },
   { href: '/admin/orders', label: 'Orders', icon: ClipboardList, roles: ['super_admin', 'editor'] },
-  { href: '/admin/site-content', label: 'Site Content', icon: ImageIcon, roles: ['super_admin', 'editor'] },
-  { href: '/admin/categories', label: 'Categories', icon: Tags, roles: ['super_admin', 'editor'] },
-  { href: '/admin/admins', label: 'Admin Users', icon: Shield, roles: ['super_admin'] },
-  // Help sits apart from the content sections
-  { href: '/admin/getting-started', label: 'Getting Started', icon: BookOpen, roles: ['super_admin', 'editor'], divider: true },
+  // Content & comms
+  { href: '/admin/site-content', label: 'Site Content', icon: ImageIcon, roles: ['super_admin', 'editor'], divider: true },
+  { href: '/admin/news', label: 'News', icon: Newspaper, roles: ['super_admin', 'editor'] },
+  { href: '/admin/inbox', label: 'Inbox', icon: Inbox, roles: ['super_admin', 'editor'] },
+  // Admin
+  { href: '/admin/admins', label: 'Admin Users', icon: Shield, roles: ['super_admin'], divider: true },
+  { href: '/admin/getting-started', label: 'Getting Started', icon: BookOpen, roles: ['super_admin', 'editor'] },
 ];
 
 export function AdminSidebar({ role, adminName, onLogout }: AdminSidebarProps) {
