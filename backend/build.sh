@@ -15,6 +15,7 @@ fi
 
 # One-time data import from local SQLite dump (remove after successful deploy)
 if [ -f data_dump.json ]; then
-  echo "Loading data from data_dump.json..."
-  python manage.py loaddata data_dump.json || echo "Warning: loaddata failed, continuing..."
+  echo "==> Loading data from data_dump.json..."
+  python manage.py loaddata data_dump.json
+  echo "==> Data loaded successfully!"
 fi
