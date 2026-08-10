@@ -73,4 +73,8 @@ class ImageUploadView(APIView):
                 f.write(chunk)
 
         url = f"{settings.MEDIA_URL}uploads/{filename}"
+        # In production, return an absolute URL so the frontend can reference it
+        base_url = os.environ.get("WAGTAILADMIN_BASE_URL", "").rstrip("/")
+        if base_url:
+            url = f"{base_url}{url}"
         return Response({"url": url})
