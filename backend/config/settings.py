@@ -156,9 +156,11 @@ SIMPLE_JWT = {
 }
 
 # CORS
-CORS_ALLOWED_ORIGINS = os.environ.get(
-    "CORS_ALLOWED_ORIGINS", "http://localhost:3000"
-).split(",")
+CORS_ALLOWED_ORIGINS = [
+    origin.strip().rstrip("/")
+    for origin in os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+    if origin.strip()
+]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
     "accept",
@@ -197,7 +199,11 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = "DENY"
     # CSRF_TRUSTED_ORIGINS — must include the backend's own domain for admin access
-    CSRF_TRUSTED_ORIGINS = os.environ.get(
-        "CSRF_TRUSTED_ORIGINS",
-        "https://si-crafts.onrender.com,https://si-crafts.isaactekulu.workers.dev"
-    ).split(",")
+    CSRF_TRUSTED_ORIGINS = [
+        origin.strip().rstrip("/")
+        for origin in os.environ.get(
+            "CSRF_TRUSTED_ORIGINS",
+            "https://si-crafts.onrender.com,https://si-crafts.isaactekulu.workers.dev"
+        ).split(",")
+        if origin.strip()
+    ]
