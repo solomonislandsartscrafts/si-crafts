@@ -39,11 +39,18 @@ class AdminLoginView(APIView):
             profile = user.admin_profile
         except AdminProfile.DoesNotExist:
             if user.is_superuser:
-                profile = AdminProfile.objects.create(user=user, role="super_admin")
+                try:
+                    profile = AdminProfile.objects.create(user=user, role="super_admin")
+                except Exception:
+                    import logging
+                    logging.getLogger(__name__).exception("Failed to create AdminProfile for superuser %s", user.pk)
+                    return Response({"error": "Login failed. Please try again later."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             else:
                 return Response({"error": "Not an admin user"}, status=status.HTTP_401_UNAUTHORIZED)
-        except Exception as e:
-            return Response({"error": f"Profile error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception:
+            import logging
+            logging.getLogger(__name__).exception("Unexpected error retrieving admin profile for user %s", user.pk)
+            return Response({"error": "Login failed. Please try again later."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Check lockout
         if profile.is_locked:
