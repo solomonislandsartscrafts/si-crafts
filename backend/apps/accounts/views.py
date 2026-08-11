@@ -19,6 +19,15 @@ class AdminLoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+        # TEMP DEBUG: wrap everything to capture the real traceback in the response.
+        # Remove this wrapper once the root cause is found.
+        try:
+            return self._post(request)
+        except Exception:
+            import traceback
+            return Response({"error": "debug", "trace": traceback.format_exc()}, status=500)
+
+    def _post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
