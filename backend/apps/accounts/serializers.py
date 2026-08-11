@@ -16,7 +16,7 @@ class AdminProfileSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    email = serializers.CharField()  # Accept email or username
     password = serializers.CharField(write_only=True)
 
 

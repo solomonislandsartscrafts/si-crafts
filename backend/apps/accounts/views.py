@@ -42,6 +42,8 @@ class AdminLoginView(APIView):
                 profile = AdminProfile.objects.create(user=user, role="super_admin")
             else:
                 return Response({"error": "Not an admin user"}, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            return Response({"error": f"Profile error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Check lockout
         if profile.is_locked:
