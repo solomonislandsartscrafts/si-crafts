@@ -8,6 +8,21 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.WAGTAIL_API_URL |
 /** True when no real backend URL is configured */
 const isBackendConfigured = API_URL.length > 0 && !API_URL.includes('localhost');
 
+/**
+ * Resolve an image URL. If it's a relative path (e.g. /uploads/... or /media/...),
+ * prefix it with the backend API URL so it loads from Render.
+ */
+export function resolveImageUrl(url: string | null | undefined): string {
+  if (!url) return '';
+  // Already absolute
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  // Relative path — prefix with backend URL
+  if (API_URL && (url.startsWith('/uploads/') || url.startsWith('/media/'))) {
+    return `${API_URL}${url.startsWith('/media/') ? url : `/media${url}`}`;
+  }
+  return url;
+}
+
 export class ApiError extends Error {
   status: number;
   constructor(message: string, status: number) {

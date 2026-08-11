@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { Upload, X, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { compressImage } from '@/lib/compress-image';
+import { resolveImageUrl } from '@/lib/api-client';
 
 interface ImageUploadProps {
   value: string; // current image URL/path
@@ -100,7 +101,7 @@ export function ImageUpload({
         <div className="relative inline-block">
           <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-sand bg-sand-light">
             <Image
-              src={value}
+              src={resolveImageUrl(value)}
               alt={altText || 'Uploaded preview'}
               fill
               className="object-cover"

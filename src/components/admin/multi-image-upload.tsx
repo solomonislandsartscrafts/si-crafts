@@ -5,6 +5,7 @@ import { Upload, X, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { compressImage } from '@/lib/compress-image';
 import { missingAltIndexes } from '@/lib/image-alt';
+import { resolveImageUrl } from '@/lib/api-client';
 
 const MAX_IMAGES = 6;
 
@@ -60,7 +61,9 @@ export function MultiImageUpload({
       formData.append('file', compressed, filename);
 
       const token = localStorage.getItem('admin_session') ?? '';
-      const res = await fetch('/api/upload', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const uploadEndpoint = apiUrl ? `${apiUrl}/api/upload/` : '/api/upload';
+      const res = await fetch(uploadEndpoint, {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
@@ -134,7 +137,7 @@ export function MultiImageUpload({
           <div key={`${url}-${index}`} className="relative group">
             <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-sand bg-sand-light">
               <Image
-                src={url}
+                src={resolveImageUrl(url)}
                 alt={`Product image ${index + 1}`}
                 fill
                 className="object-cover"
