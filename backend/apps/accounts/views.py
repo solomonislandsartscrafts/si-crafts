@@ -19,29 +19,22 @@ class AdminLoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        # TEMP DEBUG: wrap everything to capture the real traceback in the response.
-        # Remove this wrapper once the root cause is found.
-        try:
-            return self._post(request)
-        except Exception:
-            import traceback
-            return Response({"error": "debug", "trace": traceback.format_exc()}, status=500)
-
-    def _post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         email = serializer.validated_data["email"]
         password = serializer.validated_data["password"]
 
-        # Find user by email OR username (Django superuser may use email as username)
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            try:
-                user = User.objects.get(username=email)
-            except User.DoesNotExist:
-                return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        # Find user by email OR username. Use filter() instead of get() since
+        # duplicate emails can exist (e.g. legacy data + superuser bootstrap) —
+        # prefer an active superuser match, then fall back to the most recent match.
+        user = (
+            User.objects.filter(email=email, is_superuser=True).order_by("-id").first()
+            or User.objects.filter(email=email).order_by("-id").first()
+            or User.objects.filter(username=email).order_by("-id").first()
+        )
+        if user is None:
+            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
         # Check admin profile exists — auto-create for superusers
         try:
