@@ -5,7 +5,7 @@
  * "you are offline" fallback page when the network is unavailable.
  */
 
-const CACHE_NAME = 'si-crafts-v1';
+const CACHE_NAME = 'si-crafts-v2';
 const OFFLINE_URL = '/offline.html';
 
 // Assets to pre-cache for the offline shell
@@ -40,16 +40,32 @@ self.addEventListener('activate', (event) => {
 
 // Fetch: serve from network first, fall back to offline page for navigation requests
 self.addEventListener('fetch', (event) => {
+  const { request } = event;
+
+  // Never intercept non-GET requests (POST/PUT/PATCH/DELETE) — API calls like
+  // login, uploads, and form submissions must always go straight to the
+  // network. The Cache API only supports GET, so attempting to fall back to
+  // cache for other methods returns undefined and breaks the request.
+  if (request.method !== 'GET') {
+    return;
+  }
+
   // Only handle navigation requests (page loads)
-  if (event.request.mode === 'navigate') {
+  if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match(OFFLINE_URL))
+      fetch(request).catch(() => caches.match(OFFLINE_URL))
     );
     return;
   }
 
-  // For other requests, try network first then cache
+  // Never intercept API calls — always hit the network directly so errors
+  // surface normally instead of being masked by a cache-fallback attempt.
+  if (request.url.includes('/api/')) {
+    return;
+  }
+
+  // For other GET requests, try network first then cache
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    fetch(request).catch(() => caches.match(request))
   );
 });
