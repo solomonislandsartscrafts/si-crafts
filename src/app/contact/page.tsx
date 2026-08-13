@@ -38,9 +38,14 @@ export default function ContactPage() {
     if (Object.keys(newErrors).length > 0) return;
 
     setSubmitting(true);
-    await submitContactEnquiry(form);
-    setSubmitting(false);
-    setSubmitted(true);
+    try {
+      await submitContactEnquiry(form);
+      setSubmitted(true);
+    } catch (err) {
+      setErrors({ form: err instanceof Error ? err.message : 'Something went wrong. Please try again.' });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (submitted) {
@@ -71,6 +76,11 @@ export default function ContactPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16 grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-12">
         {/* Contact Form */}
         <form onSubmit={handleSubmit} noValidate className="space-y-6">
+          {errors.form && (
+            <div className="bg-error/10 border border-error/20 text-error text-sm rounded-md p-3" role="alert" aria-live="assertive">
+              {errors.form}
+            </div>
+          )}
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-warm-gray-800 mb-1">
               Name

@@ -47,6 +47,7 @@ class ContactEnquiry(models.Model):
     REASON_CHOICES = [
         ("general", "General"),
         ("wholesale", "Wholesale"),
+        ("custom-order", "Custom or bulk order"),
         ("media", "Media"),
         ("other", "Other"),
     ]

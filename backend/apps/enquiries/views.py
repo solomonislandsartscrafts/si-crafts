@@ -65,14 +65,18 @@ class ContactEnquiryViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         enquiry = serializer.save()
-        # Notify admins
-        from apps.notifications.emails import notify_contact_form
-        notify_contact_form(
-            name=enquiry.name,
-            email=enquiry.email,
-            reason=enquiry.get_reason_display(),
-            message=enquiry.message,
-        )
+        # Notify admins — don't let email failure break the form submission
+        try:
+            from apps.notifications.emails import notify_contact_form
+            notify_contact_form(
+                name=enquiry.name,
+                email=enquiry.email,
+                reason=enquiry.get_reason_display(),
+                message=enquiry.message,
+            )
+        except Exception:
+            import logging
+            logging.getLogger(__name__).exception("Failed to send contact form notification email")
 
     @action(detail=True, methods=["post"])
     def handled(self, request, pk=None):

@@ -133,21 +133,23 @@ class StockistApplyView(viewsets.GenericViewSet):
         serializer.is_valid(raise_exception=True)
         stockist = serializer.save(status="pending")
 
-        # Notify admins of new application
-        from apps.notifications.emails import notify_stockist_application, confirm_stockist_application
-        notify_stockist_application(
-            business_name=stockist.business_name,
-            contact_name=stockist.contact_name,
-            email=stockist.email,
-            description=stockist.description,
-        )
-
-        # Send confirmation email to the applicant
-        confirm_stockist_application(
-            stockist_email=stockist.email,
-            business_name=stockist.business_name,
-            contact_name=stockist.contact_name,
-        )
+        # Notify admins and applicant — don't let email failure break the submission
+        try:
+            from apps.notifications.emails import notify_stockist_application, confirm_stockist_application
+            notify_stockist_application(
+                business_name=stockist.business_name,
+                contact_name=stockist.contact_name,
+                email=stockist.email,
+                description=stockist.description,
+            )
+            confirm_stockist_application(
+                stockist_email=stockist.email,
+                business_name=stockist.business_name,
+                contact_name=stockist.contact_name,
+            )
+        except Exception:
+            import logging
+            logging.getLogger(__name__).exception("Failed to send stockist application emails")
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
