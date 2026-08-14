@@ -6,6 +6,7 @@ import { Mail, Send } from 'lucide-react';
 import { submitContactEnquiry } from '@/services/enquiries';
 import type { ContactReason } from '@/types';
 import { PageHeader } from '@/components/layout/page-header';
+import { Select } from '@/components/ui/select';
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -138,18 +139,21 @@ export default function ContactPage() {
             <label htmlFor="reason" className="block text-sm font-medium text-warm-gray-800 mb-1">
               Reason for contact
             </label>
-            <select
+            <Select
               id="reason"
               value={form.reason}
-              onChange={(e) => setForm({ ...form, reason: e.target.value as ContactReason })}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-            >
-              <option value="general">General enquiry</option>
-              <option value="wholesale">Wholesale enquiry</option>
-              <option value="custom-order">Custom or bulk order</option>
-              <option value="media">Media &amp; press</option>
-              <option value="other">Other</option>
-            </select>
+              onChange={(val) => setForm({ ...form, reason: (val || 'general') as ContactReason })}
+              options={[
+                { value: 'general', label: 'General enquiry' },
+                { value: 'wholesale', label: 'Wholesale enquiry' },
+                { value: 'custom-order', label: 'Custom or bulk order' },
+                { value: 'media', label: 'Media & press' },
+                { value: 'other', label: 'Other' },
+              ]}
+              placeholder="Select a reason"
+              label="Reason for contact"
+              className="w-full"
+            />
           </div>
 
           <div>

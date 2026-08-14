@@ -26,21 +26,21 @@ export function ProductCard({ product, makerName, showPrice = false }: ProductCa
         />
       </div>
 
-      {/* Info area — grey background */}
-      <div className="flex flex-1 flex-col p-4 bg-warm-gray-100">
-        <h3 className="font-heading text-sm font-semibold text-deep-blue group-hover:text-ocean transition-colors line-clamp-2">
+      {/* Info area — deep blue caption like gallery cards */}
+      <div className="flex flex-1 flex-col p-4 bg-deep-blue">
+        <h3 className="font-heading text-sm font-semibold text-white group-hover:text-white/80 transition-colors line-clamp-2">
           {product.name}
         </h3>
-        <div className="flex items-center gap-2 mt-1 text-xs text-warm-gray-600">
+        <div className="flex items-center gap-2 mt-1 text-xs text-white/70">
           <span className="capitalize">{product.materialCategory}</span>
           <span>·</span>
           <span className="capitalize">{product.productType}</span>
         </div>
         {makerName && (
-          <p className="text-xs text-ocean mt-1">by {makerName}</p>
+          <p className="text-xs text-white/80 mt-1">by {makerName}</p>
         )}
         {showPrice && (
-          <p className="text-sm font-semibold text-deep-blue mt-auto pt-2">
+          <p className="text-sm font-semibold text-white mt-auto pt-2">
             {formatPrice(product.wholesalePrice)}
           </p>
         )}

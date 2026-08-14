@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import type { OrderRequest } from '@/types';
 import { AdminLayout } from '@/components/admin';
+import { Select } from '@/components/ui/select';
 
 const STATUS_STYLES: Record<string, string> = {
   Submitted: 'bg-ocean/10 text-ocean',
@@ -58,12 +59,17 @@ export default function AdminOrdersPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <select value={order.status} onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                      className="text-xs border border-sand-dark rounded px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-ocean">
-                      <option value="Submitted">Submitted</option>
-                      <option value="Confirmed">Confirmed</option>
-                      <option value="Shipped">Shipped</option>
-                    </select>
+                    <Select
+                      value={order.status}
+                      onChange={(val) => handleStatusChange(order.id, val || 'Submitted')}
+                      options={[
+                        { value: 'Submitted', label: 'Submitted' },
+                        { value: 'Confirmed', label: 'Confirmed' },
+                        { value: 'Shipped', label: 'Shipped' },
+                      ]}
+                      placeholder="Status"
+                      label={`Order ${order.id} status`}
+                    />
                   </td>
                 </tr>
               ))}

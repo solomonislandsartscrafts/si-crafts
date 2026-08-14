@@ -8,6 +8,7 @@ import { ProductFormModal, type ProductFormData } from '@/components/admin/produ
 import type { MaterialCategoryOption, ProductTypeOption } from '@/services/categories';
 import { SafeImage } from '@/components/ui/safe-image';
 import { useToast } from '@/components/ui/toast';
+import { Select } from '@/components/ui/select';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -142,28 +143,24 @@ export default function AdminProductsPage() {
         </div>
 
         {/* Material category filter */}
-        <select
-          value={selectedMaterial}
-          onChange={(e) => setSelectedMaterial(e.target.value)}
-          className="px-3 py-2 text-sm rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean"
-        >
-          <option value="">All materials</option>
-          {materialOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
+        <Select
+          id="admin-material-filter"
+          value={selectedMaterial || null}
+          onChange={(val) => setSelectedMaterial(val || '')}
+          options={materialOptions.map((opt) => ({ value: opt.value, label: opt.label }))}
+          placeholder="All materials"
+          label="Filter by material category"
+        />
 
         {/* Product type filter */}
-        <select
-          value={selectedType}
-          onChange={(e) => setSelectedType(e.target.value)}
-          className="px-3 py-2 text-sm rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean"
-        >
-          <option value="">All types</option>
-          {typeOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
+        <Select
+          id="admin-type-filter"
+          value={selectedType || null}
+          onChange={(val) => setSelectedType(val || '')}
+          options={typeOptions.map((opt) => ({ value: opt.value, label: opt.label }))}
+          placeholder="All types"
+          label="Filter by product type"
+        />
 
         {/* Results count */}
         <span className="text-xs text-warm-gray-400">

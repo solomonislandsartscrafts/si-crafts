@@ -4,6 +4,7 @@ import { getAllProducts, getProductByCode } from '@/services/products';
 import { getMakerById } from '@/services/makers';
 import { getCraftById } from '@/services/crafts';
 import { PiecePageClient } from './piece-page-client';
+import { BackButton } from '@/components/shared/back-button';
 
 export async function generateStaticParams() {
   const products = await getAllProducts();
@@ -57,13 +58,7 @@ export default async function PiecePage({ params }: PiecePageProps) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
       {/* Navigation */}
       <div className="flex items-center justify-between mb-8">
-        <Link
-          href="/catalogue"
-          className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to catalogue
-        </Link>
+        <BackButton fallback="/catalogue" label="Back" />
         <div className="flex items-center gap-4">
           {prevProduct && (
             <Link

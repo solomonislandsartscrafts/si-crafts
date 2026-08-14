@@ -8,6 +8,7 @@ import { getMaterialCategories, type MaterialCategoryOption } from '@/services/c
 import { singleAltError } from '@/lib/image-alt';
 import { scrollToFirstError } from '@/lib/scroll-to-error';
 import { useToast } from '@/components/ui/toast';
+import { Select } from '@/components/ui/select';
 import { useModalA11y } from '@/lib/use-modal-a11y';interface CraftFormModalProps {
   craft: Craft | null; // null = create mode
   onClose: () => void;
@@ -167,16 +168,15 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
             <label htmlFor="craft-material" className="block text-sm font-medium text-warm-gray-800 mb-1">
               Material Category *
             </label>
-            <select
+            <Select
               id="craft-material"
-              value={form.materialCategory}
-              onChange={(e) => handleChange('materialCategory', e.target.value)}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-            >
-              {materialOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
+              value={form.materialCategory || null}
+              onChange={(val) => handleChange('materialCategory', val || '')}
+              options={materialOptions.map((opt) => ({ value: opt.value, label: opt.label }))}
+              placeholder="Select material..."
+              label="Material category"
+              className="w-full"
+            />
           </div>
 
           {/* Description */}

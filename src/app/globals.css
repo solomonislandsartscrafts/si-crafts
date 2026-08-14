@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   COLOR ACCESSIBILITY RULES (WCAG 2.1 AA minimum)
+   ============================================================================
+   1. ocean-light (#3D7AC4) — 4.4:1 on white, FAILS AA for normal text.
+      Use only for: large text (24px+/18px bold), icons, borders, focus offsets.
+   2. brand-green-light (#28994D) — 3.65:1 white-on-green, FAILS AA for text.
+      NEVER use as solid fill behind white text. Safe for: outlines, focus rings.
+   3. accent-gold — white text on ANY gold shade fails (1.8–2.6:1).
+      ALWAYS pair gold backgrounds with dark text (deep-blue or warm-gray-800).
+   4. warning (#F4B728) is background-only. For warning text, use warning-text.
+   5. footer-bg (#1B3A4B) requires explicit white/light text — never inherit
+      the default body color (warm-gray-800).
+   6. warm-gray-100/200 are surface colors, not text colors.
+   ========================================================================== */
+
 @layer base {
   :root {
     --page-bg: #FFFFFF;
@@ -14,7 +29,7 @@
   }
 
   body {
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     background-color: var(--page-bg);
     color: #3D362E;
     font-size: 1.125rem;
@@ -22,7 +37,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
     line-height: 1.2;
     letter-spacing: -0.01em;
     color: #1B3A4B;
@@ -240,7 +255,154 @@
     outline: 3px solid #3D7AC4;
     outline-offset: 2px;
   }
+
+  .btn-admin:disabled,
+  .btn-admin[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Secondary — ocean outline. Subtle hover (darken border/text 10%),
+     NOT a fill-swap. Keeps visual hierarchy below primary. */
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.6875rem 1.25rem;
+    background-color: transparent;
+    color: #1E5AA8;
+    font-weight: 500;
+    border-radius: 8px;
+    border: 2px solid #1E5AA8;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+
+  @media (min-width: 640px) {
+    .btn-secondary {
+      padding: 0.75rem 1.5rem;
+    }
+  }
+
+  .btn-secondary:hover {
+    background-color: rgba(30, 90, 168, 0.06);
+    border-color: #154A8C;
+    color: #154A8C;
+  }
+
+  .btn-secondary:active {
+    background-color: rgba(30, 90, 168, 0.12);
+  }
+
+  .btn-secondary:focus-visible {
+    outline: 3px solid #3D7AC4;
+    outline-offset: 2px;
+  }
+
+  .btn-secondary:disabled,
+  .btn-secondary[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Danger — red fill for destructive actions (delete, remove).
+     Should always be paired with a confirmation dialog. */
+  .btn-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.6875rem 1.25rem;
+    background-color: #C0392B;
+    color: #FFFFFF;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+  }
+
+  @media (min-width: 640px) {
+    .btn-danger {
+      padding: 0.75rem 1.5rem;
+    }
+  }
+
+  .btn-danger:hover {
+    background-color: #A33025;
+  }
+
+  .btn-danger:active {
+    background-color: #8B2920;
+  }
+
+  .btn-danger:focus-visible {
+    outline: 3px solid #C0392B;
+    outline-offset: 2px;
+  }
+
+  .btn-danger:disabled,
+  .btn-danger[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
+
+/* ==========================================================================
+   INTERACTION STATES CHECKLIST
+   ============================================================================
+   Every interactive component MUST be checked against these states before
+   shipping. This is the single biggest gap between "looks good in Figma" and
+   "production-ready."
+
+   State             | Description                              | Implementation pattern
+   ------------------|------------------------------------------|----------------------------------------
+   Default           | Resting appearance                       | Base class styles
+   Hover             | Mouse over (desktop)                     | :hover — subtle darken/shadow, NOT fill-swap
+   Focus-visible     | Keyboard navigation                      | :focus-visible — 3px outline, 2px offset
+   Active/Pressed    | Click/tap moment                         | :active — deeper darken or scale(0.98)
+   Disabled          | Not interactive (greyed out)             | :disabled/[aria-disabled] — opacity 0.5, cursor not-allowed
+   Loading/Pending   | Async operation in progress              | aria-busy="true" + spinner + optional text swap
+   Error             | Validation failed                        | Red border/ring + error message (role="alert")
+   Empty/Skeleton    | No data yet / loading placeholder        | Pulsing bg-warm-gray-200 animate-pulse blocks
+
+   COMPONENT-SPECIFIC NOTES:
+
+   Buttons (btn-primary, btn-secondary, btn-danger, btn-admin):
+     ✅ All states implemented in CSS above
+     • Loading: use <Button loading> component (adds Loader2 spinner + aria-busy)
+     • Danger buttons MUST be paired with a confirmation dialog
+
+   Form Inputs:
+     ✅ Default, focus, disabled, error states via `inputClasses` constant
+     • Error: data-[error=true] attribute triggers red border + ring
+     • Disabled: opacity 0.5 + not-allowed cursor + grey background
+     • Required: asterisk indicator via <FormField required>
+
+   Cards (ProductCard, MakerCard, CraftCard):
+     ✅ Default, hover (translate-y + shadow + border-color), focus (ring)
+     • Empty/skeleton: use animate-pulse placeholder blocks matching card layout
+     • Entire card is clickable (<Link> wrapper) — not just the title
+
+   Status Badges:
+     ✅ Non-interactive (no hover/focus/active needed)
+     • 5 semantic variants: success, warning, error, info, neutral
+
+   Navigation Links:
+     ✅ Default, hover (text darken + border hint), active page (border-ocean)
+     • aria-current="page" on active link
+     • Inline body links: always underlined (a:not([class]))
+     • Standalone nav links: no underline, use arrow/icon affordance
+
+   Admin Sidebar:
+     ✅ Default, hover (bg-white/5), active page (bg-white/10 + gold left border)
+     • aria-current="page" on active item
+
+   ICONOGRAPHY DECISION (Lucide React — line style):
+     • Stroke width: 2px (Lucide default)
+     • In buttons: w-4 h-4
+     • Standalone: w-5 h-5
+     • Never mix filled and line icons in the same context
+     • Color: inherit from parent text or explicit text-ocean / text-white
+   ========================================================================== */
 
 @layer utilities {
   .tap-target {
@@ -363,9 +525,9 @@
 }
 
 .article-content h2 {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #1B3A4B;
   margin-top: 2.5rem;
   margin-bottom: 0.75rem;
@@ -374,7 +536,7 @@
 }
 
 .article-content h3 {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
   font-size: 1.25rem;
   font-weight: 600;
   color: #1B3A4B;

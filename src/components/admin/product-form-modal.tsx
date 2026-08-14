@@ -8,6 +8,7 @@ import { getAllCrafts } from '@/services/crafts';
 import { getAllProducts, validateProductCode } from '@/services/products';
 import { getMaterialCategories, getProductTypes, type MaterialCategoryOption, type ProductTypeOption } from '@/services/categories';
 import { MultiImageUpload } from './multi-image-upload';
+import { Select } from '@/components/ui/select';
 import { RichTextEditor } from './rich-text-editor';
 import { altTextError, htmlHasImageMissingAlt } from '@/lib/image-alt';
 import { scrollToFirstError } from '@/lib/scroll-to-error';
@@ -246,33 +247,29 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
               <label htmlFor="product-material" className="block text-sm font-medium text-warm-gray-800 mb-1">
                 Material Category *
               </label>
-              <select
+              <Select
                 id="product-material"
-                value={form.materialCategory}
-                onChange={(e) => handleChange('materialCategory', e.target.value)}
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-              >
-                {materialCategories.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
+                value={form.materialCategory || null}
+                onChange={(val) => handleChange('materialCategory', val || '')}
+                options={materialCategories.map((opt) => ({ value: opt.value, label: opt.label }))}
+                placeholder="Select material..."
+                label="Material category"
+                className="w-full"
+              />
             </div>
             <div>
               <label htmlFor="product-maker" className="block text-sm font-medium text-warm-gray-800 mb-1">
                 Maker *
               </label>
-              <select
+              <Select
                 id="product-maker"
-                value={form.makerId}
-                onChange={(e) => handleChange('makerId', e.target.value)}
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-                aria-describedby={errors.makerId ? 'product-maker-error' : undefined}
-              >
-                <option value="">Select a maker...</option>
-                {makers.map((maker) => (
-                  <option key={maker.id} value={maker.id}>{maker.name}</option>
-                ))}
-              </select>
+                value={form.makerId || null}
+                onChange={(val) => handleChange('makerId', val || '')}
+                options={makers.map((maker) => ({ value: maker.id, label: maker.name }))}
+                placeholder="Select a maker..."
+                label="Maker"
+                className="w-full"
+              />
               {errors.makerId && <p id="product-maker-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.makerId}</p>}
             </div>
           </div>
@@ -338,33 +335,29 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
               <label htmlFor="product-type" className="block text-sm font-medium text-warm-gray-800 mb-1">
                 Product Type *
               </label>
-              <select
+              <Select
                 id="product-type"
-                value={form.productType}
-                onChange={(e) => handleChange('productType', e.target.value)}
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-              >
-                {productTypeOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
+                value={form.productType || null}
+                onChange={(val) => handleChange('productType', val || '')}
+                options={productTypeOptions.map((opt) => ({ value: opt.value, label: opt.label }))}
+                placeholder="Select type..."
+                label="Product type"
+                className="w-full"
+              />
             </div>
             <div>
               <label htmlFor="product-craft" className="block text-sm font-medium text-warm-gray-800 mb-1">
                 Craft *
               </label>
-              <select
+              <Select
                 id="product-craft"
-                value={form.craftId}
-                onChange={(e) => handleChange('craftId', e.target.value)}
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-                aria-describedby={errors.craftId ? 'product-craft-error' : undefined}
-              >
-                <option value="">Select a craft...</option>
-                {crafts.map((craft) => (
-                  <option key={craft.id} value={craft.id}>{craft.name}</option>
-                ))}
-              </select>
+                value={form.craftId || null}
+                onChange={(val) => handleChange('craftId', val || '')}
+                options={crafts.map((craft) => ({ value: craft.id, label: craft.name }))}
+                placeholder="Select a craft..."
+                label="Craft"
+                className="w-full"
+              />
               {errors.craftId && <p id="product-craft-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.craftId}</p>}
             </div>
           </div>

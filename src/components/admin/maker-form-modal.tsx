@@ -10,6 +10,7 @@ import { singleAltError } from '@/lib/image-alt';
 import { scrollToFirstError } from '@/lib/scroll-to-error';
 import { useModalA11y } from '@/lib/use-modal-a11y';
 import { useToast } from '@/components/ui/toast';
+import { Select } from '@/components/ui/select';
 
 interface MakerFormModalProps {
   maker: Maker | null; // null = create mode
@@ -238,18 +239,15 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
             <label htmlFor="maker-craft" className="block text-sm font-medium text-warm-gray-800 mb-1">
               Craft *
             </label>
-            <select
+            <Select
               id="maker-craft"
-              value={form.craftId}
-              onChange={(e) => handleChange('craftId', e.target.value)}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-              aria-describedby={errors.craftId ? 'maker-craft-error' : undefined}
-            >
-              <option value="">Select a craft...</option>
-              {crafts.map((craft) => (
-                <option key={craft.id} value={craft.id}>{craft.name}</option>
-              ))}
-            </select>
+              value={form.craftId || null}
+              onChange={(val) => handleChange('craftId', val || '')}
+              options={crafts.map((craft) => ({ value: craft.id, label: craft.name }))}
+              placeholder="Select a craft..."
+              label="Craft"
+              className="w-full"
+            />
             {errors.craftId && <p id="maker-craft-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.craftId}</p>}
           </div>
 
@@ -340,15 +338,18 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
             <label htmlFor="maker-consent" className="block text-sm font-medium text-warm-gray-800 mb-2">
               Consent Status
             </label>
-            <select
+            <Select
               id="maker-consent"
-              value={form.consentStatus}
-              onChange={(e) => handleChange('consentStatus', e.target.value)}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-            >
-              <option value="Signed">Signed</option>
-              <option value="Not Signed">Not Signed</option>
-            </select>
+              value={form.consentStatus || null}
+              onChange={(val) => handleChange('consentStatus', val || 'Not Signed')}
+              options={[
+                { value: 'Signed', label: 'Signed' },
+                { value: 'Not Signed', label: 'Not Signed' },
+              ]}
+              placeholder="Select status..."
+              label="Consent status"
+              className="w-full"
+            />
             <p className="text-xs text-warm-gray-400 mt-2">
               Setting consent to &quot;Signed&quot; will publish this maker and their products to the public site.
             </p>

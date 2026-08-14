@@ -161,7 +161,7 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
           <Link
             href="/login"
             onClick={onClose}
-            className={`tap-target inline-flex items-center justify-center gap-2 w-full max-w-xs mt-4 px-4 py-4 btn-primary text-lg transition-all duration-300 ${
+            className={`tap-target inline-flex items-center justify-center gap-2 w-full max-w-xs mt-4 px-4 py-4 btn-secondary text-lg transition-all duration-300 ${
               animating ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
             }`}
             style={{ transitionDelay: `${(NAV_LINKS.length + 1) * 50}ms` }}

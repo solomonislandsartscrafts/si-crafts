@@ -369,8 +369,8 @@ export const colours = {
 // /src/theme/typography.ts
 export const typography = {
   fontFamily: {
-    body: ['Inter', 'system-ui', 'sans-serif'],
-    heading: ['Playfair Display', 'Georgia', 'serif'],
+    body: ['DM Sans', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+    heading: ['Fraunces', 'Georgia', 'Times New Roman', 'serif'],
   },
   fontSize: {
     xs:   '0.75rem',   // 12px

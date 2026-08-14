@@ -25,6 +25,13 @@ const DEPTH = [
   { offset: 100, scale: 0.7, opacity: 0.25, blur: 2, z: 10 },
 ];
 
+/** Mobile offsets — tighter spacing so neighbours peek rather than clip mid-card. */
+const DEPTH_MOBILE = [
+  { offset: 0, scale: 1, opacity: 1, blur: 0, z: 30 },
+  { offset: 48, scale: 0.78, opacity: 0.45, blur: 1.5, z: 20 },
+  { offset: 85, scale: 0.65, opacity: 0.2, blur: 2, z: 10 },
+];
+
 /**
  * Hero gallery — a coverflow carousel. The active piece sits centre and full
  * size; neighbours recede to either side, scaled down, dimmed and softly
@@ -37,14 +44,25 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const count = items.length;
 
   useEffect(() => {
-    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setReduceMotion(query.matches);
-    const onChange = (e: MediaQueryListEvent) => setReduceMotion(e.matches);
-    query.addEventListener('change', onChange);
-    return () => query.removeEventListener('change', onChange);
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduceMotion(motionQuery.matches);
+    const onMotionChange = (e: MediaQueryListEvent) => setReduceMotion(e.matches);
+    motionQuery.addEventListener('change', onMotionChange);
+
+    // Track viewport width to use tighter mobile offsets
+    const mobileQuery = window.matchMedia('(max-width: 639px)');
+    setIsMobile(mobileQuery.matches);
+    const onMobileChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mobileQuery.addEventListener('change', onMobileChange);
+
+    return () => {
+      motionQuery.removeEventListener('change', onMotionChange);
+      mobileQuery.removeEventListener('change', onMobileChange);
+    };
   }, []);
 
   const go = useCallback(
@@ -53,15 +71,15 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
   );
 
   useEffect(() => {
-    if (count <= 1 || paused) return;
+    if (count <= 1 || paused || reduceMotion) return;
     const timer = setInterval(() => go(1), interval);
     return () => clearInterval(timer);
-  }, [count, paused, interval, go]);
+  }, [count, paused, interval, go, reduceMotion]);
 
   if (count === 0) {
     return (
       <div className="relative h-[340px] sm:h-[400px] lg:h-[440px] flex items-center justify-center">
-        <div className="w-[62%] max-w-[300px] rounded-xl overflow-hidden bg-card-bg shadow-lg ring-1 ring-black/5">
+        <div className="w-[56%] sm:w-[62%] max-w-[300px] rounded-xl overflow-hidden bg-card-bg shadow-lg ring-1 ring-black/5">
           <div className="relative aspect-[4/5] flex flex-col">
             <div className="relative flex-1">
               <SafeImage
@@ -107,14 +125,15 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
     >
-      {/* Stage — neighbours are clipped at the edges rather than colliding
-          with the headline beside them. */}
+      {/* Stage — neighbours peek from the edges. On mobile, cards are smaller
+          and use tighter offsets to avoid harsh clipping. */}
       <div className="relative h-[340px] sm:h-[400px] lg:h-[440px] overflow-hidden">
         {items.map((item, index) => {
           const d = distanceFromCurrent(index);
-          const depth = DEPTH[Math.min(Math.abs(d), DEPTH.length - 1)];
+          const depthTable = isMobile ? DEPTH_MOBILE : DEPTH;
+          const depth = depthTable[Math.min(Math.abs(d), depthTable.length - 1)];
           const isActive = d === 0;
-          const hidden = Math.abs(d) >= DEPTH.length;
+          const hidden = Math.abs(d) >= depthTable.length;
           const direction = Math.sign(d);
 
           return (
@@ -125,7 +144,7 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
               tabIndex={isActive ? -1 : 0}
               aria-label={isActive ? undefined : `Show ${item.name}`}
               aria-hidden={hidden}
-              className={`absolute top-1/2 left-1/2 w-[62%] max-w-[300px] rounded-xl overflow-hidden bg-card-bg shadow-lg ring-1 ring-black/5 focus:outline-none focus-visible:ring-4 focus-visible:ring-ocean ${
+              className={`absolute top-1/2 left-1/2 w-[56%] sm:w-[62%] max-w-[300px] rounded-xl overflow-hidden bg-card-bg shadow-lg ring-1 ring-black/5 focus:outline-none focus-visible:ring-4 focus-visible:ring-ocean ${
                 isActive ? 'cursor-default' : 'cursor-pointer'
               } ${reduceMotion ? '' : 'transition-all duration-700 ease-out'}`}
               style={{
@@ -144,7 +163,7 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
                     alt={isActive ? item.name : ''}
                     fill
                     className="object-contain"
-                    sizes="(max-width: 640px) 62vw, 300px"
+                    sizes="(max-width: 640px) 56vw, 300px"
                     priority={index === 0}
                   />
                 </div>

@@ -6,6 +6,7 @@ import { ArrowRight, MapPin, Clock, Package, Users } from 'lucide-react';
 import type { Maker } from '@/types';
 import { SolomonIslandsProvinceMap } from '@/components/map';
 import { SafeImage } from '@/components/ui/safe-image';
+import { Select } from '@/components/ui/select';
 
 interface MakerWithCraft extends Maker {
   craftName: string;
@@ -56,36 +57,33 @@ export function MakersPageContent({ makers }: Props) {
           {/* Left: Maker list */}
           <div>
             {/* Filter bar */}
-            <div className="flex items-center justify-between mb-5">
-              <p className="text-sm font-medium text-warm-gray-800" aria-live="polite">
-                {selectedProvince
-                  ? <><span className="text-ocean">{filteredMakers.length}</span> maker{filteredMakers.length !== 1 ? 's' : ''} in {selectedProvince}</>
-                  : <><span className="text-warm-gray-800 font-semibold">{filteredMakers.length}</span> makers</>
-                }
-              </p>
-              {selectedProvince ? (
+            <div className="flex items-center gap-4 mb-5">
+              {!selectedProvince ? (
+                /* Mobile province select — only below lg */
+                <div className="lg:hidden">
+                  <Select
+                    id="province-filter"
+                    value={selectedProvince}
+                    onChange={setSelectedProvince}
+                    options={provinces.map((p) => ({ value: p, label: p }))}
+                    placeholder="All provinces"
+                    label="Filter by province"
+                  />
+                </div>
+              ) : (
                 <button
                   onClick={() => setSelectedProvince(null)}
                   className="text-xs text-ocean hover:text-ocean-dark font-medium transition-colors"
                 >
                   Clear filter ×
                 </button>
-              ) : (
-                /* Mobile province select — only below lg */
-                <div className="lg:hidden">
-                  <select
-                    aria-label="Filter by province"
-                    value={selectedProvince || ''}
-                    onChange={(e) => setSelectedProvince(e.target.value || null)}
-                    className="text-xs px-3 py-1.5 rounded border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean"
-                  >
-                    <option value="">All provinces</option>
-                    {provinces.map((p) => (
-                      <option key={p} value={p}>{p}</option>
-                    ))}
-                  </select>
-                </div>
               )}
+              <p className="text-sm font-medium text-warm-gray-800 ml-auto" aria-live="polite">
+                {selectedProvince
+                  ? <><span className="text-ocean">{filteredMakers.length}</span> maker{filteredMakers.length !== 1 ? 's' : ''} in {selectedProvince}</>
+                  : <><span className="text-warm-gray-800 font-semibold">{filteredMakers.length}</span> makers</>
+                }
+              </p>
             </div>
 
             {/* Cards */}

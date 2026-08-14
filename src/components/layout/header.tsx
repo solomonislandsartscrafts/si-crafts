@@ -101,7 +101,7 @@ export function Header() {
               {authState === 'none' && (
                 <Link
                   href="/login"
-                  className="tap-target inline-flex items-center ml-2 px-5 py-2 btn-primary text-sm"
+                  className="tap-target inline-flex items-center ml-2 px-5 py-2 btn-secondary text-sm"
                 >
                   Login
                 </Link>

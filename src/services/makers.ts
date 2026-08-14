@@ -31,6 +31,24 @@ interface WagtailListResponse {
   items: WagtailMakerResponse[];
 }
 
+/**
+ * Normalize province strings to always end with " Province" so they match
+ * the province map component's ID_TO_PROVINCE values (e.g. "Choiseul Province").
+ * Handles values stored without the suffix or with inconsistent casing.
+ */
+function normalizeProvince(raw: string): string {
+  if (!raw) return '';
+  const trimmed = raw.trim();
+  if (!trimmed) return '';
+  // Already ends with " Province" (case-insensitive check)
+  if (/\s+province$/i.test(trimmed)) {
+    // Ensure consistent casing: capitalize first letter of each word
+    return trimmed.replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+  // Append " Province"
+  return `${trimmed.replace(/\b\w/g, (c) => c.toUpperCase())} Province`;
+}
+
 function mapMaker(raw: WagtailMakerResponse): Maker {
   // craft can be {id: number} (read API) or number (write API) or null
   let craftId = '';
@@ -43,7 +61,7 @@ function mapMaker(raw: WagtailMakerResponse): Maker {
     slug: raw.meta?.slug ?? raw.slug ?? '',
     name: raw.title,
     village: raw.village ?? '',
-    province: raw.province ?? '',
+    province: normalizeProvince(raw.province ?? ''),
     island: raw.island ?? '',
     portraitUrl: raw.portrait_url || raw.portrait?.meta?.download_url || null,
     portraitAlt: raw.portrait_alt || `Portrait of ${raw.title} from ${raw.village || ''}, ${raw.province || ''}`,

@@ -145,7 +145,7 @@ export function PiecePageClient({ product, craftName, craftSlug, maker }: PieceP
                   src={maker.portraitUrl}
                   alt={maker.name}
                   fill
-                  className="object-contain p-4"
+                  className="object-cover"
                   sizes="40px"
                 />
               </div>

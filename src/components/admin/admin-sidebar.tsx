@@ -16,33 +16,63 @@ interface NavItem {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   roles: AdminRole[];
-  /** Draws a separator above the item */
-  divider?: boolean;
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['super_admin', 'editor'] },
-  // Content creation flow (top-to-bottom dependency order)
-  { href: '/admin/categories', label: 'Categories', icon: Tags, roles: ['super_admin', 'editor'] },
-  { href: '/admin/crafts', label: 'Crafts', icon: Palette, roles: ['super_admin', 'editor'] },
-  { href: '/admin/makers', label: 'Makers', icon: Users, roles: ['super_admin', 'editor'] },
-  { href: '/admin/products', label: 'Products', icon: Package, roles: ['super_admin', 'editor'] },
-  // Operations & sales
-  { href: '/admin/stockists', label: 'Stockists', icon: Store, roles: ['super_admin', 'editor'], divider: true },
-  { href: '/admin/orders', label: 'Orders', icon: ClipboardList, roles: ['super_admin', 'editor'] },
-  // Content & comms
-  { href: '/admin/site-content', label: 'Site Content', icon: ImageIcon, roles: ['super_admin', 'editor'], divider: true },
-  { href: '/admin/news', label: 'News', icon: Newspaper, roles: ['super_admin', 'editor'] },
-  { href: '/admin/inbox', label: 'Inbox', icon: Inbox, roles: ['super_admin', 'editor'] },
-  // Admin
-  { href: '/admin/admins', label: 'Admin Users', icon: Shield, roles: ['super_admin'], divider: true },
-  { href: '/admin/getting-started', label: 'Getting Started', icon: BookOpen, roles: ['super_admin', 'editor'] },
+interface NavGroup {
+  /** Section header label (shown as small uppercase text) */
+  title: string;
+  /** Which roles can see this group (group hidden if no items visible) */
+  roles: AdminRole[];
+  items: NavItem[];
+}
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    title: 'Overview',
+    roles: ['super_admin', 'editor'],
+    items: [
+      { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['super_admin', 'editor'] },
+    ],
+  },
+  {
+    title: 'Catalogue',
+    roles: ['super_admin', 'editor'],
+    items: [
+      { href: '/admin/categories', label: 'Categories', icon: Tags, roles: ['super_admin', 'editor'] },
+      { href: '/admin/crafts', label: 'Crafts', icon: Palette, roles: ['super_admin', 'editor'] },
+      { href: '/admin/makers', label: 'Makers', icon: Users, roles: ['super_admin', 'editor'] },
+      { href: '/admin/products', label: 'Products', icon: Package, roles: ['super_admin', 'editor'] },
+    ],
+  },
+  {
+    title: 'Operations',
+    roles: ['super_admin', 'editor'],
+    items: [
+      { href: '/admin/stockists', label: 'Stockists', icon: Store, roles: ['super_admin', 'editor'] },
+      { href: '/admin/orders', label: 'Orders', icon: ClipboardList, roles: ['super_admin', 'editor'] },
+    ],
+  },
+  {
+    title: 'Content',
+    roles: ['super_admin', 'editor'],
+    items: [
+      { href: '/admin/site-content', label: 'Site Content', icon: ImageIcon, roles: ['super_admin', 'editor'] },
+      { href: '/admin/news', label: 'News', icon: Newspaper, roles: ['super_admin', 'editor'] },
+      { href: '/admin/inbox', label: 'Inbox', icon: Inbox, roles: ['super_admin', 'editor'] },
+    ],
+  },
+  {
+    title: 'Admin',
+    roles: ['super_admin'],
+    items: [
+      { href: '/admin/admins', label: 'Admin Users', icon: Shield, roles: ['super_admin'] },
+      { href: '/admin/getting-started', label: 'Getting Started', icon: BookOpen, roles: ['super_admin', 'editor'] },
+    ],
+  },
 ];
 
 export function AdminSidebar({ role, adminName, onLogout }: AdminSidebarProps) {
   const pathname = usePathname();
-
-  const visibleItems = NAV_ITEMS.filter((item) => item.roles.includes(role));
 
   return (
     <aside className="w-56 flex-shrink-0 bg-deep-blue text-white min-h-screen flex flex-col">
@@ -54,22 +84,45 @@ export function AdminSidebar({ role, adminName, onLogout }: AdminSidebarProps) {
         <p className="text-xs text-white/40 mt-0.5">Admin Panel</p>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 py-4 space-y-1">
-        {visibleItems.map((item) => {
-          const active = pathname === item.href;
-          const Icon = item.icon;
+      {/* Navigation — grouped with section headers */}
+      <nav className="flex-1 py-3 overflow-y-auto" aria-label="Admin navigation">
+        {NAV_GROUPS.map((group) => {
+          // Skip entire group if the current role isn't in group.roles
+          if (!group.roles.includes(role)) return null;
+          // Filter items by role
+          const visibleItems = group.items.filter((item) => item.roles.includes(role));
+          if (visibleItems.length === 0) return null;
+
           return (
-            <div key={item.href} className={item.divider ? 'mt-3 pt-3 border-t border-white/10' : undefined}>
-              <Link
-                href={item.href}
-                className={`tap-target flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
-                  active ? 'bg-white/10 text-white' : 'text-sand/70 hover:bg-white/5 hover:text-white'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                {item.label}
-              </Link>
+            <div key={group.title} className="mt-4 first:mt-0">
+              {/* Section header */}
+              <h3 className="px-4 mb-1 text-[10px] font-semibold uppercase tracking-wider text-white/40">
+                {group.title}
+              </h3>
+
+              {/* Section items */}
+              <ul className="space-y-0.5">
+                {visibleItems.map((item) => {
+                  const active = pathname === item.href || pathname.startsWith(item.href + '/');
+                  const Icon = item.icon;
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className={`tap-target flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${
+                          active
+                            ? 'bg-white/10 text-white border-l-3 border-accent-gold'
+                            : 'text-white/60 hover:bg-white/5 hover:text-white border-l-3 border-transparent'
+                        }`}
+                        aria-current={active ? 'page' : undefined}
+                      >
+                        <Icon className="w-4 h-4 flex-shrink-0" />
+                        {item.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
           );
         })}
@@ -79,7 +132,7 @@ export function AdminSidebar({ role, adminName, onLogout }: AdminSidebarProps) {
       <div className="border-t border-white/10 px-4 py-4 space-y-3">
         <Link
           href="/"
-          className="tap-target flex items-center gap-2 px-3 py-2 text-sm font-medium text-ocean-light hover:text-white hover:bg-white/5 rounded-md transition-colors"
+          className="tap-target flex items-center gap-2 px-3 py-2 text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors"
         >
           <ExternalLink className="w-4 h-4" />
           View Site

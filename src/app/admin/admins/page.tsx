@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Trash2, Shield, Edit, X } from 'lucide-react';
 import type { AdminUser, AdminRole } from '@/types';
 import { AdminLayout } from '@/components/admin';
+import { Select } from '@/components/ui/select';
 
 export default function AdminAdminsPage() {
   const [admins, setAdmins] = useState<AdminUser[]>([]);
@@ -232,15 +233,18 @@ function AddAdminModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
 
           <div>
             <label htmlFor="admin-role" className="block text-sm font-medium text-warm-gray-800 mb-1">Role *</label>
-            <select
+            <Select
               id="admin-role"
               value={role}
-              onChange={(e) => setRole(e.target.value as AdminRole)}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-            >
-              <option value="editor">Editor</option>
-              <option value="super_admin">Super Admin</option>
-            </select>
+              onChange={(val) => setRole((val || 'editor') as AdminRole)}
+              options={[
+                { value: 'editor', label: 'Editor' },
+                { value: 'super_admin', label: 'Super Admin' },
+              ]}
+              placeholder="Select role"
+              label="Admin role"
+              className="w-full"
+            />
             <p className="text-xs text-warm-gray-400 mt-1">
               Editors can manage content. Super Admins can also manage other admin users.
             </p>
