@@ -1,10 +1,18 @@
 import type { Metadata } from 'next';
+import { Poppins } from 'next/font/google';
 import { SkipLink } from '@/components/layout';
 import { LayoutShell } from '@/components/layout/layout-shell';
 import { AccessibilityWidget } from '@/components/shared/accessibility-widget';
 import { SwRegister } from '@/components/shared/sw-register';
 import { Providers } from '@/components/providers';
 import './globals.css';
+
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-heading',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://solomonislandsartsandcrafts.com.au'),
@@ -32,7 +40,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={poppins.variable}>
       <head>
         <meta name="theme-color" content="#1B3A4B" />
       </head>

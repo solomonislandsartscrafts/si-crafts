@@ -122,7 +122,7 @@ const config: Config = {
       },
       fontFamily: {
         body: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Helvetica', 'Arial', 'sans-serif'],
-        heading: ['Times New Roman', 'Times', 'Georgia', 'serif'],
+        heading: ['var(--font-heading)', 'Poppins', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
       },
       fontSize: {
         // ⚠️ ACCESSIBILITY NOTE: xs (13px) and sm (15px) are below the 16px
