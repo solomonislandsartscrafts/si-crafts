@@ -150,16 +150,16 @@ export default async function HomePage() {
               Every piece you see here was made by hand, by a named maker, in Solomon Islands.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {featuredMakers.map((maker, index) => (
-              <Link key={maker.id} href={`/maker/${maker.slug}`} className={`group flex h-full flex-col rounded-lg overflow-hidden border border-sand hover:border-ocean/30 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ocean ${index === 1 ? 'hidden sm:flex lg:flex' : ''} ${index === 2 ? 'hidden lg:flex' : ''}`}>
-                <div className="aspect-[3/4] relative bg-sand-light overflow-hidden">
+              <Link key={maker.id} href={`/maker/${maker.slug}`} className={`group flex h-full flex-col rounded-lg overflow-hidden border border-sand hover:border-ocean/30 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ocean ${index === 2 ? 'hidden lg:flex' : ''}`}>
+                <div className="aspect-square relative bg-sand-light overflow-hidden">
                   <SafeImage
                     src={maker.portraitUrl}
                     alt={maker.name}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
                   />
                 </div>
                 <div className="flex flex-1 flex-col p-4 bg-warm-gray-100">
@@ -216,7 +216,7 @@ export default async function HomePage() {
             })}
           </div>
           <div className="sm:hidden mt-6 text-center">
-            <Link href="/catalogue" className="inline-flex items-center gap-1 text-sm font-medium text-ocean">
+            <Link href="/catalogue" className="tap-target inline-flex items-center gap-2 px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light">
               View all products
             </Link>
           </div>
@@ -250,9 +250,9 @@ export default async function HomePage() {
               {sampleProductCode && (
                 <Link
                   href={`/piece/${sampleProductCode}`}
-                  className="tap-target inline-flex items-center gap-2 px-5 py-3 btn-primary"
+                  className="text-sm font-medium text-ocean hover:text-ocean-dark transition-colors"
                 >
-                  See an example tag
+                  See an example tag →
                 </Link>
               )}
             </div>
@@ -272,9 +272,9 @@ export default async function HomePage() {
           </p>
           <Link
             href="/wholesale"
-            className="tap-target inline-flex items-center gap-2 px-8 py-4 btn-primary text-lg"
+            className="text-sm font-medium text-ocean hover:text-ocean-dark transition-colors"
           >
-            Learn about wholesale
+            Learn about wholesale →
           </Link>
         </div>
       </section>

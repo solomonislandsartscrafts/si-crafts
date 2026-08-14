@@ -1,10 +1,10 @@
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { getAllProducts, getProductByCode } from '@/services/products';
 import { getMakerById } from '@/services/makers';
 import { getCraftById } from '@/services/crafts';
+import { getAllMakers } from '@/services/makers';
 import { PiecePageClient } from './piece-page-client';
-import { BackButton } from '@/components/shared/back-button';
+import { ProductCard } from '@/components/cards/product-card';
 
 export async function generateStaticParams() {
   const products = await getAllProducts();
@@ -39,50 +39,49 @@ export default async function PiecePage({ params }: PiecePageProps) {
     );
   }
 
-  const [maker, craft, allProducts] = await Promise.all([
+  const [maker, craft, allProducts, allMakers] = await Promise.all([
     getMakerById(product.makerId),
     getCraftById(product.craftId),
     getAllProducts(),
+    getAllMakers(),
   ]);
 
   const publishedMaker = maker?.publishedFlag ? maker : null;
 
-  // Find prev/next products for navigation
-  const currentIndex = allProducts.findIndex((p) => p.productCode === productCode);
-  const prevProduct = currentIndex > 0 ? allProducts[currentIndex - 1] : null;
-  const nextProduct = currentIndex >= 0 && currentIndex < allProducts.length - 1
-    ? allProducts[currentIndex + 1]
-    : null;
+  // Get related products: same craft or same maker, excluding current product
+  const relatedProducts = allProducts
+    .filter((p) =>
+      p.id !== product.id &&
+      p.publishedFlag &&
+      (p.craftId === product.craftId || p.makerId === product.makerId)
+    )
+    .slice(0, 4);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
-      {/* Navigation */}
-      <div className="flex items-center justify-between mb-8">
-        <BackButton fallback="/catalogue" label="Back" />
-        <div className="flex items-center gap-4">
-          {prevProduct && (
-            <Link
-              href={`/piece/${prevProduct.productCode}`}
-              className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Prev
-            </Link>
-          )}
-          {nextProduct && (
-            <Link
-              href={`/piece/${nextProduct.productCode}`}
-              className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark transition-colors"
-            >
-              Next item
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          )}
-        </div>
-      </div>
-
       {/* Top section: Gallery + Product Info + Maker */}
       <PiecePageClient product={product} craftName={craft?.name} craftSlug={craft?.slug} maker={publishedMaker} craft={craft} />
+
+      {/* Related Products */}
+      {relatedProducts.length > 0 && (
+        <section className="mt-12 pt-10 border-t border-sand">
+          <h2 className="font-heading text-2xl font-medium text-deep-blue mb-6">
+            You might also like
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {relatedProducts.map((relatedProduct) => {
+              const relatedMaker = allMakers.find((m) => m.id === relatedProduct.makerId);
+              return (
+                <ProductCard
+                  key={relatedProduct.id}
+                  product={relatedProduct}
+                  makerName={relatedMaker?.name}
+                />
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

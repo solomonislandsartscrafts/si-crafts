@@ -31,9 +31,18 @@ const EMPTY: SiteContent = {
   homepageMakersHeading: '',
   homepageMakersIntro: '',
   aboutPageIntro: '',
+  aboutSolomonIslandsHeading: '',
   aboutSolomonIslandsText: '',
+  aboutSolomonIslandsLinkText: '',
+  aboutSolomonIslandsLinkUrl: '',
+  aboutTeamHeading: '',
   aboutTeamText: '',
+  aboutTeamLinkText: '',
+  aboutTeamLinkUrl: '',
+  aboutWhyHeading: '',
   aboutWhyText: '',
+  aboutWhyLinkText: '',
+  aboutWhyLinkUrl: '',
   wholesaleIntro: '',
   wholesaleHowItWorks: '',
   wholesaleMinimumOrder: '',
@@ -230,16 +239,25 @@ function AboutTab({ content, update }: TabProps) {
   return (
     <>
       <Section title="Page Intro" description="The intro paragraph shown at the top of the About page.">
-        <TextArea label="Intro text" value={content.aboutPageIntro} onChange={(v) => update('aboutPageIntro', v)} placeholder="Solomon Islands Arts and Crafts connects makers..." rows={3} />
+        <TextArea label="Intro text" fieldId="about-page-intro" value={content.aboutPageIntro} onChange={(v) => update('aboutPageIntro', v)} placeholder="Solomon Islands Arts and Crafts connects makers..." rows={3} />
       </Section>
-      <Section title="About Solomon Islands" description="Text in the first section (beside the map/image).">
-        <TextArea label="Content" value={content.aboutSolomonIslandsText} onChange={(v) => update('aboutSolomonIslandsText', v)} placeholder="Solomon Islands is a sovereign nation of over 990 islands..." rows={6} />
+      <Section title="About Solomon Islands" description="First section of the About page (beside the map/image).">
+        <Field label="Section heading" fieldId="about-si-heading" value={content.aboutSolomonIslandsHeading} onChange={(v) => update('aboutSolomonIslandsHeading', v)} placeholder="About Solomon Islands" />
+        <TextArea label="Content" fieldId="about-si-content" value={content.aboutSolomonIslandsText} onChange={(v) => update('aboutSolomonIslandsText', v)} placeholder="Solomon Islands is a sovereign nation of over 990 islands..." rows={6} />
+        <Field label="Link text" fieldId="about-si-link-text" value={content.aboutSolomonIslandsLinkText} onChange={(v) => update('aboutSolomonIslandsLinkText', v)} placeholder="Find out more about Solomon Islands" />
+        <Field label="Link URL" fieldId="about-si-link-url" value={content.aboutSolomonIslandsLinkUrl} onChange={(v) => update('aboutSolomonIslandsLinkUrl', v)} placeholder="https://en.wikipedia.org/wiki/Solomon_Islands" />
       </Section>
-      <Section title="About the Team" description="Text in the SIAC team section.">
-        <TextArea label="Content" value={content.aboutTeamText} onChange={(v) => update('aboutTeamText', v)} placeholder="Solomon Islands Arts and Crafts is run entirely by volunteers..." rows={6} />
+      <Section title="About the Team" description="The SIAC team section.">
+        <Field label="Section heading" fieldId="about-team-heading" value={content.aboutTeamHeading} onChange={(v) => update('aboutTeamHeading', v)} placeholder="About the Solomon Islands Arts and Crafts (SIAC) Team" />
+        <TextArea label="Content" fieldId="about-team-content" value={content.aboutTeamText} onChange={(v) => update('aboutTeamText', v)} placeholder="Solomon Islands Arts and Crafts is run entirely by volunteers..." rows={6} />
+        <Field label="Link text" fieldId="about-team-link-text" value={content.aboutTeamLinkText} onChange={(v) => update('aboutTeamLinkText', v)} placeholder="Find out more about our team →" />
+        <Field label="Link URL" fieldId="about-team-link-url" value={content.aboutTeamLinkUrl} onChange={(v) => update('aboutTeamLinkUrl', v)} placeholder="/about/team" />
       </Section>
-      <Section title="Why We're Doing This" description="Text in the mission/purpose section.">
-        <TextArea label="Content" value={content.aboutWhyText} onChange={(v) => update('aboutWhyText', v)} placeholder="Solomon Islands makers produce work of extraordinary skill..." rows={6} />
+      <Section title="Why We're Doing This" description="The mission/purpose section.">
+        <Field label="Section heading" fieldId="about-why-heading" value={content.aboutWhyHeading} onChange={(v) => update('aboutWhyHeading', v)} placeholder="Why We're Doing This" />
+        <TextArea label="Content" fieldId="about-why-content" value={content.aboutWhyText} onChange={(v) => update('aboutWhyText', v)} placeholder="Solomon Islands makers produce work of extraordinary skill..." rows={6} />
+        <Field label="Link text" fieldId="about-why-link-text" value={content.aboutWhyLinkText} onChange={(v) => update('aboutWhyLinkText', v)} placeholder="Are you a maker in Solomon Islands? Learn how to work with us →" />
+        <Field label="Link URL" fieldId="about-why-link-url" value={content.aboutWhyLinkUrl} onChange={(v) => update('aboutWhyLinkUrl', v)} placeholder="/for-makers" />
       </Section>
     </>
   );
@@ -294,8 +312,8 @@ function Section({ title, description, children }: { title: string; description:
   );
 }
 
-function Field({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
-  const id = `field-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+function Field({ label, value, onChange, placeholder, fieldId }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; fieldId?: string }) {
+  const id = fieldId || `field-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
   return (
     <div>
       <label htmlFor={id} className="block text-sm font-medium text-warm-gray-800 mb-1">{label}</label>
@@ -311,8 +329,8 @@ function Field({ label, value, onChange, placeholder }: { label: string; value: 
   );
 }
 
-function TextArea({ label, value, onChange, placeholder, rows = 4 }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; rows?: number }) {
-  const id = `textarea-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+function TextArea({ label, value, onChange, placeholder, rows = 4, fieldId }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; rows?: number; fieldId?: string }) {
+  const id = fieldId || `textarea-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
   return (
     <div>
       <label htmlFor={id} className="block text-sm font-medium text-warm-gray-800 mb-1">{label}</label>

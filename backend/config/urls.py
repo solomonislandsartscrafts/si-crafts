@@ -34,6 +34,7 @@ urlpatterns = [
     path("api/categories/", include("apps.categories.urls")),
     path("api/site-content/", include("apps.site_content.urls")),
     path("api/upload/", include("apps.site_content.upload_urls")),
+    path("api/team/", include("apps.team.urls")),
 
     # Writable page APIs (POST/PATCH/DELETE for Wagtail pages)
     path("api/write/products/", include("apps.products.urls")),

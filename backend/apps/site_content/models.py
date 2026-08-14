@@ -25,9 +25,18 @@ class SiteContent(models.Model):
 
     # --- About page text ---
     about_page_intro = models.TextField(blank=True, default="")
+    about_solomon_islands_heading = models.CharField(max_length=200, blank=True, default="")
     about_solomon_islands_text = models.TextField(blank=True, default="")
+    about_solomon_islands_link_text = models.CharField(max_length=200, blank=True, default="")
+    about_solomon_islands_link_url = models.CharField(max_length=500, blank=True, default="")
+    about_team_heading = models.CharField(max_length=200, blank=True, default="")
     about_team_text = models.TextField(blank=True, default="")
+    about_team_link_text = models.CharField(max_length=200, blank=True, default="")
+    about_team_link_url = models.CharField(max_length=500, blank=True, default="")
+    about_why_heading = models.CharField(max_length=200, blank=True, default="")
     about_why_text = models.TextField(blank=True, default="")
+    about_why_link_text = models.CharField(max_length=200, blank=True, default="")
+    about_why_link_url = models.CharField(max_length=500, blank=True, default="")
 
     # --- Wholesale page ---
     wholesale_intro = models.TextField(blank=True, default="")

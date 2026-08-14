@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "apps.enquiries",
     "apps.categories",
     "apps.site_content",
+    "apps.team",
 ]
 
 MIDDLEWARE = [

@@ -17,9 +17,18 @@ const EMPTY_SITE_CONTENT: SiteContent = {
   homepageMakersIntro: '',
   // About
   aboutPageIntro: '',
+  aboutSolomonIslandsHeading: '',
   aboutSolomonIslandsText: '',
+  aboutSolomonIslandsLinkText: '',
+  aboutSolomonIslandsLinkUrl: '',
+  aboutTeamHeading: '',
   aboutTeamText: '',
+  aboutTeamLinkText: '',
+  aboutTeamLinkUrl: '',
+  aboutWhyHeading: '',
   aboutWhyText: '',
+  aboutWhyLinkText: '',
+  aboutWhyLinkUrl: '',
   // Wholesale
   wholesaleIntro: '',
   wholesaleHowItWorks: '',

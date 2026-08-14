@@ -28,3 +28,4 @@ export type {
   DashboardCounts,
   DashboardSummary,
 } from './dashboard';
+export type { TeamMember } from './team';

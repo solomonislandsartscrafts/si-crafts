@@ -1,8 +1,7 @@
-import Link from 'next/link';
-import { ExternalLink } from 'lucide-react';
 import { generatePageMetadata } from '@/lib/metadata';
 import { AcknowledgementOfCountry, PageHeader } from '@/components/layout';
 import { SafeImage } from '@/components/ui/safe-image';
+import { SmartLink } from '@/components/ui/smart-link';
 import { getSiteContentSafe } from '@/services/site-content';
 
 export const metadata = generatePageMetadata({
@@ -48,7 +47,7 @@ export default async function AboutPage() {
             </figure>
             <div className="lg:col-span-3">
               <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
-                About Solomon Islands
+                {siteContent.aboutSolomonIslandsHeading || "About Solomon Islands"}
               </h2>
               <div className="space-y-4 text-warm-gray-600 leading-relaxed">
                 {siteContent.aboutSolomonIslandsText ? (
@@ -76,16 +75,12 @@ export default async function AboutPage() {
                   </>
                 )}
                 <p className="pt-2">
-                  <a
-                    href="https://en.wikipedia.org/wiki/Solomon_Islands"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <SmartLink
+                    href={siteContent.aboutSolomonIslandsLinkUrl || "https://en.wikipedia.org/wiki/Solomon_Islands"}
                     className="inline-flex items-center gap-1.5 text-ocean hover:text-ocean-dark font-medium transition-colors"
                   >
-                    Find out more about Solomon Islands
-                    <ExternalLink className="w-4 h-4" aria-hidden="true" />
-                    <span className="sr-only">(opens in a new tab)</span>
-                  </a>
+                    {siteContent.aboutSolomonIslandsLinkText || "Find out more about Solomon Islands"}
+                  </SmartLink>
                 </p>
               </div>
             </div>
@@ -99,7 +94,7 @@ export default async function AboutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-start">
             <div className="lg:col-span-3 order-2 lg:order-1">
               <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
-                About the Solomon Islands Arts and Crafts (SIAC) Team
+                {siteContent.aboutTeamHeading || "About the Solomon Islands Arts and Crafts (SIAC) Team"}
               </h2>
               <div className="space-y-4 text-warm-gray-600 leading-relaxed">
                 {siteContent.aboutTeamText ? (
@@ -126,9 +121,12 @@ export default async function AboutPage() {
                   </>
                 )}
                 <p className="pt-2">
-                  <Link href="/about/team" className="text-ocean hover:text-ocean-dark font-medium transition-colors">
-                    Find out more about our team →
-                  </Link>
+                  <SmartLink
+                    href={siteContent.aboutTeamLinkUrl || "/about/team"}
+                    className="inline-flex items-center gap-1.5 text-ocean hover:text-ocean-dark font-medium transition-colors"
+                  >
+                    {siteContent.aboutTeamLinkText || "Find out more about our team →"}
+                  </SmartLink>
                 </p>
               </div>
             </div>
@@ -164,7 +162,7 @@ export default async function AboutPage() {
             </figure>
             <div className="lg:col-span-3">
               <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
-                Why We&apos;re Doing This
+                {siteContent.aboutWhyHeading || "Why We\u2019re Doing This"}
               </h2>
               <div className="space-y-4 text-warm-gray-600 leading-relaxed">
                 {siteContent.aboutWhyText ? (
@@ -198,9 +196,12 @@ export default async function AboutPage() {
                   </>
                 )}
                 <p className="pt-2">
-                  <Link href="/for-makers" className="text-ocean hover:text-ocean-dark font-medium transition-colors">
-                    Are you a maker in Solomon Islands? Learn how to work with us →
-                  </Link>
+                  <SmartLink
+                    href={siteContent.aboutWhyLinkUrl || "/for-makers"}
+                    className="inline-flex items-center gap-1.5 text-ocean hover:text-ocean-dark font-medium transition-colors"
+                  >
+                    {siteContent.aboutWhyLinkText || "Are you a maker in Solomon Islands? Learn how to work with us →"}
+                  </SmartLink>
                 </p>
               </div>
             </div>

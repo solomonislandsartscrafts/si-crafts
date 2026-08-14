@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Package, Palette, Store, ClipboardList, Shield, Inbox, Newspaper, LogOut, ExternalLink, ImageIcon, Tags, BookOpen } from 'lucide-react';
+import { LayoutDashboard, Users, UsersRound, Package, Palette, Store, ClipboardList, Shield, Inbox, Newspaper, LogOut, ExternalLink, ImageIcon, Tags, BookOpen } from 'lucide-react';
 import type { AdminRole } from '@/types';
 
 interface AdminSidebarProps {
@@ -66,6 +66,7 @@ const NAV_GROUPS: NavGroup[] = [
     roles: ['super_admin'],
     items: [
       { href: '/admin/admins', label: 'Admin Users', icon: Shield, roles: ['super_admin'] },
+      { href: '/admin/team', label: 'Team', icon: UsersRound, roles: ['super_admin'] },
       { href: '/admin/getting-started', label: 'Getting Started', icon: BookOpen, roles: ['super_admin', 'editor'] },
     ],
   },

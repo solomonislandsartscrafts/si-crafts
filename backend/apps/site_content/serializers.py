@@ -1,5 +1,28 @@
+import re
+
 from rest_framework import serializers
 from .models import SiteContent
+
+
+def _validate_safe_url(value: str) -> str:
+    """Allow only https:// URLs or internal paths starting with exactly one slash.
+
+    Rejects javascript:, data:, protocol-relative (//), and other unsafe schemes.
+    """
+    if not value:
+        return value
+
+    # Internal path: must start with exactly one slash (not //)
+    if value.startswith("/") and not value.startswith("//"):
+        return value
+
+    # External URL: only https is allowed
+    if re.match(r"^https://", value, re.IGNORECASE):
+        return value
+
+    raise serializers.ValidationError(
+        "URL must be an https:// URL or an internal path starting with /."
+    )
 
 
 # Mapping of camelCase frontend keys → snake_case model fields
@@ -19,9 +42,18 @@ FIELD_MAP = {
     "homepageMakersIntro": "homepage_makers_intro",
     # About page text
     "aboutPageIntro": "about_page_intro",
+    "aboutSolomonIslandsHeading": "about_solomon_islands_heading",
     "aboutSolomonIslandsText": "about_solomon_islands_text",
+    "aboutSolomonIslandsLinkText": "about_solomon_islands_link_text",
+    "aboutSolomonIslandsLinkUrl": "about_solomon_islands_link_url",
+    "aboutTeamHeading": "about_team_heading",
     "aboutTeamText": "about_team_text",
+    "aboutTeamLinkText": "about_team_link_text",
+    "aboutTeamLinkUrl": "about_team_link_url",
+    "aboutWhyHeading": "about_why_heading",
     "aboutWhyText": "about_why_text",
+    "aboutWhyLinkText": "about_why_link_text",
+    "aboutWhyLinkUrl": "about_why_link_url",
     # Wholesale
     "wholesaleIntro": "wholesale_intro",
     "wholesaleHowItWorks": "wholesale_how_it_works",
@@ -63,9 +95,18 @@ class SiteContentSerializer(serializers.Serializer):
     homepage_makers_intro = serializers.CharField(required=False, allow_blank=True, default="")
     # About
     about_page_intro = serializers.CharField(required=False, allow_blank=True, default="")
+    about_solomon_islands_heading = serializers.CharField(required=False, allow_blank=True, default="", max_length=200)
     about_solomon_islands_text = serializers.CharField(required=False, allow_blank=True, default="")
+    about_solomon_islands_link_text = serializers.CharField(required=False, allow_blank=True, default="", max_length=200)
+    about_solomon_islands_link_url = serializers.CharField(required=False, allow_blank=True, default="", max_length=500)
+    about_team_heading = serializers.CharField(required=False, allow_blank=True, default="", max_length=200)
     about_team_text = serializers.CharField(required=False, allow_blank=True, default="")
+    about_team_link_text = serializers.CharField(required=False, allow_blank=True, default="", max_length=200)
+    about_team_link_url = serializers.CharField(required=False, allow_blank=True, default="", max_length=500)
+    about_why_heading = serializers.CharField(required=False, allow_blank=True, default="", max_length=200)
     about_why_text = serializers.CharField(required=False, allow_blank=True, default="")
+    about_why_link_text = serializers.CharField(required=False, allow_blank=True, default="", max_length=200)
+    about_why_link_url = serializers.CharField(required=False, allow_blank=True, default="", max_length=500)
     # Wholesale
     wholesale_intro = serializers.CharField(required=False, allow_blank=True, default="")
     wholesale_how_it_works = serializers.CharField(required=False, allow_blank=True, default="")
@@ -79,6 +120,15 @@ class SiteContentSerializer(serializers.Serializer):
     contact_intro = serializers.CharField(required=False, allow_blank=True, default="")
     contact_email = serializers.CharField(required=False, allow_blank=True, default="", max_length=200)
     contact_response_time = serializers.CharField(required=False, allow_blank=True, default="", max_length=200)
+
+    def validate_about_solomon_islands_link_url(self, value):
+        return _validate_safe_url(value)
+
+    def validate_about_team_link_url(self, value):
+        return _validate_safe_url(value)
+
+    def validate_about_why_link_url(self, value):
+        return _validate_safe_url(value)
 
     def to_representation(self, instance):
         """Output camelCase keys for the frontend."""

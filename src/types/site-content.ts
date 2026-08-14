@@ -16,9 +16,18 @@ export interface SiteContent {
 
   // About page text
   aboutPageIntro: string;
+  aboutSolomonIslandsHeading: string;
   aboutSolomonIslandsText: string;
+  aboutSolomonIslandsLinkText: string;
+  aboutSolomonIslandsLinkUrl: string;
+  aboutTeamHeading: string;
   aboutTeamText: string;
+  aboutTeamLinkText: string;
+  aboutTeamLinkUrl: string;
+  aboutWhyHeading: string;
   aboutWhyText: string;
+  aboutWhyLinkText: string;
+  aboutWhyLinkUrl: string;
 
   // Wholesale
   wholesaleIntro: string;

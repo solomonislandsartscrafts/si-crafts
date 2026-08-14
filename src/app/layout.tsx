@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { SkipLink } from '@/components/layout';
 import { LayoutShell } from '@/components/layout/layout-shell';
 import { AccessibilityWidget } from '@/components/shared/accessibility-widget';
-import { ScrollToTop } from '@/components/shared/scroll-to-top';
 import { SwRegister } from '@/components/shared/sw-register';
 import { Providers } from '@/components/providers';
 import './globals.css';
@@ -60,7 +59,6 @@ export default function RootLayout({
             </LayoutShell>
           </div>
           <AccessibilityWidget />
-          <ScrollToTop />
           <SwRegister />
         </Providers>
       </body>
