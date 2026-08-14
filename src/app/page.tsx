@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { generatePageMetadata } from '@/lib/metadata';
-import { getPublicProducts } from '@/services/products';
+import { getPublicProducts, getFeaturedProducts } from '@/services/products';
 import { getPublicMakers } from '@/services/makers';
 import { getPublishedArticles } from '@/services/articles';
+import { getSiteContentSafe } from '@/services/site-content';
 import { ProductCard } from '@/components/cards/product-card';
 import { HeroCodeToggle } from '@/components/shared/hero-code-toggle';
 import { HeroSlideshow } from '@/components/shared/hero-slideshow';
@@ -17,10 +18,12 @@ export const metadata = generatePageMetadata({
 });
 
 export default async function HomePage() {
-  const [products, makers, articles] = await Promise.all([
+  const [products, makers, articles, adminFeatured, siteContent] = await Promise.all([
     getPublicProducts(),
     getPublicMakers(),
     getPublishedArticles(),
+    getFeaturedProducts(),
+    getSiteContentSafe(),
   ]);
 
   const featuredProducts = products.slice(0, 4);
@@ -28,27 +31,32 @@ export default async function HomePage() {
   const latestArticles = articles.slice(0, 3);
   const featuredMakers = makers.slice(0, 3);
 
-  // Hero gallery — show 3 products rotating. Prefer one per material category
-  // so the rotation shows the range of crafts. Products without images still
-  // appear with the placeholder.
-  const seenCategories = new Set<string>();
-  const heroProducts: (typeof products)[number][] = [];
+  // Hero gallery — use admin-selected featured products (up to 3).
+  // Falls back to auto-selection (one per material category) if no products
+  // have been marked as featured yet.
+  let heroProducts: (typeof products)[number][];
 
-  // First pass: one product per category
-  for (const product of products) {
-    if (heroProducts.length >= 3) break;
-    if (!seenCategories.has(product.materialCategory)) {
-      seenCategories.add(product.materialCategory);
-      heroProducts.push(product);
-    }
-  }
-
-  // Second pass: fill remaining slots from any category
-  if (heroProducts.length < 3) {
+  if (adminFeatured.length > 0) {
+    // Admin has chosen which products to feature
+    heroProducts = adminFeatured.slice(0, 3);
+  } else {
+    // Fallback: pick one product per material category for variety
+    const seenCategories = new Set<string>();
+    heroProducts = [];
     for (const product of products) {
       if (heroProducts.length >= 3) break;
-      if (!heroProducts.includes(product)) {
+      if (!seenCategories.has(product.materialCategory)) {
+        seenCategories.add(product.materialCategory);
         heroProducts.push(product);
+      }
+    }
+    // Fill remaining slots from any category
+    if (heroProducts.length < 3) {
+      for (const product of products) {
+        if (heroProducts.length >= 3) break;
+        if (!heroProducts.includes(product)) {
+          heroProducts.push(product);
+        }
       }
     }
   }
@@ -83,11 +91,11 @@ export default async function HomePage() {
                 </div>
 
                 <h1 className="font-heading text-[1.875rem] sm:text-4xl lg:text-[2.75rem] xl:text-5xl font-medium text-deep-blue leading-tight">
-                  Meet the Makers Behind Every Piece
+                  {siteContent.homepageHeading || 'Meet the Makers Behind Every Piece'}
                 </h1>
 
                 <p className="mt-5 text-base text-warm-gray-600 leading-relaxed max-w-md">
-                  Every product is handmade. When you buy from us, you invest directly in Solomon Islands artisans, their communities, their traditions, and their futures.
+                  {siteContent.homepageIntro || 'Every product is handmade. When you buy from us, you invest directly in Solomon Islands artisans, their communities, their traditions, and their futures.'}
                 </p>
 
                 <div className="mt-7 flex flex-wrap items-center gap-3">
@@ -95,7 +103,7 @@ export default async function HomePage() {
                     href="/catalogue"
                     className="tap-target inline-flex items-center px-6 py-3 btn-primary"
                   >
-                    Browse Catalogue
+                    {siteContent.homepageCtaText || 'Browse Catalogue'}
                   </Link>
                   <Link
                     href="/about"
@@ -230,11 +238,10 @@ export default async function HomePage() {
             </div>
             <div className="max-w-md">
               <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
-                Every tag tells a story
+                {siteContent.homepageMakersHeading || 'Every tag tells a story'}
               </h2>
               <p className="text-warm-gray-600 leading-relaxed mb-4">
-                Scan the QR code on any product tag to meet the maker — see who made your piece,
-                how it was made, and where it comes from. No app needed, no login required.
+                {siteContent.homepageMakersIntro || 'Scan the QR code on any product tag to meet the maker — see who made your piece, how it was made, and where it comes from. No app needed, no login required.'}
               </p>
               <p className="text-warm-gray-600 leading-relaxed mb-6">
                 We work directly with makers in Solomon Islands. Every piece carries the artisan&apos;s name,

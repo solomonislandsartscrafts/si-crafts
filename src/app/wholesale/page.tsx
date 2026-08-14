@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { IconJoinUs, IconWovenBasket, IconBankTransfer, IconParcelLeaf } from '@/components/icons/craft-icons';
 import { generatePageMetadata } from '@/lib/metadata';
+import { getSiteContentSafe } from '@/services/site-content';
 
 export const metadata = generatePageMetadata({
   title: 'Wholesale',
@@ -36,7 +37,9 @@ const steps = [
   },
 ];
 
-export default function WholesalePage() {
+export default async function WholesalePage() {
+  const siteContent = await getSiteContentSafe();
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 page-y pb-12 lg:pb-16">
       {/* Intro */}
@@ -44,8 +47,7 @@ export default function WholesalePage() {
         Wholesale
       </h1>
       <p className="text-warm-gray-600 leading-relaxed max-w-2xl mb-12">
-        We supply museum shops and galleries in Australia with authentic Solomon Islands
-        handicrafts. No minimum order. Bank transfer only. Here&apos;s how it works.
+        {siteContent.wholesaleIntro || "We supply museum shops and galleries in Australia with authentic Solomon Islands handicrafts. No minimum order. Bank transfer only. Here's how it works."}
       </p>
 
       {/* How it works — simple numbered steps */}

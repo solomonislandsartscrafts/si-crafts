@@ -1,5 +1,6 @@
 import { generatePageMetadata } from '@/lib/metadata';
 import { PageHeader } from '@/components/layout';
+import { getSiteContentSafe } from '@/services/site-content';
 
 export const metadata = generatePageMetadata({
   title: 'Care Guide',
@@ -45,30 +46,51 @@ const CARE_SECTIONS = [
   },
 ];
 
-export default function CareGuidePage() {
+export default async function CareGuidePage() {
+  const siteContent = await getSiteContentSafe();
+
+  // Parse newline-delimited CMS text into tip items, falling back to hardcoded tips
+  function parseTips(cmsText: string | undefined, fallbackTips: string[]): string[] {
+    if (!cmsText || !cmsText.trim()) return fallbackTips;
+    return cmsText.split('\n').map((line) => line.trim()).filter(Boolean);
+  }
+
+  // Map CMS fields to care sections by material keyword
+  const cmsFieldMap: Record<string, string | undefined> = {
+    'Pandanus': siteContent.careGuidePandanus,
+    'Wood': siteContent.careGuideWood,
+    'Shell': siteContent.careGuideShell,
+  };
+
   return (
     <div>
       <PageHeader
         title="Care Guide"
-        intro="Each material needs different care. Follow these tips to keep your pieces looking beautiful for years."
+        intro={siteContent.careGuideIntro || "Each material needs different care. Follow these tips to keep your pieces looking beautiful for years."}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16 space-y-12">
-        {CARE_SECTIONS.map((section) => (
-          <section key={section.heading}>
-            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
-              {section.heading}
-            </h2>
-            <ul className="space-y-3 text-warm-gray-600 leading-relaxed">
-              {section.tips.map((tip) => (
-                <li key={tip} className="flex gap-2">
-                  <span className="text-terracotta font-bold">•</span>
-                  {tip}
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
+        {CARE_SECTIONS.map((section) => {
+          // Determine which CMS field matches this section (by first keyword in heading)
+          const matchKey = Object.keys(cmsFieldMap).find((key) => section.heading.startsWith(key));
+          const tips = parseTips(matchKey ? cmsFieldMap[matchKey] : undefined, section.tips);
+
+          return (
+            <section key={section.heading}>
+              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
+                {section.heading}
+              </h2>
+              <ul className="space-y-3 text-warm-gray-600 leading-relaxed">
+                {tips.map((tip, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className="text-terracotta font-bold">•</span>
+                    {tip}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })}
       </div>
     </div>
   );

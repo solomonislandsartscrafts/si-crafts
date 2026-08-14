@@ -3,7 +3,7 @@ import { ExternalLink } from 'lucide-react';
 import { generatePageMetadata } from '@/lib/metadata';
 import { AcknowledgementOfCountry, PageHeader } from '@/components/layout';
 import { SafeImage } from '@/components/ui/safe-image';
-import { getSiteContent } from '@/services/site-content';
+import { getSiteContentSafe } from '@/services/site-content';
 
 export const metadata = generatePageMetadata({
   title: 'About',
@@ -13,13 +13,21 @@ export const metadata = generatePageMetadata({
 });
 
 export default async function AboutPage() {
-  const siteContent = await getSiteContent();
+  const siteContent = await getSiteContentSafe();
+
+  // Helper: split CMS text into paragraphs (double-newline separated)
+  function renderParagraphs(text: string) {
+    return text
+      .split(/\n\n+/)
+      .filter((p) => p.trim())
+      .map((p, i) => <p key={i}>{p.trim()}</p>);
+  }
 
   return (
     <div>
       <PageHeader
         title="About"
-        intro="Solomon Islands Arts and Crafts connects makers in Solomon Islands with museum and gallery shops in Australia — telling authentic stories and building respectful trade relationships."
+        intro={siteContent.aboutPageIntro || "Solomon Islands Arts and Crafts connects makers in Solomon Islands with museum and gallery shops in Australia — telling authentic stories and building respectful trade relationships."}
       />
 
       {/* Section 1: About Solomon Islands — image LEFT */}
@@ -43,24 +51,30 @@ export default async function AboutPage() {
                 About Solomon Islands
               </h2>
               <div className="space-y-4 text-warm-gray-600 leading-relaxed">
-                <p>
-                  Solomon Islands is a sovereign nation of over 990 islands spread across the
-                  southwestern Pacific Ocean. It is about three hours by plane from Brisbane.
-                  Home to around 700,000 people speaking more than 70 languages, the country holds
-                  one of the most diverse cultural heritages in the Pacific region.
-                </p>
-                <p>
-                  The islands are rich with tropical rainforest, coral reefs, and volcanic landscapes.
-                  Communities are spread across nine provinces from the large island of Guadalcanal in
-                  the south to the remote Temotu Province in the far east. Each province has distinct
-                  traditions, art forms, and materials shaped by geography and ancestry. The capital,
-                  Honiara, is on Guadalcanal and was a strategic military base during World War II.
-                </p>
-                <p>
-                  Craft traditions — pandanus weaving, wood carving, and shell-money making — are
-                  living practices passed through families and communities, not museum artefacts.
-                  They carry stories of place, kinship, and identity.
-                </p>
+                {siteContent.aboutSolomonIslandsText ? (
+                  renderParagraphs(siteContent.aboutSolomonIslandsText)
+                ) : (
+                  <>
+                    <p>
+                      Solomon Islands is a sovereign nation of over 990 islands spread across the
+                      southwestern Pacific Ocean. It is about three hours by plane from Brisbane.
+                      Home to around 700,000 people speaking more than 70 languages, the country holds
+                      one of the most diverse cultural heritages in the Pacific region.
+                    </p>
+                    <p>
+                      The islands are rich with tropical rainforest, coral reefs, and volcanic landscapes.
+                      Communities are spread across nine provinces from the large island of Guadalcanal in
+                      the south to the remote Temotu Province in the far east. Each province has distinct
+                      traditions, art forms, and materials shaped by geography and ancestry. The capital,
+                      Honiara, is on Guadalcanal and was a strategic military base during World War II.
+                    </p>
+                    <p>
+                      Craft traditions — pandanus weaving, wood carving, and shell-money making — are
+                      living practices passed through families and communities, not museum artefacts.
+                      They carry stories of place, kinship, and identity.
+                    </p>
+                  </>
+                )}
                 <p className="pt-2">
                   <a
                     href="https://en.wikipedia.org/wiki/Solomon_Islands"
@@ -88,23 +102,29 @@ export default async function AboutPage() {
                 About the Solomon Islands Arts and Crafts (SIAC) Team
               </h2>
               <div className="space-y-4 text-warm-gray-600 leading-relaxed">
-                <p>
-                  Solomon Islands Arts and Crafts is run entirely by volunteers who share a
-                  connection to Solomon Islands — through family, work, friendship, or simply
-                  a deep respect for the culture and its people.
-                </p>
-                <p>
-                  Our team handles importing, quality documentation, photography, liaising with
-                  makers, and wholesale distribution to Australian museum and gallery shops.
-                  We work directly with makers and their families to ensure every relationship
-                  is fair, respectful, and transparent.
-                </p>
-                <p>
-                  We are not a charity. We are a small business built on the principle that
-                  these extraordinary crafts deserve to reach a wider audience — and that the
-                  makers deserve fair payment and recognition for their work. Solomon Islands
-                  Arts and Crafts was founded in 2026 as a volunteer-run social enterprise.
-                </p>
+                {siteContent.aboutTeamText ? (
+                  renderParagraphs(siteContent.aboutTeamText)
+                ) : (
+                  <>
+                    <p>
+                      Solomon Islands Arts and Crafts is run entirely by volunteers who share a
+                      connection to Solomon Islands — through family, work, friendship, or simply
+                      a deep respect for the culture and its people.
+                    </p>
+                    <p>
+                      Our team handles importing, quality documentation, photography, liaising with
+                      makers, and wholesale distribution to Australian museum and gallery shops.
+                      We work directly with makers and their families to ensure every relationship
+                      is fair, respectful, and transparent.
+                    </p>
+                    <p>
+                      We are not a charity. We are a small business built on the principle that
+                      these extraordinary crafts deserve to reach a wider audience — and that the
+                      makers deserve fair payment and recognition for their work. Solomon Islands
+                      Arts and Crafts was founded in 2026 as a volunteer-run social enterprise.
+                    </p>
+                  </>
+                )}
                 <p className="pt-2">
                   <Link href="/about/team" className="text-ocean hover:text-ocean-dark font-medium transition-colors">
                     Find out more about our team →
@@ -147,30 +167,36 @@ export default async function AboutPage() {
                 Why We&apos;re Doing This
               </h2>
               <div className="space-y-4 text-warm-gray-600 leading-relaxed">
-                <p>
-                  Solomon Islands makers produce work of extraordinary skill and beauty —
-                  pandanus bags that take weeks to weave, shell-money necklaces ground disc by
-                  disc, carvings shaped from hardwood and inlaid with pearl shell over days of
-                  careful work.
-                </p>
-                <p>
-                  But access to markets outside Solomon Islands is limited. Transport is expensive,
-                  connections are few, and the stories behind the work rarely travel with the pieces.
-                </p>
-                <p>
-                  We exist to bridge that gap. Every product we bring to Australia carries the
-                  maker&apos;s name, village, and story. Every product tag links to a provenance page
-                  that tells you exactly who made your piece and how. We believe knowing the
-                  maker transforms an object into a connection to a person and a place.
-                </p>
-                <p>
-                  Providing a wider market for Solomon Islands arts and crafts also helps to
-                  maintain cultural traditions and the transfer of skills through generations.
-                </p>
-                <p>
-                  Our goal is simple: more income for makers, more stories shared, more respect
-                  for Solomon Islands craft traditions in the wider world.
-                </p>
+                {siteContent.aboutWhyText ? (
+                  renderParagraphs(siteContent.aboutWhyText)
+                ) : (
+                  <>
+                    <p>
+                      Solomon Islands makers produce work of extraordinary skill and beauty —
+                      pandanus bags that take weeks to weave, shell-money necklaces ground disc by
+                      disc, carvings shaped from hardwood and inlaid with pearl shell over days of
+                      careful work.
+                    </p>
+                    <p>
+                      But access to markets outside Solomon Islands is limited. Transport is expensive,
+                      connections are few, and the stories behind the work rarely travel with the pieces.
+                    </p>
+                    <p>
+                      We exist to bridge that gap. Every product we bring to Australia carries the
+                      maker&apos;s name, village, and story. Every product tag links to a provenance page
+                      that tells you exactly who made your piece and how. We believe knowing the
+                      maker transforms an object into a connection to a person and a place.
+                    </p>
+                    <p>
+                      Providing a wider market for Solomon Islands arts and crafts also helps to
+                      maintain cultural traditions and the transfer of skills through generations.
+                    </p>
+                    <p>
+                      Our goal is simple: more income for makers, more stories shared, more respect
+                      for Solomon Islands craft traditions in the wider world.
+                    </p>
+                  </>
+                )}
                 <p className="pt-2">
                   <Link href="/for-makers" className="text-ocean hover:text-ocean-dark font-medium transition-colors">
                     Are you a maker in Solomon Islands? Learn how to work with us →
