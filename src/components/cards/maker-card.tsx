@@ -13,13 +13,13 @@ export function MakerCard({ maker, craftName }: MakerCardProps) {
       href={`/maker/${maker.slug}`}
       className="group flex h-full flex-col rounded-lg overflow-hidden border border-sand hover:border-ocean/30 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ocean"
     >
-      {/* Image area — shorter on mobile, tall portrait on grid */}
-      <div className="aspect-[4/3] sm:aspect-[3/4] relative bg-sand-light overflow-hidden">
+      {/* Image area — white background */}
+      <div className="aspect-square relative bg-white overflow-hidden">
         <SafeImage
           src={maker.portraitUrl}
           alt={`${maker.name}, ${craftName || 'maker'} from ${maker.village}`}
           fill
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
+          className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
       </div>
