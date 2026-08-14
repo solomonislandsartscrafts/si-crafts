@@ -78,10 +78,10 @@ export default async function HomePage() {
       <div className="lg:flex lg:flex-col lg:min-h-[calc(100vh-94px)]">
         {/* Hero — Flag theme: gold accent + serif heading + split layout */}
         <section className="bg-page-bg lg:flex-1 lg:flex lg:items-center">
-          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-10 items-center py-12 lg:py-10">
+          <div className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-10 items-center pt-0 pb-12 lg:py-10">
               {/* Left: Text content */}
-              <div className="order-2 lg:order-1 lg:col-span-2">
+              <div className="order-2 lg:order-1 lg:col-span-2 px-4 sm:px-0">
                 {/* Gold accent line + subtitle */}
                 <div className="flex items-center gap-3 mb-4">
                   <span className="w-8 h-0.5 bg-ocean" aria-hidden="true" />
@@ -118,7 +118,7 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              {/* Right: Hero gallery — coverflow carousel */}
+              {/* Right: Hero gallery — full-width on mobile */}
               <div className="order-1 lg:order-2 lg:col-span-3 w-full">
                 <HeroSlideshow items={heroSlides} interval={5000} />
               </div>
@@ -150,20 +150,20 @@ export default async function HomePage() {
               Every piece you see here was made by hand, by a named maker, in Solomon Islands.
             </p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
             {featuredMakers.map((maker, index) => (
-              <Link key={maker.id} href={`/maker/${maker.slug}`} className={`group flex h-full flex-col rounded-lg overflow-hidden border border-sand hover:border-ocean/30 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ocean ${index === 2 ? 'hidden lg:flex' : ''}`}>
-                <div className="aspect-square relative bg-sand-light overflow-hidden">
+              <Link key={maker.id} href={`/maker/${maker.slug}`} className={`group block w-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-ocean ${index === 2 ? 'hidden lg:block' : ''}`}>
+                <div className="aspect-square relative bg-white overflow-hidden">
                   <SafeImage
                     src={maker.portraitUrl}
                     alt={maker.name}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
                   />
                 </div>
-                <div className="flex flex-1 flex-col p-4 bg-warm-gray-100">
-                  <h3 className="font-heading text-sm font-semibold text-deep-blue group-hover:text-ocean transition-colors">
+                <div className="bg-warm-gray-100 p-3 sm:p-4">
+                  <h3 className="font-heading text-sm sm:text-base font-semibold text-deep-blue leading-tight">
                     {maker.name}
                   </h3>
                   <p className="text-xs text-warm-gray-600 mt-1">

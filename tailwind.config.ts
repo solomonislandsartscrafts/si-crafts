@@ -125,30 +125,23 @@ const config: Config = {
         heading: ['var(--font-heading)', 'Poppins', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
       },
       fontSize: {
-        // ⚠️ ACCESSIBILITY NOTE: xs (13px) and sm (15px) are below the 16px
+        // ⚠️ ACCESSIBILITY NOTE: xs (12px) and sm (13px) are below the 16px
         // best-practice floor for body text. Use ONLY for non-essential,
         // secondary content: timestamps, captions, metadata labels, badge text.
-        // NEVER use these sizes for form labels, instructions, legal text, or
-        // any content a user needs to read to complete a task.
-        xs: '0.8125rem',   // 13px — metadata, timestamps only
-        sm: '0.9375rem',   // 15px — captions, secondary labels only
-        base: '1.125rem',  // 18px — primary body text
-        lg: '1.25rem',     // 20px — body-large / intro text
-        xl: '1.375rem',    // 22px — H3 small variant
-        // Heading scale — NOTE: Multiple size options for h1/h2 are VISUAL
-        // STYLE VARIANTS used in different page contexts (e.g. hero h1 vs
-        // interior page h1). They are NOT duplicate <h1>/<h2> tags on a single
-        // page. Every page must have exactly one <h1>. Never skip heading
-        // levels in markup (e.g. h1 → h3 without an h2).
-        '2xl': '1.625rem', // 26px — H3 / H2-small
-        '3xl': '2rem',     // 32px — H2 default
-        '4xl': '2.5rem',   // 40px — H1 interior pages
-        '5xl': '3.25rem',  // 52px — H1 hero / landing pages
+        xs: '0.75rem',     // 12px — metadata, timestamps only
+        sm: '0.8125rem',   // 13px — captions, secondary labels only
+        base: '0.9375rem', // 15px — primary body text (compact, easy to read)
+        lg: '1.0625rem',   // 17px — body-large / intro text
+        xl: '1.1875rem',   // 19px — H3 small variant
+        '2xl': '1.375rem', // 22px — H3 / H2-small
+        '3xl': '1.75rem',  // 28px — H2 default
+        '4xl': '2.125rem', // 34px — H1 interior pages
+        '5xl': '2.75rem',  // 44px — H1 hero / landing pages
       },
       lineHeight: {
-        body: '1.6',
+        body: '1.5',
         heading: '1.2',
-        relaxed: '1.75',
+        relaxed: '1.6',
       },
       spacing: {
         // Vertical page/section rhythm lives in the .page-y and .section-y
@@ -161,10 +154,10 @@ const config: Config = {
         card: '0 2px 8px rgba(0, 0, 0, 0.06)',
       },
       borderRadius: {
-        sm: '4px',
-        md: '8px',
-        lg: '12px',
-        xl: '16px',
+        sm: '0px',
+        md: '0px',
+        lg: '0px',
+        xl: '0px',
       },
       keyframes: {
         'slide-up': {

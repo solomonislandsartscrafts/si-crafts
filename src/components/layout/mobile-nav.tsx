@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { X, LogIn, User, Shield } from 'lucide-react';
+import { X, ChevronRight, LogIn, User, Shield } from 'lucide-react';
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
@@ -38,7 +38,6 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
   useEffect(() => {
     if (isOpen) {
       setMounted(true);
-      // Trigger animation on next frame
       requestAnimationFrame(() => {
         requestAnimationFrame(() => setAnimating(true));
       });
@@ -94,82 +93,82 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
       aria-modal="true"
       aria-label="Navigation menu"
       className={`fixed inset-0 md:hidden flex flex-col bg-white transition-all duration-300 ease-out ${
-        animating ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+        animating ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full'
       }`}
       style={{ zIndex: 9999 }}
     >
       {/* Top bar */}
-      <div className="flex items-center justify-between h-20 px-4 sm:px-6">
-        <span className="font-heading text-xl font-semibold text-deep-blue">
-          SIAC
-        </span>
+      <div className="flex items-center justify-between px-5 py-4 border-b border-sand">
         <button
           ref={closeButtonRef}
           onClick={onClose}
-          className="tap-target flex items-center justify-center p-2 rounded-md text-warm-gray-800 hover:bg-sand-light focus:outline-none focus:ring-2 focus:ring-ocean"
+          className="tap-target flex items-center justify-center p-2 rounded-md text-deep-blue hover:text-ocean focus:outline-none focus:ring-2 focus:ring-ocean"
           aria-label="Close menu"
         >
           <X className="h-6 w-6" />
         </button>
+        <span className="font-heading text-sm font-semibold text-deep-blue uppercase tracking-wider">
+          SIAC
+        </span>
+        {/* Spacer to balance layout */}
+        <div className="w-10" />
       </div>
 
-      {/* Nav links with staggered fade-in */}
-      <nav className="flex-1 flex flex-col items-center justify-center gap-2 px-4 pb-16">
-        {NAV_LINKS.map((link, i) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            onClick={onClose}
-            className={`tap-target flex items-center justify-center w-full max-w-xs px-4 py-4 rounded-md text-xl font-heading font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-ocean ${
-              isActive(link.href)
-                ? 'text-ocean bg-ocean/5'
-                : 'text-deep-blue hover:text-ocean hover:bg-sand-light'
-            } ${animating ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}
-            style={{ transitionDelay: `${(i + 1) * 50}ms` }}
-            aria-current={isActive(link.href) ? 'page' : undefined}
-          >
-            {link.label}
-          </Link>
-        ))}
-        {authState === 'admin' && (
-          <Link
-            href="/admin/dashboard"
-            onClick={onClose}
-            className={`tap-target inline-flex items-center justify-center gap-2 w-full max-w-xs mt-4 px-4 py-4 btn-admin text-lg transition-all duration-300 ${
-              animating ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
-            }`}
-            style={{ transitionDelay: `${(NAV_LINKS.length + 1) * 50}ms` }}
-          >
-            <Shield className="w-5 h-5" />
-            Admin Dashboard
-          </Link>
-        )}
-        {authState === 'stockist' && (
-          <Link
-            href="/stockist/catalogue"
-            onClick={onClose}
-            className={`tap-target inline-flex items-center justify-center gap-2 w-full max-w-xs mt-4 px-4 py-4 btn-primary text-lg transition-all duration-300 ${
-              animating ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
-            }`}
-            style={{ transitionDelay: `${(NAV_LINKS.length + 1) * 50}ms` }}
-          >
-            <User className="w-5 h-5" />
-            My Account
-          </Link>
-        )}
-        {authState === 'none' && (
-          <Link
-            href="/login"
-            onClick={onClose}
-            className={`tap-target inline-flex items-center justify-center gap-2 w-full max-w-xs mt-4 px-4 py-4 btn-secondary text-lg transition-all duration-300 ${
-              animating ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
-            }`}
-            style={{ transitionDelay: `${(NAV_LINKS.length + 1) * 50}ms` }}
-          >
-            <LogIn className="w-5 h-5" />
-            Login
-          </Link>
-        )}
+      {/* Nav links — compact list, left-aligned with chevrons */}
+      <nav className="flex-1 px-5 pt-2" aria-label="Main navigation">
+        <ul className="space-y-0">
+          {NAV_LINKS.map((link) => (
+            <li key={link.href}>
+              <Link
+                href={link.href}
+                onClick={onClose}
+                className={`tap-target flex items-center justify-between py-3 text-2xl font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded ${
+                  isActive(link.href)
+                    ? 'text-ocean'
+                    : 'text-deep-blue hover:text-ocean'
+                }`}
+                aria-current={isActive(link.href) ? 'page' : undefined}
+              >
+                {link.label}
+                <ChevronRight className="w-5 h-5 text-brand-green flex-shrink-0" />
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        {/* Divider */}
+        <div className="border-t border-sand mt-2 pt-4">
+          {authState === 'admin' && (
+            <Link
+              href="/admin/dashboard"
+              onClick={onClose}
+              className="tap-target inline-flex items-center gap-2 py-3 text-lg font-medium text-deep-blue hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded"
+            >
+              <Shield className="w-5 h-5" />
+              Admin Dashboard
+            </Link>
+          )}
+          {authState === 'stockist' && (
+            <Link
+              href="/stockist/catalogue"
+              onClick={onClose}
+              className="tap-target inline-flex items-center gap-2 py-3 text-lg font-medium text-deep-blue hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded"
+            >
+              <User className="w-5 h-5" />
+              My Account
+            </Link>
+          )}
+          {authState === 'none' && (
+            <Link
+              href="/login"
+              onClick={onClose}
+              className="tap-target inline-flex items-center gap-2 py-3 text-lg font-medium text-deep-blue hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded"
+            >
+              <LogIn className="w-5 h-5" />
+              Login
+            </Link>
+          )}
+        </div>
       </nav>
     </div>
   );

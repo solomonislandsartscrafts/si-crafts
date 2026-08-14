@@ -68,7 +68,7 @@ export default async function PiecePage({ params }: PiecePageProps) {
           <h2 className="font-heading text-2xl font-medium text-deep-blue mb-6">
             You might also like
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
             {relatedProducts.map((relatedProduct) => {
               const relatedMaker = allMakers.find((m) => m.id === relatedProduct.makerId);
               return (
