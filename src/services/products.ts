@@ -20,6 +20,7 @@ interface WagtailProductResponse {
   care_notes: string | null;
   wholesale_price: string | number;
   published_flag: boolean;
+  featured?: boolean;
   image_urls?: string[] | null;
   image_alts?: string[] | null;
   images?: { image: { meta: { download_url: string } } }[];
@@ -69,6 +70,7 @@ function mapProduct(raw: WagtailProductResponse): Product {
     careNotes: raw.care_notes ?? null,
     wholesalePrice: typeof raw.wholesale_price === 'string' ? parseFloat(raw.wholesale_price) : (raw.wholesale_price ?? 0),
     publishedFlag: raw.published_flag ?? false,
+    featured: raw.featured ?? false,
     // Read API nests timestamps under `meta`; the write API returns them flat.
     createdAt: raw.meta?.first_published_at ?? raw.first_published_at ?? '',
     updatedAt: raw.meta?.last_published_at ?? raw.last_published_at ?? '',
@@ -104,6 +106,19 @@ export async function getPublicProducts(filters?: ProductFilters): Promise<Produ
     `/api/v2/products/?published_flag=true&fields=*${qs}`
   );
   return data.items.map(mapProduct);
+}
+
+export async function getFeaturedProducts(): Promise<Product[]> {
+  try {
+    const data = await apiGet<WagtailListResponse>(
+      `/api/v2/products/?published_flag=true&featured=true&fields=*`
+    );
+    return data.items.map(mapProduct);
+  } catch {
+    // Backend may not have the 'featured' field yet — return empty so
+    // the homepage falls back to auto-selection logic.
+    return [];
+  }
 }
 
 export async function getPublicProductByCode(productCode: string): Promise<Product | null> {
@@ -173,6 +188,7 @@ export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'up
     dimensions: data.dimensions,
     care_notes: data.careNotes,
     wholesale_price: data.wholesalePrice,
+    featured: data.featured ?? false,
     image_urls: data.imageUrls ?? [],
     image_alts: data.imageAlts ?? [],
   }, token);
@@ -193,6 +209,7 @@ export async function updateProduct(id: string, data: Partial<Product>): Promise
   if (data.dimensions !== undefined) body.dimensions = data.dimensions;
   if (data.careNotes !== undefined) body.care_notes = data.careNotes;
   if (data.wholesalePrice !== undefined) body.wholesale_price = data.wholesalePrice;
+  if (data.featured !== undefined) body.featured = data.featured;
   if (data.imageUrls !== undefined) body.image_urls = data.imageUrls;
   if (data.imageAlts !== undefined) body.image_alts = data.imageAlts;
 

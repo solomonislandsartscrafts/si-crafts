@@ -31,6 +31,10 @@ class ProductPage(Page):
     care_notes = models.TextField(blank=True, null=True)
     wholesale_price = models.DecimalField(max_digits=10, decimal_places=2)
     published_flag = models.BooleanField(default=True)
+    featured = models.BooleanField(
+        default=False,
+        help_text="Show this product in the homepage hero gallery (max 3 recommended).",
+    )
     # Photo URLs uploaded via the admin UI (same pattern as SiteContent image URLs).
     image_urls = models.JSONField(default=list, blank=True)
     image_alts = models.JSONField(default=list, blank=True)
@@ -46,6 +50,7 @@ class ProductPage(Page):
         FieldPanel("care_notes"),
         FieldPanel("wholesale_price"),
         FieldPanel("published_flag"),
+        FieldPanel("featured"),
         FieldPanel("image_urls"),
         FieldPanel("image_alts"),
         InlinePanel("images", label="Product Images"),
@@ -62,6 +67,7 @@ class ProductPage(Page):
         APIField("care_notes"),
         APIField("wholesale_price"),
         APIField("published_flag"),
+        APIField("featured"),
         APIField("image_urls"),
         APIField("image_alts"),
     ]

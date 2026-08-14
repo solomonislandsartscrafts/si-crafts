@@ -84,7 +84,7 @@ const TASKS = [
       'Pick the material category and product type.',
       'Enter the product code (e.g. P-J-1).',
       'Upload photos. Write alt text for each one.',
-      'Fill in dimensions, care notes, and wholesale price (A$).',
+      'Fill in dimensions, care notes, and wholesale price (AUD).',
       'Click Save.',
       'When everything looks right, tick "Published".',
     ],

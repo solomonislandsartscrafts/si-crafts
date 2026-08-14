@@ -10,7 +10,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: '35cm × 28cm × 12cm',
     careNotes: 'Keep dry. Store flat or stuffed with tissue. Brush gently to remove dust.', wholesalePrice: 85.00,
-    publishedFlag: true, createdAt: '2024-03-01T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-03-01T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'prod-2', productCode: 'P-J-2', slug: 'pandanus-clutch-small', name: 'Clutch Purse (Small)',
@@ -20,7 +20,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: '20cm × 13cm',
     careNotes: 'Keep dry. Avoid direct sunlight for extended periods.', wholesalePrice: 55.00,
-    publishedFlag: true, createdAt: '2024-03-05T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-03-05T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'prod-3', productCode: 'P-J-3', slug: 'pandanus-clutch-large', name: 'Clutch Purse (Large)',
@@ -30,7 +30,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: '30cm × 16cm',
     careNotes: 'Keep dry. Avoid direct sunlight for extended periods.', wholesalePrice: 65.00,
-    publishedFlag: true, createdAt: '2024-03-10T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-03-10T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'prod-4', productCode: 'P-J-4', slug: 'pandanus-fan-palm', name: 'Fan, Palm-Leaf Shape',
@@ -40,7 +40,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: '30cm × 25cm',
     careNotes: 'Store flat. Keep away from moisture.', wholesalePrice: 35.00,
-    publishedFlag: true, createdAt: '2024-03-15T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-03-15T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'prod-5', productCode: 'P-J-5', slug: 'pandanus-fan-paddle', name: 'Fan, Paddle Shape',
@@ -50,7 +50,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: '35cm × 20cm',
     careNotes: 'Store flat. Keep away from moisture.', wholesalePrice: 40.00,
-    publishedFlag: true, createdAt: '2024-03-20T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-03-20T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'prod-6', productCode: 'P-J-6', slug: 'pandanus-flower-brooch', name: 'Flower Brooches or Hair Clips',
@@ -60,7 +60,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: 'About 8cm diameter',
     careNotes: 'Handle gently. Keep dry.', wholesalePrice: 15.00,
-    publishedFlag: true, createdAt: '2024-03-25T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-03-25T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
 
   // === BUSH-TWINE by Julie Mone (B-J-*) ===
@@ -72,7 +72,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: 'About 40cm diameter',
     careNotes: 'Keep dry or wipe away moisture. Dust with a damp cloth. Safe for hot or cold items — will not warp.', wholesalePrice: 120.00,
-    publishedFlag: true, createdAt: '2024-04-01T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-04-01T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'prod-8', productCode: 'B-J-2', slug: 'bush-twine-tray-small', name: 'Tray (Small)',
@@ -82,7 +82,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: 'About 26cm diameter',
     careNotes: 'Keep dry or wipe away moisture. Dust with a damp cloth. Safe for hot or cold items — will not warp.', wholesalePrice: 80.00,
-    publishedFlag: true, createdAt: '2024-04-05T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-04-05T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'prod-9', productCode: 'B-J-3', slug: 'bush-twine-kusa-bag', name: 'Kuza/Kusa Bag',
@@ -92,7 +92,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: null,
     careNotes: 'Keep dry or wipe away moisture. Very durable — will last for years with basic care.', wholesalePrice: 95.00,
-    publishedFlag: true, createdAt: '2024-04-10T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-04-10T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
 
   // === SHELL-MONEY JEWELLERY by Agnes Rini (S-A-*) ===
@@ -104,7 +104,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: 'About 4cm length',
     careNotes: 'Store in soft pouch. Remove before swimming or showering. Clean with dry soft cloth.', wholesalePrice: 35.00,
-    publishedFlag: true, createdAt: '2024-04-15T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-04-15T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'prod-11', productCode: 'S-A-2', slug: 'shell-money-earrings-herringbone', name: 'Shell-Money Earrings — Herringbone Design',
@@ -114,7 +114,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: 'About 4cm length',
     careNotes: 'Store in soft pouch. Remove before swimming or showering. Clean with dry soft cloth.', wholesalePrice: 40.00,
-    publishedFlag: true, createdAt: '2024-04-20T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-04-20T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'prod-12', productCode: 'S-A-3', slug: 'shell-money-earrings-loop', name: 'Shell-Money Earrings — Loop Design',
@@ -124,7 +124,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: 'About 4cm length',
     careNotes: 'Store in soft pouch. Remove before swimming or showering. Clean with dry soft cloth.', wholesalePrice: 40.00,
-    publishedFlag: true, createdAt: '2024-04-25T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-04-25T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'prod-13', productCode: 'S-A-4', slug: 'shell-money-necklace-single', name: 'Shell-Money Necklace — Single Strand',
@@ -134,7 +134,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: 'Between 35cm and 55cm in length',
     careNotes: 'Store flat in pouch. Avoid chemicals and water. Handle gently.', wholesalePrice: 75.00,
-    publishedFlag: true, createdAt: '2024-05-01T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-05-01T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'prod-14', productCode: 'S-A-5', slug: 'shell-money-necklace-intricate', name: 'Shell-Money Necklace — Intricate Design',
@@ -144,7 +144,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: 'Between 35–40cm in length',
     careNotes: 'Store flat in pouch. Avoid chemicals and water. Handle gently.', wholesalePrice: 120.00,
-    publishedFlag: true, createdAt: '2024-05-05T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-05-05T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'prod-15', productCode: 'S-A-6', slug: 'shell-money-bracelet-single', name: 'Shell-Money Bracelet — Single Strand',
@@ -154,7 +154,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: 'About 20cm in length',
     careNotes: 'Store in soft pouch. Avoid water and chemicals.', wholesalePrice: 45.00,
-    publishedFlag: true, createdAt: '2024-05-10T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-05-10T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'prod-16', productCode: 'S-A-7', slug: 'shell-money-bracelet-flower', name: 'Shell-Money Bracelet — Flower Pattern',
@@ -164,7 +164,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: 'About 20cm in length',
     careNotes: 'Store in soft pouch. Avoid water and chemicals.', wholesalePrice: 55.00,
-    publishedFlag: true, createdAt: '2024-05-15T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-05-15T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'prod-17', productCode: 'S-A-8', slug: 'shell-money-bracelet-cuff', name: 'Shell-Money Bracelet — Cuff',
@@ -174,7 +174,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: 'About 20cm long and 4cm wide',
     careNotes: 'Store flat. Avoid water and chemicals.', wholesalePrice: 65.00,
-    publishedFlag: true, createdAt: '2024-05-20T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-05-20T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'prod-18', productCode: 'S-A-9', slug: 'shell-money-diy-kit', name: 'Shell-Money DIY Kit',
@@ -184,7 +184,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: null,
     careNotes: null, wholesalePrice: 25.00,
-    publishedFlag: true, createdAt: '2024-05-25T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-05-25T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
 
   // === WOOD by Peter Kera (W-P-*) ===
@@ -196,7 +196,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: 'About 9cm diameter',
     careNotes: 'Oil occasionally with food-safe wood oil. Hand wash only. Keep away from direct heat.', wholesalePrice: 45.00,
-    publishedFlag: true, createdAt: '2024-06-01T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-06-01T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'prod-20', productCode: 'W-P-2', slug: 'wood-bowl-oval-inlay', name: 'Oval Bowl with Inlay',
@@ -206,7 +206,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: 'About 21cm L × 12cm W × 4cm H',
     careNotes: 'Oil occasionally with food-safe wood oil. Hand wash only. Keep away from direct heat.', wholesalePrice: 85.00,
-    publishedFlag: true, createdAt: '2024-06-05T00:00:00Z', updatedAt: '2024-06-05T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-06-05T00:00:00Z', updatedAt: '2024-06-05T00:00:00Z',
   },
   {
     id: 'prod-21', productCode: 'W-P-3', slug: 'wood-dolphin-bookends', name: 'Dolphin Book Ends',
@@ -216,7 +216,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: 'About 12cm L × 6cm W × 15cm H',
     careNotes: 'Dust with soft cloth. Oil occasionally for sheen.', wholesalePrice: 95.00,
-    publishedFlag: true, createdAt: '2024-06-10T00:00:00Z', updatedAt: '2024-06-10T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-06-10T00:00:00Z', updatedAt: '2024-06-10T00:00:00Z',
   },
   {
     id: 'prod-22', productCode: 'W-P-4', slug: 'wood-turtle-ornament', name: 'Turtle Ornament',
@@ -226,7 +226,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: 'About 14cm L × 7cm W',
     careNotes: 'Dust with soft cloth. Oil occasionally for sheen.', wholesalePrice: 55.00,
-    publishedFlag: true, createdAt: '2024-06-15T00:00:00Z', updatedAt: '2024-06-15T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-06-15T00:00:00Z', updatedAt: '2024-06-15T00:00:00Z',
   },
   {
     id: 'prod-23', productCode: 'W-P-5', slug: 'wood-dolphin-ornament', name: 'Dolphin Ornament',
@@ -236,7 +236,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: 'About 16cm L × 5cm W',
     careNotes: 'Dust with soft cloth. Oil occasionally for sheen.', wholesalePrice: 50.00,
-    publishedFlag: true, createdAt: '2024-06-20T00:00:00Z', updatedAt: '2024-06-20T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-06-20T00:00:00Z', updatedAt: '2024-06-20T00:00:00Z',
   },
   {
     id: 'prod-24', productCode: 'W-P-6', slug: 'wood-shark-ornament', name: 'Shark Ornament',
@@ -246,7 +246,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: 'About 16cm L × 5cm W',
     careNotes: 'Dust with soft cloth. Oil occasionally for sheen.', wholesalePrice: 50.00,
-    publishedFlag: true, createdAt: '2024-06-25T00:00:00Z', updatedAt: '2024-06-25T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-06-25T00:00:00Z', updatedAt: '2024-06-25T00:00:00Z',
   },
 
   // === Pandanus by Rosa Tabe (P-R-*) ===
@@ -258,7 +258,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: '40cm × 30cm × 25cm',
     careNotes: 'Keep dry. Brush with soft brush to clean.', wholesalePrice: 70.00,
-    publishedFlag: true, createdAt: '2024-07-01T00:00:00Z', updatedAt: '2024-07-01T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-07-01T00:00:00Z', updatedAt: '2024-07-01T00:00:00Z',
   },
 
   // === Wood by Thomas Wale (W-T-*) ===
@@ -270,7 +270,7 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: '15cm × 8cm × 5cm',
     careNotes: 'Dust with soft cloth. Oil occasionally for sheen.', wholesalePrice: 60.00,
-    publishedFlag: true, createdAt: '2024-07-05T00:00:00Z', updatedAt: '2024-07-05T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-07-05T00:00:00Z', updatedAt: '2024-07-05T00:00:00Z',
   },
   // === Wooden Stamps (W-P-7) ===
   {
@@ -281,6 +281,6 @@ export const mockProducts: Product[] = [
     imageAlts: [],
     dimensions: 'About 6cm × 6cm',
     careNotes: 'Keep dry. Wipe with damp cloth if needed.', wholesalePrice: 12.00,
-    publishedFlag: true, createdAt: '2024-07-10T00:00:00Z', updatedAt: '2024-07-10T00:00:00Z',
+    publishedFlag: true, featured: false, createdAt: '2024-07-10T00:00:00Z', updatedAt: '2024-07-10T00:00:00Z',
   },
 ];

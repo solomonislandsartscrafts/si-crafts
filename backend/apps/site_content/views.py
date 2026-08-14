@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from .models import SiteContent
-from .serializers import SiteContentSerializer
+from .serializers import SiteContentSerializer, FIELD_MAP
 
 
 class SiteContentView(APIView):
@@ -20,20 +20,12 @@ class SiteContentView(APIView):
 
     def put(self, request):
         obj = SiteContent.load()
-        # Map frontend camelCase keys to snake_case
+
+        # Map frontend camelCase keys to snake_case model fields
         data = {}
-        if "aboutSolomonIslandsImage" in request.data:
-            data["about_solomon_islands_image_url"] = request.data["aboutSolomonIslandsImage"]
-        if "aboutSolomonIslandsImageAlt" in request.data:
-            data["about_solomon_islands_image_alt"] = request.data["aboutSolomonIslandsImageAlt"]
-        if "aboutTeamImage" in request.data:
-            data["about_team_image_url"] = request.data["aboutTeamImage"]
-        if "aboutTeamImageAlt" in request.data:
-            data["about_team_image_alt"] = request.data["aboutTeamImageAlt"]
-        if "whyWeDoThisImage" in request.data:
-            data["why_we_do_this_image_url"] = request.data["whyWeDoThisImage"]
-        if "whyWeDoThisImageAlt" in request.data:
-            data["why_we_do_this_image_alt"] = request.data["whyWeDoThisImageAlt"]
+        for camel_key, snake_field in FIELD_MAP.items():
+            if camel_key in request.data:
+                data[snake_field] = request.data[camel_key]
 
         serializer = SiteContentSerializer(obj, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -94,8 +86,5 @@ class ImageUploadView(APIView):
         with open(filepath, "wb") as f:
             f.write(webp_data)
 
-        url = f"{settings.MEDIA_URL}uploads/{filename}"
-        base_url = os.environ.get("WAGTAILADMIN_BASE_URL", "").rstrip("/")
-        if base_url:
-            url = f"{base_url}{url}"
+        url = f"/uploads/{filename}"
         return Response({"url": url})

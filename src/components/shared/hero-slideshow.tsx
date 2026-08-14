@@ -79,7 +79,7 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
   if (count === 0) {
     return (
       <div className="relative h-[340px] sm:h-[400px] lg:h-[440px] flex items-center justify-center">
-        <div className="w-[56%] sm:w-[62%] max-w-[300px] rounded-xl overflow-hidden bg-card-bg shadow-lg ring-1 ring-black/5">
+        <div className="w-[62%] max-w-[300px] rounded-xl overflow-hidden bg-card-bg shadow-lg ring-1 ring-black/5">
           <div className="relative aspect-[4/5] flex flex-col">
             <div className="relative flex-1">
               <SafeImage
@@ -90,11 +90,11 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
                 sizes="(max-width: 640px) 62vw, 300px"
               />
             </div>
-            <div className="px-4 py-3 bg-deep-blue text-left">
-              <p className="font-heading text-base font-semibold text-white leading-snug">
+            <div className="px-4 py-3 bg-warm-gray-100 text-left">
+              <p className="font-heading text-base font-semibold text-deep-blue leading-snug">
                 Coming Soon
               </p>
-              <p className="text-xs text-white/80 mt-0.5">
+              <p className="text-xs text-warm-gray-600 mt-0.5">
                 Product images will appear here
               </p>
             </div>
@@ -144,7 +144,7 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
               tabIndex={isActive ? -1 : 0}
               aria-label={isActive ? undefined : `Show ${item.name}`}
               aria-hidden={hidden}
-              className={`absolute top-1/2 left-1/2 w-[56%] sm:w-[62%] max-w-[300px] rounded-xl overflow-hidden bg-card-bg shadow-lg ring-1 ring-black/5 focus:outline-none focus-visible:ring-4 focus-visible:ring-ocean ${
+              className={`absolute top-1/2 left-1/2 w-[62%] max-w-[300px] rounded-xl overflow-hidden bg-card-bg shadow-lg ring-1 ring-black/5 focus:outline-none focus-visible:ring-4 focus-visible:ring-ocean ${
                 isActive ? 'cursor-default' : 'cursor-pointer'
               } ${reduceMotion ? '' : 'transition-all duration-700 ease-out'}`}
               style={{
@@ -163,22 +163,22 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
                     alt={isActive ? item.name : ''}
                     fill
                     className="object-contain"
-                    sizes="(max-width: 640px) 56vw, 300px"
+                    sizes="(max-width: 640px) 62vw, 300px"
                     priority={index === 0}
                   />
                 </div>
 
                 {/* Caption — below the image, always visible on active slide */}
                 {isActive && (
-                  <figcaption className="px-4 py-3 bg-deep-blue text-left">
-                    <p className="font-heading text-base font-semibold text-white leading-snug">
+                  <figcaption className="px-4 py-3 bg-warm-gray-100 text-left">
+                    <p className="font-heading text-base font-semibold text-deep-blue leading-snug">
                       {item.name}
                     </p>
                     {item.makerName && (
-                      <p className="text-xs text-white mt-0.5">
+                      <p className="text-xs text-warm-gray-600 mt-0.5">
                         by {item.makerName}
                         {item.place && (
-                          <span className="text-white/80"> · {item.place}</span>
+                          <span className="text-warm-gray-400"> · {item.place}</span>
                         )}
                       </p>
                     )}

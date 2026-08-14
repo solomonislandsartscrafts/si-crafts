@@ -129,6 +129,7 @@ export async function createMaker(data: Omit<Maker, 'id' | 'createdAt' | 'update
     story: data.story,
     story_cultural_review_flag: data.storyCulturalReviewFlag,
     consent_status: data.consentStatus,
+    published_flag: data.consentStatus === 'Signed',
     age: data.age,
     years_active: data.yearsActive,
     craft: data.craftId ? parseInt(data.craftId) : null,
@@ -148,7 +149,11 @@ export async function updateMaker(id: string, data: Partial<Maker>): Promise<Mak
   if (data.island !== undefined) body.island = data.island;
   if (data.story !== undefined) body.story = data.story;
   if (data.storyCulturalReviewFlag !== undefined) body.story_cultural_review_flag = data.storyCulturalReviewFlag;
-  if (data.consentStatus !== undefined) body.consent_status = data.consentStatus;
+  if (data.consentStatus !== undefined) {
+    body.consent_status = data.consentStatus;
+    // Auto-publish when consent is signed, unpublish when not
+    body.published_flag = data.consentStatus === 'Signed';
+  }
   if (data.age !== undefined) body.age = data.age;
   if (data.yearsActive !== undefined) body.years_active = data.yearsActive;
   if (data.craftId !== undefined) body.craft = data.craftId ? parseInt(data.craftId) : null;

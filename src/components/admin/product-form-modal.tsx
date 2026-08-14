@@ -35,6 +35,7 @@ export interface ProductFormData {
   dimensions: string;
   careNotes: string;
   wholesalePrice: number;
+  featured: boolean;
 }
 
 /**
@@ -96,6 +97,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
     dimensions: product?.dimensions ?? '',
     careNotes: product?.careNotes ?? '',
     wholesalePrice: product?.wholesalePrice ?? 0,
+    featured: product?.featured ?? false,
   });
 
   useEffect(() => {
@@ -192,7 +194,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
     }
   }
 
-  function handleChange(field: keyof ProductFormData, value: string | number | string[]) {
+  function handleChange(field: keyof ProductFormData, value: string | number | boolean | string[]) {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => {
@@ -365,7 +367,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
           {/* Price */}
           <div>
             <label htmlFor="product-price" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Wholesale Price (SBD, whole number) *
+              Wholesale Price (AUD) *
             </label>
             <input
               id="product-price"
@@ -423,6 +425,25 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
             {errors.imageAlts && (
               <p className="text-sm text-error mt-1" aria-live="assertive">{errors.imageAlts}</p>
             )}
+          </div>
+
+          {/* Featured on Homepage toggle */}
+          <div className="flex items-center gap-3 py-3 px-4 bg-sand-light rounded-md">
+            <label htmlFor="product-featured" className="flex items-center gap-3 cursor-pointer flex-1">
+              <input
+                id="product-featured"
+                type="checkbox"
+                checked={form.featured}
+                onChange={(e) => handleChange('featured', e.target.checked)}
+                className="w-5 h-5 rounded border-sand-dark text-ocean focus:ring-2 focus:ring-ocean accent-ocean"
+              />
+              <div>
+                <span className="text-sm font-medium text-warm-gray-800">Featured on Homepage</span>
+                <p className="text-xs text-warm-gray-400 mt-0.5">
+                  Show this product in the hero gallery slideshow (max 3 recommended).
+                </p>
+              </div>
+            </label>
           </div>
 
           {/* Actions */}

@@ -49,24 +49,24 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
         </div>
       </Link>
 
-      {/* Info — deep blue caption like gallery cards */}
-      <div className="flex flex-1 flex-col p-4 bg-deep-blue">
+      {/* Info — neutral background */}
+      <div className="flex flex-1 flex-col p-4 bg-warm-gray-100">
         <Link href={`/piece/${product.productCode}`}>
-          <h3 className="font-heading text-sm font-semibold text-white hover:text-white/80 transition-colors line-clamp-2">
+          <h3 className="font-heading text-sm font-semibold text-deep-blue hover:text-ocean transition-colors line-clamp-2">
             {product.name}
           </h3>
         </Link>
-        <div className="flex items-center gap-2 mt-1 text-xs text-white/70">
+        <div className="flex items-center gap-2 mt-1 text-xs text-warm-gray-600">
           <span className="capitalize">{product.materialCategory}</span>
           <span>·</span>
           <span className="capitalize">{product.productType}</span>
         </div>
         {makerName && (
-          <p className="text-xs text-white/80 mt-1">by {makerName}</p>
+          <p className="text-xs text-ocean mt-1">by {makerName}</p>
         )}
 
         {/* Price */}
-        <p className="text-base font-bold text-white mt-auto pt-2">
+        <p className="text-base font-bold text-deep-blue mt-auto pt-2">
           {formatPrice(product.wholesalePrice)}
         </p>
 
@@ -76,7 +76,7 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
           {!showNotes ? (
             <button
               onClick={() => setShowNotes(true)}
-              className="text-xs text-white/70 hover:text-white transition-colors"
+              className="text-xs text-warm-gray-400 hover:text-warm-gray-600 transition-colors"
             >
               Add a note for this item
             </button>
@@ -86,24 +86,24 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
               onChange={(e) => setNotes(e.target.value)}
               placeholder="e.g. preferred colour, quantity notes..."
               rows={2}
-              className="w-full px-3 py-2 text-xs rounded-md border border-white/20 bg-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent resize-none"
+              className="w-full px-3 py-2 text-xs rounded-md border border-sand-dark bg-white text-warm-gray-800 placeholder:text-warm-gray-400 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent resize-none"
             />
           )}
 
           {/* Quantity + Add button */}
           <div className="flex items-center gap-2">
-            <div className="flex items-center border border-white/20 rounded-md">
+            <div className="flex items-center border border-sand-dark rounded-md">
               <button
                 onClick={() => setQty(Math.max(1, qty - 1))}
-                className="px-2 py-1.5 text-white/60 hover:text-white transition-colors"
+                className="px-2 py-1.5 text-warm-gray-400 hover:text-warm-gray-800 transition-colors"
                 aria-label="Decrease quantity"
               >
                 −
               </button>
-              <span className="px-2 text-sm font-medium text-white min-w-[2rem] text-center">{qty}</span>
+              <span className="px-2 text-sm font-medium text-warm-gray-800 min-w-[2rem] text-center">{qty}</span>
               <button
                 onClick={() => setQty(Math.min(999, qty + 1))}
-                className="px-2 py-1.5 text-white/60 hover:text-white transition-colors"
+                className="px-2 py-1.5 text-warm-gray-400 hover:text-warm-gray-800 transition-colors"
                 aria-label="Increase quantity"
               >
                 +

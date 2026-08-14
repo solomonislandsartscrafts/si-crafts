@@ -18,6 +18,7 @@ class ProductPageAPIViewSet(PagesAPIViewSet):
         "care_notes",
         "wholesale_price",
         "published_flag",
+        "featured",
         "image_urls",
         "image_alts",
     ]
@@ -33,6 +34,7 @@ class ProductPageAPIViewSet(PagesAPIViewSet):
         "care_notes",
         "wholesale_price",
         "published_flag",
+        "featured",
         "image_urls",
         "image_alts",
     ]
@@ -45,6 +47,7 @@ class ProductPageAPIViewSet(PagesAPIViewSet):
         "product_type",
         "maker",
         "published_flag",
+        "featured",
     ])
 
     def get_queryset(self):
@@ -64,4 +67,7 @@ class ProductPageAPIViewSet(PagesAPIViewSet):
         published = self.request.query_params.get("published_flag")
         if published is not None:
             qs = qs.filter(published_flag=published.lower() in ("true", "1"))
+        featured = self.request.query_params.get("featured")
+        if featured is not None:
+            qs = qs.filter(featured=featured.lower() in ("true", "1"))
         return qs

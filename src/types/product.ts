@@ -17,6 +17,7 @@ export interface Product {
   careNotes: string | null;
   wholesalePrice: number;
   publishedFlag: boolean;
+  featured: boolean;
   createdAt: string;
   updatedAt: string;
 }
