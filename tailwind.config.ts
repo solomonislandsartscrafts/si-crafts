@@ -121,8 +121,8 @@ const config: Config = {
         error: '#C0392B',
       },
       fontFamily: {
-        body: ['DM Sans', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
-        heading: ['Fraunces', 'Georgia', 'Times New Roman', 'serif'],
+        body: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Helvetica', 'Arial', 'sans-serif'],
+        heading: ['Times New Roman', 'Times', 'Georgia', 'serif'],
       },
       fontSize: {
         // ⚠️ ACCESSIBILITY NOTE: xs (13px) and sm (15px) are below the 16px
