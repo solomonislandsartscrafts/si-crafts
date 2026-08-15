@@ -131,31 +131,11 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
               src={images[activeIndex]}
               alt={`${alt} - image ${activeIndex + 1}`}
               fill
-              className="object-contain p-4"
+              className="object-contain"
               sizes="(max-width: 768px) 100vw, 50vw"
               priority
             />
           </button>
-
-          {/* Prev/Next arrows — hidden on mobile, visible on md+ */}
-          {images.length > 1 && (
-            <>
-              <button
-                onClick={goPrev}
-                className="absolute left-2 top-1/2 -translate-y-1/2 tap-target w-9 h-9 hidden md:flex items-center justify-center rounded-full bg-white/90 text-deep-blue shadow-sm focus:outline-none focus:ring-2 focus:ring-ocean"
-                aria-label="Previous image"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={goNext}
-                className="absolute right-2 top-1/2 -translate-y-1/2 tap-target w-9 h-9 hidden md:flex items-center justify-center rounded-full bg-white/90 text-deep-blue shadow-sm focus:outline-none focus:ring-2 focus:ring-ocean"
-                aria-label="Next image"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </>
-          )}
 
           {/* Counter */}
           {images.length > 1 && (
@@ -199,7 +179,7 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
                   src={img}
                   alt={`${alt} thumbnail ${idx + 1}`}
                   fill
-                  className="object-contain p-1 bg-white rounded-md"
+                  className="object-cover rounded-md"
                   sizes="64px"
                 />
               </button>

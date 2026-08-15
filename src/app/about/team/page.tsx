@@ -1,10 +1,9 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
 import { generatePageMetadata } from '@/lib/metadata';
 import { PageHeader } from '@/components/layout';
 import { getTeamMembers } from '@/services/team';
-import { resolveImageUrl } from '@/lib/api-client';
+import { SafeImage } from '@/components/ui/safe-image';
 
 export const metadata = generatePageMetadata({
   title: 'Our Team',
@@ -38,18 +37,14 @@ export default async function TeamPage() {
           members.map((member) => (
             <div key={member.id} className="flex gap-6 items-start">
               {/* Photo */}
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-sand flex-shrink-0 flex items-center justify-center overflow-hidden">
-                {member.photoUrl ? (
-                  <Image
-                    src={resolveImageUrl(member.photoUrl)}
-                    alt={member.photoAlt || member.name}
-                    width={96}
-                    height={96}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-warm-gray-400 text-xs text-center">Photo</span>
-                )}
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-sand-light flex-shrink-0 relative overflow-hidden">
+                <SafeImage
+                  src={member.photoUrl || null}
+                  alt={member.photoAlt || member.name}
+                  fill
+                  className="object-cover"
+                  sizes="96px"
+                />
               </div>
 
               {/* Info */}

@@ -4,10 +4,11 @@ import { getPublicProducts, getFeaturedProducts } from '@/services/products';
 import { getPublicMakers } from '@/services/makers';
 import { getPublishedArticles } from '@/services/articles';
 import { getSiteContentSafe } from '@/services/site-content';
+import { getAllCrafts } from '@/services/crafts';
 import { ProductCard } from '@/components/cards/product-card';
+import { MakerCard } from '@/components/cards/maker-card';
 import { HeroCodeToggle } from '@/components/shared/hero-code-toggle';
 import { HeroSlideshow } from '@/components/shared/hero-slideshow';
-import { AnimatedStats } from '@/components/shared/animated-stats';
 import { SafeImage } from '@/components/ui/safe-image';
 
 export const metadata = generatePageMetadata({
@@ -18,18 +19,22 @@ export const metadata = generatePageMetadata({
 });
 
 export default async function HomePage() {
-  const [products, makers, articles, adminFeatured, siteContent] = await Promise.all([
+  const [products, makers, articles, adminFeatured, siteContent, crafts] = await Promise.all([
     getPublicProducts(),
     getPublicMakers(),
     getPublishedArticles(),
     getFeaturedProducts(),
     getSiteContentSafe(),
+    getAllCrafts(),
   ]);
 
   const featuredProducts = products.slice(0, 4);
-  const sampleProductCode = products[0]?.productCode;
   const latestArticles = articles.slice(0, 3);
   const featuredMakers = makers.slice(0, 3);
+
+  // Build craft name lookup
+  const craftNameMap: Record<string, string> = {};
+  crafts.forEach((c) => { craftNameMap[c.id] = c.name; });
 
   // Hero gallery — use admin-selected featured products (up to 3).
   // Falls back to auto-selection (one per material category) if no products
@@ -125,52 +130,16 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
-
-        {/* Stats strip */}
-        <section className="bg-white border-y border-sand lg:flex-shrink-0">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <AnimatedStats variant="light" stats={[
-              { value: 'EST. 2026', label: 'Volunteer-Run' },
-              { value: String(makers.length), label: 'Solomon Islands Makers' },
-              { value: '100% HANDMADE', label: 'In Solomon Islands' },
-              { value: 'AVAILABLE IN', label: 'Australia' },
-            ]} />
-          </div>
-        </section>
       </div>
 
       {/* Featured Makers */}
       <section className="section-y">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
-              The people behind the pieces
-            </h2>
-            <p className="text-warm-gray-600 mt-2 max-w-lg mx-auto">
-              Every piece you see here was made by hand, by a named maker, in Solomon Islands.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {featuredMakers.map((maker, index) => (
-              <Link key={maker.id} href={`/maker/${maker.slug}`} className={`group block w-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-ocean ${index === 2 ? 'hidden lg:block' : ''}`}>
-                <div className="aspect-square relative bg-white overflow-hidden">
-                  <SafeImage
-                    src={maker.portraitUrl}
-                    alt={maker.name}
-                    fill
-                    className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
-                  />
-                </div>
-                <div className="bg-warm-gray-100 p-3 sm:p-4">
-                  <h3 className="font-heading text-sm sm:text-base font-semibold text-deep-blue leading-tight">
-                    {maker.name}
-                  </h3>
-                  <p className="text-xs text-warm-gray-600 mt-1">
-                    {maker.village}, {maker.province}
-                  </p>
-                </div>
-              </Link>
+              <div key={maker.id} className={index === 2 ? 'hidden lg:block' : ''}>
+                <MakerCard maker={maker} craftName={craftNameMap[maker.craftId] || undefined} />
+              </div>
             ))}
           </div>
           <div className="text-center mt-8">
@@ -223,45 +192,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Every tag tells a story */}
-      <section className="section-y">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-            <div className="hidden md:block relative aspect-[4/5] overflow-hidden rounded-lg bg-sand-light">
-              <SafeImage
-                src={featuredMakers[0]?.portraitUrl}
-                alt={featuredMakers[0]?.name || 'Maker'}
-                fill
-                className="object-contain p-4"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
-            </div>
-            <div className="max-w-md">
-              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
-                {siteContent.homepageMakersHeading || 'Every tag tells a story'}
-              </h2>
-              <p className="text-warm-gray-600 leading-relaxed mb-4">
-                {siteContent.homepageMakersIntro || 'Scan the QR code on any product tag to meet the maker — see who made your piece, how it was made, and where it comes from. No app needed, no login required.'}
-              </p>
-              <p className="text-warm-gray-600 leading-relaxed mb-6">
-                We work directly with makers in Solomon Islands. Every piece carries the artisan&apos;s name,
-                village, and story — connecting you to the person and place behind your purchase.
-              </p>
-              {sampleProductCode && (
-                <Link
-                  href={`/piece/${sampleProductCode}`}
-                  className="text-sm font-medium text-ocean hover:text-ocean-dark transition-colors"
-                >
-                  See an example tag →
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Wholesale CTA */}
-      <section className="section-y bg-warm-gray-100">
+      <section className="section-y bg-ocean/5 border-t border-ocean/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-3">
             Stock SI Crafts in your shop
@@ -272,7 +204,7 @@ export default async function HomePage() {
           </p>
           <Link
             href="/wholesale"
-            className="text-sm font-medium text-ocean hover:text-ocean-dark transition-colors"
+            className="tap-target inline-flex items-center gap-2 px-6 py-3 bg-terracotta hover:bg-terracotta-dark text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
           >
             Learn about wholesale →
           </Link>

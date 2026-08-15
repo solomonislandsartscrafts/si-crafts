@@ -38,12 +38,12 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
     <div className="flex h-full flex-col rounded-lg overflow-hidden bg-white shadow-card hover:shadow-md transition-shadow">
       {/* Image — links to piece page */}
       <Link href={`/piece/${product.productCode}`} className="block">
-        <div className="aspect-square relative bg-sand-light">
+        <div className="aspect-square relative bg-sand-light overflow-hidden">
           <SafeImage
             src={product.imageUrls[0] || null}
             alt={`${product.name}${makerName ? ` by ${makerName}` : ''}`}
             fill
-            className="object-contain p-3"
+            className="object-contain p-4"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
         </div>

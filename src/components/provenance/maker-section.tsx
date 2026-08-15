@@ -32,7 +32,7 @@ export function MakerSection({ maker, craft }: MakerSectionProps) {
       <div className="bg-sand-light border-l-4 border-terracotta rounded-lg p-6">
         <div className="flex gap-5 items-start">
           {/* Portrait */}
-          <div className="w-20 h-20 sm:w-28 sm:h-28 flex-shrink-0 relative rounded-lg overflow-hidden">
+          <div className="w-20 h-20 sm:w-28 sm:h-28 flex-shrink-0 relative rounded-lg overflow-hidden bg-sand-light">
             <SafeImage
               src={maker.portraitUrl}
               alt={`${maker.name} from ${maker.village}`}

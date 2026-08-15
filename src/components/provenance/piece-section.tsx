@@ -11,12 +11,12 @@ export function PieceSection({ product }: PieceSectionProps) {
       <h2 className="font-heading text-xl font-medium text-deep-blue mb-4">This Piece</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Image */}
-        <div className="aspect-square relative rounded-lg overflow-hidden bg-sand">
+        <div className="aspect-square relative rounded-lg overflow-hidden bg-sand-light">
           <SafeImage
             src={product.imageUrls[0] || null}
             alt={product.name}
             fill
-            className="object-contain p-4"
+            className="object-cover"
             sizes="(max-width: 640px) 100vw, 50vw"
             priority
           />

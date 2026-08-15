@@ -51,12 +51,12 @@ export default async function CraftPage({ params }: CraftPageProps) {
             <p>{craft.description}</p>
           </div>
         </div>
-        <div className="aspect-[4/3] relative rounded-lg overflow-hidden">
+        <div className="aspect-[4/3] relative rounded-lg overflow-hidden bg-sand-light">
           <SafeImage
             src={craft.processImageUrls[0] || null}
             alt={`${craft.name} process`}
             fill
-            className="object-contain p-4 rounded-lg"
+            className="object-cover"
             sizes="(max-width: 768px) 100vw, 50vw"
           />
         </div>

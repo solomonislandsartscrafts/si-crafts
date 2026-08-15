@@ -191,7 +191,7 @@
   }
 
   /* Single source of truth for the primary CTA.
-     Green fill + gold bottom border. Used on every page. */
+     Green fill. Used on every page. */
   .btn-primary {
     display: inline-flex;
     align-items: center;
@@ -204,7 +204,6 @@
     color: #FFFFFF;
     font-weight: 500;
     border-radius: 0;
-    border-bottom: 3px solid #F4B728;
     transition: background-color 0.2s ease;
   }
 
@@ -628,32 +627,17 @@
   border: 2px solid currentColor !important;
 }
 
-.a11y-reduced-motion *,
-.a11y-reduced-motion *::before,
-.a11y-reduced-motion *::after {
-  animation-duration: 0.01ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0.01ms !important;
-  scroll-behavior: auto !important;
-}
-
-.a11y-underline-links a {
-  text-decoration: underline !important;
-  text-underline-offset: 3px !important;
-}
-
-/* Colorblind simulation modes — CSS filters that adjust hues */
-/* Protanopia (red-blind): shift reds toward blue/yellow */
+/* Colorblind simulation modes */
 .a11y-protanopia .a11y-filter-scope {
   filter: url('#a11y-protanopia-filter');
 }
 
-/* Deuteranopia (green-blind): shift greens toward blue/yellow */
 .a11y-deuteranopia .a11y-filter-scope {
   filter: url('#a11y-deuteranopia-filter');
 }
 
-/* Tritanopia (blue-blind): shift blues toward red/green */
 .a11y-tritanopia .a11y-filter-scope {
   filter: url('#a11y-tritanopia-filter');
 }
+
+

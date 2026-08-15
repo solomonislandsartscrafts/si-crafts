@@ -40,8 +40,9 @@ export function FullScreenHero({ images, interval = 5000 }: FullScreenHeroProps)
           <SafeImage
             src={img}
             alt=""
+            decorative
             fill
-            className="object-contain p-4"
+            className="object-cover"
             sizes="100vw"
             priority={index === 0}
           />

@@ -154,10 +154,15 @@ const config: Config = {
         card: '0 2px 8px rgba(0, 0, 0, 0.06)',
       },
       borderRadius: {
-        sm: '0px',
-        md: '0px',
-        lg: '0px',
-        xl: '0px',
+        none: '0',
+        sm: '0',
+        DEFAULT: '0',
+        md: '0',
+        lg: '0',
+        xl: '0',
+        '2xl': '0',
+        '3xl': '0',
+        full: '9999px',
       },
       keyframes: {
         'slide-up': {

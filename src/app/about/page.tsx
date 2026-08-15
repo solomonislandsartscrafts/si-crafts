@@ -40,7 +40,7 @@ export default async function AboutPage() {
                   alt={siteContent.aboutSolomonIslandsImageAlt || "Solomon Islands landscape"}
                   fill
                   priority
-                  className="object-contain p-4"
+                  className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 40vw"
                 />
               </div>
@@ -136,7 +136,7 @@ export default async function AboutPage() {
                   src={siteContent.aboutTeamImage}
                   alt={siteContent.aboutTeamImageAlt || "The SIAC volunteer team"}
                   fill
-                  className="object-contain p-4"
+                  className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 40vw"
                 />
               </div>
@@ -155,7 +155,7 @@ export default async function AboutPage() {
                   src={siteContent.whyWeDoThisImage}
                   alt={siteContent.whyWeDoThisImageAlt || "Solomon Islands maker at work"}
                   fill
-                  className="object-contain p-4"
+                  className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 40vw"
                 />
               </div>
