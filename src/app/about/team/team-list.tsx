@@ -53,6 +53,7 @@ export function TeamList() {
               alt={member.photoAlt || member.name}
               fill
               className="object-cover"
+              style={member.photoPosition ? { objectPosition: member.photoPosition } : undefined}
               sizes="96px"
             />
           </div>

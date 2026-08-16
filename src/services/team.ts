@@ -8,6 +8,7 @@ interface ApiTeamMember {
   bio: string;
   photo_url: string;
   photo_alt: string;
+  photo_position: string;
   sort_order: number;
   created_at: string;
   updated_at: string;
@@ -21,6 +22,7 @@ function mapTeamMember(raw: ApiTeamMember): TeamMember {
     bio: raw.bio || null,
     photoUrl: raw.photo_url || null,
     photoAlt: raw.photo_alt || '',
+    photoPosition: raw.photo_position || null,
     sortOrder: raw.sort_order,
     createdAt: raw.created_at,
     updatedAt: raw.updated_at,
@@ -37,6 +39,7 @@ const DEFAULT_TEAM: TeamMember[] = [
     bio: 'Alison is the founder and director of SIAC. Born in Solomon Islands, she moved to Australia and has spent over a decade building connections between Solomon Islands makers and Australian galleries and museums.',
     photoUrl: null,
     photoAlt: 'Alison Ririnui',
+    photoPosition: null,
     sortOrder: 1,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
@@ -48,6 +51,7 @@ const DEFAULT_TEAM: TeamMember[] = [
     bio: 'Isaac is the graphic designer and web developer for SIAC. He handles the brand identity, website, and digital presence — ensuring the crafts and maker stories are presented with the respect they deserve.',
     photoUrl: null,
     photoAlt: 'Isaac Tekulu',
+    photoPosition: null,
     sortOrder: 2,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
@@ -59,6 +63,7 @@ const DEFAULT_TEAM: TeamMember[] = [
     bio: 'Julie is our Solomon Islands coordinator. She works directly with makers across the Western Province, organising collections, managing quality, and ensuring fair trade practices on the ground.',
     photoUrl: null,
     photoAlt: 'Julie Atu',
+    photoPosition: null,
     sortOrder: 3,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
@@ -70,6 +75,7 @@ const DEFAULT_TEAM: TeamMember[] = [
     bio: 'David handles logistics and shipping coordination between Solomon Islands and Australia. His knowledge of local supply chains keeps our operations running smoothly.',
     photoUrl: null,
     photoAlt: 'David Kera',
+    photoPosition: null,
     sortOrder: 4,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
@@ -178,6 +184,7 @@ export async function createTeamMember(
       bio: data.bio ?? '',
       photo_url: data.photoUrl ?? '',
       photo_alt: data.photoAlt ?? '',
+      photo_position: data.photoPosition ?? '',
       sort_order: data.sortOrder,
     }, token);
     return mapTeamMember(raw);
@@ -193,6 +200,7 @@ export async function createTeamMember(
       bio: data.bio,
       photoUrl: data.photoUrl,
       photoAlt: data.photoAlt,
+      photoPosition: data.photoPosition,
       sortOrder: data.sortOrder,
       createdAt: now,
       updatedAt: now,
@@ -216,6 +224,7 @@ export async function updateTeamMember(
     if (data.bio !== undefined) body.bio = data.bio ?? '';
     if (data.photoUrl !== undefined) body.photo_url = data.photoUrl ?? '';
     if (data.photoAlt !== undefined) body.photo_alt = data.photoAlt ?? '';
+    if (data.photoPosition !== undefined) body.photo_position = data.photoPosition ?? '';
     if (data.sortOrder !== undefined) body.sort_order = data.sortOrder;
 
     const raw = await apiPatch<ApiTeamMember>(`/api/team/${id}/`, body, token);

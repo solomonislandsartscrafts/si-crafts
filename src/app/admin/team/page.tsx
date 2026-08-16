@@ -60,6 +60,7 @@ export default function AdminTeamPage() {
           bio: data.bio || null,
           photoUrl: data.photoUrl || null,
           photoAlt: data.photoAlt,
+          photoPosition: data.photoPosition || null,
           sortOrder: data.sortOrder,
         });
         toastSuccess(`"${data.name}" updated.`);
@@ -71,6 +72,7 @@ export default function AdminTeamPage() {
           bio: data.bio || null,
           photoUrl: data.photoUrl || null,
           photoAlt: data.photoAlt,
+          photoPosition: data.photoPosition || null,
           sortOrder: data.sortOrder,
         });
         toastSuccess(`"${data.name}" added to team.`);
