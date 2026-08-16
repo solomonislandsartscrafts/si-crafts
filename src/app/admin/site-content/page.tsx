@@ -227,10 +227,6 @@ function HomepageTab({ content, update }: TabProps) {
         <TextArea label="Intro paragraph" value={content.homepageIntro} onChange={(v) => update('homepageIntro', v)} placeholder="Every product is handmade. When you buy from us..." rows={3} />
         <Field label="Primary CTA button text" value={content.homepageCtaText} onChange={(v) => update('homepageCtaText', v)} placeholder="Browse Catalogue" />
       </Section>
-      <Section title="Makers Section" description="The 'Meet the Makers' section lower on the homepage.">
-        <Field label="Section heading" value={content.homepageMakersHeading} onChange={(v) => update('homepageMakersHeading', v)} placeholder="Handmade in Solomon Islands" />
-        <TextArea label="Section intro" value={content.homepageMakersIntro} onChange={(v) => update('homepageMakersIntro', v)} placeholder="Scan the QR code on any product tag..." rows={3} />
-      </Section>
     </>
   );
 }

@@ -138,37 +138,51 @@ export function PiecePageClient({ product, craftName, craftSlug, maker }: PieceP
               Meet the Maker
             </h2>
 
-            {/* Maker card */}
-            <div className="flex items-center gap-3 mb-4 bg-warm-gray-100 rounded-lg p-3">
-              <div className="w-10 h-10 flex-shrink-0 relative rounded-full overflow-hidden bg-sand">
+            {/* Maker identity — portrait, name, place */}
+            <Link
+              href={`/maker/${maker.slug}`}
+              className="group flex items-center gap-3 mb-4 bg-warm-gray-100 hover:bg-sand-light rounded-lg p-3 transition-colors"
+            >
+              <div className="w-12 h-12 flex-shrink-0 relative rounded-full overflow-hidden bg-sand">
                 <SafeImage
                   src={maker.portraitUrl}
                   alt={maker.name}
                   fill
                   className="object-cover"
-                  sizes="40px"
+                  sizes="48px"
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-heading text-sm font-semibold text-deep-blue">
+                <p className="font-heading text-sm font-semibold text-deep-blue group-hover:text-ocean transition-colors">
                   {maker.name}
                 </p>
                 <p className="text-xs text-warm-gray-600">
                   {maker.village}, {maker.province}
                 </p>
               </div>
-            </div>
+            </Link>
 
-            {/* Storytelling intro */}
-            <p className="text-sm text-warm-gray-700 leading-relaxed">
-              Hi there my name is {maker.name} ..{' '}
+            {/* Maker's story — first-person excerpt */}
+            <div className="text-sm text-warm-gray-700 leading-relaxed space-y-2">
+              {maker.story ? (
+                <>
+                  <p className="italic text-warm-gray-800">
+                    &ldquo;{maker.story.length > 180 ? `${maker.story.slice(0, 180).trim()}…` : maker.story}&rdquo;
+                  </p>
+                  <p className="text-xs text-warm-gray-500">— {maker.name}, {maker.village}</p>
+                </>
+              ) : (
+                <p>
+                  {maker.name} is a maker from {maker.village}, {maker.province}. This piece was made by hand using skills passed down through generations.
+                </p>
+              )}
               <Link
                 href={`/maker/${maker.slug}`}
-                className="text-sm font-medium text-ocean hover:text-ocean-dark transition-colors"
+                className="inline-block text-sm font-medium text-ocean hover:text-ocean-dark transition-colors mt-1"
               >
-                View story →
+                Read {maker.name}&apos;s full story →
               </Link>
-            </p>
+            </div>
           </div>
         )}
 
