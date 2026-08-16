@@ -19,7 +19,8 @@ function isR2Configured(): boolean {
  */
 async function uploadToR2(data: Uint8Array, contentType: string): Promise<string> {
   const id = crypto.randomUUID();
-  const filename = `${id}.webp`;
+  const ext = contentType === 'image/png' ? 'png' : contentType === 'image/jpeg' ? 'jpg' : 'webp';
+  const filename = `${id}.${ext}`;
   const key = `uploads/${filename}`;
   const endpoint = `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
   const url = `${endpoint}/${R2_BUCKET_NAME}/${key}`;

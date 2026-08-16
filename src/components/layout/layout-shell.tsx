@@ -27,7 +27,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
         <RouteProgressBar />
       </Suspense>
       <Header />
-      <main id="main-content" className="flex-1 pt-4 sm:pt-6">
+      <main id="main-content" className="flex-1 pt-3 sm:pt-4 lg:pt-6">
         {children}
       </main>
       <Footer />

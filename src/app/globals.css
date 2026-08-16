@@ -74,44 +74,33 @@
 
 @layer components {
   /* --- Vertical rhythm -------------------------------------------------
-     Two responsive steps, so spacing scales with viewport instead of
-     sitting at one fixed value on every device.
+     Fluid responsive spacing using calc() + vw for smooth scaling
+     across all viewport sizes. Based on industry best practices:
+     - Mobile (320px): tighter spacing
+     - Tablet (768px): moderate spacing
+     - Desktop (1280px+): generous spacing
 
      .page-y     top/bottom padding for a whole page's content
      .section-y  padding for a band/section within a page
      -------------------------------------------------------------------- */
   .page-y {
-    padding-top: 2.5rem;    /* 40px — mobile */
-    padding-bottom: 2.5rem;
+    padding-top: calc(1.5rem + 1.5vw);     /* ~24px mobile → ~44px tablet → ~60px desktop */
+    padding-bottom: calc(1.5rem + 1.5vw);
   }
 
   .section-y {
-    padding-top: 3rem;      /* 48px — mobile */
-    padding-bottom: 3rem;
+    padding-top: calc(2rem + 2vw);          /* ~32px mobile → ~52px tablet → ~72px desktop */
+    padding-bottom: calc(2rem + 2vw);
   }
 
-  @media (min-width: 640px) {
+  @media (min-width: 1280px) {
     .page-y {
-      padding-top: 3rem;    /* 48px — tablet */
-      padding-bottom: 3rem;
-    }
-  }
-
-  @media (min-width: 768px) {
-    .section-y {
-      padding-top: 4rem;    /* 64px — tablet */
-      padding-bottom: 4rem;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .page-y {
-      padding-top: 4rem;    /* 64px — desktop */
+      padding-top: 4rem;    /* cap at 64px on large screens */
       padding-bottom: 4rem;
     }
 
     .section-y {
-      padding-top: 5rem;    /* 80px — desktop */
+      padding-top: 5rem;    /* cap at 80px on large screens */
       padding-bottom: 5rem;
     }
   }
