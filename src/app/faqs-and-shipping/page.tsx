@@ -12,7 +12,7 @@ const FAQS = [
   },
   {
     q: 'How long does delivery take?',
-    a: 'We ship from our Melbourne warehouse within 3–5 business days of receiving payment. Delivery within Australia is typically 2–5 business days depending on your location. Within Australia, we use tracked shipping on all orders. In 2026 when we started this small business, we made one shopping trip to purchase orders directly from the makers in Solomon Islands. We intend to do this each year while also exploring a reliable and cost-effective freight and customs service between Honiara and Australia.',
+    a: 'We ship from Sydney within 3–5 business days of receiving payment. Delivery within Australia is typically 2–5 business days depending on your location. Within Australia, we use tracked shipping on all orders. In 2026 when we started this small business, we made one shopping trip to purchase orders directly from the makers in Solomon Islands. We intend to do this each year while also exploring a reliable and cost-effective freight and customs service between Honiara and Australia.',
   },
   {
     q: 'What is your returns policy?',
@@ -20,11 +20,11 @@ const FAQS = [
   },
   {
     q: 'Can I return unsold goods?',
-    a: 'No — orders are purchased outright at wholesale price. We do not offer sale-or-return. We recommend starting with a small order to gauge customer interest before committing to larger quantities.',
+    a: 'No — orders are purchased outright at wholesale prices.',
   },
   {
     q: 'Do you sell to the public?',
-    a: 'No — Solomon Islands Arts Crafts is wholesale-only. We do not sell individual pieces to the public. If you are a retail customer, please visit one of our stocking retailers (check the "Where to buy" section on any product\'s provenance page) to purchase a piece in person or by using that shop\'s online ordering service.',
+    a: 'No — Solomon Islands Arts & Crafts is wholesale-only. We do not sell individual pieces to the public. If you are a retail customer, please visit one of our stocking retailers (check the "Where to buy" section on any product\'s provenance page) to purchase a piece in person or by using that shop\'s online ordering service.',
   },
   {
     q: 'Can I order custom or bulk items?',

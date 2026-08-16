@@ -63,7 +63,7 @@ export default function ForMakersPage() {
     <div>
       <PageHeader
         title="For Makers"
-        intro="If you make crafts in Solomon Islands and would like to sell your work through Solomon Islands Arts Crafts (SIAC), this page explains how it works and how to get in touch."
+        intro="If you make crafts in Solomon Islands and would like to sell your work through Solomon Islands Arts & Crafts (SIAC), this page explains how it works and how to get in touch."
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">
@@ -107,8 +107,8 @@ export default function ForMakersPage() {
           <p>
             If we cannot buy from you right now, it does not mean your work is not good enough.
             It means we have reached our current capacity. We keep every expression of interest
-            on file and reach out when we can take on more makers.
-            <span className="text-warm-gray-400 italic text-sm"> [NEEDS REVIEW — confirm waitlist/follow-up process]</span>
+            on file and reach out when we can take on more makers. Please fill in the form below
+            to express interest in joining Solomon Islands Arts &amp; Crafts as a maker.
           </p>
         </div>
       </section>

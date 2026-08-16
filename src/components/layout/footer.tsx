@@ -51,7 +51,7 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-3 text-sm text-white/70">
-            <p>&copy; {new Date().getFullYear()} Solomon Islands Arts Crafts.</p>
+            <p>&copy; {new Date().getFullYear()} Solomon Islands Arts & Crafts.</p>
             <Link href="/for-makers" className="text-white/70 hover:text-white transition-colors underline underline-offset-2">
               For Makers
             </Link>

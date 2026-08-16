@@ -17,18 +17,18 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   metadataBase: new URL('https://solomonislandsartsandcrafts.com.au'),
   title: {
-    default: 'Solomon Islands Arts Crafts',
+    default: 'Solomon Islands Arts & Crafts',
     template: '%s | SI Crafts',
   },
   description:
     'Authentic Solomon Islands handicrafts — pandanus weaving, wood carving, and shell-money jewellery. Meet the makers, discover the stories.',
   manifest: '/manifest.json',
   openGraph: {
-    title: 'Solomon Islands Arts Crafts',
+    title: 'Solomon Islands Arts & Crafts',
     description:
       'Authentic Solomon Islands handicrafts — pandanus weaving, wood carving, and shell-money jewellery.',
     url: 'https://solomonislandsartsandcrafts.com.au',
-    siteName: 'Solomon Islands Arts Crafts',
+    siteName: 'Solomon Islands Arts & Crafts',
     type: 'website',
     images: [{ url: '/images/og-default.jpg' }],
   },

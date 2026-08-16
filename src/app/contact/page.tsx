@@ -71,7 +71,7 @@ export default function ContactPage() {
     <div>
       <PageHeader
         title="Contact"
-        intro="Get in touch with the Solomon Islands Arts Crafts team."
+        intro="Get in touch with the Solomon Islands Arts & Crafts team."
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16 grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-12">
@@ -204,7 +204,7 @@ export default function ContactPage() {
           <div>
             <h3 className="font-heading font-semibold text-deep-blue mb-2">Wholesale enquiries</h3>
             <p className="text-sm text-warm-gray-600">
-              Interested in stocking Solomon Islands Arts Crafts in your museum or gallery shop?{' '}
+              Interested in stocking Solomon Islands Arts & Crafts in your museum or gallery shop?{' '}
               <Link href="/wholesale" className="text-ocean hover:text-ocean-dark font-medium">Visit our Wholesale page →</Link>
             </p>
           </div>

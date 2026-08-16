@@ -7,7 +7,7 @@ import type { Article } from '@/types';
 
 export const metadata = generatePageMetadata({
   title: 'News',
-  description: 'Stories, updates, and behind-the-scenes from Solomon Islands Arts Crafts.',
+  description: 'Stories, updates, and behind-the-scenes from Solomon Islands Arts & Crafts.',
   path: '/news',
 });
 
@@ -70,7 +70,7 @@ export default async function NewsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
         <div className="text-center py-12">
           <h1 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">News</h1>
-          <p className="text-warm-gray-600">No articles published yet. Check back soon for stories and updates from Solomon Islands Arts Crafts.</p>
+          <p className="text-warm-gray-600">No articles published yet. Check back soon for stories and updates from Solomon Islands Arts & Crafts.</p>
         </div>
       </div>
     );
@@ -80,7 +80,7 @@ export default async function NewsPage() {
     <div>
       <PageHeader
         title="News"
-        intro="Stories and updates from Solomon Islands Arts Crafts — makers, crafts, and the people we work with."
+        intro="Stories and updates from Solomon Islands Arts & Crafts — makers, crafts, and the people we work with."
       />
 
       {/* Articles grid — left-aligned */}

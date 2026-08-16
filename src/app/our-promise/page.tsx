@@ -47,8 +47,8 @@ export default function OurPromisePage() {
             </h2>
             <p className="text-warm-gray-600 leading-relaxed">
               Makers set their own prices. We pay upfront — not on consignment, not on commission.
-              Our wholesale margin covers shipping, documentation, and distribution only. The team
-              behind Solomon Islands Arts Crafts donate their time and expertise.
+              Our wholesale margin covers marketing, shipping, documentation, and distribution only. The team
+              behind Solomon Islands Arts &amp; Crafts donate their time and expertise.
             </p>
           </div>
         </div>
@@ -109,13 +109,13 @@ export default function OurPromisePage() {
           </p>
           <ul className="list-disc pl-6 space-y-2">
             <li>
-              <strong>The maker receives the price they set</strong> — paid upfront in Solomon Islands Dollars ($SBD) at the point of purchase in Solomon Islands, before the piece reaches Australia.
+              <strong>The maker receives the price they set</strong> — paid upfront in Solomon Islands Dollars ($SBD) at the point of purchase in Solomon Islands, before the piece reaches Australia. Museum and gallery shops in Australia set their own prices to cover their costs.
             </li>
             <li>
               <strong>SIAC&apos;s margin covers operations</strong> — international freight, import documentation, photography, provenance tagging, warehousing, and distribution to stockists.
             </li>
             <li>
-              <strong>No middlemen, no agents</strong> — we buy directly from makers or maker cooperatives. There is no third-party supply chain taking a cut. The logistics and website team behind Solomon Islands Arts Crafts donate their time and expertise. Only the makers are paid at the price they set.
+              <strong>No middlemen, no agents</strong> — we buy directly from makers or maker cooperatives. There is no third-party supply chain taking a cut. The logistics and website team behind Solomon Islands Arts &amp; Crafts donate their time and expertise. Only the makers are paid at the price they set.
             </li>
           </ul>
           <p>

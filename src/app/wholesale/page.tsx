@@ -33,7 +33,7 @@ const steps = [
     icon: IconParcelLeaf,
     title: 'Receive',
     description:
-      'We ship from Melbourne. Each piece arrives with a QR-coded tag linking to its maker\u2019s story.',
+      'We ship from Sydney. Each piece arrives with a QR-coded tag linking to its maker\u2019s story. We will pay the shipping costs for your first order.',
   },
 ];
 
@@ -100,8 +100,7 @@ export default async function WholesalePage() {
               Can I return unsold goods?
             </dt>
             <dd className="text-sm text-warm-gray-600 leading-relaxed">
-              No — orders are purchased outright at wholesale price. We accept returns only
-              for damage in transit (within 7 days of delivery with photos).
+              No — orders are purchased outright at wholesale prices.
             </dd>
           </div>
           <div>

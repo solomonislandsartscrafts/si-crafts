@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Solomon Islands Arts Crafts (SI Crafts / SIAC) is a volunteer-run wholesale business that imports Solomon Islands handicrafts — pandanus weaving, wood carving, and shell-money jewellery — and sells them to Australian museum and gallery shops. This document specifies the requirements for the SI Crafts public website and wholesale platform.
+Solomon Islands Arts & Crafts (SI Crafts / SIAC) is a volunteer-run wholesale business that imports Solomon Islands handicrafts — pandanus weaving, wood carving, and shell-money jewellery — and sells them to Australian museum and gallery shops. This document specifies the requirements for the SI Crafts public website and wholesale platform.
 
 The public site tells authentic maker stories and showcases products without pricing. Wholesale pricing and ordering are gated behind a stockist login. The hero feature is the "meet the maker" provenance flow: every product tag carries a QR/short URL that opens a mobile-first story page connecting the piece to its maker, craft technique, and place of origin.
 
@@ -76,7 +76,7 @@ The site is built phase-by-phase on mock data first (Phases 0–8), with real CM
 
 #### Acceptance Criteria
 
-1. THE Site SHALL display a hero section on the Home page with a featured image, a heading introducing Solomon Islands Arts Crafts, and introductory text (no more than 3 sentences) describing the business purpose.
+1. THE Site SHALL display a hero section on the Home page with a featured image, a heading introducing Solomon Islands Arts & Crafts, and introductory text (no more than 3 sentences) describing the business purpose.
 2. THE Site SHALL display a curated selection of at least 3 and no more than 6 featured Products on the Home page, each showing name, photograph, material category, and Maker name, without any pricing information.
 3. THE Site SHALL display a "Meet the Makers" preview section showing at least 2 Maker portrait cards (name, village, portrait) with a link to the Makers index page.
 4. THE Site SHALL display a "Featured Crafts" section highlighting the three craft techniques with links to their respective /craft/{slug} pages.
