@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, Store } from 'lucide-react';
+import { Store } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { getPublicMakers, getPublicMakerBySlug } from '@/services/makers';
 import { getProductsByMaker } from '@/services/products';

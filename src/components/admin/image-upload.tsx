@@ -60,23 +60,48 @@ export function ImageUpload({
       const filename = `${Date.now()}-${file.name.replace(/\.[^.]+$/, '')}.${ext}`;
       formData.append('file', compressed, filename);
 
-      // Upload to backend API
+      // Upload to backend API, fall back to local Next.js route
       const token = localStorage.getItem('admin_session') ?? '';
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-      const uploadEndpoint = apiUrl ? `${apiUrl}/api/upload/` : '/api/upload';
-      const res = await fetch(uploadEndpoint, {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: formData,
-      });
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Upload failed');
+      let url: string | null = null;
+
+      // Try remote backend first
+      if (apiUrl) {
+        try {
+          const res = await fetch(`${apiUrl}/api/upload/`, {
+            method: 'POST',
+            headers,
+            body: formData,
+          });
+          if (res.ok) {
+            const data = await res.json();
+            url = data.url;
+          }
+        } catch {
+          // Remote failed — will try local
+        }
       }
 
-      const { url } = await res.json();
-      onChange(url);
+      // Fall back to local Next.js API route
+      if (!url) {
+        const localForm = new FormData();
+        localForm.append('file', compressed, filename);
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          headers,
+          body: localForm,
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || 'Upload failed');
+        }
+        const data = await res.json();
+        url = data.url;
+      }
+
+      onChange(url!);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
     } finally {

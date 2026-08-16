@@ -23,11 +23,13 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
 
   // Touch/swipe state
   const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
   const touchDeltaX = useRef(0);
   const [dragging, setDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const suppressClickRef = useRef(false);
+  const isHorizontalGesture = useRef<boolean | null>(null);
 
   useEffect(() => {
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -61,36 +63,56 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
   // Touch handlers for swipe
   function handleTouchStart(e: React.TouchEvent) {
     touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
     touchDeltaX.current = 0;
+    isHorizontalGesture.current = null; // undecided
     setDragging(true);
     setPaused(true);
   }
 
   function handleTouchMove(e: React.TouchEvent) {
-    if (touchStartX.current === null) return;
-    const delta = e.touches[0].clientX - touchStartX.current;
-    touchDeltaX.current = delta;
-    setDragOffset(delta);
+    if (touchStartX.current === null || touchStartY.current === null) return;
+
+    const deltaX = e.touches[0].clientX - touchStartX.current;
+    const deltaY = e.touches[0].clientY - touchStartY.current;
+
+    // Lock direction on first significant movement
+    if (isHorizontalGesture.current === null) {
+      if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+        isHorizontalGesture.current = Math.abs(deltaX) > Math.abs(deltaY);
+      }
+    }
+
+    // Only apply drag feedback for horizontal gestures
+    if (isHorizontalGesture.current) {
+      touchDeltaX.current = deltaX;
+      setDragOffset(deltaX);
+    }
   }
 
   function handleTouchEnd() {
     setDragging(false);
-    const threshold = 50; // minimum px to register a swipe
-    const didSwipe = Math.abs(touchDeltaX.current) > threshold;
 
-    if (touchDeltaX.current < -threshold) {
-      go(1); // swipe left = next
-    } else if (touchDeltaX.current > threshold) {
-      go(-1); // swipe right = previous
-    }
+    // Only trigger swipe navigation for horizontal gestures
+    if (isHorizontalGesture.current) {
+      const threshold = 50;
+      const didSwipe = Math.abs(touchDeltaX.current) > threshold;
 
-    // Suppress the compatibility click that fires after touchend on recognized swipes
-    if (didSwipe) {
-      suppressClickRef.current = true;
+      if (touchDeltaX.current < -threshold) {
+        go(1); // swipe left = next
+      } else if (touchDeltaX.current > threshold) {
+        go(-1); // swipe right = previous
+      }
+
+      if (didSwipe) {
+        suppressClickRef.current = true;
+      }
     }
 
     touchStartX.current = null;
+    touchStartY.current = null;
     touchDeltaX.current = 0;
+    isHorizontalGesture.current = null;
     setDragOffset(0);
     setPaused(false);
   }
@@ -99,7 +121,9 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
     setDragging(false);
     setPaused(false);
     touchStartX.current = null;
+    touchStartY.current = null;
     touchDeltaX.current = 0;
+    isHorizontalGesture.current = null;
     setDragOffset(0);
   }
 

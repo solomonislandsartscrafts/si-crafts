@@ -2,8 +2,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { generatePageMetadata } from '@/lib/metadata';
 import { PageHeader } from '@/components/layout';
-import { getTeamMembers } from '@/services/team';
-import { SafeImage } from '@/components/ui/safe-image';
+import { TeamList } from './team-list';
 
 export const metadata = generatePageMetadata({
   title: 'Our Team',
@@ -11,9 +10,7 @@ export const metadata = generatePageMetadata({
   path: '/about/team',
 });
 
-export default async function TeamPage() {
-  const members = await getTeamMembers();
-
+export default function TeamPage() {
   return (
     <div>
       <PageHeader
@@ -30,42 +27,8 @@ export default async function TeamPage() {
         }
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16 space-y-10">
-        {members.length === 0 ? (
-          <p className="text-warm-gray-400 italic">Team information coming soon.</p>
-        ) : (
-          members.map((member) => (
-            <div key={member.id} className="flex gap-6 items-start">
-              {/* Photo */}
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-sand-light flex-shrink-0 relative overflow-hidden">
-                <SafeImage
-                  src={member.photoUrl || null}
-                  alt={member.photoAlt || member.name}
-                  fill
-                  className="object-cover"
-                  sizes="96px"
-                />
-              </div>
-
-              {/* Info */}
-              <div>
-                <h2 className="font-heading text-lg font-semibold text-deep-blue">
-                  {member.name}
-                </h2>
-                {member.location && (
-                  <p className="text-sm text-warm-gray-400 mb-2">{member.location}</p>
-                )}
-                {member.bio ? (
-                  <p className="text-sm text-warm-gray-600 leading-relaxed">
-                    {member.bio}
-                  </p>
-                ) : (
-                  <p className="text-warm-gray-400 italic text-sm">Bio coming soon.</p>
-                )}
-              </div>
-            </div>
-          ))
-        )}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">
+        <TeamList />
       </div>
     </div>
   );

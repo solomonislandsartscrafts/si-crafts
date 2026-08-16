@@ -54,14 +54,14 @@ export function Header() {
               SIAC
             </Link>
 
-            <nav className="hidden md:flex items-center gap-2" aria-label="Primary">
+            <nav className="hidden md:flex items-center gap-1" aria-label="Primary">
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`tap-target flex items-center px-3 py-2 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-ocean border-b-[3px] rounded-none ${
+                  className={`tap-target px-3 py-1.5 text-sm font-medium border-b-2 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded-sm ${
                     isActive(link.href)
-                      ? 'text-deep-blue border-ocean'
+                      ? 'text-ocean border-ocean'
                       : 'text-warm-gray-600 border-transparent hover:text-deep-blue hover:border-ocean'
                   }`}
                   aria-current={isActive(link.href) ? 'page' : undefined}
