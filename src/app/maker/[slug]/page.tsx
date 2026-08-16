@@ -6,7 +6,7 @@ import { getProductsByMaker } from '@/services/products';
 import { getCraftById } from '@/services/crafts';
 import { ProductCard } from '@/components/cards/product-card';
 import { SafeImage } from '@/components/ui/safe-image';
-import { BackButton } from '@/components/shared/back-button';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 import type { Product } from '@/types';
 
 export async function generateStaticParams() {
@@ -48,8 +48,15 @@ export default async function MakerPage({ params }: MakerPageProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
-      {/* Back link */}
-      <BackButton fallback="/makers" label="Back" className="mb-8" />
+      {/* Breadcrumb */}
+      <Breadcrumb
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Makers', url: '/makers' },
+          { name: maker.name },
+        ]}
+        className="mb-8"
+      />
 
       {/* Maker profile */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mb-12 lg:mb-16">

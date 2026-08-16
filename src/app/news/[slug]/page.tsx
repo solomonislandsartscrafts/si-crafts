@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, Clock } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import sanitizeHtml from 'sanitize-html';
 import { getArticleBySlug, getPublishedArticles } from '@/services/articles';
@@ -7,6 +7,7 @@ import { generatePageMetadata } from '@/lib/metadata';
 import { ShareButtons } from '@/components/shared/share-buttons';
 import { NewsSidebar } from '@/components/news/news-sidebar';
 import { SafeImage } from '@/components/ui/safe-image';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 export async function generateStaticParams() {
   const articles = await getPublishedArticles();
@@ -45,14 +46,15 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
         {/* Article content */}
         <article className="max-w-3xl">
-          {/* Back link */}
-          <Link
-            href="/news"
-            className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark mb-8 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            All articles
-          </Link>
+          {/* Breadcrumb */}
+          <Breadcrumb
+            items={[
+              { name: 'Home', url: '/' },
+              { name: 'News', url: '/news' },
+              { name: article.title },
+            ]}
+            className="mb-8"
+          />
 
           {/* Article header */}
           <header className="mb-10">

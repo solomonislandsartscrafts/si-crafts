@@ -5,6 +5,7 @@ import { getCraftById } from '@/services/crafts';
 import { getAllMakers } from '@/services/makers';
 import { PiecePageClient } from './piece-page-client';
 import { ProductCard } from '@/components/cards/product-card';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 export async function generateStaticParams() {
   const products = await getAllProducts();
@@ -59,6 +60,16 @@ export default async function PiecePage({ params }: PiecePageProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-10 sm:pt-8 sm:pb-12 lg:pt-10 lg:pb-16">
+      {/* Breadcrumb */}
+      <Breadcrumb
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Catalogue', url: '/catalogue' },
+          { name: product.name },
+        ]}
+        className="mb-6"
+      />
+
       {/* Top section: Gallery + Product Info + Maker */}
       <PiecePageClient product={product} craftName={craft?.name} craftSlug={craft?.slug} maker={publishedMaker} craft={craft} />
 

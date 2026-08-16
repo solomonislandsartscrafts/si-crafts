@@ -1,8 +1,7 @@
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
 import { generatePageMetadata } from '@/lib/metadata';
 import { PageHeader } from '@/components/layout';
 import { TeamList } from './team-list';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 export const metadata = generatePageMetadata({
   title: 'Our Team',
@@ -17,13 +16,13 @@ export default function TeamPage() {
         title="Our Team"
         intro="Solomon Islands Arts and Crafts is run entirely by volunteers who share a connection to Solomon Islands."
         eyebrow={
-          <Link
-            href="/about"
-            className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to About
-          </Link>
+          <Breadcrumb
+            items={[
+              { name: 'Home', url: '/' },
+              { name: 'About', url: '/about' },
+              { name: 'Team' },
+            ]}
+          />
         }
       />
 

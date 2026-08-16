@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { getAllCrafts, getCraftBySlug } from '@/services/crafts';
 import { getMakersByCraft } from '@/services/makers';
@@ -7,6 +6,7 @@ import { getPublicProducts } from '@/services/products';
 import { MakerCard } from '@/components/cards/maker-card';
 import { ProductCard } from '@/components/cards/product-card';
 import { SafeImage } from '@/components/ui/safe-image';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 export async function generateStaticParams() {
   const crafts = await getAllCrafts();
@@ -32,14 +32,15 @@ export default async function CraftPage({ params }: CraftPageProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
-      {/* Back link */}
-      <Link
-        href="/crafts-and-techniques"
-        className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark mb-8 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        All crafts & techniques
-      </Link>
+      {/* Breadcrumb */}
+      <Breadcrumb
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Crafts', url: '/crafts-and-techniques' },
+          { name: craft.name },
+        ]}
+        className="mb-8"
+      />
 
       {/* Header with image */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center mb-12 lg:mb-16">

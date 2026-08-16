@@ -33,7 +33,8 @@ export function RouteProgressBar() {
     const currentPath = pathname + searchParams.toString();
 
     if (currentPath !== prevPathRef.current) {
-      // Navigation completed — finish the bar
+      // Navigation completed — finish the bar and scroll to top
+      window.scrollTo(0, 0);
       const hideTimer = completeAndHide();
       prevPathRef.current = currentPath;
       return () => clearTimeout(hideTimer);
