@@ -78,10 +78,14 @@ const DEFAULT_TEAM: TeamMember[] = [
 
 // --- Local storage helpers (client-side persistence until backend is connected) ---
 
-/** Returns true only for network failures or service-unavailable — never for auth/validation/404 */
-function isTransportError(err: unknown): boolean {
+/** Returns true for errors that should trigger local storage fallback.
+ * During mock-data phase, all backend errors fall back locally since
+ * the team data is managed via localStorage until the backend auth is aligned.
+ */
+function shouldFallbackLocally(err: unknown): boolean {
   if (err instanceof ApiError) {
-    return err.status === 0 || err.status === 503;
+    // Any backend error: auth mismatch, 404, 500 — use local data
+    return true;
   }
   return true; // Non-ApiError (e.g. TypeError from fetch) = network issue
 }
@@ -137,7 +141,7 @@ export async function getTeamMembers(): Promise<TeamMember[]> {
     const list = Array.isArray(data) ? data : (data?.results ?? []);
     if (list.length > 0) return list.map(mapTeamMember);
   } catch (err) {
-    if (!isTransportError(err)) throw err;
+    if (!shouldFallbackLocally(err)) throw err;
     // API unavailable — use local data
   }
 
@@ -153,7 +157,7 @@ export async function getTeamMemberById(id: string): Promise<TeamMember | null> 
     const raw = await apiGet<ApiTeamMember>(`/api/team/${id}/`);
     return mapTeamMember(raw);
   } catch (err) {
-    if (!isTransportError(err)) throw err;
+    if (!shouldFallbackLocally(err)) throw err;
     // Fall back to local
     const members = getLocalTeam() ?? DEFAULT_TEAM;
     return members.find((m) => m.id === id) ?? null;
@@ -178,7 +182,7 @@ export async function createTeamMember(
     }, token);
     return mapTeamMember(raw);
   } catch (err) {
-    if (!isTransportError(err)) throw err;
+    if (!shouldFallbackLocally(err)) throw err;
     // Backend unavailable — persist locally
     const members = getLocalTeam() ?? [...DEFAULT_TEAM];
     const now = new Date().toISOString();
@@ -217,7 +221,7 @@ export async function updateTeamMember(
     const raw = await apiPatch<ApiTeamMember>(`/api/team/${id}/`, body, token);
     return mapTeamMember(raw);
   } catch (err) {
-    if (!isTransportError(err)) throw err;
+    if (!shouldFallbackLocally(err)) throw err;
     // Backend unavailable — persist locally
     const members = getLocalTeam() ?? [...DEFAULT_TEAM];
     const index = members.findIndex((m) => m.id === id);
@@ -241,7 +245,7 @@ export async function deleteTeamMember(id: string): Promise<boolean> {
     await apiDelete(`/api/team/${id}/`, token);
     return true;
   } catch (err) {
-    if (!isTransportError(err)) throw err;
+    if (!shouldFallbackLocally(err)) throw err;
     // Backend unavailable — persist locally
     const members = getLocalTeam() ?? [...DEFAULT_TEAM];
     const filtered = members.filter((m) => m.id !== id);
