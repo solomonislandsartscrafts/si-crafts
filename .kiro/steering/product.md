@@ -1,7 +1,7 @@
 # SI Crafts — Product & Business Context
 
 ## Business
-Solomon Islands Arts and Crafts (SI Crafts / SIAC) is a volunteer-run **wholesale** business that imports Solomon Islands handicrafts — pandanus weaving, wood carving, and shell-money jewellery — and sells them to Australian museum and gallery shops.
+Solomon Islands Arts Crafts (SI Crafts / SIAC) is a volunteer-run **wholesale** business that imports Solomon Islands handicrafts — pandanus weaving, wood carving, and shell-money jewellery — and sells them to Australian museum and gallery shops.
 
 ## Audience
 1. **Public visitors** — anyone interested in Solomon Islands culture and craft. They browse stories, makers, and product photos but never see pricing.

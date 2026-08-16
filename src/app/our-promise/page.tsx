@@ -48,7 +48,7 @@ export default function OurPromisePage() {
             <p className="text-warm-gray-600 leading-relaxed">
               Makers set their own prices. We pay upfront — not on consignment, not on commission.
               Our wholesale margin covers shipping, documentation, and distribution only. The team
-              behind Solomon Islands Arts and Crafts donate their time and expertise.
+              behind Solomon Islands Arts Crafts donate their time and expertise.
             </p>
           </div>
         </div>
@@ -115,7 +115,7 @@ export default function OurPromisePage() {
               <strong>SIAC&apos;s margin covers operations</strong> — international freight, import documentation, photography, provenance tagging, warehousing, and distribution to stockists.
             </li>
             <li>
-              <strong>No middlemen, no agents</strong> — we buy directly from makers or maker cooperatives. There is no third-party supply chain taking a cut. The logistics and website team behind Solomon Islands Arts and Crafts donate their time and expertise. Only the makers are paid at the price they set.
+              <strong>No middlemen, no agents</strong> — we buy directly from makers or maker cooperatives. There is no third-party supply chain taking a cut. The logistics and website team behind Solomon Islands Arts Crafts donate their time and expertise. Only the makers are paid at the price they set.
             </li>
           </ul>
           <p>

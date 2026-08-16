@@ -109,12 +109,12 @@ describe('Property 1: Open Graph tags valid on all public pages', () => {
     expect(ogDesc.endsWith('...')).toBe(true);
   });
 
-  it('siteName is always "Solomon Islands Arts and Crafts"', () => {
+  it('siteName is always "Solomon Islands Arts Crafts"', () => {
     const meta = generatePageMetadata({ title: 'X', description: 'Y' });
     const siteName = meta.openGraph && 'siteName' in meta.openGraph
       ? meta.openGraph.siteName
       : '';
-    expect(siteName).toBe('Solomon Islands Arts and Crafts');
+    expect(siteName).toBe('Solomon Islands Arts Crafts');
   });
 });
 
@@ -229,6 +229,6 @@ describe('Accessibility: Structural requirements (data-level)', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((meta.openGraph as any).url).toContain('/test');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((meta.openGraph as any).siteName).toBe('Solomon Islands Arts and Crafts');
+    expect((meta.openGraph as any).siteName).toBe('Solomon Islands Arts Crafts');
   });
 });

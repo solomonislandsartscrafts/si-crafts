@@ -24,7 +24,7 @@ const FAQS = [
   },
   {
     q: 'Do you sell to the public?',
-    a: 'No — Solomon Islands Arts and Crafts is wholesale-only. We do not sell individual pieces to the public. If you are a retail customer, please visit one of our stocking retailers (check the "Where to buy" section on any product\'s provenance page) to purchase a piece in person or by using that shop\'s online ordering service.',
+    a: 'No — Solomon Islands Arts Crafts is wholesale-only. We do not sell individual pieces to the public. If you are a retail customer, please visit one of our stocking retailers (check the "Where to buy" section on any product\'s provenance page) to purchase a piece in person or by using that shop\'s online ordering service.',
   },
   {
     q: 'Can I order custom or bulk items?',

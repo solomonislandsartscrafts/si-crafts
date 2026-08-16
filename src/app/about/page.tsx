@@ -26,7 +26,7 @@ export default async function AboutPage() {
     <div>
       <PageHeader
         title="About"
-        intro={siteContent.aboutPageIntro || "Solomon Islands Arts and Crafts connects makers in Solomon Islands with museum and gallery shops in Australia — telling authentic stories and building respectful trade relationships."}
+        intro={siteContent.aboutPageIntro || "Solomon Islands Arts Crafts connects makers in Solomon Islands with museum and gallery shops in Australia — telling authentic stories and building respectful trade relationships."}
       />
 
       {/* Section 1: About Solomon Islands — image LEFT */}
@@ -94,7 +94,7 @@ export default async function AboutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-start">
             <div className="lg:col-span-3 order-2 lg:order-1">
               <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
-                {siteContent.aboutTeamHeading || "About the Solomon Islands Arts and Crafts (SIAC) Team"}
+                {siteContent.aboutTeamHeading || "About the Solomon Islands Arts Crafts (SIAC) Team"}
               </h2>
               <div className="space-y-4 text-warm-gray-600 leading-relaxed">
                 {siteContent.aboutTeamText ? (
@@ -102,7 +102,7 @@ export default async function AboutPage() {
                 ) : (
                   <>
                     <p>
-                      Solomon Islands Arts and Crafts is run entirely by volunteers who share a
+                      Solomon Islands Arts Crafts is run entirely by volunteers who share a
                       connection to Solomon Islands — through family, work, friendship, or simply
                       a deep respect for the culture and its people.
                     </p>
@@ -116,7 +116,7 @@ export default async function AboutPage() {
                       We are not a charity. We are a small business built on the principle that
                       these extraordinary crafts deserve to reach a wider audience — and that the
                       makers deserve fair payment and recognition for their work. Solomon Islands
-                      Arts and Crafts was founded in 2026 as a volunteer-run social enterprise.
+                      Arts Crafts was founded in 2026 as a volunteer-run social enterprise.
                     </p>
                   </>
                 )}

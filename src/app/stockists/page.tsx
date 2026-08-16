@@ -6,7 +6,7 @@ import { getRetailStockists } from '@/services/retail-stockists';
 
 export const metadata = generatePageMetadata({
   title: 'Stockists',
-  description: 'Find Solomon Islands Arts and Crafts in museum and gallery shops across Australia.',
+  description: 'Find Solomon Islands Arts Crafts in museum and gallery shops across Australia.',
   path: '/stockists',
 });
 
@@ -17,7 +17,7 @@ export default async function StockistsPage() {
     <div>
       <PageHeader
         title="Stockists"
-        intro="Find Solomon Islands Arts and Crafts in these museum and gallery shops. Visit in person or contact them to ask about availability."
+        intro="Find Solomon Islands Arts Crafts in these museum and gallery shops. Visit in person or contact them to ask about availability."
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">

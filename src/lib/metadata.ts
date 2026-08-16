@@ -33,7 +33,7 @@ export function generatePageMetadata({
       description: ogDescription,
       url,
       images: [{ url: imageUrl || DEFAULT_OG_IMAGE }],
-      siteName: 'Solomon Islands Arts and Crafts',
+      siteName: 'Solomon Islands Arts Crafts',
       type: 'website',
     },
   };

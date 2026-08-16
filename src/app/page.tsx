@@ -12,7 +12,7 @@ import { HeroSlideshow } from '@/components/shared/hero-slideshow';
 import { SafeImage } from '@/components/ui/safe-image';
 
 export const metadata = generatePageMetadata({
-  title: 'Solomon Islands Arts and Crafts',
+  title: 'Solomon Islands Arts Crafts',
   description:
     'Authentic Solomon Islands handicrafts. Meet the makers behind every piece of pandanus weaving, wood carving, and shell-money jewellery.',
   path: '/',

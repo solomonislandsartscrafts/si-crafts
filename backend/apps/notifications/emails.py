@@ -13,7 +13,7 @@ from django.template.loader import render_to_string
 logger = logging.getLogger(__name__)
 
 ADMIN_EMAIL = getattr(settings, "ADMIN_NOTIFICATION_EMAIL", settings.DEFAULT_FROM_EMAIL)
-SITE_NAME = "Solomon Islands Arts and Crafts"
+SITE_NAME = "Solomon Islands Arts Crafts"
 SITE_URL = getattr(settings, "SITE_URL", "https://solomonislandsartsandcrafts.com.au")
 
 

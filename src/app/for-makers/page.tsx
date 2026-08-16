@@ -63,7 +63,7 @@ export default function ForMakersPage() {
     <div>
       <PageHeader
         title="For Makers"
-        intro="If you make crafts in Solomon Islands and would like to sell your work through Solomon Islands Arts and Crafts (SIAC), this page explains how it works and how to get in touch."
+        intro="If you make crafts in Solomon Islands and would like to sell your work through Solomon Islands Arts Crafts (SIAC), this page explains how it works and how to get in touch."
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">

@@ -235,7 +235,7 @@ function AboutTab({ content, update }: TabProps) {
   return (
     <>
       <Section title="Page Intro" description="The intro paragraph shown at the top of the About page.">
-        <TextArea label="Intro text" fieldId="about-page-intro" value={content.aboutPageIntro} onChange={(v) => update('aboutPageIntro', v)} placeholder="Solomon Islands Arts and Crafts connects makers..." rows={3} />
+        <TextArea label="Intro text" fieldId="about-page-intro" value={content.aboutPageIntro} onChange={(v) => update('aboutPageIntro', v)} placeholder="Solomon Islands Arts Crafts connects makers..." rows={3} />
       </Section>
       <Section title="About Solomon Islands" description="First section of the About page (beside the map/image).">
         <Field label="Section heading" fieldId="about-si-heading" value={content.aboutSolomonIslandsHeading} onChange={(v) => update('aboutSolomonIslandsHeading', v)} placeholder="About Solomon Islands" />
@@ -244,8 +244,8 @@ function AboutTab({ content, update }: TabProps) {
         <Field label="Link URL" fieldId="about-si-link-url" value={content.aboutSolomonIslandsLinkUrl} onChange={(v) => update('aboutSolomonIslandsLinkUrl', v)} placeholder="https://en.wikipedia.org/wiki/Solomon_Islands" />
       </Section>
       <Section title="About the Team" description="The SIAC team section.">
-        <Field label="Section heading" fieldId="about-team-heading" value={content.aboutTeamHeading} onChange={(v) => update('aboutTeamHeading', v)} placeholder="About the Solomon Islands Arts and Crafts (SIAC) Team" />
-        <TextArea label="Content" fieldId="about-team-content" value={content.aboutTeamText} onChange={(v) => update('aboutTeamText', v)} placeholder="Solomon Islands Arts and Crafts is run entirely by volunteers..." rows={6} />
+        <Field label="Section heading" fieldId="about-team-heading" value={content.aboutTeamHeading} onChange={(v) => update('aboutTeamHeading', v)} placeholder="About the Solomon Islands Arts Crafts (SIAC) Team" />
+        <TextArea label="Content" fieldId="about-team-content" value={content.aboutTeamText} onChange={(v) => update('aboutTeamText', v)} placeholder="Solomon Islands Arts Crafts is run entirely by volunteers..." rows={6} />
         <Field label="Link text" fieldId="about-team-link-text" value={content.aboutTeamLinkText} onChange={(v) => update('aboutTeamLinkText', v)} placeholder="Find out more about our team →" />
         <Field label="Link URL" fieldId="about-team-link-url" value={content.aboutTeamLinkUrl} onChange={(v) => update('aboutTeamLinkUrl', v)} placeholder="/about/team" />
       </Section>

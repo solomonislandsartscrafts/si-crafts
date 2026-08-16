@@ -72,11 +72,28 @@ export function ImageUpload({
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Upload failed');
+        const data: unknown = await res.json().catch(() => null);
+        const message =
+          data &&
+          typeof data === 'object' &&
+          'error' in data &&
+          typeof data.error === 'string'
+            ? data.error
+            : 'Upload failed';
+        throw new Error(message);
       }
 
-      const { url } = await res.json();
+      const data: unknown = await res.json();
+      const url =
+        data &&
+        typeof data === 'object' &&
+        'url' in data &&
+        typeof data.url === 'string'
+          ? data.url
+          : null;
+      if (!url || !url.trim()) {
+        throw new Error('Upload response did not include a valid URL');
+      }
       onChange(url);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
