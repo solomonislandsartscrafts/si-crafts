@@ -59,9 +59,9 @@ export function Header() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`tap-target px-3 py-1.5 text-sm font-medium border-b-2 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded-sm ${
+                  className={`tap-target px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded-sm ${
                     isActive(link.href)
-                      ? 'text-ocean border-ocean'
+                      ? 'text-ocean'
                       : 'text-warm-gray-600 border-transparent hover:text-deep-blue hover:border-ocean'
                   }`}
                   aria-current={isActive(link.href) ? 'page' : undefined}
