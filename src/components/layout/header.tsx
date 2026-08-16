@@ -44,9 +44,11 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white transition-all duration-300 relative">
+      <header className="z-40 bg-white relative">
+        {/* Flag stripe — at the top, scrolls away with the page */}
+        <div className="flag-divider" aria-hidden="true" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+          <div className="flex items-center justify-between h-16">
             <Link
               href="/"
               className="font-heading text-xl font-semibold text-deep-blue hover:text-ocean transition-colors"
@@ -121,8 +123,6 @@ export function Header() {
             </button>
           </div>
         </div>
-        {/* Flag stripe — positioned at the bottom of the header, inside */}
-        <div className="flag-divider absolute bottom-0 left-0 right-0" aria-hidden="true" />
       </header>
 
       <MobileNav
