@@ -1,5 +1,3 @@
-import { FlagDivider } from './flag-divider';
-
 /**
  * Standard page title block — the single source of truth for page-level
  * typography. Every interior page uses this so the h1 size, the flag mark,
@@ -25,7 +23,6 @@ export function PageHeader({ title, intro, eyebrow, children }: PageHeaderProps)
       <h1 className="font-heading text-[1.75rem] sm:text-3xl md:text-4xl font-medium text-deep-blue leading-tight mb-3">
         {title}
       </h1>
-      <FlagDivider variant="mark" className="mb-5" />
       {intro ? (
         <p className="text-base sm:text-lg text-warm-gray-600 max-w-2xl leading-relaxed">{intro}</p>
       ) : null}
