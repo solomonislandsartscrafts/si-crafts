@@ -27,6 +27,8 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
         <RouteProgressBar />
       </Suspense>
       <Header />
+      {/* Flag stripe — sits below the header, scrolls with page content */}
+      <div className="flag-divider" aria-hidden="true" />
       <main id="main-content" className="flex-1 pt-3 sm:pt-4 lg:pt-6">
         {children}
       </main>

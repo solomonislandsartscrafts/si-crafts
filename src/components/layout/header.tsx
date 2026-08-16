@@ -44,9 +44,7 @@ export function Header() {
 
   return (
     <>
-      <header className="z-40 bg-white relative">
-        {/* Flag stripe — at the top, scrolls away with the page */}
-        <div className="flag-divider" aria-hidden="true" />
+      <header className="sticky top-0 z-40 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link
