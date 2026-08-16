@@ -300,7 +300,7 @@ function AboutTab({ content, update }: TabProps) {
         <Field label="Link URL" fieldId="about-si-link-url" value={content.aboutSolomonIslandsLinkUrl} onChange={(v) => update('aboutSolomonIslandsLinkUrl', v)} placeholder="https://en.wikipedia.org/wiki/Solomon_Islands" />
       </Section>
       <Section title="About the Team" description="The SIAC team section.">
-        <Field label="Section heading" fieldId="about-team-heading" value={content.aboutTeamHeading} onChange={(v) => update('aboutTeamHeading', v)} placeholder="About the Solomon Islands Arts & Crafts (SIAC) Team" />
+        <Field label="Section heading" fieldId="about-team-heading" value={content.aboutTeamHeading} onChange={(v) => update('aboutTeamHeading', v)} placeholder="Our Team" />
         <TextArea label="Content" fieldId="about-team-content" value={content.aboutTeamText} onChange={(v) => update('aboutTeamText', v)} placeholder="Solomon Islands Arts & Crafts is run entirely by volunteers..." rows={6} />
         <Field label="Link text" fieldId="about-team-link-text" value={content.aboutTeamLinkText} onChange={(v) => update('aboutTeamLinkText', v)} placeholder="Find out more about our team →" />
         <Field label="Link URL" fieldId="about-team-link-url" value={content.aboutTeamLinkUrl} onChange={(v) => update('aboutTeamLinkUrl', v)} placeholder="/about/team" />

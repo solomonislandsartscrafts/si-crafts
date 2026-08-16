@@ -94,7 +94,7 @@ export default async function AboutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-start">
             <div className="lg:col-span-3 order-2 lg:order-1">
               <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
-                {siteContent.aboutTeamHeading || "About the Solomon Islands Arts & Crafts (SIAC) Team"}
+                {siteContent.aboutTeamHeading || "Our Team"}
               </h2>
               <div className="space-y-4 text-warm-gray-600 leading-relaxed">
                 {siteContent.aboutTeamText ? (

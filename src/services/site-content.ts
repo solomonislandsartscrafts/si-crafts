@@ -21,7 +21,7 @@ const EMPTY_SITE_CONTENT: SiteContent = {
   aboutSolomonIslandsText: 'Solomon Islands is a sovereign nation of over 990 islands in the South Pacific, east of Papua New Guinea. Its people have practised weaving, carving, and shell-work for thousands of years — skills passed down through generations within families and communities.',
   aboutSolomonIslandsLinkText: '',
   aboutSolomonIslandsLinkUrl: '',
-  aboutTeamHeading: 'About the Solomon Islands Arts & Crafts (SIAC) Team',
+  aboutTeamHeading: 'Our Team',
   aboutTeamText: 'Solomon Islands Arts & Crafts is run entirely by volunteers who share a connection to Solomon Islands — through family, work, friendship, or simply a deep respect for the culture and its people.',
   aboutTeamLinkText: 'Find out more about our team →',
   aboutTeamLinkUrl: '/about/team',
