@@ -60,15 +60,22 @@ export default async function PiecePage({ params }: PiecePageProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-10 sm:pt-8 sm:pb-12 lg:pt-10 lg:pb-16">
-      {/* Breadcrumb */}
-      <Breadcrumb
-        items={[
-          { name: 'Home', url: '/' },
-          { name: 'Catalogue', url: '/catalogue' },
-          { name: product.name },
-        ]}
-        className="mb-6"
-      />
+      {/* Breadcrumb + Back link */}
+      <div className="mb-6 flex flex-col gap-2">
+        <Breadcrumb
+          items={[
+            { name: 'Home', url: '/' },
+            { name: 'Catalogue', url: '/catalogue' },
+            { name: product.name },
+          ]}
+        />
+        <Link
+          href="/catalogue"
+          className="inline-flex items-center gap-1 text-sm font-medium text-ocean hover:text-ocean-dark transition-colors w-fit"
+        >
+          ← Back to Catalogue
+        </Link>
+      </div>
 
       {/* Top section: Gallery + Product Info + Maker */}
       <PiecePageClient product={product} craftName={craft?.name} craftSlug={craft?.slug} maker={publishedMaker} craft={craft} />
