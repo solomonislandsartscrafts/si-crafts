@@ -1,21 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Loader2 } from 'lucide-react';
+import { Save, Loader2, AlertTriangle } from 'lucide-react';
 import type { SiteContent } from '@/types';
 import { AdminLayout } from '@/components/admin';
 import { ImageUpload } from '@/components/admin/image-upload';
 import { useToast } from '@/components/ui/toast';
 
-type Tab = 'images' | 'homepage' | 'about' | 'wholesale' | 'care-guide' | 'contact';
+type Tab = 'homepage' | 'about' | 'catalogue' | 'news' | 'stockists' | 'wholesale' | 'care-guide' | 'contact' | 'images';
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'images', label: 'Images' },
   { id: 'homepage', label: 'Homepage' },
   { id: 'about', label: 'About' },
+  { id: 'catalogue', label: 'Catalogue' },
+  { id: 'news', label: 'News' },
+  { id: 'stockists', label: 'Stockists' },
   { id: 'wholesale', label: 'Wholesale' },
   { id: 'care-guide', label: 'Care Guide' },
   { id: 'contact', label: 'Contact' },
+  { id: 'images', label: 'Images' },
 ];
 
 const EMPTY: SiteContent = {
@@ -43,6 +46,9 @@ const EMPTY: SiteContent = {
   aboutWhyText: '',
   aboutWhyLinkText: '',
   aboutWhyLinkUrl: '',
+  catalogueIntro: '',
+  newsIntro: '',
+  stockistsIntro: '',
   wholesaleIntro: '',
   wholesaleHowItWorks: '',
   wholesaleMinimumOrder: '',
@@ -60,7 +66,7 @@ export default function AdminSiteContentPage() {
   const [loading, setLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<Tab>('images');
+  const [activeTab, setActiveTab] = useState<Tab>('homepage');
   const { success: toastSuccess, error: toastError } = useToast();
 
   useEffect(() => {
@@ -80,11 +86,13 @@ export default function AdminSiteContentPage() {
     load();
   }, []);
 
+  const [showConfirm, setShowConfirm] = useState(false);
+
   function update(field: keyof SiteContent, value: string) {
     setContent((prev) => ({ ...prev, [field]: value }));
   }
 
-  async function handleSave() {
+  function handleSaveClick() {
     // Validate image alt text
     const missingAlt: string[] = [];
     if (content.aboutSolomonIslandsImage && !content.aboutSolomonIslandsImageAlt.trim()) {
@@ -101,11 +109,16 @@ export default function AdminSiteContentPage() {
       return;
     }
 
+    setShowConfirm(true);
+  }
+
+  async function handleConfirmSave() {
+    setShowConfirm(false);
     setSaving(true);
     try {
       const { updateSiteContent } = await import('@/services/site-content');
       await updateSiteContent(content);
-      toastSuccess('Site content saved.');
+      toastSuccess('Site content published successfully.');
     } catch {
       toastError('Failed to save. Please try again.');
     } finally {
@@ -135,12 +148,12 @@ export default function AdminSiteContentPage() {
             </p>
           </div>
           <button
-            onClick={handleSave}
+            onClick={handleSaveClick}
             disabled={saving || loadFailed}
             className="tap-target inline-flex items-center gap-2 px-6 py-3 btn-primary"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            {saving ? 'Saving...' : 'Save All'}
+            {saving ? 'Publishing...' : 'Save & Publish'}
           </button>
         </div>
 
@@ -163,14 +176,57 @@ export default function AdminSiteContentPage() {
 
         {/* Tab content */}
         <div className="space-y-6">
-          {activeTab === 'images' && <ImagesTab content={content} update={update} />}
           {activeTab === 'homepage' && <HomepageTab content={content} update={update} />}
           {activeTab === 'about' && <AboutTab content={content} update={update} />}
+          {activeTab === 'catalogue' && <CatalogueTab content={content} update={update} />}
+          {activeTab === 'news' && <NewsTab content={content} update={update} />}
+          {activeTab === 'stockists' && <StockistsTab content={content} update={update} />}
           {activeTab === 'wholesale' && <WholesaleTab content={content} update={update} />}
           {activeTab === 'care-guide' && <CareGuideTab content={content} update={update} />}
           {activeTab === 'contact' && <ContactTab content={content} update={update} />}
+          {activeTab === 'images' && <ImagesTab content={content} update={update} />}
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50" onClick={() => setShowConfirm(false)}>
+          <div
+            className="bg-white rounded-lg shadow-md w-full max-w-md p-6"
+            onClick={(e) => e.stopPropagation()}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="confirm-title"
+            aria-describedby="confirm-desc"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-5 h-5 text-warning" />
+              </div>
+              <h2 id="confirm-title" className="font-heading text-lg font-semibold text-deep-blue">
+                Publish changes?
+              </h2>
+            </div>
+            <p id="confirm-desc" className="text-sm text-warm-gray-600 mb-6">
+              This will update the live website immediately. All visitors will see the new content. Are you sure you want to publish these changes?
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="tap-target px-5 py-2.5 border-2 border-sand-dark text-warm-gray-600 hover:text-deep-blue rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmSave}
+                className="tap-target px-5 py-2.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
+              >
+                Yes, publish
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
@@ -254,6 +310,36 @@ function AboutTab({ content, update }: TabProps) {
         <TextArea label="Content" fieldId="about-why-content" value={content.aboutWhyText} onChange={(v) => update('aboutWhyText', v)} placeholder="Solomon Islands makers produce work of extraordinary skill..." rows={6} />
         <Field label="Link text" fieldId="about-why-link-text" value={content.aboutWhyLinkText} onChange={(v) => update('aboutWhyLinkText', v)} placeholder="Are you a maker in Solomon Islands? Learn how to work with us →" />
         <Field label="Link URL" fieldId="about-why-link-url" value={content.aboutWhyLinkUrl} onChange={(v) => update('aboutWhyLinkUrl', v)} placeholder="/for-makers" />
+      </Section>
+    </>
+  );
+}
+
+function CatalogueTab({ content, update }: TabProps) {
+  return (
+    <>
+      <Section title="Catalogue Page" description="The intro text shown at the top of the catalogue.">
+        <TextArea label="Page intro" value={content.catalogueIntro} onChange={(v) => update('catalogueIntro', v)} placeholder="Browse our full collection of Solomon Islands handicrafts. All items are made from renewable, natural resources..." rows={3} />
+      </Section>
+    </>
+  );
+}
+
+function NewsTab({ content, update }: TabProps) {
+  return (
+    <>
+      <Section title="News Page" description="The intro text shown at the top of the news listing.">
+        <TextArea label="Page intro" value={content.newsIntro} onChange={(v) => update('newsIntro', v)} placeholder="Stories and updates from Solomon Islands Arts Crafts — makers, crafts, and the people we work with." rows={3} />
+      </Section>
+    </>
+  );
+}
+
+function StockistsTab({ content, update }: TabProps) {
+  return (
+    <>
+      <Section title="Stockists Page" description="The intro text shown on the stockists page.">
+        <TextArea label="Page intro" value={content.stockistsIntro} onChange={(v) => update('stockistsIntro', v)} placeholder="Find Solomon Islands Arts Crafts in these museum and gallery shops." rows={3} />
       </Section>
     </>
   );

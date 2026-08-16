@@ -29,6 +29,15 @@ export interface SiteContent {
   aboutWhyLinkText: string;
   aboutWhyLinkUrl: string;
 
+  // Catalogue
+  catalogueIntro: string;
+
+  // News
+  newsIntro: string;
+
+  // Stockists
+  stockistsIntro: string;
+
   // Wholesale
   wholesaleIntro: string;
   wholesaleHowItWorks: string;

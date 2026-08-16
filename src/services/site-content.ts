@@ -29,6 +29,12 @@ const EMPTY_SITE_CONTENT: SiteContent = {
   aboutWhyText: '',
   aboutWhyLinkText: '',
   aboutWhyLinkUrl: '',
+  // Catalogue
+  catalogueIntro: '',
+  // News
+  newsIntro: '',
+  // Stockists
+  stockistsIntro: '',
   // Wholesale
   wholesaleIntro: '',
   wholesaleHowItWorks: '',
