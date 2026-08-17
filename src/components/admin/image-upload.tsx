@@ -64,7 +64,7 @@ export function ImageUpload({
       // Falls back to the local Next.js route when no backend is configured.
       const token = localStorage.getItem('admin_session') ?? '';
       const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
       const uploadEndpoint = apiUrl ? `${apiUrl}/api/upload/` : '/api/upload';
 
       const res = await fetch(uploadEndpoint, {

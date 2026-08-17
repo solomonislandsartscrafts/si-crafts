@@ -107,7 +107,7 @@ export function RichTextEditor({
       formData.append('file', compressed, filename);
 
       const token = localStorage.getItem('admin_session') ?? '';
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
       const uploadEndpoint = apiUrl ? `${apiUrl}/api/upload/` : '/api/upload';
       const res = await fetch(uploadEndpoint, {
         method: 'POST',

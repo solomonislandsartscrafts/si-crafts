@@ -26,7 +26,7 @@ export function MakersPageContent({ makers }: Props) {
     : makers;
 
   return (
-    <div className="min-h-screen bg-page-bg">
+    <div className="min-h-screen">
       {/* Page header */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6">
         <p className="text-xs font-medium uppercase tracking-widest text-ocean mb-2">

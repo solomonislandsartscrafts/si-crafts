@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Header } from './header';
 import { Footer } from './footer';
 import { RouteProgressBar } from '@/components/shared/route-progress-bar';
+import { PageBackdrop } from '@/components/shared/page-backdrop';
 
 export function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -26,6 +27,8 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
       <Suspense fallback={null}>
         <RouteProgressBar />
       </Suspense>
+      {/* Decorative abstract backdrop — public pages only */}
+      <PageBackdrop />
       <Header />
       {/* Flag stripe — sits below the header, scrolls with page content */}
       <div className="flag-divider" aria-hidden="true" />

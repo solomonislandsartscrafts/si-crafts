@@ -82,7 +82,7 @@ export default async function HomePage() {
           is visible until the user scrolls. Offset = header (80px) + flag divider (14px). */}
       <div className="lg:flex lg:flex-col lg:min-h-[calc(100vh-94px)]">
         {/* Hero — Flag theme: gold accent + serif heading + split layout */}
-        <section className="bg-page-bg lg:flex-1 lg:flex lg:items-center">
+        <section className="lg:flex-1 lg:flex lg:items-center">
           <div className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-10 items-center pt-0 pb-12 lg:py-10">
               {/* Left: Text content */}
@@ -154,7 +154,7 @@ export default async function HomePage() {
       </section>
 
       {/* Featured Products */}
-      <section className="section-y bg-card-bg">
+      <section className="section-y">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between mb-8">
             <div>
