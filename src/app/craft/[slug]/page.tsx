@@ -5,8 +5,8 @@ import { getMakersByCraft } from '@/services/makers';
 import { getPublicProducts } from '@/services/products';
 import { MakerCard } from '@/components/cards/maker-card';
 import { ProductCard } from '@/components/cards/product-card';
-import { SafeImage } from '@/components/ui/safe-image';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { CraftHeroImage } from './craft-hero-image';
 
 export async function generateStaticParams() {
   const crafts = await getAllCrafts();
@@ -52,15 +52,11 @@ export default async function CraftPage({ params }: CraftPageProps) {
             <p>{craft.description}</p>
           </div>
         </div>
-        <div className="aspect-[4/3] relative rounded-lg overflow-hidden bg-sand-light">
-          <SafeImage
-            src={craft.processImageUrls[0] || null}
-            alt={`${craft.name} process`}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
-        </div>
+        <CraftHeroImage
+          slug={craft.slug}
+          name={craft.name}
+          initialSrc={craft.processImageUrls[0] || null}
+        />
       </div>
 
       {/* Cultural context — only show if reviewed */}

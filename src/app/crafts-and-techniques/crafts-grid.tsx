@@ -49,7 +49,7 @@ export function CraftsGrid() {
               src={craft.processImageUrls[0] || null}
               alt={craft.name}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              className="object-contain group-hover:scale-105 transition-transform duration-300"
               sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, 33vw"
             />
             <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/60 to-transparent" />
