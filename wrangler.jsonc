@@ -6,5 +6,8 @@
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
+  },
+  "vars": {
+    "R2_BUCKET_NAME": "si-crafts-media"
   }
 }
