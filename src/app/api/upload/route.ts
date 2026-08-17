@@ -2,15 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
-// R2 configuration (same env vars as the Django backend)
-const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || '';
-const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || '';
-const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || '';
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || 'si-crafts-media';
-const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || '';
+// R2 configuration — read at request time, not module init (edge runtime may not
+// populate process.env at import time on Cloudflare Pages)
+function getR2Config() {
+  return {
+    accountId: process.env.R2_ACCOUNT_ID || '',
+    accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+    bucketName: process.env.R2_BUCKET_NAME || 'si-crafts-media',
+    publicUrl: process.env.R2_PUBLIC_URL || '',
+  };
+}
 
 function isR2Configured(): boolean {
-  return Boolean(R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY && R2_PUBLIC_URL);
+  const cfg = getR2Config();
+  return Boolean(cfg.accountId && cfg.accessKeyId && cfg.secretAccessKey && cfg.publicUrl);
 }
 
 /**
@@ -18,12 +24,13 @@ function isR2Configured(): boolean {
  * Returns the public URL of the uploaded file.
  */
 async function uploadToR2(data: Uint8Array, contentType: string): Promise<string> {
+  const cfg = getR2Config();
   const id = crypto.randomUUID();
   const ext = contentType === 'image/png' ? 'png' : contentType === 'image/jpeg' ? 'jpg' : 'webp';
   const filename = `${id}.${ext}`;
   const key = `uploads/${filename}`;
-  const endpoint = `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
-  const url = `${endpoint}/${R2_BUCKET_NAME}/${key}`;
+  const endpoint = `https://${cfg.accountId}.r2.cloudflarestorage.com`;
+  const url = `${endpoint}/${cfg.bucketName}/${key}`;
 
   const now = new Date();
   const dateStamp = now.toISOString().replace(/[-:]/g, '').slice(0, 8);
@@ -57,7 +64,7 @@ async function uploadToR2(data: Uint8Array, contentType: string): Promise<string
 
   const payloadHash = await sha256Hex(data);
   const headers: Record<string, string> = {
-    'host': `${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    'host': `${cfg.accountId}.r2.cloudflarestorage.com`,
     'x-amz-date': amzDate,
     'x-amz-content-sha256': payloadHash,
     'content-type': contentType,
@@ -70,7 +77,7 @@ async function uploadToR2(data: Uint8Array, contentType: string): Promise<string
   const canonicalHeaders = signedHeaderKeys.map((k) => `${k}:${headers[k]}\n`).join('');
   const canonicalRequest = [
     'PUT',
-    `/${R2_BUCKET_NAME}/${key}`,
+    `/${cfg.bucketName}/${key}`,
     '',
     canonicalHeaders,
     signedHeadersStr,
@@ -88,14 +95,14 @@ async function uploadToR2(data: Uint8Array, contentType: string): Promise<string
   ].join('\n');
 
   // Signing key
-  const kDate = await hmacSha256(encoder.encode(`AWS4${R2_SECRET_ACCESS_KEY}`), dateStamp);
+  const kDate = await hmacSha256(encoder.encode(`AWS4${cfg.secretAccessKey}`), dateStamp);
   const kRegion = await hmacSha256(kDate, region);
   const kService = await hmacSha256(kRegion, service);
   const kSigning = await hmacSha256(kService, 'aws4_request');
   const signatureBuf = await hmacSha256(kSigning, stringToSign);
   const signature = bufToHex(signatureBuf);
 
-  const authorization = `AWS4-HMAC-SHA256 Credential=${R2_ACCESS_KEY_ID}/${credentialScope}, SignedHeaders=${signedHeadersStr}, Signature=${signature}`;
+  const authorization = `AWS4-HMAC-SHA256 Credential=${cfg.accessKeyId}/${credentialScope}, SignedHeaders=${signedHeadersStr}, Signature=${signature}`;
 
   const res = await fetch(url, {
     method: 'PUT',
@@ -111,7 +118,7 @@ async function uploadToR2(data: Uint8Array, contentType: string): Promise<string
     throw new Error(`R2 upload failed (${res.status}): ${text}`);
   }
 
-  const publicUrl = R2_PUBLIC_URL.replace(/\/$/, '');
+  const publicUrl = cfg.publicUrl.replace(/\/$/, '');
   return `${publicUrl}/${key}`;
 }
 
