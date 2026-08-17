@@ -33,13 +33,22 @@ function mapCraft(raw: WagtailCraftResponse): Craft {
 
 export async function getAllCrafts(): Promise<Craft[]> {
   const data = await apiGet<WagtailListResponse>('/api/v2/crafts/?fields=*');
-  return data.items.map(mapCraft).map(mergeCraftImages);
+  const crafts = data.items.map(mapCraft).map(mergeCraftImages);
+  if (crafts.length > 0) return crafts;
+
+  // Fallback to mock data when API returns empty
+  const { mockCrafts } = await import('@/data/mock/crafts');
+  return mockCrafts.map(mergeCraftImages);
 }
 
 export async function getCraftBySlug(slug: string): Promise<Craft | null> {
   const data = await apiGet<WagtailListResponse>(`/api/v2/crafts/?slug=${slug}&fields=*`);
-  if (data.items.length === 0) return null;
-  return mergeCraftImages(mapCraft(data.items[0]));
+  if (data.items.length > 0) return mergeCraftImages(mapCraft(data.items[0]));
+
+  // Fallback to mock
+  const { mockCrafts } = await import('@/data/mock/crafts');
+  const mock = mockCrafts.find((c) => c.slug === slug);
+  return mock ? mergeCraftImages(mock) : null;
 }
 
 export async function getCraftById(id: string): Promise<Craft | null> {
@@ -47,7 +56,10 @@ export async function getCraftById(id: string): Promise<Craft | null> {
     const raw = await apiGet<WagtailCraftResponse>(`/api/v2/crafts/${id}/?fields=*`);
     return mergeCraftImages(mapCraft(raw));
   } catch {
-    return null;
+    // Fallback to mock
+    const { mockCrafts } = await import('@/data/mock/crafts');
+    const mock = mockCrafts.find((c) => c.id === id);
+    return mock ? mergeCraftImages(mock) : null;
   }
 }
 
