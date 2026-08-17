@@ -19,11 +19,18 @@ class CraftPage(Page):
     )
     material_category = models.CharField(max_length=50)
 
+    # Process photo stored as a URL (R2/media). Kept as a plain URL rather than
+    # a wagtailimages FK so the admin UI can save an uploaded image by URL.
+    process_image_url = models.CharField(max_length=500, blank=True, default="")
+    process_image_alt = models.CharField(max_length=300, blank=True, default="")
+
     content_panels = Page.content_panels + [
         FieldPanel("description"),
         FieldPanel("material_category"),
         FieldPanel("cultural_context"),
         FieldPanel("cultural_context_review_flag"),
+        FieldPanel("process_image_url"),
+        FieldPanel("process_image_alt"),
         InlinePanel("process_images", label="Process Images"),
     ]
 
@@ -32,6 +39,8 @@ class CraftPage(Page):
         APIField("cultural_context"),
         APIField("cultural_context_review_flag"),
         APIField("material_category"),
+        APIField("process_image_url"),
+        APIField("process_image_alt"),
     ]
 
     class Meta:

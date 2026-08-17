@@ -8,4 +8,5 @@ class CraftPageSerializer(serializers.ModelSerializer):
         fields = [
             "id", "title", "slug", "description",
             "material_category", "cultural_context", "cultural_context_review_flag",
+            "process_image_url", "process_image_alt",
         ]

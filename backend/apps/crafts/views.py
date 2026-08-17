@@ -33,6 +33,8 @@ class CraftWriteViewSet(viewsets.ViewSet):
             material_category=data.get("material_category", ""),
             cultural_context=data.get("cultural_context", ""),
             cultural_context_review_flag=data.get("cultural_context_review_flag", "unreviewed"),
+            process_image_url=data.get("process_image_url", ""),
+            process_image_alt=data.get("process_image_alt", ""),
         )
         crafts_index.add_child(instance=craft)
         return Response(CraftPageSerializer(craft).data, status=status.HTTP_201_CREATED)
@@ -56,6 +58,10 @@ class CraftWriteViewSet(viewsets.ViewSet):
             craft.cultural_context = data["cultural_context"]
         if "cultural_context_review_flag" in data:
             craft.cultural_context_review_flag = data["cultural_context_review_flag"]
+        if "process_image_url" in data:
+            craft.process_image_url = data["process_image_url"]
+        if "process_image_alt" in data:
+            craft.process_image_alt = data["process_image_alt"]
 
         craft.save_revision().publish()
         return Response(CraftPageSerializer(craft).data)
