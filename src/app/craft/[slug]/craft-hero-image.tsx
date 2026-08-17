@@ -35,12 +35,12 @@ export function CraftHeroImage({ slug, name, initialSrc }: CraftHeroImageProps) 
   }, [slug, initialSrc]);
 
   return (
-    <div className="aspect-[4/3] relative rounded-lg overflow-hidden bg-sand-light">
+    <div className="aspect-[4/3] relative rounded-lg overflow-hidden bg-white">
       <SafeImage
         src={src}
         alt={`${name} process`}
         fill
-        className="object-contain"
+        className="object-contain p-4"
         sizes="(max-width: 768px) 100vw, 50vw"
       />
     </div>

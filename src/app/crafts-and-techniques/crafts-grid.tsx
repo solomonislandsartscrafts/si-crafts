@@ -26,7 +26,13 @@ export function CraftsGrid() {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="aspect-[4/5] bg-sand-light animate-pulse rounded" />
+          <div key={i} className="rounded-lg overflow-hidden shadow-card animate-pulse">
+            <div className="aspect-square bg-sand-light" />
+            <div className="bg-warm-gray-100 p-3 sm:p-4 space-y-2">
+              <div className="h-4 bg-sand-light rounded w-2/3" />
+              <div className="h-3 bg-sand-light rounded w-full" />
+            </div>
+          </div>
         ))}
       </div>
     );
@@ -42,25 +48,26 @@ export function CraftsGrid() {
         <Link
           key={craft.id}
           href={`/craft/${craft.slug}`}
-          className="group relative block w-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-ocean"
+          className="group block w-full overflow-hidden rounded-lg shadow-card hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-ocean"
         >
-          <div className="aspect-[4/5] relative bg-sand-light overflow-hidden">
+          {/* Image area */}
+          <div className="aspect-square relative bg-sand-light overflow-hidden rounded-t-lg">
             <SafeImage
               src={craft.processImageUrls[0] || null}
               alt={craft.name}
               fill
-              className="object-contain group-hover:scale-105 transition-transform duration-300"
-              sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, 33vw"
+              className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+              sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
-            <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/60 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
-              <h2 className="font-heading text-sm sm:text-base font-semibold text-white leading-tight">
-                {craft.name}
-              </h2>
-              <p className="text-xs text-white/80 mt-0.5 line-clamp-2">
-                {craft.description}
-              </p>
-            </div>
+          </div>
+          {/* Info bar — subtle grey background */}
+          <div className="bg-warm-gray-100 p-3 sm:p-4">
+            <h2 className="font-heading text-sm sm:text-base font-semibold text-deep-blue leading-tight line-clamp-2">
+              {craft.name}
+            </h2>
+            <p className="text-xs text-warm-gray-600 mt-1 line-clamp-2">
+              {craft.description}
+            </p>
           </div>
         </Link>
       ))}
