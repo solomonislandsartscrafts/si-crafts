@@ -26,7 +26,7 @@ export default async function AboutPage() {
     <div>
       <PageHeader
         title="About"
-        intro={siteContent.aboutPageIntro || "Solomon Islands Arts & Crafts connects makers in Solomon Islands with museum and gallery shops in Australia — telling authentic stories and building respectful trade relationships."}
+        intro={siteContent.aboutPageIntro || "Solomon Islands Arts Crafts connects makers in Solomon Islands with museum and gallery shops in Australia — telling authentic stories and building respectful trade relationships."}
       />
 
       {/* Section 1: About Solomon Islands — image LEFT */}
@@ -102,7 +102,7 @@ export default async function AboutPage() {
                 ) : (
                   <>
                     <p>
-                      Solomon Islands Arts & Crafts is run entirely by volunteers who share a
+                      Solomon Islands Arts Crafts is run entirely by volunteers who share a
                       connection to Solomon Islands — through family, work, friendship, or simply
                       a deep respect for the culture and its people.
                     </p>

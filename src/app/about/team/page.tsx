@@ -5,7 +5,7 @@ import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 export const metadata = generatePageMetadata({
   title: 'Our Team',
-  description: 'Meet the volunteer team behind Solomon Islands Arts & Crafts.',
+  description: 'Meet the volunteer team behind Solomon Islands Arts Crafts.',
   path: '/about/team',
 });
 
@@ -14,7 +14,7 @@ export default function TeamPage() {
     <div>
       <PageHeader
         title="Our Team"
-        intro="Solomon Islands Arts & Crafts is run entirely by volunteers who share a connection to Solomon Islands."
+        intro="Solomon Islands Arts Crafts is run entirely by volunteers who share a connection to Solomon Islands."
         eyebrow={
           <Breadcrumb
             items={[

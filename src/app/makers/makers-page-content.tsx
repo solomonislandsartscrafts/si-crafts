@@ -30,7 +30,7 @@ export function MakersPageContent({ makers }: Props) {
       {/* Page header */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6">
         <p className="text-xs font-medium uppercase tracking-widest text-ocean mb-2">
-          Solomon Islands Arts &amp; Crafts
+          Solomon Islands Arts Crafts
         </p>
         <h1 className="font-heading text-3xl sm:text-4xl font-medium text-deep-blue leading-tight mb-2">
           Meet the Makers
