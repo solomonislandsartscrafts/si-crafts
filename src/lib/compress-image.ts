@@ -24,6 +24,10 @@ export async function compressImage(
       const ctx = canvas.getContext('2d');
       if (!ctx) { reject(new Error('Canvas not supported')); return; }
 
+      // Fill with white background so transparent areas don't turn black
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, width, height);
+
       ctx.drawImage(img, 0, 0, width, height);
 
       // Try WebP first (smaller), fall back to JPEG
