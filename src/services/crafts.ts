@@ -118,6 +118,13 @@ export async function updateCraft(id: string, data: Partial<Craft>): Promise<Cra
     const craft = mapCraft(raw);
     return mergeCraftImages(craft);
   } catch {
+    // Backend unavailable — return a merged craft from mock data
+    const { mockCrafts } = await import('@/data/mock/crafts');
+    const mock = mockCrafts.find((c) => c.id === id);
+    if (mock) {
+      const updated = { ...mock, ...data } as Craft;
+      return mergeCraftImages(updated);
+    }
     return null;
   }
 }
