@@ -107,7 +107,9 @@ export function RichTextEditor({
       formData.append('file', compressed, filename);
 
       const token = localStorage.getItem('admin_session') ?? '';
-      const res = await fetch('/api/upload', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const uploadEndpoint = apiUrl ? `${apiUrl}/api/upload/` : '/api/upload';
+      const res = await fetch(uploadEndpoint, {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,

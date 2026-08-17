@@ -60,12 +60,14 @@ export function ImageUpload({
       const filename = `${Date.now()}-${file.name.replace(/\.[^.]+$/, '')}.${ext}`;
       formData.append('file', compressed, filename);
 
-      // Always upload via local Next.js API route (avoids CORS issues).
-      // The local route handles R2 upload when configured.
+      // Upload to the Django backend, which handles R2 storage.
+      // Falls back to the local Next.js route when no backend is configured.
       const token = localStorage.getItem('admin_session') ?? '';
       const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const uploadEndpoint = apiUrl ? `${apiUrl}/api/upload/` : '/api/upload';
 
-      const res = await fetch('/api/upload', {
+      const res = await fetch(uploadEndpoint, {
         method: 'POST',
         headers,
         body: formData,
