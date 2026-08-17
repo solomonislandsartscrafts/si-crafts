@@ -168,9 +168,23 @@ export async function POST(request: NextRequest) {
 
     // Upload to R2 if configured
     if (isR2Configured()) {
-      const url = await uploadToR2(data, file.type);
-      return NextResponse.json({ url });
+      try {
+        const url = await uploadToR2(data, file.type);
+        return NextResponse.json({ url });
+      } catch (r2Err) {
+        // Return detailed error for debugging
+        const msg = r2Err instanceof Error ? r2Err.message : 'Unknown R2 error';
+        return NextResponse.json({ error: `R2 upload error: ${msg}` }, { status: 500 });
+      }
     }
+
+    // R2 not configured — return debug info about which vars are missing
+    const cfg = getR2Config();
+    const missing = [];
+    if (!cfg.accountId) missing.push('R2_ACCOUNT_ID');
+    if (!cfg.accessKeyId) missing.push('R2_ACCESS_KEY_ID');
+    if (!cfg.secretAccessKey) missing.push('R2_SECRET_ACCESS_KEY');
+    if (!cfg.publicUrl) missing.push('R2_PUBLIC_URL');
 
     // Fallback: save locally (only works in Node.js dev, not on edge)
     try {
@@ -178,7 +192,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ url });
     } catch {
       return NextResponse.json(
-        { error: 'Upload storage not configured. Please set R2 environment variables.' },
+        { error: `Upload storage not configured. Missing: ${missing.join(', ')}` },
         { status: 500 }
       );
     }
