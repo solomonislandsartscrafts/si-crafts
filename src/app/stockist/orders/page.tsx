@@ -20,9 +20,9 @@ export default function StockistOrdersPage() {
   useEffect(() => {
     async function checkAuth() {
       const token = localStorage.getItem('stockist_session');
-      if (!token) { router.push('/login'); return; }
+      if (!token) { router.push('/stockist/login'); return; }
       const stockist = await validateStockistSession(token);
-      if (!stockist) { localStorage.removeItem('stockist_session'); router.push('/login'); return; }
+      if (!stockist) { localStorage.removeItem('stockist_session'); router.push('/stockist/login'); return; }
       setAuthenticated(true);
       setCart(getCart());
       setLoading(false);

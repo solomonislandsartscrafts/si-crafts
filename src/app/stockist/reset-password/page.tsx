@@ -84,7 +84,7 @@ function ResetPasswordForm() {
           </p>
         </div>
         <button
-          onClick={() => router.push('/login')}
+          onClick={() => router.push('/stockist/login')}
           className="tap-target inline-flex items-center justify-center px-6 py-3 btn-primary"
         >
           Log in now

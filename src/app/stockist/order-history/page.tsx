@@ -22,9 +22,9 @@ export default function OrderHistoryPage() {
   useEffect(() => {
     async function load() {
       const token = localStorage.getItem('stockist_session');
-      if (!token) { router.push('/login'); return; }
+      if (!token) { router.push('/stockist/login'); return; }
       const stockist = await validateStockistSession(token);
-      if (!stockist) { localStorage.removeItem('stockist_session'); router.push('/login'); return; }
+      if (!stockist) { localStorage.removeItem('stockist_session'); router.push('/stockist/login'); return; }
 
       const result = await getOrdersByStockist(stockist.id);
       setOrders(result);

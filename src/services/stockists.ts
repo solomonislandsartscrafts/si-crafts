@@ -76,6 +76,39 @@ export async function createApplication(data: StockistApplicationInput): Promise
   return mapStockist(raw);
 }
 
+export interface CreateStockistInput extends StockistApplicationInput {
+  /** Leave blank to email the stockist a one-time link to set their own. */
+  password?: string;
+}
+
+export interface CreateStockistResult {
+  stockist: Stockist;
+  message: string;
+}
+
+/** Admin creates an approved stockist directly, skipping the application flow. */
+export async function createStockist(
+  data: CreateStockistInput,
+  token?: string
+): Promise<CreateStockistResult> {
+  const authToken = token || getAdminToken();
+  const raw = await apiPost<StockistResponse & { message?: string }>(
+    '/api/stockists/',
+    {
+      business_name: data.businessName,
+      abn: data.abn,
+      contact_name: data.contactName,
+      email: data.email,
+      phone: data.phone,
+      description: data.description,
+      status: 'approved',
+      ...(data.password ? { password: data.password } : {}),
+    },
+    authToken
+  );
+  return { stockist: mapStockist(raw), message: raw.message || 'Stockist added.' };
+}
+
 export async function approveStockist(id: string, token?: string): Promise<Stockist | null> {
   const authToken = token || getAdminToken();
   const raw = await apiPost<StockistResponse>(`/api/stockists/${id}/approve/`, {}, authToken);

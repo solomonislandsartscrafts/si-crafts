@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { loginAdmin } from '@/lib/auth-client';
 
 export default function AdminLoginPage() {
@@ -60,6 +61,13 @@ export default function AdminLoginPage() {
             {loading ? 'Logging in...' : 'Log in'}
           </button>
         </form>
+
+        <p className="text-sm text-warm-gray-600 mt-6 text-center">
+          Are you a stockist?{' '}
+          <Link href="/stockist/login" className="text-ocean hover:underline font-medium">
+            Stockist login
+          </Link>
+        </p>
       </div>
     </div>
   );

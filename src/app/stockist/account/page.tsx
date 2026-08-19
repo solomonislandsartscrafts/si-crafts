@@ -47,10 +47,10 @@ export default function StockistAccountPage() {
   useEffect(() => {
     async function load() {
       const token = localStorage.getItem('stockist_session');
-      if (!token) { router.push('/login'); return; }
+      if (!token) { router.push('/stockist/login'); return; }
 
       const s = await validateStockistSession(token);
-      if (!s) { localStorage.removeItem('stockist_session'); router.push('/login'); return; }
+      if (!s) { localStorage.removeItem('stockist_session'); router.push('/stockist/login'); return; }
 
       // Load full profile from backend
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';

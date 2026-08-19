@@ -1,17 +1,79 @@
+import secrets
+
+from django.contrib.auth.models import User
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
+from apps.accounts.permissions import IsSiteAdmin
+
 from .models import Stockist
 from .serializers import StockistSerializer, StockistApplicationSerializer
+
+
+def provision_stockist_login(stockist, password=None, send_invite=True):
+    """Give an approved stockist a way to log in.
+
+    Creates or links their Django user, then either sets the password supplied
+    by an admin or emails them a one-time link to set their own. Returns a
+    short message for the admin UI describing what happened.
+    """
+    from .models import PasswordSetToken
+
+    user = stockist.user
+    if user is None:
+        # filter().first() rather than get() — auth_user.email is not unique.
+        user = User.objects.filter(email__iexact=stockist.email).order_by("-id").first()
+
+    if user is None:
+        username = stockist.email[:150]
+        if User.objects.filter(username=username).exists():
+            username = f"{username[:140]}-{secrets.token_hex(4)}"
+        contact = stockist.contact_name or ""
+        user = User(
+            username=username,
+            email=stockist.email,
+            first_name=contact.split(" ")[0] if contact else "",
+            last_name=" ".join(contact.split(" ")[1:]) if " " in contact else "",
+        )
+        user.set_unusable_password()
+        user.save()
+
+    if stockist.user_id != user.pk:
+        stockist.user = user
+        stockist.save(update_fields=["user"])
+
+    if not user.is_active:
+        user.is_active = True
+        user.save(update_fields=["is_active"])
+
+    if password:
+        user.set_password(password)
+        user.save()
+        return "Login created — they can sign in now with the password you set."
+
+    if not send_invite:
+        return "Saved. They'll need a password link before they can log in."
+
+    token = secrets.token_urlsafe(48)
+    PasswordSetToken.objects.create(stockist=stockist, token=token)
+
+    from apps.notifications.emails import notify_stockist_approved_with_link
+    notify_stockist_approved_with_link(
+        stockist_email=stockist.email,
+        business_name=stockist.business_name,
+        contact_name=stockist.contact_name,
+        set_password_token=token,
+    )
+    return "Password setup email sent to the stockist."
 
 
 class StockistViewSet(viewsets.ModelViewSet):
     queryset = Stockist.objects.all()
     serializer_class = StockistSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsSiteAdmin]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -20,56 +82,59 @@ class StockistViewSet(viewsets.ModelViewSet):
             qs = qs.filter(status=status_filter)
         email = self.request.query_params.get("email")
         if email:
-            qs = qs.filter(email=email)
+            qs = qs.filter(email__iexact=email.strip())
         return qs
+
+    def create(self, request, *args, **kwargs):
+        """Admin adds a stockist directly, without waiting for an application.
+
+        Pass a `password` to set one immediately, or leave it blank to email the
+        stockist a one-time link so they choose their own.
+        """
+        password = str(request.data.get("password") or "").strip()
+        if password and len(password) < 8:
+            return Response(
+                {"error": "Password must be at least 8 characters."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Normalise the address before validating — Stockist.email is unique and
+        # every lookup is case-insensitive, so store one canonical form.
+        data = {key: request.data.get(key) for key in request.data}
+        email = str(data.get("email") or "").strip().lower()
+        data["email"] = email
+        data.pop("password", None)
+
+        if email and Stockist.objects.filter(email__iexact=email).exists():
+            return Response(
+                {"error": "A stockist with that email already exists."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        stockist = serializer.save(status=data.get("status") or "approved")
+
+        message = "Stockist added."
+        if stockist.status == "approved":
+            message = provision_stockist_login(stockist, password=password or None)
+
+        return Response(
+            {**self.get_serializer(stockist).data, "message": message},
+            status=status.HTTP_201_CREATED,
+        )
 
     @action(detail=True, methods=["post"])
     def approve(self, request, pk=None):
-        from django.contrib.auth.models import User
-        import secrets
-        from .models import PasswordSetToken
-
         stockist = self.get_object()
         stockist.status = "approved"
-
-        # Create a Django User account if one doesn't exist
-        if not stockist.user:
-            username = stockist.email
-
-            # Check if user already exists with this email
-            user, created = User.objects.get_or_create(
-                email=stockist.email,
-                defaults={
-                    "username": username,
-                    "first_name": stockist.contact_name.split(" ")[0] if stockist.contact_name else "",
-                    "last_name": " ".join(stockist.contact_name.split(" ")[1:]) if " " in (stockist.contact_name or "") else "",
-                },
-            )
-            if created:
-                # Set unusable password — stockist will set their own via the token link
-                user.set_unusable_password()
-                user.save()
-
-            stockist.user = user
-
         stockist.save()
 
-        # Generate a password-set token
-        token = secrets.token_urlsafe(48)
-        PasswordSetToken.objects.create(stockist=stockist, token=token)
-
-        # Email the stockist with a link to set their password
-        from apps.notifications.emails import notify_stockist_approved_with_link
-        notify_stockist_approved_with_link(
-            stockist_email=stockist.email,
-            business_name=stockist.business_name,
-            contact_name=stockist.contact_name,
-            set_password_token=token,
-        )
+        message = provision_stockist_login(stockist)
 
         return Response({
             **StockistSerializer(stockist).data,
-            "message": "Approved — password setup email sent to the stockist.",
+            "message": f"Approved — {message[0].lower()}{message[1:]}",
         })
 
     @action(detail=True, methods=["post"])

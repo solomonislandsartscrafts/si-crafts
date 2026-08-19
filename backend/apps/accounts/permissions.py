@@ -17,3 +17,22 @@ class IsAdminOrReadOnly(BasePermission):
 
         # Check that the user has an admin profile
         return hasattr(request.user, "admin_profile")
+
+class IsSiteAdmin(BasePermission):
+    """Allow only users with an active AdminProfile (superusers always pass).
+
+    IsAuthenticated is not enough for admin-only endpoints: a logged-in
+    stockist also holds a valid JWT.
+    """
+
+    message = "Admin access required."
+
+    def has_permission(self, request, view):
+        user = getattr(request, "user", None)
+        if user is None or not user.is_authenticated:
+            return False
+        if user.is_superuser:
+            return True
+        # Raises RelatedObjectDoesNotExist (an AttributeError) when absent.
+        profile = getattr(user, "admin_profile", None)
+        return bool(profile and profile.is_active)

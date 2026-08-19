@@ -133,35 +133,86 @@ class AdminLogoutView(APIView):
 
 
 class StockistLoginView(APIView):
-    """Stockist login — returns JWT tokens."""
+    """Stockist login — returns a JWT access token for approved stockists."""
 
     permission_classes = [AllowAny]
 
+    PAUSED_MESSAGE = (
+        "Your stockist account is currently paused. Please contact us to reactivate it."
+    )
+    NO_PASSWORD_MESSAGE = (
+        "You haven't set a password yet. Use the link in your approval email, "
+        "or request a new one from 'Forgot your password?'."
+    )
+
     def post(self, request):
+        from apps.stockists.models import Stockist
+
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        email = serializer.validated_data["email"]
+        email = serializer.validated_data["email"].strip()
         password = serializer.validated_data["password"]
 
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            try:
-                user = User.objects.get(username=email)
-            except User.DoesNotExist:
-                return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        invalid = Response(
+            {"error": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED
+        )
 
-        # Verify user has a stockist profile
-        from apps.stockists.models import Stockist
-        try:
-            stockist = Stockist.objects.get(user=user, status="approved")
-        except Stockist.DoesNotExist:
-            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        # Resolve the Stockist record first. Stockist.email is unique, whereas
+        # auth_user.email is not — looking the User up by email crashed with
+        # MultipleObjectsReturned (or matched the wrong row) whenever the same
+        # address existed twice, e.g. a stockist who is also an admin.
+        stockist = (
+            Stockist.objects.select_related("user").filter(email__iexact=email).first()
+        )
 
-        authed_user = authenticate(username=user.username, password=password)
-        if authed_user is None:
-            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        if stockist is None:
+            # Fallback for legacy rows where the login address is on the User
+            # record rather than the Stockist record.
+            user = (
+                User.objects.filter(stockist__isnull=False, email__iexact=email)
+                .order_by("-id")
+                .first()
+                or User.objects.filter(stockist__isnull=False, username__iexact=email)
+                .order_by("-id")
+                .first()
+            )
+            stockist = getattr(user, "stockist", None) if user else None
+
+        if stockist is None:
+            return invalid
+
+        if stockist.status == "pending":
+            return Response(
+                {
+                    "error": "Your stockist application is still under review. "
+                    "We'll email you as soon as it's approved."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        if stockist.status == "suspended":
+            return Response({"error": self.PAUSED_MESSAGE}, status=status.HTTP_403_FORBIDDEN)
+        if stockist.status != "approved":
+            return invalid
+
+        user = stockist.user
+        if user is None:
+            return Response(
+                {
+                    "error": "Your account isn't finished being set up. "
+                    "Please contact us so we can send you a new password link."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        if not user.is_active:
+            return Response({"error": self.PAUSED_MESSAGE}, status=status.HTTP_403_FORBIDDEN)
+        if not user.has_usable_password():
+            return Response(
+                {"error": self.NO_PASSWORD_MESSAGE}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        if authenticate(username=user.username, password=password) is None:
+            return invalid
 
         refresh = RefreshToken.for_user(user)
         return Response({
@@ -169,7 +220,7 @@ class StockistLoginView(APIView):
             "sessionToken": str(refresh.access_token),
             "user": {
                 "id": stockist.id,
-                "email": user.email,
+                "email": stockist.email or user.email,
                 "businessName": stockist.business_name,
                 "contactName": stockist.contact_name,
             },

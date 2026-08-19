@@ -175,7 +175,7 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
           )}
           {authState === 'none' && (
             <Link
-              href="/login"
+              href="/stockist/login"
               onClick={onClose}
               className="tap-target flex items-center justify-center gap-2 w-full px-4 py-3 bg-terracotta text-white rounded-lg font-medium transition-colors hover:bg-terracotta-dark focus:outline-none focus:ring-2 focus:ring-terracotta-light"
             >

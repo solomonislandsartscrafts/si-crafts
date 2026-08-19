@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, ChevronDown, ChevronUp, Mail, Phone, Building2, FileText, Pause, Play, Trash2 } from 'lucide-react';
+import { CheckCircle, XCircle, ChevronDown, ChevronUp, Mail, Phone, Building2, FileText, Pause, Play, Trash2, Plus, X } from 'lucide-react';
 import type { Stockist } from '@/types';
 import { AdminLayout } from '@/components/admin';
 
@@ -16,6 +16,7 @@ export default function AdminStockistsPage() {
   const [stockists, setStockists] = useState<Stockist[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => { loadStockists(); }, []);
 
@@ -136,6 +137,12 @@ export default function AdminStockistsPage() {
             <p className="text-sm text-warning-text mt-1">{pendingCount} application{pendingCount > 1 ? 's' : ''} awaiting review</p>
           )}
         </div>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="tap-target inline-flex items-center gap-2 px-4 py-2 btn-primary text-sm"
+        >
+          <Plus className="w-4 h-4" /> Add Stockist
+        </button>
       </div>
 
       {loading ? <p className="text-warm-gray-400">Loading...</p> : (
@@ -310,6 +317,240 @@ export default function AdminStockistsPage() {
           })}
         </div>
       )}
+
+      {showAddModal && (
+        <AddStockistModal
+          onClose={() => setShowAddModal(false)}
+          onSuccess={(message) => {
+            setShowAddModal(false);
+            if (message) alert(message);
+            loadStockists();
+          }}
+        />
+      )}
     </AdminLayout>
+  );
+}
+
+const FIELD_CLASS =
+  'w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent';
+
+function AddStockistModal({
+  onClose,
+  onSuccess,
+}: {
+  onClose: () => void;
+  onSuccess: (message?: string) => void;
+}) {
+  const [businessName, setBusinessName] = useState('');
+  const [contactName, setContactName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [abn, setAbn] = useState('');
+  const [description, setDescription] = useState('');
+  const [password, setPassword] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (!businessName.trim() || !contactName.trim() || !email.trim()) {
+      setError('Business name, contact name and email are required.');
+      return;
+    }
+    if (password && password.length < 8) {
+      setError('Password must be at least 8 characters, or leave it blank.');
+      return;
+    }
+
+    setSaving(true);
+    setError('');
+
+    try {
+      const token = localStorage.getItem('admin_session');
+      const res = await fetch('/api/stockists', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          businessName,
+          contactName,
+          email,
+          phone,
+          abn,
+          description,
+          password,
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Failed to add stockist.');
+
+      onSuccess(data.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add stockist.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50 overflow-y-auto"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-lg shadow-md w-full max-w-md my-8"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="add-stockist-title"
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-sand">
+          <h2 id="add-stockist-title" className="font-heading text-xl font-medium text-deep-blue">
+            Add Stockist
+          </h2>
+          <button
+            onClick={onClose}
+            className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+          {error && (
+            <div className="bg-error/10 border border-error/20 text-error text-sm rounded-md p-3" role="alert" aria-live="assertive">
+              {error}
+            </div>
+          )}
+
+          <p className="text-sm text-warm-gray-600">
+            Creates an approved stockist with wholesale access straight away — use this
+            for shops you already deal with, instead of waiting for an application.
+          </p>
+
+          <div>
+            <label htmlFor="stockist-business" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              Business Name *
+            </label>
+            <input
+              id="stockist-business"
+              type="text"
+              value={businessName}
+              onChange={(e) => setBusinessName(e.target.value)}
+              className={FIELD_CLASS}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="stockist-contact" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              Contact Name *
+            </label>
+            <input
+              id="stockist-contact"
+              type="text"
+              value={contactName}
+              onChange={(e) => setContactName(e.target.value)}
+              className={FIELD_CLASS}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="stockist-email" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              Email *
+            </label>
+            <input
+              id="stockist-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={FIELD_CLASS}
+            />
+            <p className="text-xs text-warm-gray-400 mt-1">This is the address they log in with.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="stockist-phone" className="block text-sm font-medium text-warm-gray-800 mb-1">
+                Phone
+              </label>
+              <input
+                id="stockist-phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className={FIELD_CLASS}
+              />
+            </div>
+            <div>
+              <label htmlFor="stockist-abn" className="block text-sm font-medium text-warm-gray-800 mb-1">
+                ABN
+              </label>
+              <input
+                id="stockist-abn"
+                type="text"
+                inputMode="numeric"
+                maxLength={11}
+                value={abn}
+                onChange={(e) => setAbn(e.target.value)}
+                className={FIELD_CLASS}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="stockist-notes" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              Notes
+            </label>
+            <textarea
+              id="stockist-notes"
+              rows={3}
+              maxLength={500}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className={FIELD_CLASS}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="stockist-password" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              Password
+            </label>
+            <input
+              id="stockist-password"
+              type="password"
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Leave blank to email a setup link"
+              className={FIELD_CLASS}
+            />
+            <p className="text-xs text-warm-gray-400 mt-1">
+              Leave blank and we&apos;ll email them a one-time link to choose their own
+              password. Set one here only if you need to give it to them directly.
+            </p>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={saving}
+              className="tap-target px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button type="submit" disabled={saving} className="tap-target px-6 py-3 btn-primary">
+              {saving ? 'Adding...' : 'Add Stockist'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }

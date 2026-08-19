@@ -9,6 +9,7 @@ import { MaterialFilter } from '@/components/catalogue/material-filter';
 import { SearchInput } from '@/components/catalogue/search-input';
 import { ProductGrid } from '@/components/catalogue/product-grid';
 import { StockistProductGrid } from '@/components/catalogue/stockist-product-grid';
+import { validateStockistSession } from '@/lib/auth-client';
 import type { MaterialCategoryOption } from '@/services/categories';
 
 interface CatalogueClientProps {
@@ -23,8 +24,30 @@ export function CatalogueClient({ products, makers, materialCategories }: Catalo
   const [searchQuery, setSearchQuery] = useState('');
   const [isStockist, setIsStockist] = useState(false);
 
+  // Confirm the session with the backend rather than trusting the presence of
+  // a localStorage key, so an expired token stops showing wholesale pricing.
   useEffect(() => {
-    setIsStockist(!!localStorage.getItem('stockist_session'));
+    let cancelled = false;
+
+    async function checkStockistSession() {
+      const token = localStorage.getItem('stockist_session');
+      if (!token) return;
+
+      const stockist = await validateStockistSession(token);
+      if (cancelled) return;
+
+      if (stockist) {
+        setIsStockist(true);
+      } else {
+        localStorage.removeItem('stockist_session');
+        setIsStockist(false);
+      }
+    }
+
+    checkStockistSession();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Build a maker name lookup for search
