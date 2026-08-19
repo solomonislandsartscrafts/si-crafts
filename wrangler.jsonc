@@ -9,5 +9,14 @@
   },
   "vars": {
     "R2_BUCKET_NAME": "si-crafts-media"
-  }
+  },
+  // Keeps parity with the deployed production Worker, which already has this
+  // binding. Git-based builds deploy strictly from this file, so omitting it
+  // would strip the binding off production on the next deploy.
+  "r2_buckets": [
+    {
+      "bucket_name": "si-crafts-media",
+      "binding": "si_crafts_media"
+    }
+  ]
 }
