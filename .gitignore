@@ -33,6 +33,9 @@ backend/.env
 # OpenNext / Cloudflare build output
 .open-next
 
+# Wrangler local state (miniflare dev caches/R2 emulation — machine-specific)
+.wrangler
+
 # backend
 backend/db.sqlite3
 backend/media/
