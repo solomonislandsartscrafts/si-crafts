@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ChevronLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 export interface BreadcrumbItem {
   name: string;
@@ -12,43 +12,37 @@ interface BreadcrumbProps {
 }
 
 /**
- * Breadcrumb navigation following Cedar REI patterns:
- * - <nav> with aria-label="Breadcrumb"
- * - Ordered list for semantic structure
- * - "/" separators
- * - Current page (last item) rendered as text, not a link
- * - Parent link styled as ocean to act as clear "back" affordance
- * - Compact on mobile: shows only parent + current page
+ * Breadcrumb navigation with prominent back-navigation:
+ * - Mobile: pill-style "← Parent" button — large, tappable, unmissable
+ * - Desktop: full trail with emphasized parent link (arrow + medium weight)
+ * - Semantic: <nav> with aria-label, ordered list, aria-current on last item
  */
 export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
   if (items.length === 0) return null;
 
-  // On mobile, show only the parent as a back link (more usable on small screens)
   const parent = items.length >= 2 ? items[items.length - 2] : null;
 
   return (
     <nav aria-label="Breadcrumb" className={className}>
-      {/* Mobile: simple back link to parent */}
+      {/* Mobile: prominent pill-style back link */}
       {parent?.url && (
         <Link
           href={parent.url}
-          className="sm:hidden inline-flex items-center gap-1 text-sm font-medium text-ocean hover:text-ocean-dark transition-colors tap-target"
+          className="sm:hidden inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-ocean bg-ocean/8 hover:bg-ocean/15 rounded-full transition-colors tap-target"
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4" />
           {parent.name}
         </Link>
       )}
 
-      {/* Desktop: full breadcrumb trail */}
+      {/* Desktop: full breadcrumb trail with emphasized parent */}
       <ol className="hidden sm:flex flex-wrap items-center gap-0 text-sm">
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
+          const isParent = index === items.length - 2;
 
           return (
-            <li
-              key={index}
-              className="flex items-center"
-            >
+            <li key={index} className="flex items-center">
               {index > 0 && (
                 <span className="mx-2 text-warm-gray-400 select-none" aria-hidden="true">/</span>
               )}
@@ -59,6 +53,14 @@ export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
                 >
                   {item.name}
                 </span>
+              ) : isParent ? (
+                <Link
+                  href={item.url}
+                  className="inline-flex items-center gap-1 font-medium text-ocean hover:text-ocean-dark transition-colors"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  {item.name}
+                </Link>
               ) : (
                 <Link
                   href={item.url}

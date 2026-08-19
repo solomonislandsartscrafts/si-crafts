@@ -7,6 +7,7 @@ import { MakerCard } from '@/components/cards/maker-card';
 import { ProductCard } from '@/components/cards/product-card';
 import { SafeImage } from '@/components/ui/safe-image';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { BackLink } from '@/components/shared/back-link';
 
 export async function generateStaticParams() {
   const crafts = await getAllCrafts();
@@ -126,6 +127,11 @@ export default async function CraftPage({ params }: CraftPageProps) {
           </p>
         )}
       </section>
+
+      {/* Bottom back link */}
+      <div className="mt-12 pt-8 border-t border-sand text-center">
+        <BackLink href="/crafts-and-techniques" label="All crafts & techniques" />
+      </div>
     </div>
   );
 }

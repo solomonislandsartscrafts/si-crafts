@@ -110,7 +110,12 @@ export async function apiFetch<T = unknown>(path: string, options: RequestOption
     return undefined as T;
   }
 
-  return res.json();
+  // Guard against empty response bodies that would cause JSON.parse to fail
+  const text = await res.text();
+  if (!text) {
+    return undefined as T;
+  }
+  return JSON.parse(text) as T;
 }
 
 // Convenience helpers

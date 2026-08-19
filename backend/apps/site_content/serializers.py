@@ -7,10 +7,19 @@ from .models import SiteContent
 def _validate_safe_url(value: str) -> str:
     """Allow only https:// URLs or internal paths starting with exactly one slash.
 
-    Rejects javascript:, data:, protocol-relative (//), and other unsafe schemes.
+    Rejects javascript:, data:, protocol-relative (//), backslashes, control
+    characters, and other unsafe schemes that browsers may normalise into
+    protocol-relative or otherwise dangerous URLs.
     """
     if not value:
         return value
+
+    # Reject backslashes and control characters (U+0000–U+001F) early —
+    # browsers may normalise these into protocol-relative or unexpected URLs.
+    if "\\" in value or any(ord(ch) < 0x20 for ch in value):
+        raise serializers.ValidationError(
+            "URL must not contain backslashes or control characters."
+        )
 
     # Internal path: must start with exactly one slash (not //)
     if value.startswith("/") and not value.startswith("//"):
@@ -67,6 +76,8 @@ FIELD_MAP = {
     "contactIntro": "contact_intro",
     "contactEmail": "contact_email",
     "contactResponseTime": "contact_response_time",
+    # Slideshow
+    "slideshowSettings": "slideshow_settings",
 }
 
 # Reverse mapping: snake_case → camelCase
@@ -120,6 +131,8 @@ class SiteContentSerializer(serializers.Serializer):
     contact_intro = serializers.CharField(required=False, allow_blank=True, default="")
     contact_email = serializers.CharField(required=False, allow_blank=True, default="", max_length=200)
     contact_response_time = serializers.CharField(required=False, allow_blank=True, default="", max_length=200)
+    # Slideshow
+    slideshow_settings = serializers.JSONField(required=False, default=dict)
 
     def validate_about_solomon_islands_link_url(self, value):
         return _validate_safe_url(value)
@@ -134,7 +147,12 @@ class SiteContentSerializer(serializers.Serializer):
         """Output camelCase keys for the frontend."""
         result = {}
         for camel_key, snake_field in FIELD_MAP.items():
-            result[camel_key] = getattr(instance, snake_field, "") or ""
+            value = getattr(instance, snake_field, "")
+            # JSON fields return dict/list, not string — pass through as-is
+            if snake_field == "slideshow_settings":
+                result[camel_key] = value if value else {}
+            else:
+                result[camel_key] = value or ""
         return result
 
     def update(self, instance, validated_data):

@@ -5,11 +5,66 @@ import { getPublicMakers } from '@/services/makers';
 import { getPublishedArticles } from '@/services/articles';
 import { getSiteContentSafe } from '@/services/site-content';
 import { getAllCrafts } from '@/services/crafts';
+import { getSlideshowSettingsSafe } from '@/services/slideshow';
 import { ProductCard } from '@/components/cards/product-card';
 import { MakerCard } from '@/components/cards/maker-card';
 import { HeroCodeToggle } from '@/components/shared/hero-code-toggle';
-import { HeroSlideshow } from '@/components/shared/hero-slideshow';
+import { HeroSlideshow, type SlideItem } from '@/components/shared/hero-slideshow';
 import { SafeImage } from '@/components/ui/safe-image';
+import type { Product, Maker, Craft, SlideshowSettings } from '@/types';
+
+interface BuildHeroSlidesArgs {
+  products: Product[];
+  makers: Maker[];
+  crafts: Craft[];
+  adminFeatured: Product[];
+  craftNameMap: Record<string, string>;
+  slideshowSettings: SlideshowSettings;
+}
+
+/**
+ * Checks if a specific item is enabled in slideshow settings.
+ * Items not listed in settings.items are enabled by default.
+ */
+function isItemEnabled(settings: SlideshowSettings, id: string, kind: string): boolean {
+  const toggle = settings.items.find((i) => i.id === id && i.kind === kind);
+  return toggle ? toggle.enabled : true;
+}
+
+/**
+ * Builds the homepage hero gallery showing product images only.
+ * Displays up to 5 products, preferring admin-featured items when available.
+ */
+function buildHeroSlides({
+  products,
+  makers,
+  adminFeatured,
+  slideshowSettings,
+}: BuildHeroSlidesArgs): SlideItem[] {
+  const sourceProducts = adminFeatured.length > 0 ? adminFeatured : products;
+
+  // Filter to enabled items with images
+  const enabledProducts = sourceProducts
+    .filter((p) => isItemEnabled(slideshowSettings, p.id, 'product'))
+    .filter((p) => p.imageUrls[0]);
+
+  // Take up to 5 products
+  const heroProducts = enabledProducts.slice(0, 5);
+
+  return heroProducts.map((product) => {
+    const maker = makers.find((m) => m.id === product.makerId);
+    return {
+      kind: 'product' as const,
+      imageUrl: product.imageUrls[0],
+      imageAlt: product.imageAlts[0] || product.name,
+      kicker: 'Handmade Piece',
+      title: product.name,
+      subtitle: maker ? `by ${maker.name} · ${maker.village}, ${maker.province}` : undefined,
+      tag: product.materialCategory,
+      href: `/piece/${product.productCode}`,
+    };
+  });
+}
 
 export const metadata = generatePageMetadata({
   title: 'Solomon Islands Arts Crafts',
@@ -19,13 +74,14 @@ export const metadata = generatePageMetadata({
 });
 
 export default async function HomePage() {
-  const [products, makers, articles, adminFeatured, siteContent, crafts] = await Promise.all([
+  const [products, makers, articles, adminFeatured, siteContent, crafts, slideshowSettings] = await Promise.all([
     getPublicProducts(),
     getPublicMakers(),
     getPublishedArticles(),
     getFeaturedProducts(),
     getSiteContentSafe(),
     getAllCrafts(),
+    getSlideshowSettingsSafe(),
   ]);
 
   const featuredProducts = products.slice(0, 4);
@@ -36,51 +92,16 @@ export default async function HomePage() {
   const craftNameMap: Record<string, string> = {};
   crafts.forEach((c) => { craftNameMap[c.id] = c.name; });
 
-  // Hero gallery — use admin-selected featured products (up to 3).
-  // Falls back to auto-selection (one per material category) if no products
-  // have been marked as featured yet.
-  let heroProducts: (typeof products)[number][];
-
-  if (adminFeatured.length > 0) {
-    // Admin has chosen which products to feature
-    heroProducts = adminFeatured.slice(0, 3);
-  } else {
-    // Fallback: pick one product per material category for variety
-    const seenCategories = new Set<string>();
-    heroProducts = [];
-    for (const product of products) {
-      if (heroProducts.length >= 3) break;
-      if (!seenCategories.has(product.materialCategory)) {
-        seenCategories.add(product.materialCategory);
-        heroProducts.push(product);
-      }
-    }
-    // Fill remaining slots from any category
-    if (heroProducts.length < 3) {
-      for (const product of products) {
-        if (heroProducts.length >= 3) break;
-        if (!heroProducts.includes(product)) {
-          heroProducts.push(product);
-        }
-      }
-    }
-  }
-
-  const heroSlides = heroProducts.map((product) => {
-    const maker = makers.find((m) => m.id === product.makerId);
-    return {
-      imageUrl: product.imageUrls[0] ?? '',
-      name: product.name,
-      makerName: maker?.name,
-      place: maker ? `${maker.village}, ${maker.province}` : undefined,
-    };
-  });
+  const heroSlides = buildHeroSlides({ products, makers, crafts, adminFeatured, craftNameMap, slideshowSettings });
 
   return (
     <div className="flex flex-col">
       {/* Hero + stats fill the first viewport on desktop, so nothing below
-          is visible until the user scrolls. Offset = header (80px) + flag divider (14px). */}
-      <div className="lg:flex lg:flex-col lg:min-h-[calc(100vh-94px)]">
+          is visible until the user scrolls. Offset = header (80px) + flag divider (14px).
+          Negative top margin cancels out <main>'s top padding (pt-3/sm:pt-4) so the
+          hero gallery sits flush against the flag divider on mobile/tablet — desktop
+          spacing (lg:pt-6) is left untouched via lg:mt-0. */}
+      <div className="-mt-3 sm:-mt-4 lg:mt-0 lg:flex lg:flex-col lg:min-h-[calc(100vh-94px)]">
         {/* Hero — Flag theme: gold accent + serif heading + split layout */}
         <section className="lg:flex-1 lg:flex lg:items-center">
           <div className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">

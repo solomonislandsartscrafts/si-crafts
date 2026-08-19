@@ -70,7 +70,7 @@ export function PiecePageClient({ product, craftName, craftSlug, maker }: PieceP
       <ImageGallery images={product.imageUrls} alt={product.name} />
 
       {/* Right: Product Info */}
-      <div>
+      <div className="bg-white rounded-lg p-5 sm:p-6">
         {/* Category breadcrumb */}
         <p className="text-sm text-warm-gray-600 capitalize mb-1">
           {product.materialCategory} · {product.productType}
@@ -128,28 +128,29 @@ export function PiecePageClient({ product, craftName, craftSlug, maker }: PieceP
           </div>
         )}
 
-        {/* Product info tabs */}
-        <ProductTabs product={product} craftName={craftName} craftSlug={craftSlug} />
+        {/* Product info tabs — clean section with top border */}
+        <div className="border-t border-sand pt-5">
+          <ProductTabs product={product} craftName={craftName} craftSlug={craftSlug} />
+        </div>
 
         {/* Meet the Maker — storytelling section */}
         {maker && maker.publishedFlag && (
-          <div className="mt-8">
-            <h2 className="font-heading text-xl font-medium text-deep-blue mb-4">
+          <div className="border-t border-sand pt-6 mt-6">
+            <h2 className="font-heading text-lg font-medium text-deep-blue mb-4">
               Meet the Maker
             </h2>
 
-            {/* Maker identity — portrait, name, place */}
             <Link
               href={`/maker/${maker.slug}`}
-              className="group flex items-center gap-3 mb-4 bg-warm-gray-100 hover:bg-sand-light rounded-lg p-3 transition-colors"
+              className="group flex items-center gap-3 mb-4"
             >
-              <div className="w-12 h-12 flex-shrink-0 relative rounded-full overflow-hidden bg-sand">
+              <div className="w-11 h-11 flex-shrink-0 relative rounded-full overflow-hidden bg-sand ring-2 ring-sand">
                 <SafeImage
                   src={maker.portraitUrl}
                   alt={maker.name}
                   fill
                   className="object-cover"
-                  sizes="48px"
+                  sizes="44px"
                 />
               </div>
               <div className="flex-1 min-w-0">
@@ -162,7 +163,6 @@ export function PiecePageClient({ product, craftName, craftSlug, maker }: PieceP
               </div>
             </Link>
 
-            {/* Maker's story — first-person excerpt */}
             <div className="text-sm text-warm-gray-700 leading-relaxed space-y-2">
               {maker.story ? (
                 <>

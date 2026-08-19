@@ -6,7 +6,7 @@ from wagtail.models import Page
 from apps.page_tree import repair_numchild, delete_page
 
 from .models import CraftPage
-from .serializers import CraftPageSerializer
+from .serializers import CraftPageSerializer, CraftPageRequestSerializer
 
 
 class CraftWriteViewSet(viewsets.ViewSet):
@@ -16,6 +16,18 @@ class CraftWriteViewSet(viewsets.ViewSet):
 
     def create(self, request):
         data = request.data
+
+        # Validate process_image_url and process_image_alt
+        image_fields = {}
+        if "process_image_url" in data:
+            image_fields["process_image_url"] = data["process_image_url"]
+        if "process_image_alt" in data:
+            image_fields["process_image_alt"] = data["process_image_alt"]
+        if image_fields:
+            req_serializer = CraftPageRequestSerializer(data=image_fields)
+            if not req_serializer.is_valid():
+                return Response(req_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         crafts_index = Page.objects.filter(title="Crafts").first()
         if not crafts_index:
             root = Page.objects.filter(depth=1).first()
@@ -46,6 +58,18 @@ class CraftWriteViewSet(viewsets.ViewSet):
             return Response({"error": "Not found"}, status=status.HTTP_404_NOT_FOUND)
 
         data = request.data
+
+        # Validate process_image_url and process_image_alt
+        image_fields = {}
+        if "process_image_url" in data:
+            image_fields["process_image_url"] = data["process_image_url"]
+        if "process_image_alt" in data:
+            image_fields["process_image_alt"] = data["process_image_alt"]
+        if image_fields:
+            req_serializer = CraftPageRequestSerializer(data=image_fields)
+            if not req_serializer.is_valid():
+                return Response(req_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         if "title" in data or "name" in data:
             craft.title = data.get("title", data.get("name", craft.title))
         if "slug" in data:

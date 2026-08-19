@@ -18,7 +18,7 @@ export function CraftCard({ craft }: CraftCardProps) {
           src={craft.processImageUrls[0] || null}
           alt={`${craft.name} process`}
           fill
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
+          className="object-contain p-4"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
         />
       </div>

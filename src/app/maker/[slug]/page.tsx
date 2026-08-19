@@ -7,6 +7,7 @@ import { getCraftById } from '@/services/crafts';
 import { ProductCard } from '@/components/cards/product-card';
 import { SafeImage } from '@/components/ui/safe-image';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { BackLink } from '@/components/shared/back-link';
 import type { Product } from '@/types';
 
 export async function generateStaticParams() {
@@ -172,6 +173,11 @@ export default async function MakerPage({ params }: MakerPageProps) {
           </div>
         </section>
       )}
+
+      {/* Bottom back link */}
+      <div className="mt-12 pt-8 border-t border-sand text-center">
+        <BackLink href="/makers" label="All makers" />
+      </div>
     </div>
   );
 }

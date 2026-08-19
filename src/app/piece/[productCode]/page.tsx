@@ -6,6 +6,7 @@ import { getAllMakers } from '@/services/makers';
 import { PiecePageClient } from './piece-page-client';
 import { ProductCard } from '@/components/cards/product-card';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { BackLink } from '@/components/shared/back-link';
 
 export async function generateStaticParams() {
   const products = await getAllProducts();
@@ -93,6 +94,11 @@ export default async function PiecePage({ params }: PiecePageProps) {
           </div>
         </section>
       )}
+
+      {/* Bottom back link — useful for QR-scan users with no browsing history */}
+      <div className="mt-12 pt-8 border-t border-sand text-center">
+        <BackLink href="/catalogue" label="Browse all pieces" />
+      </div>
     </div>
   );
 }

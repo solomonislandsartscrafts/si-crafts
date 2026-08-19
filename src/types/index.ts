@@ -29,3 +29,4 @@ export type {
   DashboardSummary,
 } from './dashboard';
 export type { TeamMember } from './team';
+export type { SlideCategory, SlideItemToggle, SlideshowSettings } from './slideshow';

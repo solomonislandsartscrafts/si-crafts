@@ -54,6 +54,14 @@ class SiteContent(models.Model):
     contact_email = models.CharField(max_length=200, blank=True, default="")
     contact_response_time = models.CharField(max_length=200, blank=True, default="")
 
+    # --- Slideshow settings (JSON) ---
+    # Stores category toggles and per-item visibility for the homepage hero.
+    slideshow_settings = models.JSONField(
+        blank=True,
+        default=dict,
+        help_text="Homepage slideshow configuration: enabled categories and per-item toggles.",
+    )
+
     class Meta:
         verbose_name = "Site Content"
         verbose_name_plural = "Site Content"

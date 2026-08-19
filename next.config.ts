@@ -25,6 +25,12 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
+        // R2 media served through a Cloudflare Worker (R2_PUBLIC_URL)
+        protocol: 'https',
+        hostname: '*.workers.dev',
+        pathname: '/**',
+      },
+      {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },

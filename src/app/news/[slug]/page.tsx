@@ -8,6 +8,7 @@ import { ShareButtons } from '@/components/shared/share-buttons';
 import { NewsSidebar } from '@/components/news/news-sidebar';
 import { SafeImage } from '@/components/ui/safe-image';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { BackLink } from '@/components/shared/back-link';
 
 export async function generateStaticParams() {
   const articles = await getPublishedArticles();
@@ -138,12 +139,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               <ShareButtons title={article.title} />
             </div>
             <div className="mt-6 text-center">
-              <Link
-                href="/news"
-                className="text-sm font-medium text-ocean hover:text-ocean-dark transition-colors"
-              >
-                ← More articles
-              </Link>
+              <BackLink href="/news" label="More articles" />
             </div>
           </div>
         </article>

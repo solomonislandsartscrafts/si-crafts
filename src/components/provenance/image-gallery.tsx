@@ -196,7 +196,7 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
           aria-modal="true"
           aria-label="Image viewer"
           tabIndex={-1}
-          className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center outline-none"
+          className="fixed inset-0 z-[9999] bg-white flex items-center justify-center outline-none"
           onClick={() => setFullscreen(false)}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -204,14 +204,14 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
         >
           <button
             onClick={() => setFullscreen(false)}
-            className="absolute top-4 right-4 tap-target p-2 text-white/70 hover:text-white rounded-full focus:outline-none focus:ring-2 focus:ring-ocean"
+            className="absolute top-4 right-4 tap-target p-2 text-warm-gray-600 hover:text-deep-blue rounded-full focus:outline-none focus:ring-2 focus:ring-ocean"
             aria-label="Close fullscreen"
           >
             <X className="w-5 h-5" />
           </button>
 
           {images.length > 1 && (
-            <span className="absolute top-4 left-4 text-sm text-white/50">
+            <span className="absolute top-4 left-4 text-sm text-warm-gray-600">
               {activeIndex + 1} / {images.length}
             </span>
           )}
@@ -219,7 +219,7 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
           {images.length > 1 && (
             <button
               onClick={(e) => { e.stopPropagation(); goPrev(); }}
-              className="absolute left-4 tap-target p-2 text-white/60 hover:text-white rounded-full focus:outline-none focus:ring-2 focus:ring-ocean"
+              className="absolute left-4 tap-target p-2 text-warm-gray-600 hover:text-deep-blue rounded-full focus:outline-none focus:ring-2 focus:ring-ocean"
               aria-label="Previous image"
             >
               <ChevronLeft className="w-6 h-6" />
@@ -242,7 +242,7 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
           {images.length > 1 && (
             <button
               onClick={(e) => { e.stopPropagation(); goNext(); }}
-              className="absolute right-4 tap-target p-2 text-white/60 hover:text-white rounded-full focus:outline-none focus:ring-2 focus:ring-ocean"
+              className="absolute right-4 tap-target p-2 text-warm-gray-600 hover:text-deep-blue rounded-full focus:outline-none focus:ring-2 focus:ring-ocean"
               aria-label="Next image"
             >
               <ChevronRight className="w-6 h-6" />
