@@ -73,6 +73,30 @@ Now edit content, upload images, and break things freely. Production is untouche
 - Backend code changes: after merging, go to Render → `si-crafts` → **Manual Deploy** (auto-deploy is off on purpose).
 - Content: enter it in the production admin.
 
+## Troubleshooting
+
+**Admin screens show nothing / "0 of 0 products"**
+
+The backend isn't running, or `NEXT_PUBLIC_API_URL` points somewhere that isn't
+answering. Failed reads fall back to empty data (deliberately, so builds don't
+break when Render's free tier is asleep), so an unreachable backend looks the same
+as an empty database.
+
+Check the backend is up:
+
+```bash
+curl "http://localhost:8001/api/v2/products/?limit=1"
+```
+
+If that fails, start it:
+
+```bash
+cd backend && .venv/bin/python manage.py runserver 8001
+```
+
+Both servers need to be running at the same time: Django on 8001 and `npm run dev`
+on 3000.
+
 ## Known limitation
 
 Preview URLs (`https://<branch>-si-crafts.siacrafts.workers.dev`) still point at the

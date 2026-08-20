@@ -29,6 +29,24 @@ export function resolveImageUrl(url: string | null | undefined): string {
   return url;
 }
 
+/**
+ * True when the backend actually answers.
+ *
+ * Failed GETs fall back to empty data (so builds don't break when the backend is
+ * asleep), which makes "nothing created yet" and "cannot reach the backend" look
+ * identical in the UI. Admin screens use this to tell the two apart before
+ * showing an empty state.
+ */
+export async function isBackendReachable(): Promise<boolean> {
+  if (!isBackendConfigured) return false;
+  try {
+    const res = await fetch(`${API_URL}/api/v2/products/?limit=1`, { cache: 'no-store' });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 export class ApiError extends Error {
   status: number;
   constructor(message: string, status: number) {

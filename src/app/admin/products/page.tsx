@@ -13,6 +13,7 @@ import { Select } from '@/components/ui/select';
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [backendDown, setBackendDown] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
   const { success: toastSuccess, error: toastError } = useToast();
@@ -31,6 +32,16 @@ export default function AdminProductsPage() {
   async function loadProducts() {
     const { getAllProducts } = await import('@/services/products');
     const data = await getAllProducts();
+
+    // An unreachable backend also returns an empty list, which would otherwise
+    // read as "no products yet". Check before showing that message.
+    if (data.length === 0) {
+      const { isBackendReachable } = await import('@/lib/api-client');
+      setBackendDown(!(await isBackendReachable()));
+    } else {
+      setBackendDown(false);
+    }
+
     setProducts(data);
     setLoading(false);
   }
@@ -187,7 +198,11 @@ export default function AdminProductsPage() {
               {filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-4 py-8 text-center text-warm-gray-400">
-                    {products.length === 0 ? 'No products yet. Click "Add Product" to create one.' : 'No products match your filters.'}
+                    {products.length > 0
+                      ? 'No products match your filters.'
+                      : backendDown
+                        ? 'Cannot reach the backend, so products could not be loaded. If you are running locally, start it with: cd backend && .venv/bin/python manage.py runserver 8001'
+                        : 'No products yet. Click "Add Product" to create one.'}
                   </td>
                 </tr>
               ) : (
