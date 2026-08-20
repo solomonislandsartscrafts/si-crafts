@@ -44,24 +44,20 @@ function mapCraft(raw: WagtailCraftResponse): Craft {
   };
 }
 
+// NOTE: these readers deliberately do NOT fall back to mock data. Substituting
+// invented crafts when the backend is asleep or empty made it impossible to tell
+// real content from placeholder content, and risks publishing unreviewed
+// cultural material. An empty result now stays empty.
+
 export async function getAllCrafts(): Promise<Craft[]> {
   const data = await apiGet<WagtailListResponse>('/api/v2/crafts/?fields=*');
-  const crafts = data.items.map(mapCraft);
-  if (crafts.length > 0) return crafts;
-
-  // Fallback to mock data when API returns empty
-  const { mockCrafts } = await import('@/data/mock/crafts');
-  return mockCrafts;
+  return data.items.map(mapCraft);
 }
 
 export async function getCraftBySlug(slug: string): Promise<Craft | null> {
   const data = await apiGet<WagtailListResponse>(`/api/v2/crafts/?slug=${slug}&fields=*`);
   if (data.items.length > 0) return mapCraft(data.items[0]);
-
-  // Fallback to mock
-  const { mockCrafts } = await import('@/data/mock/crafts');
-  const mock = mockCrafts.find((c) => c.slug === slug);
-  return mock ?? null;
+  return null;
 }
 
 export async function getCraftById(id: string): Promise<Craft | null> {
@@ -69,10 +65,7 @@ export async function getCraftById(id: string): Promise<Craft | null> {
     const raw = await apiGet<WagtailCraftResponse>(`/api/v2/crafts/${id}/?fields=*`);
     return mapCraft(raw);
   } catch {
-    // Fallback to mock
-    const { mockCrafts } = await import('@/data/mock/crafts');
-    const mock = mockCrafts.find((c) => c.id === id);
-    return mock ?? null;
+    return null;
   }
 }
 

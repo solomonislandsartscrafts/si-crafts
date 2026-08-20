@@ -38,10 +38,14 @@ backend/.env
 
 # backend
 backend/db.sqlite3
+backend/db.sqlite3.bak-*
 backend/media/
 backend/staticfiles/
 backend/__pycache__/
 **/__pycache__/
+backend/.venv/
+# Production snapshot from scripts/sync-prod-to-local.sh — contains password hashes
+backend/prod-snapshot.json
 
 # uploads (user-uploaded images)
 /public/uploads

@@ -5,8 +5,14 @@
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.WAGTAIL_API_URL || '';
 
-/** True when no real backend URL is configured */
-const isBackendConfigured = API_URL.length > 0 && !API_URL.includes('localhost');
+/**
+ * True when a backend URL is configured.
+ *
+ * localhost is deliberately allowed so you can run the Django backend locally
+ * and experiment without touching production. Unreachable backends are already
+ * handled by the try/catch in apiFetch, so no extra guard is needed here.
+ */
+const isBackendConfigured = API_URL.length > 0;
 
 /**
  * Resolve an image URL. If it's a relative path (e.g. /uploads/... or /media/...),
