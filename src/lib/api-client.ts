@@ -80,6 +80,22 @@ export async function isBackendReachable(): Promise<boolean> {
   }
 }
 
+/**
+ * True only for a real transport failure — the request never got an answer.
+ *
+ * Deliberately an allow-list rather than a catch-all. Anything else thrown out
+ * of fetch() during a render is a framework signal (see the catch block in
+ * apiFetch) and must not be mistaken for the backend being down.
+ *
+ * - undici raises TypeError("fetch failed") for DNS/connection/TLS errors.
+ * - AbortSignal.timeout() raises TimeoutError; an aborted request, AbortError.
+ */
+function isNetworkFailure(err: unknown): boolean {
+  if (err instanceof TypeError) return true;
+  const name = (err as { name?: unknown } | null)?.name;
+  return name === 'TimeoutError' || name === 'AbortError';
+}
+
 export class ApiError extends Error {
   status: number;
   constructor(message: string, status: number) {
@@ -165,7 +181,26 @@ export async function apiFetch<T = unknown>(path: string, options: RequestOption
     });
   } catch (err) {
     /**
-     * Network error or timeout.
+     * Next.js signals control flow by THROWING, not just by failing. During
+     * prerendering, a `cache: 'no-store'` fetch throws DynamicServerError to
+     * tell Next "this route must be dynamic"; notFound() and redirect() throw
+     * too. None of these are network faults, and all of them must propagate.
+     *
+     * Swallowing them is not cosmetic. If DynamicServerError is caught here and
+     * empty data is returned instead, Next never learns the route is dynamic,
+     * so it prerenders it as STATIC with the empty result — shipping a blank
+     * page to production that no amount of live backend data can fix. That also
+     * made every build log read "Backend unreachable" while the backend was
+     * perfectly healthy, which hid the real problem.
+     *
+     * So: only genuine transport failures are eligible for the fallback below.
+     */
+    if (!isNetworkFailure(err)) {
+      throw err;
+    }
+
+    /**
+     * Genuine network error or timeout.
      *
      * A cacheable GET must NOT fall back to empty data. It backs an ISR page,
      * so an empty result would render an empty page and that page would then be
