@@ -6,6 +6,36 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.WAGTAIL_API_URL || '';
 
 /**
+ * How long a public page may be served from the Cloudflare cache before the
+ * data is refetched in the background.
+ *
+ * This is the single most important number for perceived speed. The backend
+ * runs on Render's free tier, which spins down after 15 minutes without
+ * traffic and then takes 30-60s to wake. Without caching, every page render
+ * blocked on that wake-up, so the first visitor after a quiet spell waited
+ * the better part of a minute. With it, the cached HTML is served from the
+ * edge and the cold start lands on a background revalidation instead of a
+ * customer.
+ *
+ * Trade-off: content edited in the admin takes up to this long to appear on
+ * the public site. Lower it for fresher content at the cost of more traffic
+ * to the backend.
+ */
+export const PUBLIC_REVALIDATE_SECONDS = 300;
+
+/**
+ * Ceiling on any single request.
+ *
+ * This exists to stop a hung request blocking forever, not to fail fast. A
+ * sleeping Render dyno accepts the connection long before it can answer, so
+ * without a signal the fetch never settles. The budget sits above the observed
+ * cold start (measured at 38s on an idle dyno) because a shorter one turns
+ * "slow" into "broken" — and on a cached read, into an empty result that then
+ * gets cached.
+ */
+const REQUEST_TIMEOUT_MS = 60_000;
+
+/**
  * True when a backend URL is configured.
  *
  * localhost is deliberately allowed so you can run the Django backend locally
@@ -40,7 +70,10 @@ export function resolveImageUrl(url: string | null | undefined): string {
 export async function isBackendReachable(): Promise<boolean> {
   if (!isBackendConfigured) return false;
   try {
-    const res = await fetch(`${API_URL}/api/v2/products/?limit=1`, { cache: 'no-store' });
+    const res = await fetch(`${API_URL}/api/v2/products/?limit=1`, {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
     return res.ok;
   } catch {
     return false;
@@ -63,6 +96,12 @@ interface RequestOptions {
   headers?: Record<string, string>;
   /** Skip JSON parsing (for 204 No Content responses) */
   noContent?: boolean;
+  /**
+   * Opt this request into Next's data cache for the given number of seconds.
+   * Only honoured for un-authenticated server-side GETs — see apiFetch.
+   * Prefer apiGetPublic() over setting this by hand.
+   */
+  revalidate?: number;
 }
 
 /**
@@ -70,7 +109,7 @@ interface RequestOptions {
  * Returns empty/default data gracefully when the backend is unreachable (e.g. during build).
  */
 export async function apiFetch<T = unknown>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = 'GET', body, token, headers: extraHeaders, noContent } = options;
+  const { method = 'GET', body, token, headers: extraHeaders, noContent, revalidate } = options;
 
   // If no backend URL is configured, return empty data for reads, throw for writes
   if (!isBackendConfigured) {
@@ -95,17 +134,49 @@ export async function apiFetch<T = unknown>(path: string, options: RequestOption
     headers['Content-Type'] = 'application/json';
   }
 
+  /**
+   * Caching policy. The default is no-store, which is what mutations,
+   * authenticated reads and browser fetches all need. A request only becomes
+   * cacheable when it opts in explicitly AND is safe to share:
+   *
+   * - GET only — never cache a write.
+   * - No token — a cached response keyed loosely could serve one account's
+   *   data to another, and wholesale pricing must never reach the open site.
+   * - Server-side only — in the browser `next.revalidate` is meaningless and
+   *   dropping no-store would let the HTTP cache hold on to admin data.
+   *
+   * Caching is opt-in rather than inferred on purpose: getAdminToken() returns
+   * '' on the server, so "no token" alone would quietly make admin endpoints
+   * look public.
+   */
+  const isCacheable =
+    method === 'GET' && !token && revalidate !== undefined && typeof window === 'undefined';
+
   let res: Response;
   try {
     res = await fetch(`${API_URL}${path}`, {
       method,
       headers,
       body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
-      cache: 'no-store',
+      // A hung request used to block a page render indefinitely, because a
+      // sleeping Render dyno accepts the connection before it can answer.
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      ...(isCacheable ? { next: { revalidate } } : { cache: 'no-store' as const }),
     });
   } catch (err) {
-    // Network error (backend not running) — return empty data for GET, throw for mutations
-    if (method === 'GET') {
+    /**
+     * Network error or timeout.
+     *
+     * A cacheable GET must NOT fall back to empty data. It backs an ISR page,
+     * so an empty result would render an empty page and that page would then be
+     * cached at the edge for the whole revalidate window — one cold start on
+     * Render turning into minutes of a blank catalogue. Throwing instead fails
+     * the background revalidation, and Next keeps serving the last good page.
+     *
+     * Un-cached GETs keep the fallback: they are admin screens and build-time
+     * reads, where an empty list is better than a crash, and nothing is stored.
+     */
+    if (method === 'GET' && !isCacheable) {
       console.warn(`[api-client] Backend unreachable for GET ${path} — returning empty data`);
       // Wagtail page API returns { items: [] }, DRF list endpoints return []
       if (path.includes('/api/v2/')) {
@@ -146,6 +217,22 @@ export async function apiFetch<T = unknown>(path: string, options: RequestOption
 
 export function apiGet<T>(path: string, token?: string): Promise<T> {
   return apiFetch<T>(path, { token });
+}
+
+/**
+ * GET a public, un-authenticated resource and allow it to be cached.
+ *
+ * Use this for data that appears on the open site (products, makers, crafts,
+ * articles, site copy). Pages built from these calls become ISR: prerendered
+ * at build time, then refreshed in the background every
+ * PUBLIC_REVALIDATE_SECONDS, so a visitor's request never waits on the
+ * backend.
+ *
+ * Do NOT use it for anything behind a login — wholesale pricing, stockist
+ * accounts, admin data, or session validation. Those must stay on apiGet.
+ */
+export function apiGetPublic<T>(path: string, revalidate = PUBLIC_REVALIDATE_SECONDS): Promise<T> {
+  return apiFetch<T>(path, { revalidate });
 }
 
 export function apiPost<T>(path: string, body: unknown, token?: string): Promise<T> {

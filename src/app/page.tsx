@@ -9,9 +9,11 @@ import { getSlideshowSettingsSafe } from '@/services/slideshow';
 import { ProductCard } from '@/components/cards/product-card';
 import { MakerCard } from '@/components/cards/maker-card';
 import { ArticleCard } from '@/components/cards/article-card';
+import { posterGridClasses, posterGridClassesThreeUp } from '@/components/cards/poster-card';
 import { HeroCodeToggle } from '@/components/shared/hero-code-toggle';
 import { HeroSlideshow, type SlideItem } from '@/components/shared/hero-slideshow';
 import { PageCta } from '@/components/layout/page-cta';
+import { SponsorBanner } from '@/components/shared/sponsor-banner';
 import { ButtonLink } from '@/components/ui/button';
 import type { Product, Maker, Craft, SlideshowSettings } from '@/types';
 
@@ -57,13 +59,10 @@ function buildHeroSlides({
     const maker = makers.find((m) => m.id === product.makerId);
     const toggle = slideshowSettings.items.find((i) => i.id === product.id && i.kind === 'product');
     return {
-      kind: 'product' as const,
       imageUrl: product.imageUrls[0],
       imageAlt: product.imageAlts[0] || product.name,
-      kicker: 'Handmade Piece',
       title: product.name,
       subtitle: maker ? `by ${maker.name} · ${maker.village}, ${maker.province}` : undefined,
-      tag: product.materialCategory,
       href: `/piece/${product.productCode}`,
       objectPosition: toggle?.objectPosition || 'center',
     };
@@ -109,9 +108,9 @@ export default async function HomePage() {
         {/* Hero — Flag theme: gold accent + serif heading + split layout */}
         <section className="lg:flex-1 lg:flex lg:items-center">
           <div className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-10 items-center pt-0 pb-12 lg:py-10">
-              {/* Left: Text content */}
-              <div className="order-2 lg:order-1 lg:col-span-2 px-4 sm:px-0">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-10 items-center pt-0 pb-12 lg:py-10">
+              {/* Text content — below the sponsor banner on mobile, left on desktop */}
+              <div className="order-3 lg:order-1 lg:col-span-2 px-4 sm:px-0">
                 {/* Gold accent line + subtitle */}
                 <div className="flex items-center gap-3 mb-4">
                   <span className="w-8 h-0.5 bg-ocean" aria-hidden="true" />
@@ -142,17 +141,28 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              {/* Right: Hero gallery — full-width on mobile */}
+              {/* Hero gallery — first on mobile, right on desktop */}
               <div className="order-1 lg:order-2 lg:col-span-3 w-full">
                 <HeroSlideshow items={heroSlides} interval={5000} />
+              </div>
+
+              {/* Sponsor banner — shown right under the slideshow dots on mobile/tablet,
+                  hidden here on desktop where it lives at the bottom of the viewport. */}
+              <div className="order-2 lg:hidden col-span-1">
+                <SponsorBanner />
               </div>
             </div>
           </div>
         </section>
+
+        {/* Sponsor logos — pinned to the bottom of the first viewport on desktop only */}
+        <div className="hidden lg:block">
+          <SponsorBanner />
+        </div>
       </div>
 
       {/* Featured Makers */}
-      <section className="section-y">
+      <section className="section-y bg-sand-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Heading matters here: this is the first thing below the hero, and
               three unlabelled portraits give a first-time visitor no context. */}
@@ -174,7 +184,7 @@ export default async function HomePage() {
           </div>
           {/* All three show on every breakpoint. Previously the third was
               hidden below lg, which read as a loading fault on phones. */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className={posterGridClassesThreeUp}>
             {featuredMakers.map((maker) => (
               <MakerCard
                 key={maker.id}
@@ -210,7 +220,7 @@ export default async function HomePage() {
               View all
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className={posterGridClasses}>
             {featuredProducts.map((product) => {
               const maker = makers.find((m) => m.id === product.makerId);
               return (
@@ -240,7 +250,7 @@ export default async function HomePage() {
 
       {/* Latest News */}
       {latestArticles.length > 0 && (
-        <section className="section-y">
+        <section className="section-y bg-sand-light">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-8">
               <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
@@ -253,10 +263,17 @@ export default async function HomePage() {
                 All articles
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className={posterGridClassesThreeUp}>
               {latestArticles.map((article) => (
                 <ArticleCard key={article.id} article={article} />
               ))}
+            </div>
+            {/* The header link above is hidden below sm, so without this the
+                news section was a dead end on a phone — no route to /news. */}
+            <div className="sm:hidden mt-6 text-center">
+              <ButtonLink href="/news" variant="secondary">
+                All articles
+              </ButtonLink>
             </div>
           </div>
         </section>

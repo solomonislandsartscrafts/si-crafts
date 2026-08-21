@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Check, ShoppingCart, Minus, Plus } from 'lucide-react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import type { Product, Maker, Craft } from '@/types';
 import { ImageGallery } from '@/components/provenance/image-gallery';
@@ -65,104 +66,149 @@ export function PiecePageClient({ product, craftName, craftSlug, maker, craft }:
     setQty(1);
   }
 
+  // Short description for the above-the-fold preview only. The full text is
+  // rendered untruncated in the Description tab below, so nothing is lost here.
+  const shortDescription = product.description
+    ? product.description.length > 120
+      ? `${product.description.slice(0, 120).trim()}\u2026`
+      : product.description
+    : null;
+
   return (
-    // Two columns only from lg up. Splitting at md put each column at roughly
-    // 350px on an iPad in portrait, which squeezed the title onto two lines and
-    // narrowed the maker quote to a few words per line.
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-      {/* Left: Image Gallery. Capped while the layout is a single column so a
-          full-width square does not push the maker below the fold on a tablet. */}
-      <div className="w-full max-w-lg mx-auto lg:max-w-none lg:mx-0">
-        <ImageGallery images={product.imageUrls} alt={product.name} />
+    <div className="space-y-10">
+      {/* ─── Top section: Gallery (left) + Product Info (right) ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+        {/* Left column — Image gallery with thumbnails */}
+        <div className="w-full">
+          <ImageGallery images={product.imageUrls} alt={product.name} />
+        </div>
+
+        {/* Right column — Product info */}
+        <div className="flex flex-col">
+          {/* Category pill */}
+          <p className="mb-3">
+            {craftName && craftSlug ? (
+              <Link
+                href={`/craft/${craftSlug}`}
+                className="inline-block text-sm font-medium text-ocean bg-ocean/10 px-3 py-1 rounded-full hover:bg-ocean/20 transition-colors"
+              >
+                {craftName}
+              </Link>
+            ) : (
+              <span className="inline-block text-sm font-medium text-ocean bg-ocean/10 px-3 py-1 rounded-full">
+                {materialLabel(product.materialCategory)}
+              </span>
+            )}
+          </p>
+
+          {/* Product name */}
+          <h1 className="font-heading text-2xl sm:text-3xl font-medium text-deep-blue mb-3">
+            {product.name}
+          </h1>
+
+          {/* Gold accent bar under title */}
+          <div className="w-16 h-1 bg-accent-gold rounded-full mb-4" />
+
+          {/* Short description preview */}
+          {shortDescription && (
+            <p className="text-base text-warm-gray-600 leading-relaxed mb-4">
+              {shortDescription}
+            </p>
+          )}
+
+          {/* Price — stockists only */}
+          {isStockist && (
+            <p className="font-heading text-2xl font-semibold text-deep-blue mb-4">
+              {formatPrice(product.wholesalePrice)}
+              <span className="text-sm text-warm-gray-400 font-body font-normal ml-2">ex. GST</span>
+            </p>
+          )}
+
+          {/* Add to order — stockists only */}
+          {isStockist && (
+            <div ref={ctaRef} className="mb-6">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center border border-sand-dark rounded-md bg-white">
+                  <button
+                    onClick={() => setQty(Math.max(1, qty - 1))}
+                    className="tap-target flex items-center justify-center text-warm-gray-800 hover:bg-sand-light rounded-l-md focus:outline-none focus:ring-2 focus:ring-ocean"
+                    aria-label="Decrease quantity"
+                  >
+                    <Minus className="w-4 h-4" aria-hidden="true" />
+                  </button>
+                  <span className="px-3 text-base font-medium text-deep-blue border-x border-sand-dark min-w-[3rem] text-center">
+                    {qty}
+                  </span>
+                  <button
+                    onClick={() => setQty(Math.min(999, qty + 1))}
+                    className="tap-target flex items-center justify-center text-warm-gray-800 hover:bg-sand-light rounded-r-md focus:outline-none focus:ring-2 focus:ring-ocean"
+                    aria-label="Increase quantity"
+                  >
+                    <Plus className="w-4 h-4" aria-hidden="true" />
+                  </button>
+                </div>
+                <Button
+                  onClick={handleAddToCart}
+                  disabled={added}
+                  className={added ? 'bg-success/10 text-success' : ''}
+                >
+                  {added ? (
+                    <>
+                      <Check className="w-4 h-4" aria-hidden="true" />
+                      Added
+                    </>
+                  ) : (
+                    'Add to Order'
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Category / Reference — compact meta block */}
+          <dl className="grid grid-cols-2 gap-4 py-4 border-y border-sand">
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wider text-ocean mb-1">Category</dt>
+              <dd className="text-base capitalize text-warm-gray-800">
+                {materialLabel(product.materialCategory)}, {productTypeLabel(product.productType)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wider text-ocean mb-1">Reference</dt>
+              <dd className="font-mono font-bold text-warm-gray-800">{product.productCode}</dd>
+            </div>
+          </dl>
+
+          {/* Trade-only badge */}
+          {!isStockist && (
+            <div className="mt-5 px-4 py-3 bg-ocean/5 border border-ocean/20 rounded-lg">
+              <p className="text-sm text-warm-gray-600">
+                This piece is available to approved wholesale stockists.{' '}
+                <Link href="/stockist/apply" className="text-ocean hover:text-ocean-dark font-medium">
+                  Apply for an account
+                </Link>{' '}
+                or{' '}
+                <Link href="/stockists" className="text-ocean hover:text-ocean-dark font-medium">
+                  find a retail stockist
+                </Link>
+                .
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Right: Product Info */}
-      <div className="bg-white rounded-lg p-5 sm:p-6">
-        {/* Category and trade badge share a row, so the title below always gets
-            the full column width. */}
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 mb-2">
-          <p className="text-base text-warm-gray-600 capitalize">
-            {materialLabel(product.materialCategory)} ·{' '}
-            {productTypeLabel(product.productType)}
-          </p>
-          <span className="flex-shrink-0 inline-block px-3 py-1 text-xs font-medium text-brand-green border border-brand-green/40 rounded-full">
-            Wholesale · Trade only
-          </span>
-        </div>
+      {/* ─── Tabbed section: full width below the fold ─── */}
+      <div>
+        <ProductTabs product={product} craftName={craftName} craftSlug={craftSlug} />
+      </div>
 
-        {/* Product name */}
-        <h1 className="font-heading text-2xl sm:text-3xl font-medium text-deep-blue mb-3">
-          {product.name}
-        </h1>
+      {/* ─── Meet the Maker ─── */}
+      <MakerSection maker={maker} craft={craft} />
 
-        {/* Description */}
-        <p className="text-base text-warm-gray-800 leading-relaxed mb-4">
-          {product.description}
-        </p>
-
-        {/* CTA card — stockists only */}
-        {isStockist && (
-          <div ref={ctaRef} className="bg-sand-light rounded-lg p-6 mb-6">
-            <p className="text-lg font-heading font-semibold text-deep-blue mb-3">
-              {formatPrice(product.wholesalePrice)}
-              <span className="text-xs text-warm-gray-400 font-body font-normal ml-1">ex. GST</span>
-            </p>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center border border-sand-dark rounded-md bg-white">
-                <button
-                  onClick={() => setQty(Math.max(1, qty - 1))}
-                  className="tap-target flex items-center justify-center text-warm-gray-800 hover:bg-sand-light rounded-l-md focus:outline-none focus:ring-2 focus:ring-ocean"
-                  aria-label="Decrease quantity"
-                >
-                  <Minus className="w-4 h-4" aria-hidden="true" />
-                </button>
-                <span className="px-3 text-base font-medium text-deep-blue border-x border-sand-dark min-w-[3rem] text-center">
-                  {qty}
-                </span>
-                <button
-                  onClick={() => setQty(Math.min(999, qty + 1))}
-                  className="tap-target flex items-center justify-center text-warm-gray-800 hover:bg-sand-light rounded-r-md focus:outline-none focus:ring-2 focus:ring-ocean"
-                  aria-label="Increase quantity"
-                >
-                  <Plus className="w-4 h-4" aria-hidden="true" />
-                </button>
-              </div>
-              <Button
-                onClick={handleAddToCart}
-                disabled={added}
-                fullWidth
-                className={added ? 'bg-success/10 text-success' : ''}
-              >
-                {added ? (
-                  <>
-                    <Check className="w-4 h-4" aria-hidden="true" />
-                    Added
-                  </>
-                ) : (
-                  'Add to Order'
-                )}
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Meet the Maker — sits ABOVE the specification tabs. A QR-scan
-            visitor is here for the maker, not the dimensions. MakerSection
-            returns null unless the maker's consent flag is set. */}
-        <MakerSection maker={maker} craft={craft} />
-
-        {/* Reference info. "Where to buy" is one of the tabs, which is the only
-            next step a public visitor has — pricing and Add to Order are
-            stockist-only. It replaced a separate section that repeated most of
-            what the old "How to buy" tab already said. */}
-        <div className="mt-8">
-          <ProductTabs product={product} craftName={craftName} craftSlug={craftSlug} />
-        </div>
-
-        {/* Share buttons */}
-        <div className="mt-6 pt-4 border-t border-sand">
-          <ShareButtons title={product.name} />
-        </div>
+      {/* ─── Share — at the bottom after content ─── */}
+      <div className="flex items-center justify-center py-4 border-t border-sand">
+        <ShareButtons title={product.name} />
       </div>
 
       {/* Sticky bottom bar — mobile only, stockists only */}
