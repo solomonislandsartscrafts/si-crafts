@@ -120,9 +120,19 @@ Defined in `globals.css`. Use these rather than inventing new dividers:
 | `.flag-hairline` | 3px | Caps the top edge of dark bands |
 | `.flag-mark` | 4px × 64px | Stub under interior page titles |
 
-`<FlagMark>` (`src/components/layout/logo.tsx`) is the SVG version used in the
-logo lockup. `<Logo>` is the full brand lockup — mark plus wordmark, showing
-"SIAC" below `lg` and the full name from `lg` up.
+`<Logo>` (`src/components/layout/logo.tsx`) is the brand lockup: the SIAC logo
+image (`/images/sica logo.png`), which already contains the frangipani mark and
+the "Solomon Islands Arts & Crafts" wordmark. Never set text beside it.
+
+- Sized by height with `w-auto` (`h-10 sm:h-11`) so the artwork cannot distort.
+- Renders `alt=""` on purpose: it always sits inside a link that carries its own
+  `aria-label`, and that label wins over `alt` for the accessible name.
+- There is no `light` variant. The artwork is dark ink on transparency, so it
+  disappears on dark surfaces. The footer and admin sidebar render their own
+  white text instead of using `<Logo>`.
+
+There is no `<FlagMark>` component; the flag device is CSS-only via the classes
+above.
 
 ## Spacing (LOCKED)
 
