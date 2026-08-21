@@ -167,6 +167,7 @@ export default function AdminUsersPage() {
   // arrive are already the ones to show. Filtering again here would only hide
   // results from the current page.
   const visible = users;
+  const hasActiveFilters = !!(debouncedSearch || roleFilter);
 
   return (
     <AdminLayout requiredRole="super_admin">
@@ -225,19 +226,19 @@ export default function AdminUsersPage() {
       ) : visible.length === 0 ? (
         <EmptyState
           icon={UserIcon}
-          title={users.length === 0 ? 'No accounts yet.' : 'No accounts match that search.'}
+          title={hasActiveFilters ? 'No accounts match that search.' : 'No accounts yet.'}
           action={
-            users.length === 0 ? (
-              <Button size="sm" onClick={() => setShowAdd(true)}>
-                <Plus className="w-4 h-4" /> Add Account
-              </Button>
-            ) : (
+            hasActiveFilters ? (
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={() => { setSearch(''); setRoleFilter(''); }}
               >
                 Clear search
+              </Button>
+            ) : (
+              <Button size="sm" onClick={() => setShowAdd(true)}>
+                <Plus className="w-4 h-4" /> Add Account
               </Button>
             )
           }

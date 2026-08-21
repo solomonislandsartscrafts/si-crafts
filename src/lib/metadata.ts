@@ -7,7 +7,8 @@ interface OGMetaParams {
   imageUrl?: string;
 }
 
-export const SITE_URL = 'https://solomonislandsartsandcrafts.com.au';
+export const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://solomonislandsartsandcrafts.com.au';
 
 /**
  * Generate consistent Open Graph metadata for any page.

@@ -109,11 +109,33 @@ fi
 echo "Loading snapshot: $SNAPSHOT"
 
 # Keep a copy of the current sandbox so a failed load is recoverable.
+BACKUP=""
+HAD_DB=false
 if [ -f "$SQLITE_FILE" ]; then
+  HAD_DB=true
   BACKUP="${SQLITE_FILE}.bak-$(date +%Y%m%d-%H%M%S)"
   cp "$SQLITE_FILE" "$BACKUP"
   echo "Previous sandbox saved to $BACKUP"
 fi
+
+# If anything fails between here and successful sanitization, roll back:
+#  - restore the backup if one existed, or
+#  - remove the newly created database if there was no prior database.
+SEED_OK=false
+cleanup_on_failure() {
+  if [ "$SEED_OK" = true ]; then
+    return
+  fi
+  echo "error: seed failed — rolling back." >&2
+  if [ -n "$BACKUP" ] && [ -f "$BACKUP" ]; then
+    cp "$BACKUP" "$SQLITE_FILE"
+    echo "Restored previous sandbox from $BACKUP" >&2
+  elif [ "$HAD_DB" = false ] && [ -f "$SQLITE_FILE" ]; then
+    rm -f "$SQLITE_FILE"
+    echo "Removed partially-created database." >&2
+  fi
+}
+trap cleanup_on_failure EXIT
 
 "$PYTHON" manage.py migrate --noinput
 
@@ -192,6 +214,10 @@ AdminProfile.objects.update_or_create(
 print(f"  sanitised {User.objects.exclude(pk=sandbox_admin.pk).count()} imported account(s)")
 print(f"  sandbox admin: {admin_email}")
 PY
+
+# Sanitization completed successfully — disable the rollback trap.
+SEED_OK=true
+trap - EXIT
 
 # Rebuild the search index, which was deliberately left out of the snapshot.
 "$PYTHON" manage.py update_index || echo "note: update_index skipped"

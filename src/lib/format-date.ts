@@ -49,10 +49,10 @@ interface CalendarDay {
 }
 
 function displayDayOf(instant: Date): CalendarDay {
-  const [year, month, day] = displayDayFormatter
-    .format(instant)
-    .split('-')
-    .map(Number);
+  const parts = displayDayFormatter.formatToParts(instant);
+  const year = Number(parts.find((p) => p.type === 'year')!.value);
+  const month = Number(parts.find((p) => p.type === 'month')!.value);
+  const day = Number(parts.find((p) => p.type === 'day')!.value);
   return { year, month, day };
 }
 
@@ -61,6 +61,16 @@ function toCalendarDay(dateStr: string): CalendarDay | null {
 
   if (DATE_ONLY.test(trimmed)) {
     const [year, month, day] = trimmed.split('-').map(Number);
+    // Validate the date is real (e.g. reject Feb 30). Construct a UTC date and
+    // confirm it matches the parsed components — Date will normalise overflows.
+    const check = new Date(Date.UTC(year, month - 1, day));
+    if (
+      check.getUTCFullYear() !== year ||
+      check.getUTCMonth() !== month - 1 ||
+      check.getUTCDate() !== day
+    ) {
+      return null;
+    }
     return { year, month, day };
   }
 

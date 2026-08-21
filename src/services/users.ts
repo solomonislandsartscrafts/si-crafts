@@ -168,6 +168,14 @@ export async function getAllUsers(
 
     items.push(...(data.results ?? []));
     if (!data.next) break;
+
+    // If we've exhausted MAX_PAGES but more pages remain, the result set is
+    // incomplete — surface the error rather than silently returning partial data.
+    if (page === MAX_PAGES && data.next) {
+      throw new Error(
+        `Pagination limit reached (${MAX_PAGES} pages). The account list is too large to load in full.`
+      );
+    }
   }
 
   return items.map(mapUser);

@@ -84,18 +84,30 @@ def _stockist_email_taken(email, exclude_user_id=None):
     return qs.exists()
 
 
-def _active_super_admins(exclude_user_id=None):
-    """Count super admins who can actually sign in.
+def _active_super_admins(exclude_user_id=None, lock=False):
+    """Return the set of super admins who can actually sign in.
 
     A deactivated login with an active admin profile is not a usable super
     admin, so the "keep at least one" guards must not count it.
+
+    When *lock=True* the matching rows are locked with SELECT FOR UPDATE in a
+    stable order (by pk) so that concurrent demote/deactivate/delete requests
+    serialise against each other. The full set is materialized (including the
+    target) so callers can inspect membership directly.
+
+    The caller MUST already be inside a transaction.atomic() block when using
+    lock=True.
+
+    Returns a list of user_ids of active super admins.
     """
     qs = AdminProfile.objects.filter(
         role="super_admin", is_active=True, user__is_active=True
-    )
-    if exclude_user_id is not None:
-        qs = qs.exclude(user_id=exclude_user_id)
-    return qs.count()
+    ).order_by("user_id")
+    if lock:
+        qs = qs.select_for_update()
+    # Materialize the full locked set — do NOT exclude the target so the lock
+    # covers it and callers can check sole-membership.
+    return list(qs.values_list("user_id", flat=True))
 
 
 def _as_bool(value, default=True):
@@ -473,15 +485,6 @@ class UserAdminViewSet(viewsets.ViewSet):
                     {"error": "This account is a Django superuser and must stay a super admin."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            if (
-                resolve_role(user) == "super_admin"
-                and new_role != "super_admin"
-                and _active_super_admins(exclude_user_id=user.pk) == 0
-            ):
-                return Response(
-                    {"error": "There must be at least one active super admin."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
 
         password = _clean(data.get("password"))
         try:
@@ -495,17 +498,29 @@ class UserAdminViewSet(viewsets.ViewSet):
                     {"error": "You can't deactivate your own account."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            if (
-                resolve_role(user) == "super_admin"
-                and _active_super_admins(exclude_user_id=user.pk) == 0
-            ):
-                return Response(
-                    {"error": "There must be at least one active super admin."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
 
         try:
             with transaction.atomic():
+                # Lock the full active super-admin set in stable order so
+                # concurrent demote/deactivate requests serialise correctly.
+                active_sa_ids = _active_super_admins(lock=True)
+
+                if (
+                    new_role
+                    and new_role != resolve_role(user)
+                    and resolve_role(user) == "super_admin"
+                    and new_role != "super_admin"
+                    and active_sa_ids == [user.pk]
+                ):
+                    raise ValidationProblem("There must be at least one active super admin.")
+
+                if (
+                    has_is_active
+                    and not wants_active
+                    and resolve_role(user) == "super_admin"
+                    and active_sa_ids == [user.pk]
+                ):
+                    raise ValidationProblem("There must be at least one active super admin.")
                 user_fields = []
 
                 if "name" in data:
@@ -613,20 +628,23 @@ class UserAdminViewSet(viewsets.ViewSet):
                 {"error": "Django superusers can't be deleted from here."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if (
-            resolve_role(user) == "super_admin"
-            and _active_super_admins(exclude_user_id=user.pk) == 0
-        ):
-            return Response(
-                {"error": "There must be at least one active super admin."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
-        # Stockist.user is SET_NULL, so the stockist record and its orders
-        # survive as an unlinked application. Delete it from the Stockists
-        # page if it should go too.
-        had_stockist = getattr(user, "stockist", None) is not None
-        user.delete()
+        try:
+            with transaction.atomic():
+                active_sa_ids = _active_super_admins(lock=True)
+                if (
+                    resolve_role(user) == "super_admin"
+                    and active_sa_ids == [user.pk]
+                ):
+                    raise ValidationProblem("There must be at least one active super admin.")
+
+                # Stockist.user is SET_NULL, so the stockist record and its orders
+                # survive as an unlinked application. Delete it from the Stockists
+                # page if it should go too.
+                had_stockist = getattr(user, "stockist", None) is not None
+                user.delete()
+        except ValidationProblem as exc:
+            return Response({"error": exc.message}, status=status.HTTP_400_BAD_REQUEST)
 
         message = "Account deleted."
         if had_stockist:

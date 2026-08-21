@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <rect width="192" height="192" rx="24" fill="#1B3A4B"/>
+  <text x="96" y="120" font-family="sans-serif" font-size="72" font-weight="600" fill="#FFFFFF" text-anchor="middle">SIAC</text>
+  <rect x="56" y="136" width="80" height="4" rx="2" fill="#F4B728"/>
+</svg>
