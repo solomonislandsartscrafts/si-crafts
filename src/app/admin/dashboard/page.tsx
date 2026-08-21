@@ -17,6 +17,9 @@ import { AdminLayout } from '@/components/admin';
 import { AttentionPanel } from '@/components/admin/attention-panel';
 import { ActivityFeed } from '@/components/admin/activity-feed';
 import { SetupProgressCard } from '@/components/admin/setup-progress-card';
+import { pageTitleClasses } from '@/components/layout/page-header';
+import { ButtonLink } from '@/components/ui/button';
+import { Skeleton, SkeletonRegion } from '@/components/ui/skeleton';
 import { getDashboardSummary } from '@/services/dashboard';
 import type { DashboardSummary } from '@/types';
 
@@ -50,19 +53,16 @@ export default function AdminDashboardPage() {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
-          <h1 className="font-heading text-2xl font-medium text-deep-blue">Dashboard</h1>
-          <p className="text-sm text-warm-gray-600 mt-1">
+          <h1 className={pageTitleClasses}>Dashboard</h1>
+          <p className="text-base text-warm-gray-600 mt-1">
             What needs your attention, and what changed recently.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link
-            href="/admin/getting-started"
-            className="tap-target inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border-2 border-ocean text-ocean rounded-md hover:bg-ocean hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
-          >
+          <ButtonLink href="/admin/getting-started" variant="secondary" size="sm">
             <BookOpen className="w-4 h-4" aria-hidden="true" />
             Getting started
-          </Link>
+          </ButtonLink>
           <Link
             href="/"
             className="tap-target inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-ocean hover:text-ocean-dark transition-colors"
@@ -204,13 +204,12 @@ function QuickActions() {
 
 function LoadingState() {
   return (
-    <div className="space-y-6" aria-live="polite" aria-busy="true">
-      <p className="sr-only">Loading dashboard</p>
+    <SkeletonRegion label="Loading dashboard" className="space-y-6">
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="bg-card-bg rounded-lg p-4 shadow-card">
-            <div className="h-3 w-2/3 bg-sand rounded mb-3" />
-            <div className="h-6 w-10 bg-sand rounded" />
+            <Skeleton className="h-3 w-2/3 mb-3" />
+            <Skeleton className="h-6 w-10" />
           </div>
         ))}
       </div>
@@ -218,6 +217,6 @@ function LoadingState() {
         <div className="lg:col-span-2 bg-card-bg rounded-lg shadow-card h-64" />
         <div className="bg-card-bg rounded-lg shadow-card h-64" />
       </div>
-    </div>
+    </SkeletonRegion>
   );
 }

@@ -1,9 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { AdminLayout } from '@/components/admin';
 import type { MaterialCategoryOption, ProductTypeOption } from '@/services/categories';
+import { pageTitleClasses } from '@/components/layout/page-header';
+import { Button } from '@/components/ui/button';
+import { FormField, inputClasses } from '@/components/ui/form-field';
+import { SkeletonText } from '@/components/ui/skeleton';
 
 export default function AdminCategoriesPage() {
   const [materialCategories, setMaterialCategories] = useState<MaterialCategoryOption[]>([]);
@@ -86,8 +90,8 @@ export default function AdminCategoriesPage() {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-6 h-6 text-ocean animate-spin" />
+        <div className="max-w-3xl py-8">
+          <SkeletonText lines={6} />
         </div>
       </AdminLayout>
     );
@@ -96,10 +100,10 @@ export default function AdminCategoriesPage() {
   return (
     <AdminLayout>
       <div className="max-w-3xl">
-        <h1 className="font-heading text-2xl font-medium text-deep-blue mb-2">
+        <h1 className={`${pageTitleClasses} mb-2`}>
           Categories & Types
         </h1>
-        <p className="text-sm text-warm-gray-600 mb-8">
+        <p className="text-base text-warm-gray-600 mb-8">
           Manage material categories and product types. These appear in dropdown menus across the admin panel and catalogue filters.
         </p>
 
@@ -108,7 +112,7 @@ export default function AdminCategoriesPage() {
           <h2 className="font-heading text-lg font-semibold text-deep-blue mb-4">
             Material Categories
           </h2>
-          <p className="text-sm text-warm-gray-600 mb-4">
+          <p className="text-base text-warm-gray-600 mb-4">
             Each category has a code initial used in product codes (e.g. P for Pandanus → P-J-1).
           </p>
 
@@ -138,40 +142,29 @@ export default function AdminCategoriesPage() {
 
           {/* Add new category */}
           <div className="flex flex-wrap items-end gap-3 p-4 bg-sand-light rounded-lg">
-            <div className="flex-1 min-w-[140px]">
-              <label htmlFor="new-cat-label" className="block text-xs font-medium text-warm-gray-800 mb-1">
-                Category Name
-              </label>
+            <FormField label="Category Name" htmlFor="new-cat-label" className="flex-1 min-w-[140px]">
               <input
-                id="new-cat-label"
                 type="text"
                 value={newCatLabel}
                 onChange={(e) => setNewCatLabel(e.target.value)}
                 placeholder="e.g. Coconut Shell"
-                className="w-full px-3 py-2 text-sm rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+                className={inputClasses}
               />
-            </div>
-            <div className="w-20">
-              <label htmlFor="new-cat-initial" className="block text-xs font-medium text-warm-gray-800 mb-1">
-                Code Initial
-              </label>
+            </FormField>
+            <FormField label="Code Initial" htmlFor="new-cat-initial" className="w-24">
               <input
-                id="new-cat-initial"
                 type="text"
                 value={newCatInitial}
                 onChange={(e) => setNewCatInitial(e.target.value.toUpperCase().slice(0, 3))}
                 placeholder="C"
                 maxLength={3}
-                className="w-full px-3 py-2 text-sm rounded-md border border-sand-dark bg-white text-warm-gray-800 font-mono uppercase focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+                className={`${inputClasses} font-mono uppercase`}
               />
-            </div>
-            <button
-              onClick={handleAddCategory}
-              className="tap-target inline-flex items-center gap-1.5 px-4 py-2 text-sm btn-primary"
-            >
+            </FormField>
+            <Button size="sm" onClick={handleAddCategory}>
               <Plus className="w-4 h-4" />
               Add
-            </button>
+            </Button>
           </div>
           {catError && <p className="text-sm text-error mt-2">{catError}</p>}
         </section>
@@ -181,7 +174,7 @@ export default function AdminCategoriesPage() {
           <h2 className="font-heading text-lg font-semibold text-deep-blue mb-4">
             Product Types
           </h2>
-          <p className="text-sm text-warm-gray-600 mb-4">
+          <p className="text-base text-warm-gray-600 mb-4">
             Types of products that can be assigned in the product form.
           </p>
 
@@ -206,26 +199,19 @@ export default function AdminCategoriesPage() {
 
           {/* Add new type */}
           <div className="flex items-end gap-3 p-4 bg-sand-light rounded-lg">
-            <div className="flex-1">
-              <label htmlFor="new-type-label" className="block text-xs font-medium text-warm-gray-800 mb-1">
-                Type Name
-              </label>
+            <FormField label="Type Name" htmlFor="new-type-label" className="flex-1">
               <input
-                id="new-type-label"
                 type="text"
                 value={newTypeLabel}
                 onChange={(e) => setNewTypeLabel(e.target.value)}
                 placeholder="e.g. Mats"
-                className="w-full px-3 py-2 text-sm rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+                className={inputClasses}
               />
-            </div>
-            <button
-              onClick={handleAddType}
-              className="tap-target inline-flex items-center gap-1.5 px-4 py-2 text-sm btn-primary"
-            >
+            </FormField>
+            <Button size="sm" onClick={handleAddType}>
               <Plus className="w-4 h-4" />
               Add
-            </button>
+            </Button>
           </div>
           {typeError && <p className="text-sm text-error mt-2">{typeError}</p>}
         </section>

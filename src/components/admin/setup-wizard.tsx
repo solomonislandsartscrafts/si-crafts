@@ -39,13 +39,13 @@ export function SetupWizard({ progress }: SetupWizardProps) {
                       className="w-4 h-4 flex-shrink-0 text-ocean"
                       aria-hidden="true"
                     />
-                    <h3 className="font-heading text-sm font-semibold text-deep-blue">
+                    <h3 className="font-heading text-base font-semibold text-deep-blue">
                       {step.title}
                     </h3>
                   </div>
-                  <p className="text-xs text-warm-gray-600 mt-1 leading-body">{step.description}</p>
+                  <p className="text-base text-warm-gray-600 mt-1 leading-body">{step.description}</p>
                   {step.prerequisite && (
-                    <p className="text-xs text-warm-gray-400 mt-1 italic">{step.prerequisite}</p>
+                    <p className="text-base text-warm-gray-400 mt-1 italic">{step.prerequisite}</p>
                   )}
                 </div>
 

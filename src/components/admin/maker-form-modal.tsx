@@ -11,6 +11,8 @@ import { scrollToFirstError } from '@/lib/scroll-to-error';
 import { useModalA11y } from '@/lib/use-modal-a11y';
 import { useToast } from '@/components/ui/toast';
 import { Select } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { FormField, inputClasses } from '@/components/ui/form-field';
 
 interface MakerFormModalProps {
   maker: Maker | null; // null = create mode
@@ -165,78 +167,58 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
         <form ref={formRef} onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
           {/* Save error banner */}
           {saveError && (
-            <div className="bg-error/10 border border-error/20 text-error text-sm rounded-md p-3" role="alert" aria-live="assertive">
+            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert" aria-live="assertive">
               {saveError}
             </div>
           )}
 
           {/* Name */}
-          <div>
-            <label htmlFor="maker-name" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Name *
-            </label>
+          <FormField label="Name *" htmlFor="maker-name" error={errors.name}>
             <input
-              id="maker-name"
               type="text"
               value={form.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-              aria-describedby={errors.name ? 'maker-name-error' : undefined}
+              className={inputClasses}
+              data-error={errors.name ? 'true' : undefined}
             />
-            {errors.name && <p id="maker-name-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.name}</p>}
-          </div>
+          </FormField>
 
           {/* Village + Province (row) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="maker-village" className="block text-sm font-medium text-warm-gray-800 mb-1">
-                Village *
-              </label>
+            <FormField label="Village *" htmlFor="maker-village" error={errors.village}>
               <input
-                id="maker-village"
                 type="text"
                 value={form.village}
                 onChange={(e) => handleChange('village', e.target.value)}
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-                aria-describedby={errors.village ? 'maker-village-error' : undefined}
+                className={inputClasses}
+                data-error={errors.village ? 'true' : undefined}
               />
-              {errors.village && <p id="maker-village-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.village}</p>}
-            </div>
-            <div>
-              <label htmlFor="maker-province" className="block text-sm font-medium text-warm-gray-800 mb-1">
-                Province *
-              </label>
+            </FormField>
+            <FormField label="Province *" htmlFor="maker-province" error={errors.province}>
               <input
-                id="maker-province"
                 type="text"
                 value={form.province}
                 onChange={(e) => handleChange('province', e.target.value)}
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-                aria-describedby={errors.province ? 'maker-province-error' : undefined}
+                className={inputClasses}
+                data-error={errors.province ? 'true' : undefined}
               />
-              {errors.province && <p id="maker-province-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.province}</p>}
-            </div>
+            </FormField>
           </div>
 
           {/* Island */}
-          <div>
-            <label htmlFor="maker-island" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Island *
-            </label>
+          <FormField label="Island *" htmlFor="maker-island" error={errors.island}>
             <input
-              id="maker-island"
               type="text"
               value={form.island}
               onChange={(e) => handleChange('island', e.target.value)}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-              aria-describedby={errors.island ? 'maker-island-error' : undefined}
+              className={inputClasses}
+              data-error={errors.island ? 'true' : undefined}
             />
-            {errors.island && <p id="maker-island-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.island}</p>}
-          </div>
+          </FormField>
 
           {/* Craft */}
           <div>
-            <label htmlFor="maker-craft" className="block text-sm font-medium text-warm-gray-800 mb-1">
+            <label htmlFor="maker-craft" className="block text-base font-medium text-warm-gray-800 mb-1">
               Craft *
             </label>
             <Select
@@ -248,41 +230,33 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
               label="Craft"
               className="w-full"
             />
-            {errors.craftId && <p id="maker-craft-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.craftId}</p>}
+            {errors.craftId && <p id="maker-craft-error" className="text-base text-error mt-1" role="alert" aria-live="assertive">{errors.craftId}</p>}
           </div>
 
           {/* Age + Years Active (row) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="maker-age" className="block text-sm font-medium text-warm-gray-800 mb-1">
-                Age
-              </label>
+            <FormField label="Age" htmlFor="maker-age">
               <input
-                id="maker-age"
                 type="number"
                 min="0"
                 max="120"
                 value={form.age ?? ''}
                 onChange={(e) => handleChange('age', e.target.value)}
                 placeholder="e.g. 42"
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+                className={inputClasses}
               />
-            </div>
-            <div>
-              <label htmlFor="maker-years-active" className="block text-sm font-medium text-warm-gray-800 mb-1">
-                Years Crafting
-              </label>
+            </FormField>
+            <FormField label="Years Crafting" htmlFor="maker-years-active">
               <input
-                id="maker-years-active"
                 type="number"
                 min="0"
                 max="100"
                 value={form.yearsActive ?? ''}
                 onChange={(e) => handleChange('yearsActive', e.target.value)}
                 placeholder="e.g. 34"
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+                className={inputClasses}
               />
-            </div>
+            </FormField>
           </div>
 
           {/* Portrait */}
@@ -298,24 +272,20 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
               quality={0.82}
             />
             {errors.portraitAlt && (
-              <p className="text-sm text-error mt-1" aria-live="assertive">{errors.portraitAlt}</p>
+              <p className="text-base text-error mt-1" role="alert" aria-live="assertive">{errors.portraitAlt}</p>
             )}
           </div>
 
           {/* Story */}
-          <div>
-            <label htmlFor="maker-story" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Story (first-person voice)
-            </label>
+          <FormField label="Story (first-person voice)" htmlFor="maker-story">
             <textarea
-              id="maker-story"
               value={form.story}
               onChange={(e) => handleChange('story', e.target.value)}
               rows={4}
               placeholder="I learned to weave from my grandmother..."
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent resize-y"
+              className={`${inputClasses} resize-y`}
             />
-          </div>
+          </FormField>
 
           {/* Cultural Review Flag */}
           <div className="flex items-center gap-3">
@@ -328,14 +298,14 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
               }
               className="w-4 h-4 rounded border-sand-dark text-ocean focus:ring-ocean"
             />
-            <label htmlFor="maker-cultural-review" className="text-sm text-warm-gray-800">
+            <label htmlFor="maker-cultural-review" className="text-base text-warm-gray-800">
               Story reviewed by cultural partner
             </label>
           </div>
 
           {/* Consent Status */}
           <div className="bg-sand-light rounded-md p-4">
-            <label htmlFor="maker-consent" className="block text-sm font-medium text-warm-gray-800 mb-2">
+            <label htmlFor="maker-consent" className="block text-base font-medium text-warm-gray-800 mb-2">
               Consent Status
             </label>
             <Select
@@ -357,21 +327,12 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
-            <button
-              type="button"
-              onClick={handleDismiss}
-              disabled={saving}
-              className="tap-target px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light disabled:opacity-50"
-            >
+            <Button variant="secondary" onClick={handleDismiss} disabled={saving}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="tap-target px-6 py-3 btn-primary"
-            >
-              {saving ? 'Saving...' : maker ? 'Update Maker' : 'Create Maker'}
-            </button>
+            </Button>
+            <Button type="submit" loading={saving} loadingText="Saving...">
+              {maker ? 'Update Maker' : 'Create Maker'}
+            </Button>
           </div>
         </form>
       </div>

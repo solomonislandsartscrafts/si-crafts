@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Shield, Store } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { FormField, inputClasses } from '@/components/ui/form-field';
 
 export type AccountType = 'stockist' | 'admin';
 
@@ -120,7 +122,7 @@ export function LoginForm({
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
         {error && (
           <div
-            className="bg-error/10 border border-error/20 text-error text-sm rounded-md p-3"
+            className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3"
             role="alert"
             aria-live="assertive"
           >
@@ -128,10 +130,7 @@ export function LoginForm({
           </div>
         )}
 
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-warm-gray-800 mb-1">
-            Email
-          </label>
+        <FormField label="Email" htmlFor="email">
           <input
             id="email"
             type="email"
@@ -139,14 +138,11 @@ export function LoginForm({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+            className={inputClasses}
           />
-        </div>
+        </FormField>
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-warm-gray-800 mb-1">
-            Password
-          </label>
+        <FormField label="Password" htmlFor="password">
           <input
             id="password"
             type="password"
@@ -154,28 +150,29 @@ export function LoginForm({
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+            className={inputClasses}
           />
-        </div>
+        </FormField>
 
-        <button
+        <Button
           type="submit"
-          disabled={loading}
-          className="tap-target w-full flex items-center justify-center px-6 py-3 btn-primary"
+          fullWidth
+          loading={loading}
+          loadingText="Logging in..."
         >
-          {loading ? 'Logging in...' : isStockist ? 'Log in to wholesale' : 'Log in'}
-        </button>
+          {isStockist ? 'Log in to wholesale' : 'Log in'}
+        </Button>
       </form>
 
       {isStockist && (
         <>
-          <p className="text-sm text-warm-gray-600 mt-6 text-center">
+          <p className="text-base text-warm-gray-600 mt-6 text-center">
             Not a stockist yet?{' '}
             <Link href="/stockist/apply" className="text-ocean hover:underline font-medium">
               Apply for an account
             </Link>
           </p>
-          <p className="text-sm text-warm-gray-600 mt-2 text-center">
+          <p className="text-base text-warm-gray-600 mt-2 text-center">
             <Link href="/stockist/forgot-password" className="text-ocean hover:underline">
               Forgot your password?
             </Link>

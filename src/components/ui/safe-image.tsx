@@ -53,12 +53,13 @@ export function SafeImage({
   const isPlaceholder = !resolvedSrc || resolvedSrc.trim() === '' || hasError;
   const effectiveSrc = isPlaceholder ? PLACEHOLDER : resolvedSrc;
 
-  // Decorative images get empty alt + role=presentation per Cedar guidelines
-  const effectiveAlt = decorative
-    ? ''
-    : isPlaceholder
-      ? PLACEHOLDER_ALT
-      : (alt || PLACEHOLDER_ALT);
+  // An empty string is a meaningful alt value: it tells assistive tech to skip
+  // an image that adds nothing, which is correct when adjacent text already
+  // names it. So only fall back when alt is genuinely absent — testing `alt ||`
+  // would override a deliberate `alt=""` and narrate the placeholder wording on
+  // every decorative image.
+  const isDecorative = decorative || alt === '';
+  const effectiveAlt = isDecorative ? '' : (alt ?? PLACEHOLDER_ALT);
 
   // Combine radius class with provided className
   const radiusClass = RADIUS_MAP[radius] || '';
@@ -75,7 +76,7 @@ export function SafeImage({
       className={combinedClassName}
       loading={effectiveLoading}
       priority={priority}
-      {...(decorative && { role: 'presentation' })}
+      {...(isDecorative && { role: 'presentation' })}
       onError={(e) => {
         setHasError(true);
         onError?.(e);

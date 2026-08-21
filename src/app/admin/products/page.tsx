@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Plus, Edit, Trash2, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Package } from 'lucide-react';
 import type { Product } from '@/types';
 import { AdminLayout } from '@/components/admin';
 import { ProductFormModal, type ProductFormData } from '@/components/admin/product-form-modal';
@@ -9,6 +9,33 @@ import type { MaterialCategoryOption, ProductTypeOption } from '@/services/categ
 import { SafeImage } from '@/components/ui/safe-image';
 import { useToast } from '@/components/ui/toast';
 import { Select } from '@/components/ui/select';
+import { pageTitleClasses } from '@/components/layout/page-header';
+import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
+import { inputClasses } from '@/components/ui/form-field';
+import { Skeleton, SkeletonRegion } from '@/components/ui/skeleton';
+import { formatPrice } from '@/lib/price';
+
+/** Row-shaped placeholder while the products table loads. */
+function TableSkeleton() {
+  return (
+    <SkeletonRegion
+      label="Loading products"
+      className="bg-white rounded-lg shadow-card p-4 space-y-4"
+    >
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-4">
+          <Skeleton className="w-10 h-10 flex-shrink-0" />
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 flex-1" />
+          <Skeleton className="h-4 w-24 hidden md:block" />
+          <Skeleton className="h-4 w-20 hidden lg:block" />
+          <Skeleton className="h-4 w-16" />
+        </div>
+      ))}
+    </SkeletonRegion>
+  );
+}
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -130,13 +157,10 @@ export default function AdminProductsPage() {
   return (
     <AdminLayout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-heading text-2xl font-medium text-deep-blue">Products</h1>
-        <button
-          onClick={handleAdd}
-          className="tap-target inline-flex items-center gap-2 px-4 py-2 btn-primary text-sm"
-        >
+        <h1 className={pageTitleClasses}>Products</h1>
+        <Button size="sm" onClick={handleAdd}>
           <Plus className="w-4 h-4" /> Add Product
-        </button>
+        </Button>
       </div>
 
       {/* Filters */}
@@ -149,7 +173,8 @@ export default function AdminProductsPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by name or code..."
-            className="w-full pl-9 pr-4 py-2 text-sm rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+            aria-label="Search products by name or code"
+            className={`${inputClasses} pl-9`}
           />
         </div>
 
@@ -179,7 +204,32 @@ export default function AdminProductsPage() {
         </span>
       </div>
 
-      {loading ? <p className="text-warm-gray-400">Loading...</p> : (
+      {loading ? <TableSkeleton /> : filteredProducts.length === 0 ? (
+        <EmptyState
+          icon={Package}
+          title={
+            products.length > 0
+              ? 'No products match your filters.'
+              : backendDown
+                ? `Could not load products from the backend at ${process.env.NEXT_PUBLIC_API_URL || '(no NEXT_PUBLIC_API_URL set)'}.`
+                : 'No products yet.'
+          }
+          description={
+            products.length > 0
+              ? undefined
+              : backendDown
+                ? "Open the browser console: a CORS error means this origin is not in the backend's CORS_ALLOWED_ORIGINS. A connection error means the backend is down or asleep."
+                : 'Click "Add Product" to create one.'
+          }
+          action={
+            products.length > 0 ? undefined : (
+              <Button size="sm" onClick={handleAdd}>
+                <Plus className="w-4 h-4" /> Add Product
+              </Button>
+            )
+          }
+        />
+      ) : (
         <div className="bg-white rounded-lg shadow-card overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-sand-light border-b border-sand">
@@ -195,18 +245,7 @@ export default function AdminProductsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-sand">
-              {filteredProducts.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-warm-gray-400">
-                    {products.length > 0
-                      ? 'No products match your filters.'
-                      : backendDown
-                        ? 'Cannot reach the backend, so products could not be loaded. If you are running locally, start it with: cd backend && .venv/bin/python manage.py runserver 8001'
-                        : 'No products yet. Click "Add Product" to create one.'}
-                  </td>
-                </tr>
-              ) : (
-                filteredProducts.map((product) => (
+              {filteredProducts.map((product) => (
                   <tr key={product.id} className="hover:bg-sand-light/50">
                     <td className="px-4 py-2">
                       <div className="w-10 h-10 relative rounded overflow-hidden bg-sand-light flex-shrink-0">
@@ -223,7 +262,7 @@ export default function AdminProductsPage() {
                     <td className="px-4 py-3 font-medium text-warm-gray-800">{product.name}</td>
                     <td className="px-4 py-3 text-warm-gray-600 capitalize hidden md:table-cell">{product.materialCategory}</td>
                     <td className="px-4 py-3 text-warm-gray-600 capitalize hidden md:table-cell">{product.productType}</td>
-                    <td className="px-4 py-3 text-warm-gray-600 hidden lg:table-cell">A${product.wholesalePrice.toFixed(2)}</td>
+                    <td className="px-4 py-3 text-warm-gray-600 hidden lg:table-cell">{formatPrice(product.wholesalePrice)}</td>
                     <td className="px-4 py-3 text-warm-gray-400 text-xs hidden lg:table-cell">
                       {product.createdAt
                         ? new Date(product.createdAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -246,8 +285,7 @@ export default function AdminProductsPage() {
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>

@@ -56,3 +56,6 @@ backend/prod-snapshot.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Database snapshots (may contain real user data — never commit)
+backend/snapshots/

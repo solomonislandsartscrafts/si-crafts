@@ -37,7 +37,7 @@ export function PieceLookup() {
         />
         <button
           type="submit"
-          className="tap-target px-4 py-2 bg-terracotta text-white text-xs font-bold uppercase tracking-wider hover:bg-terracotta-dark transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
+          className="tap-target px-4 py-2 bg-brand-green text-white text-xs font-bold uppercase tracking-wider hover:bg-brand-green-dark transition-colors focus:outline-none focus:ring-2 focus:ring-brand-green-light"
         >
           GO
         </button>

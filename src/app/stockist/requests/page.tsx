@@ -3,10 +3,15 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { validateStockistSession } from '@/lib/auth-client';
 import { submitStockistRequest } from '@/services/enquiries';
 import type { ReplacementTagRequest, CustomBulkRequest } from '@/types';
+import { PageHeader } from '@/components/layout/page-header';
+import { Button, ButtonLink } from '@/components/ui/button';
+import { FormField, inputClasses } from '@/components/ui/form-field';
+import { SkeletonText } from '@/components/ui/skeleton';
+import { SuccessPanel } from '@/components/ui/success-panel';
 
 type RequestKind = 'replacement-tag' | 'custom-bulk';
 
@@ -71,131 +76,160 @@ export default function StockistRequestsPage() {
       request = { kind: 'custom-bulk', product: customProduct.trim(), customisation: customisation.trim(), quantity: Number(customQty), notes: customNotes.trim() };
     }
 
-    await submitStockistRequest({ stockistId, request });
-    setSubmitting(false);
-    setSubmitted(true);
+    // Without the finally, a failed submit left the button disabled forever
+    // with nothing on screen to explain why.
+    try {
+      await submitStockistRequest({ stockistId, request });
+      setSubmitted(true);
+    } catch (err) {
+      setErrors({
+        form:
+          err instanceof Error
+            ? err.message
+            : "We couldn't send your request. Please try again.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (!authenticated || loading) {
-    return <div className="max-w-2xl mx-auto px-4 page-y"><p className="text-warm-gray-400">Loading...</p></div>;
-  }
-
-  if (submitted) {
     return (
-      <div className="max-w-md mx-auto px-4 sm:px-6 page-y text-center">
-        <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="w-8 h-8 text-success" />
-        </div>
-        <h1 className="font-heading text-2xl font-medium text-deep-blue mb-3">Request submitted</h1>
-        <p className="text-warm-gray-600 mb-6">
-          {kind === 'replacement-tag'
-            ? 'We\'ll post your replacement tags shortly.'
-            : 'We\'ll be in touch to discuss your custom/bulk order.'}
-        </p>
-        <Link href="/stockist/catalogue" className="text-ocean hover:text-ocean-dark font-medium">
-          Back to catalogue
-        </Link>
+      <div className="max-w-2xl mx-auto px-4 page-y">
+        <SkeletonText lines={4} />
       </div>
     );
   }
 
+  if (submitted) {
+    return (
+      <SuccessPanel
+        title="Request submitted"
+        description={
+          kind === 'replacement-tag'
+            ? 'We\'ll post your replacement tags shortly.'
+            : 'We\'ll be in touch to discuss your custom/bulk order.'
+        }
+        actions={
+          <ButtonLink href="/stockist/catalogue" variant="secondary">
+            Back to catalogue
+          </ButtonLink>
+        }
+      />
+    );
+  }
+
   return (
-    <div className="max-w-lg mx-auto px-4 sm:px-6 page-y">
-      <Link href="/stockist/catalogue" className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark mb-8 transition-colors">
-        <ArrowLeft className="w-4 h-4" /> Back to catalogue
-      </Link>
+    <>
+      <PageHeader
+        title="Requests"
+        intro="Need replacement tags or want to discuss a custom/bulk order? Submit a request below."
+        eyebrow={
+          <Link href="/stockist/catalogue" className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Back to catalogue
+          </Link>
+        }
+        width="narrow"
+      />
 
-      <h1 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-2">
-        Requests
-      </h1>
-      <p className="text-sm text-warm-gray-600 mb-8">
-        Need replacement tags or want to discuss a custom/bulk order? Submit a request below.
-      </p>
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <div className="max-w-lg">
+          {/* Type selector.
+              Native radios in a fieldset rather than role="radio" buttons: the
+              buttons gave the group one tab stop per option and no arrow-key
+              movement, so it announced as a radiogroup without behaving like
+              one. Real inputs get focus, arrow keys and checked state from the
+              browser, so there is no keyboard handling to maintain. The inputs
+              are visually hidden and the label carries the segmented styling. */}
+          <fieldset className="mb-8">
+            <legend className="sr-only">Request type</legend>
+            <div className="flex border border-sand-dark rounded-md overflow-hidden">
+              {([
+                ['replacement-tag', 'Replacement Tags'],
+                ['custom-bulk', 'Custom / Bulk Order'],
+              ] as const).map(([value, label]) => (
+                <label
+                  key={value}
+                  className={`tap-target flex-1 flex items-center justify-center px-4 py-3 text-sm font-medium text-center cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-ocean focus-within:ring-inset ${
+                    kind === value
+                      ? 'bg-ocean text-white'
+                      : 'bg-white text-warm-gray-600 hover:bg-sand-light'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="request-kind"
+                    value={value}
+                    checked={kind === value}
+                    onChange={() => { setKind(value); setErrors({}); }}
+                    className="sr-only"
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
 
-      {/* Type selector */}
-      <div className="flex border border-sand-dark rounded-md overflow-hidden mb-8" role="radiogroup" aria-label="Request type">
-        <button
-          role="radio"
-          aria-checked={kind === 'replacement-tag'}
-          onClick={() => { setKind('replacement-tag'); setErrors({}); }}
-          className={`tap-target flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-            kind === 'replacement-tag' ? 'bg-ocean text-white' : 'bg-white text-warm-gray-600 hover:bg-sand-light'
-          }`}
-        >
-          Replacement Tags
-        </button>
-        <button
-          role="radio"
-          aria-checked={kind === 'custom-bulk'}
-          onClick={() => { setKind('custom-bulk'); setErrors({}); }}
-          className={`tap-target flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-            kind === 'custom-bulk' ? 'bg-ocean text-white' : 'bg-white text-warm-gray-600 hover:bg-sand-light'
-          }`}
-        >
-          Custom / Bulk Order
-        </button>
+          <form onSubmit={handleSubmit} noValidate className="space-y-5">
+            {kind === 'replacement-tag' ? (
+              <>
+                <FormField label="Product code" htmlFor="tagCode" error={errors.tagCode}>
+                  <input id="tagCode" type="text" placeholder="e.g. P-J-1" value={tagCode}
+                    onChange={(e) => setTagCode(e.target.value)}
+                    className={`${inputClasses} font-mono uppercase placeholder:normal-case`}
+                    data-error={!!errors.tagCode || undefined} />
+                </FormField>
+                <FormField label="Quantity" htmlFor="tagQty" error={errors.tagQty}>
+                  <input id="tagQty" type="number" min="1" value={tagQty}
+                    onChange={(e) => setTagQty(e.target.value)}
+                    className={inputClasses}
+                    data-error={!!errors.tagQty || undefined} />
+                </FormField>
+              </>
+            ) : (
+              <>
+                <FormField label="Product" htmlFor="customProduct" error={errors.customProduct}>
+                  <input id="customProduct" type="text" placeholder="e.g. Pandanus Shoulder Bag" value={customProduct}
+                    onChange={(e) => setCustomProduct(e.target.value)}
+                    className={inputClasses}
+                    data-error={!!errors.customProduct || undefined} />
+                </FormField>
+                <FormField label="Customisation details" htmlFor="customisation" error={errors.customisation}>
+                  <input id="customisation" type="text" placeholder="e.g. Gallery name woven into border" value={customisation}
+                    onChange={(e) => setCustomisation(e.target.value)}
+                    className={inputClasses}
+                    data-error={!!errors.customisation || undefined} />
+                </FormField>
+                <FormField label="Quantity" htmlFor="customQty" error={errors.customQty}>
+                  <input id="customQty" type="number" min="1" value={customQty}
+                    onChange={(e) => setCustomQty(e.target.value)}
+                    className={inputClasses}
+                    data-error={!!errors.customQty || undefined} />
+                </FormField>
+                <FormField label="Notes (optional)" htmlFor="customNotes">
+                  <textarea id="customNotes" rows={3} value={customNotes}
+                    onChange={(e) => setCustomNotes(e.target.value)}
+                    placeholder="e.g. Needed by September for exhibition"
+                    className={`${inputClasses} resize-y`} />
+                </FormField>
+              </>
+            )}
+
+            {errors.form && (
+              <div
+                className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3"
+                role="alert"
+                aria-live="assertive"
+              >
+                {errors.form}
+              </div>
+            )}
+            <Button type="submit" loading={submitting} loadingText="Submitting...">
+              Submit request
+            </Button>
+          </form>
+        </div>
       </div>
-
-      <form onSubmit={handleSubmit} noValidate className="space-y-5">
-        {kind === 'replacement-tag' ? (
-          <>
-            <Field label="Product code" id="tagCode" error={errors.tagCode}>
-              <input id="tagCode" type="text" placeholder="e.g. P-J-1" value={tagCode}
-                onChange={(e) => setTagCode(e.target.value)}
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 font-mono uppercase placeholder:text-warm-gray-400 placeholder:normal-case focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-                aria-describedby={errors.tagCode ? 'tagCode-error' : undefined} aria-invalid={!!errors.tagCode} />
-            </Field>
-            <Field label="Quantity" id="tagQty" error={errors.tagQty}>
-              <input id="tagQty" type="number" min="1" value={tagQty}
-                onChange={(e) => setTagQty(e.target.value)}
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-                aria-describedby={errors.tagQty ? 'tagQty-error' : undefined} aria-invalid={!!errors.tagQty} />
-            </Field>
-          </>
-        ) : (
-          <>
-            <Field label="Product" id="customProduct" error={errors.customProduct}>
-              <input id="customProduct" type="text" placeholder="e.g. Pandanus Shoulder Bag" value={customProduct}
-                onChange={(e) => setCustomProduct(e.target.value)}
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 placeholder:text-warm-gray-400 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-                aria-describedby={errors.customProduct ? 'customProduct-error' : undefined} aria-invalid={!!errors.customProduct} />
-            </Field>
-            <Field label="Customisation details" id="customisation" error={errors.customisation}>
-              <input id="customisation" type="text" placeholder="e.g. Gallery name woven into border" value={customisation}
-                onChange={(e) => setCustomisation(e.target.value)}
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 placeholder:text-warm-gray-400 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-                aria-describedby={errors.customisation ? 'customisation-error' : undefined} aria-invalid={!!errors.customisation} />
-            </Field>
-            <Field label="Quantity" id="customQty" error={errors.customQty}>
-              <input id="customQty" type="number" min="1" value={customQty}
-                onChange={(e) => setCustomQty(e.target.value)}
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-                aria-describedby={errors.customQty ? 'customQty-error' : undefined} aria-invalid={!!errors.customQty} />
-            </Field>
-            <Field label="Notes (optional)" id="customNotes" error={undefined}>
-              <textarea id="customNotes" rows={3} value={customNotes}
-                onChange={(e) => setCustomNotes(e.target.value)}
-                placeholder="e.g. Needed by September for exhibition"
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 placeholder:text-warm-gray-400 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent resize-y" />
-            </Field>
-          </>
-        )}
-
-        <button type="submit" disabled={submitting}
-          className="tap-target inline-flex items-center gap-2 px-6 py-3 btn-primary">
-          {submitting ? 'Submitting...' : 'Submit request'}
-        </button>
-      </form>
-    </div>
-  );
-}
-
-function Field({ label, id, error, children }: { label: string; id: string; error?: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-medium text-warm-gray-800 mb-1">{label}</label>
-      {children}
-      {error && <p id={`${id}-error`} className="text-sm text-error mt-1" aria-live="assertive">{error}</p>}
-    </div>
+    </>
   );
 }

@@ -4,6 +4,16 @@ export type { Craft } from './craft';
 export type { Product, MaterialCategory, ProductType } from './product';
 export type { Stockist, StockistStatus } from './stockist';
 export type { AdminUser, AdminRole } from './admin';
+export type {
+  AccountUser,
+  AccountRole,
+  AccountAdminProfile,
+  AccountStockistProfile,
+  StockistDetailsInput,
+  CreateAccountInput,
+  UpdateAccountInput,
+} from './user';
+export { ROLE_LABELS } from './user';
 export type { CartItem, OrderRequest, OrderStatus } from './order';
 export type { ContactSubmission } from './contact';
 export type {

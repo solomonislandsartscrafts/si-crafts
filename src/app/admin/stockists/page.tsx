@@ -1,22 +1,51 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, ChevronDown, ChevronUp, Mail, Phone, Building2, FileText, Pause, Play, Trash2, Plus, X } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { CheckCircle, XCircle, ChevronDown, ChevronUp, Mail, Phone, Building2, FileText, Pause, Play, Trash2, Plus, X, Store } from 'lucide-react';
 import type { Stockist } from '@/types';
 import { AdminLayout } from '@/components/admin';
+import { pageTitleClasses } from '@/components/layout/page-header';
+import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
+import { FormField, inputClasses } from '@/components/ui/form-field';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { Skeleton, SkeletonRegion } from '@/components/ui/skeleton';
+import { useToast } from '@/components/ui/toast';
 
-const STATUS_STYLES: Record<string, string> = {
-  approved: 'bg-success/10 text-success',
-  pending: 'bg-warning/10 text-warning-text',
-  suspended: 'bg-warm-gray-200 text-warm-gray-600',
-  rejected: 'bg-error/10 text-error',
+const STATUS_BADGE: Record<string, 'success' | 'warning' | 'error' | 'neutral'> = {
+  approved: 'success',
+  pending: 'warning',
+  suspended: 'neutral',
+  rejected: 'error',
 };
+
+/** Card-shaped placeholder while the stockist list loads. */
+function StockistListSkeleton() {
+  return (
+    <SkeletonRegion label="Loading stockists" className="space-y-3">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div
+          key={i}
+          className="bg-white rounded-lg shadow-card border border-sand flex items-center justify-between px-5 py-4 gap-4"
+        >
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-1/3" />
+            <Skeleton className="h-3 w-1/2" />
+          </div>
+          <Skeleton className="h-5 w-20" />
+        </div>
+      ))}
+    </SkeletonRegion>
+  );
+}
 
 export default function AdminStockistsPage() {
   const [stockists, setStockists] = useState<Stockist[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+  const { success: toastSuccess, error: toastError } = useToast();
 
   useEffect(() => { loadStockists(); }, []);
 
@@ -45,15 +74,15 @@ export default function AdminStockistsPage() {
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ id, action: 'approve' }),
       });
-      if (!res.ok) { alert('Failed to approve stockist.'); return; }
+      if (!res.ok) { toastError('Failed to approve stockist.'); return; }
       const data = await res.json();
       if (data?.message) {
-        alert(data.message);
+        toastSuccess(data.message);
       }
       setExpandedId(null);
       loadStockists();
     } catch {
-      alert('Failed to approve stockist.');
+      toastError('Failed to approve stockist.');
     }
   }
 
@@ -66,11 +95,11 @@ export default function AdminStockistsPage() {
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ id, action: 'reject' }),
       });
-      if (!res.ok) { alert('Failed to reject stockist.'); return; }
+      if (!res.ok) { toastError('Failed to reject stockist.'); return; }
       setExpandedId(null);
       loadStockists();
     } catch {
-      alert('Failed to reject stockist.');
+      toastError('Failed to reject stockist.');
     }
   }
 
@@ -82,42 +111,45 @@ export default function AdminStockistsPage() {
     if (!confirm(`Suspend "${businessName}"? They will lose access until re-enabled.`)) return;
     try {
       const token = localStorage.getItem('admin_session');
-      await fetch('/api/stockists', {
+      const res = await fetch('/api/stockists', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ id, action: 'suspend' }),
       });
+      if (!res.ok) { toastError('Failed to suspend stockist.'); return; }
       setExpandedId(null);
       loadStockists();
-    } catch { alert('Failed to suspend stockist.'); }
+    } catch { toastError('Failed to suspend stockist.'); }
   }
 
   async function handleEnable(id: string, businessName: string) {
     if (!confirm(`Re-enable "${businessName}"? They will regain login access.`)) return;
     try {
       const token = localStorage.getItem('admin_session');
-      await fetch('/api/stockists', {
+      const res = await fetch('/api/stockists', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ id, action: 'enable' }),
       });
+      if (!res.ok) { toastError('Failed to enable stockist.'); return; }
       setExpandedId(null);
       loadStockists();
-    } catch { alert('Failed to enable stockist.'); }
+    } catch { toastError('Failed to enable stockist.'); }
   }
 
   async function handleDelete(id: string, businessName: string) {
     if (!confirm(`Permanently delete "${businessName}"? This cannot be undone. Their user account will also be removed.`)) return;
     try {
       const token = localStorage.getItem('admin_session');
-      await fetch('/api/stockists', {
+      const res = await fetch('/api/stockists', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ id }),
       });
+      if (!res.ok) { toastError('Failed to delete stockist.'); return; }
       setExpandedId(null);
       loadStockists();
-    } catch { alert('Failed to delete stockist.'); }
+    } catch { toastError('Failed to delete stockist.'); }
   }
 
   // Sort: pending first, then approved, then suspended, then rejected
@@ -132,25 +164,28 @@ export default function AdminStockistsPage() {
     <AdminLayout>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="font-heading text-2xl font-medium text-deep-blue">Stockists</h1>
+          <h1 className={pageTitleClasses}>Stockists</h1>
           {pendingCount > 0 && (
-            <p className="text-sm text-warning-text mt-1">{pendingCount} application{pendingCount > 1 ? 's' : ''} awaiting review</p>
+            <p className="text-base text-warning-text mt-1">{pendingCount} application{pendingCount > 1 ? 's' : ''} awaiting review</p>
           )}
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="tap-target inline-flex items-center gap-2 px-4 py-2 btn-primary text-sm"
-        >
+        <Button ref={addButtonRef} size="sm" onClick={() => setShowAddModal(true)}>
           <Plus className="w-4 h-4" /> Add Stockist
-        </button>
+        </Button>
       </div>
 
-      {loading ? <p className="text-warm-gray-400">Loading...</p> : (
+      {loading ? <StockistListSkeleton /> : sortedStockists.length === 0 ? (
+        <EmptyState
+          icon={Store}
+          title="No stockist applications yet."
+          action={
+            <Button size="sm" onClick={() => setShowAddModal(true)}>
+              <Plus className="w-4 h-4" /> Add Stockist
+            </Button>
+          }
+        />
+      ) : (
         <div className="space-y-3">
-          {sortedStockists.length === 0 && (
-            <p className="text-warm-gray-400 text-sm">No stockist applications yet.</p>
-          )}
-
           {sortedStockists.map((s) => {
             const isExpanded = expandedId === s.id;
             const isPending = s.status === 'pending';
@@ -175,9 +210,9 @@ export default function AdminStockistsPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className={`px-2 py-1 rounded text-xs font-medium capitalize ${STATUS_STYLES[s.status] || ''}`}>
+                    <StatusBadge status={STATUS_BADGE[s.status] ?? 'neutral'} className="capitalize">
                       {s.status}
-                    </span>
+                    </StatusBadge>
                     {isExpanded ? <ChevronUp className="w-4 h-4 text-warm-gray-400" /> : <ChevronDown className="w-4 h-4 text-warm-gray-400" />}
                   </div>
                 </button>
@@ -225,7 +260,7 @@ export default function AdminStockistsPage() {
                     {s.description && (
                       <div className="mb-4">
                         <p className="text-xs text-warm-gray-400 mb-1">Why they want to stock our products</p>
-                        <p className="text-sm text-warm-gray-800 bg-white rounded-md p-3 border border-sand">
+                        <p className="text-base text-warm-gray-800 bg-white rounded-md p-3 border border-sand">
                           {s.description}
                         </p>
                       </div>
@@ -241,72 +276,51 @@ export default function AdminStockistsPage() {
                     {/* Action buttons */}
                     {isPending && (
                       <div className="flex items-center gap-3 pt-3 border-t border-sand">
-                        <button
-                          onClick={() => handleApprove(s.id, s.businessName)}
-                          className="tap-target inline-flex items-center gap-2 px-5 py-2.5 bg-success hover:bg-success/90 text-white rounded-md font-medium text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-success"
-                        >
+                        <Button size="sm" onClick={() => handleApprove(s.id, s.businessName)}>
                           <CheckCircle className="w-4 h-4" />
                           Approve
-                        </button>
-                        <button
-                          onClick={() => handleReject(s.id, s.businessName)}
-                          className="tap-target inline-flex items-center gap-2 px-5 py-2.5 border-2 border-error text-error hover:bg-error hover:text-white rounded-md font-medium text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-error"
-                        >
+                        </Button>
+                        <Button variant="danger" size="sm" onClick={() => handleReject(s.id, s.businessName)}>
                           <XCircle className="w-4 h-4" />
                           Reject
-                        </button>
+                        </Button>
                       </div>
                     )}
 
                     {s.status === 'approved' && (
                       <div className="flex items-center gap-3 pt-3 border-t border-sand">
-                        <button
-                          onClick={() => handleSuspend(s.id, s.businessName)}
-                          className="tap-target inline-flex items-center gap-2 px-4 py-2 border-2 border-warm-gray-400 text-warm-gray-600 hover:bg-warm-gray-200 rounded-md font-medium text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
-                        >
+                        <Button variant="secondary" size="sm" onClick={() => handleSuspend(s.id, s.businessName)}>
                           <Pause className="w-4 h-4" />
                           Suspend Access
-                        </button>
-                        <button
-                          onClick={() => handleDelete(s.id, s.businessName)}
-                          className="tap-target inline-flex items-center gap-2 px-4 py-2 text-error hover:text-error/80 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-error"
-                        >
+                        </Button>
+                        <Button variant="danger" size="sm" onClick={() => handleDelete(s.id, s.businessName)}>
                           <Trash2 className="w-4 h-4" />
                           Delete
-                        </button>
+                        </Button>
                         <p className="text-xs text-success font-medium ml-auto">Active — has login access</p>
                       </div>
                     )}
 
                     {s.status === 'suspended' && (
                       <div className="flex items-center gap-3 pt-3 border-t border-sand">
-                        <button
-                          onClick={() => handleEnable(s.id, s.businessName)}
-                          className="tap-target inline-flex items-center gap-2 px-5 py-2.5 bg-ocean hover:bg-ocean-dark text-white rounded-md font-medium text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
-                        >
+                        <Button size="sm" onClick={() => handleEnable(s.id, s.businessName)}>
                           <Play className="w-4 h-4" />
                           Re-enable Access
-                        </button>
-                        <button
-                          onClick={() => handleDelete(s.id, s.businessName)}
-                          className="tap-target inline-flex items-center gap-2 px-4 py-2 text-error hover:text-error/80 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-error"
-                        >
+                        </Button>
+                        <Button variant="danger" size="sm" onClick={() => handleDelete(s.id, s.businessName)}>
                           <Trash2 className="w-4 h-4" />
                           Delete
-                        </button>
+                        </Button>
                         <p className="text-xs text-warm-gray-400 font-medium ml-auto">Suspended — no login access</p>
                       </div>
                     )}
 
                     {s.status === 'rejected' && (
                       <div className="flex items-center gap-3 pt-3 border-t border-sand">
-                        <button
-                          onClick={() => handleDelete(s.id, s.businessName)}
-                          className="tap-target inline-flex items-center gap-2 px-4 py-2 text-error hover:text-error/80 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-error"
-                        >
+                        <Button variant="danger" size="sm" onClick={() => handleDelete(s.id, s.businessName)}>
                           <Trash2 className="w-4 h-4" />
                           Delete
-                        </button>
+                        </Button>
                         <p className="text-xs text-error font-medium ml-auto">Rejected</p>
                       </div>
                     )}
@@ -320,10 +334,11 @@ export default function AdminStockistsPage() {
 
       {showAddModal && (
         <AddStockistModal
-          onClose={() => setShowAddModal(false)}
+          onClose={() => { setShowAddModal(false); addButtonRef.current?.focus(); }}
           onSuccess={(message) => {
             setShowAddModal(false);
-            if (message) alert(message);
+            addButtonRef.current?.focus();
+            if (message) toastSuccess(message);
             loadStockists();
           }}
         />
@@ -331,9 +346,6 @@ export default function AdminStockistsPage() {
     </AdminLayout>
   );
 }
-
-const FIELD_CLASS =
-  'w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent';
 
 function AddStockistModal({
   onClose,
@@ -351,6 +363,38 @@ function AddStockistModal({
   const [password, setPassword] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Focus the dialog on mount and trap focus within it
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    dialog.focus();
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        if (!saving) onClose();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const focusable = dialog!.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [saving, onClose]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -400,10 +444,12 @@ function AddStockistModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50 overflow-y-auto"
-      onClick={onClose}
+      onClick={() => { if (!saving) onClose(); }}
     >
       <div
-        className="bg-white rounded-lg shadow-md w-full max-w-md my-8"
+        ref={dialogRef}
+        tabIndex={-1}
+        className="bg-white rounded-lg shadow-md w-full max-w-md my-8 outline-none"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -414,8 +460,9 @@ function AddStockistModal({
             Add Stockist
           </h2>
           <button
-            onClick={onClose}
-            className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+            onClick={() => { if (!saving) onClose(); }}
+            disabled={saving}
+            className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-50"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -424,112 +471,88 @@ function AddStockistModal({
 
         <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
           {error && (
-            <div className="bg-error/10 border border-error/20 text-error text-sm rounded-md p-3" role="alert" aria-live="assertive">
+            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert" aria-live="assertive">
               {error}
             </div>
           )}
 
-          <p className="text-sm text-warm-gray-600">
+          <p className="text-base text-warm-gray-600">
             Creates an approved stockist with wholesale access straight away — use this
             for shops you already deal with, instead of waiting for an application.
           </p>
 
-          <div>
-            <label htmlFor="stockist-business" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Business Name *
-            </label>
+          <FormField label="Business Name *" htmlFor="stockist-business">
             <input
-              id="stockist-business"
               type="text"
               value={businessName}
               onChange={(e) => setBusinessName(e.target.value)}
-              className={FIELD_CLASS}
+              className={inputClasses}
             />
-          </div>
+          </FormField>
 
-          <div>
-            <label htmlFor="stockist-contact" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Contact Name *
-            </label>
+          <FormField label="Contact Name *" htmlFor="stockist-contact">
             <input
-              id="stockist-contact"
               type="text"
               value={contactName}
               onChange={(e) => setContactName(e.target.value)}
-              className={FIELD_CLASS}
+              className={inputClasses}
             />
-          </div>
+          </FormField>
 
           <div>
-            <label htmlFor="stockist-email" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Email *
-            </label>
-            <input
-              id="stockist-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={FIELD_CLASS}
-            />
+            <FormField label="Email *" htmlFor="stockist-email">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputClasses}
+              />
+            </FormField>
             <p className="text-xs text-warm-gray-400 mt-1">This is the address they log in with.</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="stockist-phone" className="block text-sm font-medium text-warm-gray-800 mb-1">
-                Phone
-              </label>
+            <FormField label="Phone" htmlFor="stockist-phone">
               <input
-                id="stockist-phone"
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className={FIELD_CLASS}
+                className={inputClasses}
               />
-            </div>
-            <div>
-              <label htmlFor="stockist-abn" className="block text-sm font-medium text-warm-gray-800 mb-1">
-                ABN
-              </label>
+            </FormField>
+            <FormField label="ABN" htmlFor="stockist-abn">
               <input
-                id="stockist-abn"
                 type="text"
                 inputMode="numeric"
                 maxLength={11}
                 value={abn}
                 onChange={(e) => setAbn(e.target.value)}
-                className={FIELD_CLASS}
+                className={inputClasses}
               />
-            </div>
+            </FormField>
           </div>
 
-          <div>
-            <label htmlFor="stockist-notes" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Notes
-            </label>
+          <FormField label="Notes" htmlFor="stockist-notes">
             <textarea
-              id="stockist-notes"
               rows={3}
               maxLength={500}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className={FIELD_CLASS}
+              className={`${inputClasses} resize-y`}
             />
-          </div>
+          </FormField>
 
           <div>
-            <label htmlFor="stockist-password" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Password
-            </label>
-            <input
-              id="stockist-password"
-              type="password"
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Leave blank to email a setup link"
-              className={FIELD_CLASS}
-            />
+            <FormField label="Password" htmlFor="stockist-password">
+              <input
+                type="password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Leave blank to email a setup link"
+                className={inputClasses}
+              />
+            </FormField>
             <p className="text-xs text-warm-gray-400 mt-1">
               Leave blank and we&apos;ll email them a one-time link to choose their own
               password. Set one here only if you need to give it to them directly.
@@ -537,17 +560,12 @@ function AddStockistModal({
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={saving}
-              className="tap-target px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light disabled:opacity-50"
-            >
+            <Button variant="secondary" onClick={onClose} disabled={saving}>
               Cancel
-            </button>
-            <button type="submit" disabled={saving} className="tap-target px-6 py-3 btn-primary">
-              {saving ? 'Adding...' : 'Add Stockist'}
-            </button>
+            </Button>
+            <Button type="submit" loading={saving} loadingText="Adding...">
+              Add Stockist
+            </Button>
           </div>
         </form>
       </div>

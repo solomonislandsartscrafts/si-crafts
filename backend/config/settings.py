@@ -157,11 +157,28 @@ SIMPLE_JWT = {
 }
 
 # CORS
+#
+# The public pages are server-rendered, so those fetches are server-to-server and
+# CORS never applies. The admin dashboard is a client component, so its fetches
+# come straight from the browser and DO get checked against this list. An origin
+# missing here shows up in the UI as "cannot reach the backend", because the
+# browser blocks the response before our code ever sees it.
 CORS_ALLOWED_ORIGINS = [
     origin.strip().rstrip("/")
     for origin in os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",")
     if origin.strip()
 ]
+
+# Local dev origins are always permitted so a developer can point their localhost
+# front end at this backend without a redeploy. This is safe with our JWT-in-
+# localStorage auth: a page on someone else's machine cannot read the victim's
+# token, so it can only reach endpoints that are already public. Drop these two
+# entries if you ever want to lock the API to deployed origins only.
+LOCAL_DEV_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
+for origin in LOCAL_DEV_ORIGINS:
+    if origin not in CORS_ALLOWED_ORIGINS:
+        CORS_ALLOWED_ORIGINS.append(origin)
+
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
     "accept",
@@ -204,7 +221,7 @@ if not DEBUG:
         origin.strip().rstrip("/")
         for origin in os.environ.get(
             "CSRF_TRUSTED_ORIGINS",
-            "https://si-crafts.onrender.com,https://si-crafts.isaactekulu.workers.dev"
+            "https://si-crafts-iwcd.onrender.com,https://si-crafts.isaactekulu.workers.dev",
         ).split(",")
         if origin.strip()
     ]

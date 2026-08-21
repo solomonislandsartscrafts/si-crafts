@@ -15,6 +15,7 @@ interface MultiImageUploadProps {
   altTexts?: string[];
   onAltTextsChange?: (alts: string[]) => void;
   label?: string;
+  aspectHint?: string;
   maxWidth?: number;
   quality?: number;
 }
@@ -29,6 +30,7 @@ export function MultiImageUpload({
   altTexts = [],
   onAltTextsChange,
   label = 'Product Photos',
+  aspectHint,
   maxWidth = 1200,
   quality = 0.8,
 }: MultiImageUploadProps) {
@@ -268,6 +270,7 @@ export function MultiImageUpload({
         <p className="text-xs text-warm-gray-400 mt-2">
           Upload up to {MAX_IMAGES} images. The first image will be the main product photo.
           Each one needs alt text before you can save.
+          {aspectHint && <><br />Recommended: {aspectHint}</>}
         </p>
       )}
     </div>

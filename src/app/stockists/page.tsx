@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import { MapPin, Phone, Mail, Clock, ExternalLink } from 'lucide-react';
 import { generatePageMetadata } from '@/lib/metadata';
-import { PageHeader } from '@/components/layout';
+import { PageCta, PageHeader } from '@/components/layout';
+import { ButtonLink } from '@/components/ui/button';
 import { getRetailStockists } from '@/services/retail-stockists';
 
 export const metadata = generatePageMetadata({
@@ -33,18 +33,19 @@ export default async function StockistsPage() {
                   {stockist.name}
                 </h2>
               </div>
-              <a
+              <ButtonLink
                 href={stockist.url}
+                variant="secondary"
+                size="sm"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="tap-target inline-flex items-center gap-1 px-3 py-2 text-xs font-medium text-ocean border border-ocean/30 rounded-md hover:bg-ocean/5 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
               >
-                <ExternalLink className="w-3.5 h-3.5" />
+                <ExternalLink className="w-4 h-4" aria-hidden="true" />
                 Website
-              </a>
+              </ButtonLink>
             </div>
 
-            <div className="space-y-2 text-sm text-warm-gray-600">
+            <div className="space-y-2 text-base text-warm-gray-600">
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-warm-gray-400 mt-0.5 flex-shrink-0" />
                 <span>{stockist.address}</span>
@@ -72,20 +73,12 @@ export default async function StockistsPage() {
           </div>
         ))}
       </div>
+      </div>
 
       {/* CTA for stockists who want to stock us */}
-      <div className="mt-12 bg-sand-light rounded-lg p-6 text-center">
-        <p className="text-warm-gray-600 mb-4">
-          Are you a museum or gallery shop interested in stocking SI Crafts?
-        </p>
-        <Link
-          href="/wholesale"
-          className="tap-target inline-flex items-center gap-2 px-5 py-3 btn-primary"
-        >
-          Learn about wholesale
-        </Link>
-      </div>
-      </div>
+      <PageCta heading="Are you a museum or gallery shop interested in stocking SI Crafts?">
+        <ButtonLink href="/wholesale">Learn about wholesale</ButtonLink>
+      </PageCta>
     </div>
   );
 }

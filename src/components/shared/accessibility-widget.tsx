@@ -141,7 +141,7 @@ export function AccessibilityWidget() {
       <button
         ref={triggerRef}
         onClick={() => setOpen(!open)}
-        className="fixed bottom-20 right-4 sm:bottom-4 z-50 w-12 h-12 bg-terracotta hover:bg-terracotta-dark text-white rounded-full shadow-lg flex items-center justify-center transition-colors focus:outline-none focus:ring-4 focus:ring-terracotta-light"
+        className="fixed bottom-20 right-4 sm:bottom-4 z-50 w-12 h-12 bg-brand-green hover:bg-brand-green-dark text-white rounded-full shadow-lg flex items-center justify-center transition-colors focus:outline-none focus:ring-4 focus:ring-brand-green-light"
         aria-label="Accessibility options"
         aria-expanded={open}
       >

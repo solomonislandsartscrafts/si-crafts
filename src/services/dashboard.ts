@@ -17,6 +17,7 @@ import type {
   AnyEnquiry,
 } from '@/types';
 
+import { formatPrice } from '@/lib/price';
 import { getAllMakers } from './makers';
 import { getAllProducts } from './products';
 import { getAllCrafts } from './crafts';
@@ -270,7 +271,7 @@ function buildActivity(input: {
       id: `order-${o.id}`,
       kind: 'order' as const,
       label: o.referenceNumber,
-      detail: `${o.status} \u00b7 A$${o.totalAud.toLocaleString('en-AU')}`,
+      detail: `${o.status} \u00b7 ${formatPrice(o.totalAud)}`,
       at: o.submittedAt,
       href: '/admin/orders',
     })),

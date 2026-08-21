@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { CheckCircle } from 'lucide-react';
 import { submitMakerEnquiry } from '@/services/enquiries';
 import { PageHeader } from '@/components/layout/page-header';
+import { Button, ButtonLink } from '@/components/ui/button';
+import { FormField, inputClasses } from '@/components/ui/form-field';
+import { SuccessPanel } from '@/components/ui/success-panel';
 
 export default function ForMakersPage() {
   const [form, setForm] = useState({
@@ -44,18 +46,11 @@ export default function ForMakersPage() {
 
   if (submitted) {
     return (
-      <div className="max-w-md mx-auto px-4 sm:px-6 page-y text-center">
-        <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="w-8 h-8 text-success" />
-        </div>
-        <h1 className="font-heading text-2xl font-medium text-deep-blue mb-3">
-          Thank you
-        </h1>
-        <p className="text-warm-gray-600">
-          We have received your expression of interest. If we are able to work together,
-          we will reach out using the contact details you provided.
-        </p>
-      </div>
+      <SuccessPanel
+        title="Thank you"
+        icon={CheckCircle}
+        description="We have received your expression of interest. If we are able to work together, we will reach out using the contact details you provided."
+      />
     );
   }
 
@@ -70,7 +65,7 @@ export default function ForMakersPage() {
 
       {/* How we source */}
       <section className="mb-12">
-        <h2 className="font-heading text-xl font-medium text-deep-blue mb-4">
+        <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
           How SIAC sources crafts
         </h2>
         <div className="space-y-4 text-warm-gray-600 leading-relaxed">
@@ -95,7 +90,7 @@ export default function ForMakersPage() {
 
       {/* Selection process */}
       <section className="mb-12">
-        <h2 className="font-heading text-xl font-medium text-deep-blue mb-4">
+        <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
           Why not everyone at once
         </h2>
         <div className="space-y-4 text-warm-gray-600 leading-relaxed">
@@ -115,163 +110,138 @@ export default function ForMakersPage() {
 
       {/* Fair pay + consent */}
       <section className="mb-12">
-        <h2 className="font-heading text-xl font-medium text-deep-blue mb-4">
+        <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
           What we promise makers
         </h2>
         <ul className="space-y-3 text-warm-gray-600">
           <li className="flex gap-2">
-            <span className="text-terracotta font-bold">•</span>
+            <span className="text-brand-green font-bold">•</span>
             You set your own price. We do not negotiate down.
           </li>
           <li className="flex gap-2">
-            <span className="text-terracotta font-bold">•</span>
+            <span className="text-brand-green font-bold">•</span>
             We pay you when we collect the work — upfront, not after it sells.
           </li>
           <li className="flex gap-2">
-            <span className="text-terracotta font-bold">•</span>
+            <span className="text-brand-green font-bold">•</span>
             Your name, photo, and story only appear on our website if you give written consent.
             You can withdraw consent at any time.
           </li>
           <li className="flex gap-2">
-            <span className="text-terracotta font-bold">•</span>
+            <span className="text-brand-green font-bold">•</span>
             Your designs and patterns remain yours. We document provenance; we do not own your work.
           </li>
         </ul>
-        <p className="text-warm-gray-400 italic text-sm mt-4">
-          [NEEDS REVIEW — confirm all terms with SIAC team]
-        </p>
+        {/* NEEDS REVIEW — confirm all terms with SIAC team */}
       </section>
 
       {/* Expression of interest form */}
       <section className="border-t border-sand pt-12">
-        <h2 className="font-heading text-xl font-medium text-deep-blue mb-2">
+        <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-2">
           Get in touch
         </h2>
-        <p className="text-sm text-warm-gray-600 mb-8">
+        <p className="text-base text-warm-gray-600 mb-8">
           Fill in the form below and we will contact you if we are able to work together.
           All fields except &ldquo;Message&rdquo; are required.
         </p>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-5 max-w-md">
-          <Field label="Your name" id="name" error={errors.name}>
+          <FormField label="Your name" htmlFor="name" error={errors.name}>
             <input
               id="name"
               type="text"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-              aria-describedby={errors.name ? 'name-error' : undefined}
+              className={inputClasses}
+              data-error={!!errors.name || undefined}
               aria-invalid={!!errors.name}
             />
-          </Field>
+          </FormField>
 
-          <Field label="Village" id="village" error={errors.village}>
+          <FormField label="Village" htmlFor="village" error={errors.village}>
             <input
               id="village"
               type="text"
               value={form.village}
               onChange={(e) => setForm({ ...form, village: e.target.value })}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-              aria-describedby={errors.village ? 'village-error' : undefined}
+              className={inputClasses}
+              data-error={!!errors.village || undefined}
               aria-invalid={!!errors.village}
             />
-          </Field>
+          </FormField>
 
-          <Field label="Province" id="province" error={errors.province}>
+          <FormField label="Province" htmlFor="province" error={errors.province}>
             <input
               id="province"
               type="text"
               value={form.province}
               onChange={(e) => setForm({ ...form, province: e.target.value })}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-              aria-describedby={errors.province ? 'province-error' : undefined}
+              className={inputClasses}
+              data-error={!!errors.province || undefined}
               aria-invalid={!!errors.province}
             />
-          </Field>
+          </FormField>
 
-          <Field label="What do you make? (materials, craft)" id="craft" error={errors.craft}>
+          <FormField label="What do you make? (materials, craft)" htmlFor="craft" error={errors.craft}>
             <input
               id="craft"
               type="text"
               placeholder="e.g. pandanus bags, shell jewellery, wood carvings"
               value={form.craft}
               onChange={(e) => setForm({ ...form, craft: e.target.value })}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 placeholder:text-warm-gray-400 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-              aria-describedby={errors.craft ? 'craft-error' : undefined}
+              className={inputClasses}
+              data-error={!!errors.craft || undefined}
               aria-invalid={!!errors.craft}
             />
-          </Field>
+          </FormField>
 
-          <Field label="How can we reach you? (phone or email)" id="contact" error={errors.contact}>
+          <FormField label="How can we reach you? (phone or email)" htmlFor="contact" error={errors.contact}>
             <input
               id="contact"
               type="text"
               placeholder="e.g. +677 7412345 or email"
               value={form.contact}
               onChange={(e) => setForm({ ...form, contact: e.target.value })}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 placeholder:text-warm-gray-400 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-              aria-describedby={errors.contact ? 'contact-error' : undefined}
+              className={inputClasses}
+              data-error={!!errors.contact || undefined}
               aria-invalid={!!errors.contact}
             />
-          </Field>
+          </FormField>
 
-          <Field label="WhatsApp number (optional)" id="whatsapp" error={errors.whatsapp}>
+          <FormField label="WhatsApp number (optional)" htmlFor="whatsapp" error={errors.whatsapp}>
             <input
               id="whatsapp"
               type="text"
               placeholder="e.g. +677 7412345"
               value={form.whatsapp}
               onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 placeholder:text-warm-gray-400 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+              className={inputClasses}
             />
-          </Field>
+          </FormField>
 
-          <Field label="Message (optional)" id="message" error={errors.message}>
+          <FormField label="Message (optional)" htmlFor="message" error={errors.message}>
             <textarea
               id="message"
               rows={3}
               value={form.message}
               onChange={(e) => setForm({ ...form, message: e.target.value })}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent resize-y"
+              className={`${inputClasses} resize-y`}
             />
-          </Field>
+          </FormField>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="tap-target inline-flex items-center gap-2 px-6 py-3 btn-primary"
-          >
-            {submitting ? 'Sending...' : 'Send'}
-          </button>
+          <Button type="submit" loading={submitting} loadingText="Sending...">
+            Send
+          </Button>
         </form>
       </section>
 
       {/* Back to home */}
       <div className="mt-12 border-t border-sand pt-8">
-        <Link
-          href="/"
-          className="tap-target inline-flex items-center gap-2 px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
-        >
+        <ButtonLink href="/" variant="secondary">
           ← Back to home
-        </Link>
+        </ButtonLink>
       </div>
       </div>
-    </div>
-  );
-}
-
-function Field({ label, id, error, children }: { label: string; id: string; error?: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-medium text-warm-gray-800 mb-1">
-        {label}
-      </label>
-      {children}
-      {error && (
-        <p id={`${id}-error`} className="text-sm text-error mt-1" aria-live="assertive">
-          {error}
-        </p>
-      )}
     </div>
   );
 }

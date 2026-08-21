@@ -1,10 +1,13 @@
 import Link from 'next/link';
-import { Store } from 'lucide-react';
+import { Store, MapPin, ChevronDown, Package } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { getPublicMakers, getPublicMakerBySlug } from '@/services/makers';
 import { getProductsByMaker } from '@/services/products';
 import { getCraftById } from '@/services/crafts';
 import { ProductCard } from '@/components/cards/product-card';
+import { pageTitleClasses } from '@/components/layout/page-header';
+import { ButtonLink } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import { SafeImage } from '@/components/ui/safe-image';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { BackLink } from '@/components/shared/back-link';
@@ -74,11 +77,10 @@ export default async function MakerPage({ params }: MakerPageProps) {
         </div>
 
         {/* Info */}
-        <div className="flex flex-col justify-center p-6 md:p-8">
-          <h1 className="font-heading text-3xl md:text-4xl font-medium text-deep-blue mb-2">
-            {maker.name}
-          </h1>
-          <p className="text-lg text-warm-gray-600 mb-3">
+        <div className="flex flex-col justify-center">
+          <h1 className={`${pageTitleClasses} mb-2`}>{maker.name}</h1>
+          <p className="flex items-center gap-1.5 text-lg text-warm-gray-600 mb-3">
+            <MapPin className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
             {maker.village}, {maker.province}
           </p>
 
@@ -86,7 +88,7 @@ export default async function MakerPage({ params }: MakerPageProps) {
           {craft && (
             <Link
               href={`/craft/${craft.slug}`}
-              className="inline-block bg-ocean/10 text-ocean px-3 py-1 rounded-full text-sm font-medium hover:bg-ocean/20 transition-colors w-fit mb-6"
+              className="inline-block bg-ocean/10 text-ocean px-3 py-1 rounded text-sm font-medium hover:bg-ocean/20 transition-colors w-fit mb-6 focus:outline-none focus:ring-2 focus:ring-ocean"
             >
               {craft.name}
             </Link>
@@ -94,37 +96,54 @@ export default async function MakerPage({ params }: MakerPageProps) {
 
           {/* Story — first-person voice */}
           {maker.story ? (
-            <blockquote className="text-warm-gray-600 leading-relaxed italic border-l-4 border-terracotta pl-4">
+            <blockquote className="text-base text-warm-gray-800 leading-relaxed italic border-l-4 border-brand-green pl-4">
               &ldquo;{maker.story}&rdquo;
             </blockquote>
           ) : (
-            <p className="text-warm-gray-400 italic">
+            <p className="text-base text-warm-gray-600 italic">
               Story pending cultural review.
             </p>
           )}
 
           {/* Scroll prompt */}
           {products.length > 0 && (
-            <a href="#pieces" className="inline-flex items-center gap-1.5 mt-8 text-sm text-ocean hover:text-ocean-dark transition-colors">
+            <a
+              href="#pieces"
+              className="tap-target inline-flex items-center gap-1.5 mt-8 w-fit text-base font-medium text-ocean hover:text-ocean-dark transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded-sm"
+            >
               <span>View pieces by {maker.name}</span>
-              <svg className="w-4 h-4 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
+              <ChevronDown className="w-4 h-4 animate-bounce" aria-hidden="true" />
             </a>
           )}
         </div>
       </div>
 
-      {/* Products section */}
-      {products.length > 0 && (
-        <section id="pieces" className="border-t border-sand pt-12 mt-12 lg:mt-16 scroll-mt-24">
-          {/* Heading with count */}
-          <h2 className="font-heading text-2xl font-medium text-deep-blue mb-8">
-            Pieces by {maker.name}
+      {/* Products section. Renders even when empty so a maker profile never
+          just stops after the story with no explanation. */}
+      <section id="pieces" className="border-t border-sand pt-12 mt-12 lg:mt-16 scroll-mt-24">
+        {/* Heading with count */}
+        <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-8">
+          Pieces by {maker.name}
+          {products.length > 0 && (
             <span className="text-base font-normal text-warm-gray-600 ml-2">
               ({products.length})
             </span>
-          </h2>
+          )}
+        </h2>
+
+        {products.length === 0 ? (
+          <EmptyState
+            icon={Package}
+            title={`No pieces by ${maker.name} are listed right now.`}
+            description="Stock is handmade and limited. Browse the full catalogue to see what else is available."
+            action={
+              <ButtonLink href="/catalogue" variant="secondary" size="sm">
+                Browse the catalogue
+              </ButtonLink>
+            }
+          />
+        ) : (
+          <>
 
           {/* Products grouped by type */}
           {productGroups.length > 1 ? (
@@ -158,21 +177,20 @@ export default async function MakerPage({ params }: MakerPageProps) {
             </div>
           )}
 
-          {/* Wholesale enquiry CTA */}
-          <div className="mt-12 pt-8 border-t border-sand text-center">
-            <p className="text-warm-gray-600 mb-4">
-              Interested in stocking {maker.name}&apos;s pieces?
-            </p>
-            <Link
-              href="/wholesale"
-              className="tap-target inline-flex items-center gap-2 px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
-            >
-              <Store className="w-4 h-4" />
-              Wholesale Enquiry
-            </Link>
-          </div>
-        </section>
-      )}
+          </>
+        )}
+
+        {/* Wholesale enquiry CTA */}
+        <div className="mt-12 pt-8 border-t border-sand text-center">
+          <p className="text-base text-warm-gray-600 mb-4">
+            Interested in stocking {maker.name}&apos;s pieces?
+          </p>
+          <ButtonLink href="/wholesale" variant="secondary">
+            <Store className="w-4 h-4" aria-hidden="true" />
+            Wholesale Enquiry
+          </ButtonLink>
+        </div>
+      </section>
 
       {/* Bottom back link */}
       <div className="mt-12 pt-8 border-t border-sand text-center">

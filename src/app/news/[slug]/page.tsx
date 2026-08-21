@@ -6,9 +6,11 @@ import { getArticleBySlug, getPublishedArticles } from '@/services/articles';
 import { generatePageMetadata } from '@/lib/metadata';
 import { ShareButtons } from '@/components/shared/share-buttons';
 import { NewsSidebar } from '@/components/news/news-sidebar';
+import { pageTitleClasses } from '@/components/layout/page-header';
 import { SafeImage } from '@/components/ui/safe-image';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { BackLink } from '@/components/shared/back-link';
+import { formatArticleDate } from '@/lib/format-date';
 
 export async function generateStaticParams() {
   const articles = await getPublishedArticles();
@@ -68,19 +70,16 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               ))}
             </div>
 
-            {/* Title */}
-            <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-medium text-deep-blue leading-tight mb-6">
-              {article.title}
-            </h1>
+            {/* Title. Uses the shared page-title treatment rather than a
+                bespoke, larger scale — this was the biggest h1 on the site. */}
+            <h1 className={`${pageTitleClasses} mb-6`}>{article.title}</h1>
 
             <div className="flex items-center justify-between mt-6">
               <div className="flex items-center gap-4 text-sm text-warm-gray-600">
                 <span className="font-medium">{article.authorName}</span>
                 <span className="text-warm-gray-400">·</span>
                 <time dateTime={article.publishedAt || article.createdAt}>
-                  {new Date(article.publishedAt || article.createdAt).toLocaleDateString('en-AU', {
-                    day: 'numeric', month: 'long', year: 'numeric',
-                  })}
+                  {formatArticleDate(article.publishedAt || article.createdAt)}
                 </time>
                 <span className="text-warm-gray-400">·</span>
                 <span className="flex items-center gap-1 text-warm-gray-400">

@@ -1,10 +1,33 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CheckCircle, Mail, Users, Store, Newspaper } from 'lucide-react';
+import { CheckCircle, Mail, Users, Store, Newspaper, Inbox } from 'lucide-react';
 import type { AnyEnquiry, EnquiryType } from '@/types';
 import { AdminLayout } from '@/components/admin';
 import { listEnquiries, markHandled } from '@/services/enquiries';
+import { pageTitleClasses } from '@/components/layout/page-header';
+import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { Skeleton, SkeletonRegion } from '@/components/ui/skeleton';
+
+/** Card-shaped placeholder while the enquiry list loads. */
+function EnquiryListSkeleton() {
+  return (
+    <SkeletonRegion label="Loading enquiries" className="space-y-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="bg-white rounded-lg shadow-card p-4 sm:p-5 space-y-3">
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-5 w-20" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <Skeleton className="h-4 w-1/3" />
+          <Skeleton className="h-4 w-2/3" />
+        </div>
+      ))}
+    </SkeletonRegion>
+  );
+}
 
 const FILTERS: { id: EnquiryType | 'all'; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 'all', label: 'All', icon: Mail },
@@ -35,7 +58,7 @@ export default function AdminInboxPage() {
 
   return (
     <AdminLayout>
-      <h1 className="font-heading text-2xl font-medium text-deep-blue mb-6">Inbox</h1>
+      <h1 className={`${pageTitleClasses} mb-6`}>Inbox</h1>
 
       {/* Type filter */}
       <div className="flex flex-wrap gap-2 mb-6">
@@ -61,9 +84,19 @@ export default function AdminInboxPage() {
 
       {/* Enquiry list */}
       {loading ? (
-        <p className="text-warm-gray-400">Loading...</p>
+        <EnquiryListSkeleton />
       ) : enquiries.length === 0 ? (
-        <p className="text-warm-gray-600 py-8 text-center">No enquiries match this filter.</p>
+        <EmptyState
+          icon={Inbox}
+          title="No enquiries match this filter."
+          action={
+            filter === 'all' ? undefined : (
+              <Button variant="secondary" size="sm" onClick={() => setFilter('all')}>
+                Show all enquiries
+              </Button>
+            )
+          }
+        />
       ) : (
         <div className="space-y-4">
           {enquiries.map((item) => (
@@ -93,18 +126,15 @@ function EnquiryCard({ item, onMarkHandled }: { item: AnyEnquiry; onMarkHandled:
           <span className="text-xs text-warm-gray-400">{date}</span>
         </div>
         {!handled && (
-          <button
-            onClick={onMarkHandled}
-            className="tap-target inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-ocean border border-ocean/30 rounded-md hover:bg-ocean/5 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
-          >
+          <Button variant="secondary" size="sm" onClick={onMarkHandled}>
             <CheckCircle className="w-3.5 h-3.5" />
             Mark handled
-          </button>
+          </Button>
         )}
         {handled && (
-          <span className="text-xs text-success font-medium flex items-center gap-1">
+          <StatusBadge status="success" className="gap-1">
             <CheckCircle className="w-3.5 h-3.5" /> Handled
-          </span>
+          </StatusBadge>
         )}
       </div>
 
@@ -114,7 +144,7 @@ function EnquiryCard({ item, onMarkHandled }: { item: AnyEnquiry; onMarkHandled:
           <p className="font-medium text-warm-gray-800">{item.data.name}</p>
           <p className="text-xs text-warm-gray-400">{item.data.village}, {item.data.province}</p>
           <p className="text-sm text-warm-gray-600 mt-2">{item.data.craft}</p>
-          {item.data.message && <p className="text-sm text-warm-gray-600 mt-1 italic">{item.data.message}</p>}
+          {item.data.message && <p className="text-base text-warm-gray-600 mt-1 italic">{item.data.message}</p>}
           <p className="text-xs text-ocean mt-2">Contact: {item.data.contact}</p>
         </div>
       )}
@@ -145,7 +175,7 @@ function EnquiryCard({ item, onMarkHandled }: { item: AnyEnquiry; onMarkHandled:
         <div>
           <p className="font-medium text-warm-gray-800">{item.data.name}</p>
           <p className="text-xs text-warm-gray-400">{item.data.email}</p>
-          <p className="text-sm text-warm-gray-600 mt-2">{item.data.message}</p>
+          <p className="text-base text-warm-gray-600 mt-2">{item.data.message}</p>
         </div>
       )}
     </div>
@@ -153,11 +183,11 @@ function EnquiryCard({ item, onMarkHandled }: { item: AnyEnquiry; onMarkHandled:
 }
 
 function TypeBadge({ type }: { type: EnquiryType }) {
-  const styles: Record<EnquiryType, string> = {
-    'maker-enquiry': 'bg-terracotta/10 text-terracotta',
-    'stockist-request': 'bg-ocean/10 text-ocean',
-    'contact': 'bg-warm-gray-200 text-warm-gray-600',
-    'media': 'bg-warning/10 text-warning-text',
+  const status: Record<EnquiryType, 'success' | 'info' | 'neutral' | 'warning'> = {
+    'maker-enquiry': 'success',
+    'stockist-request': 'info',
+    'contact': 'neutral',
+    'media': 'warning',
   };
   const labels: Record<EnquiryType, string> = {
     'maker-enquiry': 'Maker',
@@ -165,9 +195,5 @@ function TypeBadge({ type }: { type: EnquiryType }) {
     'contact': 'Contact',
     'media': 'Media',
   };
-  return (
-    <span className={`px-2 py-0.5 rounded text-xs font-medium ${styles[type]}`}>
-      {labels[type]}
-    </span>
-  );
+  return <StatusBadge status={status[type]}>{labels[type]}</StatusBadge>;
 }

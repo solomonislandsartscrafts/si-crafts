@@ -16,6 +16,8 @@ export interface SlideItem {
   subtitle?: string;
   tag?: string;
   href: string;
+  /** CSS object-position value to control crop focus (e.g. 'top', 'center', 'bottom', '50% 30%'). Defaults to 'center'. */
+  objectPosition?: string;
 }
 
 interface HeroSlideshowProps {
@@ -23,38 +25,19 @@ interface HeroSlideshowProps {
   interval?: number;
 }
 
-/** How far each neighbouring slide sits from centre, and how it recedes. */
-const DEPTH = [
-  { offset: 0, scale: 1, opacity: 1, blur: 0, z: 30 },
-  { offset: 58, scale: 0.84, opacity: 0.55, blur: 1, z: 20 },
-  { offset: 100, scale: 0.7, opacity: 0.25, blur: 2, z: 10 },
-];
-
-/** Mobile offsets — tighter spacing so neighbours peek rather than clip mid-card. */
-const DEPTH_MOBILE = [
-  { offset: 0, scale: 1, opacity: 1, blur: 0, z: 30 },
-  { offset: 48, scale: 0.78, opacity: 0.45, blur: 1.5, z: 20 },
-  { offset: 85, scale: 0.65, opacity: 0.2, blur: 2, z: 10 },
-];
-
 function ctaLabel(kind: SlideKind) {
   return kind === 'product' ? 'View piece' : kind === 'maker' ? 'Meet them' : 'See how';
 }
 
 /**
- * Hero gallery — a coverflow carousel. The active slide sits centre and full
- * size; neighbours recede to either side, scaled down, dimmed and softly
- * blurred. Only the active slide is captioned. Clicking a neighbour brings
- * it to centre; the prev/next buttons below step through slides one at a time.
- *
- * Autoplay pauses on hover, keyboard focus, and touch so it can't yank a
- * slide away while someone is reading, tabbing through, or swiping.
+ * Hero slideshow — a traditional full-image slideshow with a gradient overlay
+ * at the bottom so text is always readable on top of the image.
+ * Auto-advances, pauses on hover/focus/touch, supports swipe and keyboard nav.
  */
 export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const count = items.length;
 
   const touchStartX = useRef<number | null>(null);
@@ -65,16 +48,7 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
     setReduceMotion(motionQuery.matches);
     const onMotionChange = (e: MediaQueryListEvent) => setReduceMotion(e.matches);
     motionQuery.addEventListener('change', onMotionChange);
-
-    const mobileQuery = window.matchMedia('(max-width: 639px)');
-    setIsMobile(mobileQuery.matches);
-    const onMobileChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mobileQuery.addEventListener('change', onMobileChange);
-
-    return () => {
-      motionQuery.removeEventListener('change', onMotionChange);
-      mobileQuery.removeEventListener('change', onMobileChange);
-    };
+    return () => motionQuery.removeEventListener('change', onMotionChange);
   }, []);
 
   const go = useCallback(
@@ -115,25 +89,18 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
 
   if (count === 0) {
     return (
-      <div className="relative w-full aspect-square flex items-center justify-center">
-        <div className="w-[60%] max-w-[380px] rounded-lg overflow-hidden bg-card-bg shadow-card ring-1 ring-black/5">
-          <div className="relative aspect-[4/5] flex items-center justify-center bg-sand-light">
-            <p className="text-warm-gray-400 text-sm px-4 text-center">Images coming soon</p>
-          </div>
-        </div>
+      <div className="relative w-full aspect-[4/5] sm:aspect-[3/2] flex items-center justify-center bg-sand-light">
+        <p className="text-warm-gray-400 text-sm px-4 text-center">Images coming soon</p>
       </div>
     );
   }
 
-  const active = items[current];
-
-  /** Shortest signed distance from the active slide, wrapping around the ends. */
-  function distanceFromCurrent(index: number) {
-    let d = index - current;
-    if (d > count / 2) d -= count;
-    if (d < -count / 2) d += count;
-    return d;
-  }
+  // Product slides are fitted whole onto the light image well, so the chrome
+  // over them has to switch to dark ink. Photographs keep the white treatment.
+  const lightSlide = items[current].kind === 'product';
+  const arrowClasses = lightSlide
+    ? 'text-deep-blue/60 hover:text-deep-blue focus:ring-ocean'
+    : 'text-white/80 hover:text-white focus:ring-white/60';
 
   return (
     <div
@@ -147,100 +114,148 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
       onBlurCapture={() => setPaused(false)}
       onKeyDown={handleKeyDown}
     >
-      {/* Stage — neighbours peek from the edges, clipped rather than overflowing.
-          Scales with the column width instead of a fixed pixel height, so it
-          fills the hero space properly at every breakpoint. */}
+      {/* Slide container */}
       <div
-        className="relative w-full aspect-square overflow-hidden"
+        className="relative w-full aspect-[4/5] sm:aspect-[3/2] overflow-hidden bg-sand-light"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
+        {/* Slides */}
         {items.map((item, index) => {
-          const d = distanceFromCurrent(index);
-          const depthTable = isMobile ? DEPTH_MOBILE : DEPTH;
-          const depth = depthTable[Math.min(Math.abs(d), depthTable.length - 1)];
-          const isActive = d === 0;
-          const hidden = Math.abs(d) >= depthTable.length;
-          const direction = Math.sign(d);
-
+          const isActive = index === current;
+          // Product shots are cut-outs on a plain background, so cropping them
+          // to fill the frame cuts the edges off the piece itself. Fit those
+          // whole inside an inset box that clears the caption. Maker and craft
+          // slides are real photographs, where filling the frame is correct and
+          // a crop is expected.
+          const fitWhole = item.kind === 'product';
           return (
-            <button
+            <div
               key={index}
-              type="button"
-              onClick={() => setCurrent(index)}
-              tabIndex={isActive ? -1 : 0}
-              aria-label={isActive ? undefined : `Show ${item.title}`}
-              aria-hidden={hidden}
-              className={`absolute top-1/2 left-1/2 w-[62%] max-w-[380px] rounded-lg overflow-hidden bg-card-bg shadow-card ring-1 ring-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean ${
-                isActive ? 'cursor-default' : 'cursor-pointer'
-              } ${reduceMotion ? '' : 'transition-all duration-700 ease-out'}`}
-              style={{
-                transform: `translate(calc(-50% + ${depth.offset * direction}%), -50%) scale(${depth.scale})`,
-                opacity: hidden ? 0 : depth.opacity,
-                filter: depth.blur ? `blur(${depth.blur}px)` : undefined,
-                zIndex: depth.z,
-                pointerEvents: hidden || isActive ? 'none' : 'auto',
-              }}
+              className={`absolute inset-0 pointer-events-none ${reduceMotion ? '' : 'transition-opacity duration-700 ease-in-out'}`}
+              style={{ opacity: isActive ? 1 : 0, zIndex: isActive ? 1 : 0 }}
+              aria-hidden={!isActive}
             >
-              <div className="relative aspect-[4/5] bg-sand-light">
-                {/* Image fills the entire card */}
+              {/* `fill` ignores padding, so the inset has to come from a
+                  positioned wrapper rather than a padding utility. */}
+              <div
+                className={
+                  fitWhole
+                    ? 'absolute inset-x-3 top-3 bottom-32 sm:bottom-36'
+                    : 'absolute inset-0'
+                }
+              >
                 <SafeImage
                   src={item.imageUrl}
                   alt={isActive ? item.imageAlt : ''}
                   fill
-                  className="object-cover"
-                  sizes="(max-width: 640px) 62vw, 380px"
+                  className={fitWhole ? 'object-contain' : 'object-cover'}
+                  style={fitWhole ? undefined : { objectPosition: item.objectPosition || 'center' }}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 600px"
                   priority={index === 0}
                 />
-
-                {/* Caption — solid dark band anchored to the bottom, only on the active card */}
-                {isActive && (
-                  <figcaption
-                    className={`absolute inset-x-0 bottom-0 px-3 py-2.5 bg-deep-blue/90 text-left ${reduceMotion ? '' : 'animate-fade-in-up'}`}
-                  >
-                    <p className="font-heading text-sm font-semibold text-white leading-tight line-clamp-1">
-                      {item.title}
-                    </p>
-                    <Link
-                      href={item.href}
-                      onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center gap-1 text-xs font-medium text-white/90 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/60 rounded-sm"
-                    >
-                      {ctaLabel(item.kind)}
-                      <ChevronRight className="w-3 h-3 shrink-0" />
-                    </Link>
-                  </figcaption>
-                )}
               </div>
-            </button>
+            </div>
           );
         })}
+
+        {/* Dark scrim, only for the slides that need one. A fitted product sits
+            on the light image well, so a dark gradient would be a band across
+            empty background — and white text over it would fail contrast.
+            Photographs fill the frame and do need the scrim. */}
+        {!lightSlide && (
+          <div
+            className="absolute inset-x-0 bottom-0 h-2/5 z-[2] pointer-events-none"
+            style={{
+              background: 'linear-gradient(to top, rgba(27, 58, 75, 0.85) 0%, rgba(27, 58, 75, 0.5) 50%, transparent 100%)',
+            }}
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Caption. Ink colour follows the backing: dark on the light well for
+            fitted products, white over the scrim for photographs. */}
+        <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-4 sm:px-6 sm:pb-6">
+          {items[current].kicker && (
+            <p
+              className={`text-xs font-medium uppercase tracking-wide mb-1 ${
+                lightSlide ? 'text-warm-gray-600' : 'text-white/70'
+              }`}
+            >
+              {items[current].kicker}
+            </p>
+          )}
+          <h3
+            className={`font-heading text-lg sm:text-xl font-semibold leading-tight line-clamp-2 ${
+              lightSlide ? 'text-deep-blue' : 'text-white'
+            }`}
+          >
+            {items[current].title}
+          </h3>
+          {items[current].subtitle && (
+            <p
+              className={`text-sm mt-1 line-clamp-1 ${
+                lightSlide ? 'text-warm-gray-600' : 'text-white/80'
+              }`}
+            >
+              {items[current].subtitle}
+            </p>
+          )}
+          <Link
+            href={items[current].href}
+            className={`inline-flex items-center gap-1 mt-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 rounded-sm ${
+              lightSlide
+                ? 'text-ocean hover:text-ocean-dark focus:ring-ocean'
+                : 'text-white hover:text-white/80 focus:ring-white/60'
+            }`}
+          >
+            {ctaLabel(items[current].kind)}
+            <ChevronRight className="w-4 h-4 shrink-0" />
+          </Link>
+        </div>
+
+        {/* Prev/Next arrows. Same contrast problem as the caption: white arrows
+            disappear against a fitted product on the light well. */}
+        {count > 1 && (
+          <>
+            <button
+              onClick={() => go(-1)}
+              className={`absolute top-1/2 left-2 sm:left-3 -translate-y-1/2 z-20 tap-target flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 transition-colors focus:outline-none focus:ring-2 rounded-sm ${arrowClasses}`}
+              aria-label="Previous slide"
+            >
+              <ChevronLeft className="w-7 h-7" />
+            </button>
+            <button
+              onClick={() => go(1)}
+              className={`absolute top-1/2 right-2 sm:right-3 -translate-y-1/2 z-20 tap-target flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 transition-colors focus:outline-none focus:ring-2 rounded-sm ${arrowClasses}`}
+              aria-label="Next slide"
+            >
+              <ChevronRight className="w-7 h-7" />
+            </button>
+          </>
+        )}
       </div>
 
-      {/* Prev/Next controls — below the stage, centred */}
+      {/* Dot indicators */}
       {count > 1 && (
-        <div className="flex justify-center gap-3 mt-4">
-          <button
-            onClick={() => go(-1)}
-            className="tap-target flex items-center justify-center w-11 h-11 rounded-full border border-sand-dark bg-card-bg text-warm-gray-600 hover:border-ocean hover:text-ocean shadow-card transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
-            aria-label="Previous slide"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => go(1)}
-            className="tap-target flex items-center justify-center w-11 h-11 rounded-full border border-sand-dark bg-card-bg text-warm-gray-600 hover:border-ocean hover:text-ocean shadow-card transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
-            aria-label="Next slide"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
+        <div className="flex justify-center gap-2 mt-3">
+          {items.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrent(index)}
+              className={`w-2 h-2 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-ocean ${
+                index === current ? 'bg-ocean' : 'bg-sand-dark hover:bg-warm-gray-400'
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
         </div>
       )}
 
       {count > 1 && (
         <p className="sr-only" aria-live="polite">
-          Showing {active.title}, {current + 1} of {count}
+          Showing {items[current].title}, {current + 1} of {count}
         </p>
       )}
     </div>

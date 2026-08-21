@@ -4,10 +4,14 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Package, ClipboardList, MessageSquare, LogOut, ShoppingCart, Save, Loader2, Upload, Lock } from 'lucide-react';
+import { Package, ClipboardList, MessageSquare, LogOut, ShoppingCart, Save, Upload, Lock } from 'lucide-react';
 import { validateStockistSession } from '@/lib/auth-client';
 import { getCart } from '@/lib/cart';
 import { compressImage } from '@/lib/compress-image';
+import { pageTitleClasses } from '@/components/layout/page-header';
+import { Button } from '@/components/ui/button';
+import { FormField, inputClasses } from '@/components/ui/form-field';
+import { SkeletonText } from '@/components/ui/skeleton';
 
 interface StockistProfile {
   id: number;
@@ -211,7 +215,11 @@ export default function StockistAccountPage() {
   }
 
   if (loading) {
-    return <div className="max-w-7xl mx-auto px-4 page-y"><p className="text-warm-gray-400">Loading...</p></div>;
+    return (
+      <div className="max-w-7xl mx-auto px-4 page-y">
+        <SkeletonText lines={4} />
+      </div>
+    );
   }
 
   if (!profile) return null;
@@ -232,19 +240,16 @@ export default function StockistAccountPage() {
             )}
           </div>
           <div>
-            <h1 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
+            <h1 className={pageTitleClasses}>
               Welcome back, {profile.contactName.split(' ')[0]}
             </h1>
             <p className="text-warm-gray-600 mt-1">{profile.businessName}</p>
           </div>
         </div>
-        <button
-          onClick={handleLogout}
-          className="tap-target inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-warm-gray-600 border border-sand-dark rounded-md hover:bg-error/5 hover:text-error hover:border-error/30 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
-        >
+        <Button variant="secondary" size="sm" onClick={handleLogout}>
           <LogOut className="w-4 h-4" />
           Log out
-        </button>
+        </Button>
       </div>
 
       {/* Quick actions grid */}
@@ -252,17 +257,17 @@ export default function StockistAccountPage() {
         <Link href="/stockist/catalogue" className="group block p-6 bg-white rounded-lg shadow-card hover:shadow-md transition-shadow">
           <Package className="w-6 h-6 text-ocean mb-3" />
           <h3 className="font-heading font-semibold text-deep-blue group-hover:text-ocean transition-colors">Browse Catalogue</h3>
-          <p className="text-sm text-warm-gray-600 mt-1">View products and pricing</p>
+          <p className="text-base text-warm-gray-600 mt-1">View products and pricing</p>
         </Link>
 
         <Link href="/stockist/orders" className="group block p-6 bg-white rounded-lg shadow-card hover:shadow-md transition-shadow relative">
           <ShoppingCart className="w-6 h-6 text-ocean mb-3" />
           <h3 className="font-heading font-semibold text-deep-blue group-hover:text-ocean transition-colors">Current Order</h3>
-          <p className="text-sm text-warm-gray-600 mt-1">
+          <p className="text-base text-warm-gray-600 mt-1">
             {cartCount > 0 ? `${cartCount} item${cartCount > 1 ? 's' : ''} in order` : 'Start an order'}
           </p>
           {cartCount > 0 && (
-            <span className="absolute top-4 right-4 min-w-[20px] h-[20px] flex items-center justify-center bg-terracotta text-white text-xs font-bold rounded-full px-1">
+            <span className="absolute top-4 right-4 min-w-[20px] h-[20px] flex items-center justify-center bg-brand-green text-white text-xs font-bold rounded-full px-1">
               {cartCount}
             </span>
           )}
@@ -271,13 +276,13 @@ export default function StockistAccountPage() {
         <Link href="/stockist/order-history" className="group block p-6 bg-white rounded-lg shadow-card hover:shadow-md transition-shadow">
           <ClipboardList className="w-6 h-6 text-ocean mb-3" />
           <h3 className="font-heading font-semibold text-deep-blue group-hover:text-ocean transition-colors">Order History</h3>
-          <p className="text-sm text-warm-gray-600 mt-1">View past orders and status</p>
+          <p className="text-base text-warm-gray-600 mt-1">View past orders and status</p>
         </Link>
 
         <Link href="/stockist/requests" className="group block p-6 bg-white rounded-lg shadow-card hover:shadow-md transition-shadow">
           <MessageSquare className="w-6 h-6 text-ocean mb-3" />
           <h3 className="font-heading font-semibold text-deep-blue group-hover:text-ocean transition-colors">Requests</h3>
-          <p className="text-sm text-warm-gray-600 mt-1">Custom orders and tags</p>
+          <p className="text-base text-warm-gray-600 mt-1">Custom orders and tags</p>
         </Link>
       </div>
 
@@ -289,83 +294,76 @@ export default function StockistAccountPage() {
             <h2 className="font-heading text-lg font-medium text-deep-blue mb-4">Profile Details</h2>
 
             {saveSuccess && (
-              <div className="mb-4 bg-success/10 border border-success/20 text-success text-sm rounded-md p-3" role="status">
+              <div className="mb-4 bg-success/10 border border-success/20 text-success text-base rounded-md p-3" role="status">
                 Profile updated successfully.
               </div>
             )}
             {saveError && (
-              <div className="mb-4 bg-error/10 border border-error/20 text-error text-sm rounded-md p-3" role="alert">
+              <div className="mb-4 bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert">
                 {saveError}
               </div>
             )}
 
             <form onSubmit={handleSaveProfile} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="contactName" className="block text-sm font-medium text-warm-gray-800 mb-1">Contact Name</label>
+                <FormField label="Contact Name" htmlFor="contactName">
                   <input
                     id="contactName"
                     type="text"
                     value={editForm.contactName ?? ''}
                     onChange={(e) => setEditForm({ ...editForm, contactName: e.target.value })}
-                    className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+                    className={inputClasses}
                   />
-                </div>
-                <div>
-                  <label htmlFor="businessName" className="block text-sm font-medium text-warm-gray-800 mb-1">Business Name</label>
+                </FormField>
+                <FormField label="Business Name" htmlFor="businessName">
                   <input
                     id="businessName"
                     type="text"
                     value={editForm.businessName ?? ''}
                     onChange={(e) => setEditForm({ ...editForm, businessName: e.target.value })}
-                    className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+                    className={inputClasses}
                   />
-                </div>
+                </FormField>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-warm-gray-800 mb-1">Phone</label>
+                <FormField label="Phone" htmlFor="phone">
                   <input
                     id="phone"
                     type="tel"
                     value={editForm.phone ?? ''}
                     onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                    className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+                    className={inputClasses}
                   />
-                </div>
-                <div>
-                  <label htmlFor="abn" className="block text-sm font-medium text-warm-gray-800 mb-1">ABN</label>
+                </FormField>
+                <FormField label="ABN" htmlFor="abn">
                   <input
                     id="abn"
                     type="text"
                     value={editForm.abn ?? ''}
                     onChange={(e) => setEditForm({ ...editForm, abn: e.target.value })}
-                    className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+                    className={inputClasses}
                   />
-                </div>
+                </FormField>
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-warm-gray-800 mb-1">Email</label>
-                <input
-                  id="email"
-                  type="email"
-                  value={profile.email}
-                  disabled
-                  className="w-full px-4 py-3 rounded-md border border-sand bg-sand-light/50 text-warm-gray-400 cursor-not-allowed"
-                />
+                <FormField label="Email" htmlFor="email">
+                  <input
+                    id="email"
+                    type="email"
+                    value={profile.email}
+                    disabled
+                    className={inputClasses}
+                  />
+                </FormField>
                 <p className="text-xs text-warm-gray-400 mt-1">Email cannot be changed. Contact us if needed.</p>
               </div>
 
-              <button
-                type="submit"
-                disabled={saving}
-                className="tap-target inline-flex items-center gap-2 px-5 py-2.5 btn-primary text-sm"
-              >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                {saving ? 'Saving...' : 'Save Changes'}
-              </button>
+              <Button type="submit" size="sm" loading={saving} loadingText="Saving...">
+                <Save className="w-4 h-4" />
+                Save Changes
+              </Button>
             </form>
           </div>
 
@@ -377,59 +375,58 @@ export default function StockistAccountPage() {
             </h2>
 
             {passwordSuccess && (
-              <div className="mb-4 bg-success/10 border border-success/20 text-success text-sm rounded-md p-3" role="status">
+              <div className="mb-4 bg-success/10 border border-success/20 text-success text-base rounded-md p-3" role="status">
                 Password changed successfully.
               </div>
             )}
             {passwordError && (
-              <div className="mb-4 bg-error/10 border border-error/20 text-error text-sm rounded-md p-3" role="alert">
+              <div className="mb-4 bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert">
                 {passwordError}
               </div>
             )}
 
             <form onSubmit={handleChangePassword} className="space-y-4">
-              <div>
-                <label htmlFor="currentPassword" className="block text-sm font-medium text-warm-gray-800 mb-1">Current Password</label>
+              <FormField label="Current Password" htmlFor="currentPassword">
                 <input
                   id="currentPassword"
                   type="password"
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+                  className={inputClasses}
                 />
-              </div>
+              </FormField>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="newPassword" className="block text-sm font-medium text-warm-gray-800 mb-1">New Password</label>
+                <FormField label="New Password" htmlFor="newPassword">
                   <input
                     id="newPassword"
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Minimum 8 characters"
-                    className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+                    className={inputClasses}
                   />
-                </div>
-                <div>
-                  <label htmlFor="confirmNewPassword" className="block text-sm font-medium text-warm-gray-800 mb-1">Confirm New Password</label>
+                </FormField>
+                <FormField label="Confirm New Password" htmlFor="confirmNewPassword">
                   <input
                     id="confirmNewPassword"
                     type="password"
                     value={confirmNewPassword}
                     onChange={(e) => setConfirmNewPassword(e.target.value)}
-                    className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+                    className={inputClasses}
                   />
-                </div>
+                </FormField>
               </div>
 
-              <button
+              <Button
                 type="submit"
-                disabled={passwordSaving}
-                className="tap-target inline-flex items-center gap-2 px-5 py-2.5 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
+                variant="secondary"
+                size="sm"
+                loading={passwordSaving}
+                loadingText="Updating..."
               >
-                {passwordSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
-                {passwordSaving ? 'Updating...' : 'Update Password'}
-              </button>
+                <Lock className="w-4 h-4" />
+                Update Password
+              </Button>
             </form>
           </div>
         </div>
@@ -450,15 +447,16 @@ export default function StockistAccountPage() {
                 )}
               </div>
 
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="tap-target inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light disabled:opacity-50"
+                loading={uploading}
+                loadingText="Uploading..."
               >
-                {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                {uploading ? 'Uploading...' : 'Upload Photo'}
-              </button>
+                <Upload className="w-4 h-4" />
+                Upload Photo
+              </Button>
 
               <input
                 ref={fileInputRef}

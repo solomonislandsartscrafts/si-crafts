@@ -12,8 +12,6 @@ const OFFLINE_URL = '/offline.html';
 const PRECACHE_ASSETS = [
   OFFLINE_URL,
   '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
 ];
 
 // Install: pre-cache the offline shell assets

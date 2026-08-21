@@ -28,12 +28,12 @@
     scroll-behavior: smooth;
   }
 
+  /* Type (family, size, line-height) is owned by the utility classes on <body>
+     in src/app/layout.tsx: `font-body text-base leading-body`. Declaring it
+     here as well would be dead code — the utility layer always wins. */
   body {
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     background-color: var(--page-bg);
     color: #3D362E;
-    font-size: 1.125rem;
-    line-height: 1.7;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -521,10 +521,21 @@
   pointer-events: none;
 }
 
-/* Article content — Medium-style prose */
+/* ==========================================================================
+   ARTICLE PROSE
+   ============================================================================
+   Styles CMS-authored HTML, which cannot carry Tailwind classes. Hex values
+   here MUST stay in sync with tailwind.config.ts:
+     #3D362E warm-gray-800   #5C5648 warm-gray-600
+     #1B3A4B deep-blue       #1E5AA8 ocean        #154A8C ocean-dark
+     #1E7A3D brand-green
+   The type scale mirrors the Tailwind scale: body 1.125rem (text-lg, slightly
+   larger than base for long-form reading), h2 1.5rem (text-2xl),
+   h3 1.25rem (text-xl).
+   ========================================================================== */
 .article-content {
-  font-size: 1.1875rem;
-  line-height: 1.85;
+  font-size: 1.125rem;
+  line-height: 1.7;
   color: #3D362E;
 }
 
@@ -552,6 +563,18 @@
   margin-bottom: 0.5rem;
   line-height: 1.2;
   letter-spacing: -0.01em;
+}
+
+/* Figure captions — metadata, so smaller than body is correct here. */
+.article-content figure {
+  margin: 2rem 0;
+}
+
+.article-content figcaption {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #5C5648;
+  margin-top: 0.5rem;
 }
 
 .article-content ul,

@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { Users, Package, Newspaper, ClipboardList, Inbox, Store } from 'lucide-react';
 import type { ActivityItem } from '@/types';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ButtonLink } from '@/components/ui/button';
 
 interface ActivityFeedProps {
   items: ActivityItem[];
@@ -42,9 +44,15 @@ export function ActivityFeed({ items }: ActivityFeedProps) {
       <h2 className="font-heading text-lg font-semibold text-deep-blue mb-3">Recent activity</h2>
 
       {items.length === 0 ? (
-        <p className="text-sm text-warm-gray-600">
-          No activity yet. Once you add content or receive enquiries they will show here.
-        </p>
+        <EmptyState
+          title="No activity yet."
+          description="Once you add content or receive enquiries they will show here."
+          action={
+            <ButtonLink href="/admin/getting-started" variant="secondary" size="sm">
+              Getting started
+            </ButtonLink>
+          }
+        />
       ) : (
         <ul className="divide-y divide-sand">
           {items.map((item) => {

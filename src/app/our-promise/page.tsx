@@ -1,6 +1,7 @@
 import { IconAuthenticity, IconHandHeart, IconCulturalEye, IconCommunity, IconShellMoney, IconWovenQuestion } from '@/components/icons/craft-icons';
 import { generatePageMetadata } from '@/lib/metadata';
-import { PageHeader } from '@/components/layout';
+import { PageCta, PageHeader } from '@/components/layout';
+import { ButtonLink } from '@/components/ui/button';
 
 export const metadata = generatePageMetadata({
   title: 'Our Promise',
@@ -21,8 +22,8 @@ export default function OurPromisePage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 mb-12 lg:mb-16">
         {/* Authenticity */}
         <div className="flex gap-4">
-          <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-terracotta/10 flex items-center justify-center">
-            <IconAuthenticity className="w-6 h-6 text-terracotta" />
+          <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-brand-green/10 flex items-center justify-center">
+            <IconAuthenticity className="w-6 h-6 text-brand-green" />
           </div>
           <div>
             <h2 className="font-heading text-lg font-semibold text-deep-blue mb-2">
@@ -38,8 +39,8 @@ export default function OurPromisePage() {
 
         {/* Fair Payment */}
         <div className="flex gap-4">
-          <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-terracotta/10 flex items-center justify-center">
-            <IconHandHeart className="w-6 h-6 text-terracotta" />
+          <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-brand-green/10 flex items-center justify-center">
+            <IconHandHeart className="w-6 h-6 text-brand-green" />
           </div>
           <div>
             <h2 className="font-heading text-lg font-semibold text-deep-blue mb-2">
@@ -55,8 +56,8 @@ export default function OurPromisePage() {
 
         {/* Cultural Respect */}
         <div className="flex gap-4">
-          <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-terracotta/10 flex items-center justify-center">
-            <IconCulturalEye className="w-6 h-6 text-terracotta" />
+          <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-brand-green/10 flex items-center justify-center">
+            <IconCulturalEye className="w-6 h-6 text-brand-green" />
           </div>
           <div>
             <h2 className="font-heading text-lg font-semibold text-deep-blue mb-2">
@@ -72,8 +73,8 @@ export default function OurPromisePage() {
 
         {/* Consent & Transparency */}
         <div className="flex gap-4">
-          <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-terracotta/10 flex items-center justify-center">
-            <IconCommunity className="w-6 h-6 text-terracotta" />
+          <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-brand-green/10 flex items-center justify-center">
+            <IconCommunity className="w-6 h-6 text-brand-green" />
           </div>
           <div>
             <h2 className="font-heading text-lg font-semibold text-deep-blue mb-2">
@@ -98,9 +99,7 @@ export default function OurPromisePage() {
             <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-2">
               Where the money goes
             </h2>
-            <p className="text-sm text-warm-gray-400 italic">
-              [NEEDS REVIEW — placeholder: exact figures to be confirmed with SIAC team]
-            </p>
+            {/* NEEDS REVIEW — placeholder: exact figures to be confirmed with SIAC team */}
           </div>
         </div>
         <div className="max-w-2xl space-y-4 text-warm-gray-600 leading-relaxed">
@@ -120,7 +119,7 @@ export default function OurPromisePage() {
           </ul>
           <p>
             We are a volunteer-run operation. No one at SIAC draws a salary from craft sales. Every dollar above operating costs goes toward sourcing more work from more makers.
-            <span className="text-warm-gray-400 italic text-sm"> [NEEDS REVIEW — confirm volunteer/salary structure]</span>
+            {/* NEEDS REVIEW — confirm volunteer/salary structure */}
           </p>
         </div>
       </section>
@@ -158,12 +157,17 @@ export default function OurPromisePage() {
               <strong>We are transparent.</strong> This page exists so you can hold us to account. If something here isn&apos;t right, tell us.
             </li>
           </ul>
-          <p className="text-warm-gray-400 italic text-sm">
-            [NEEDS REVIEW — entire section to be reviewed by SIAC team and ideally a Solomon Islands cultural partner before publication]
-          </p>
+          {/* NEEDS REVIEW — entire section to be reviewed by SIAC team and ideally a Solomon Islands cultural partner before publication */}
         </div>
       </section>
       </div>
+
+      <PageCta
+        heading="Meet the makers"
+        description="Every piece we sell is genuinely handmade by a known, named maker in Solomon Islands."
+      >
+        <ButtonLink href="/makers">View all makers</ButtonLink>
+      </PageCta>
     </div>
   );
 }

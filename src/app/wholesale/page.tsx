@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { IconJoinUs, IconWovenBasket, IconBankTransfer, IconParcelLeaf } from '@/components/icons/craft-icons';
+import { PageHeader, PageCta } from '@/components/layout';
+import { ButtonLink } from '@/components/ui/button';
 import { generatePageMetadata } from '@/lib/metadata';
 import { getSiteContentSafe } from '@/services/site-content';
 
@@ -41,18 +43,19 @@ export default async function WholesalePage() {
   const siteContent = await getSiteContentSafe();
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 page-y pb-12 lg:pb-16">
-      {/* Intro */}
-      <h1 className="font-heading text-3xl md:text-4xl font-medium text-deep-blue mb-4">
-        Wholesale
-      </h1>
-      <p className="text-warm-gray-600 leading-relaxed max-w-2xl mb-12">
-        {siteContent.wholesaleIntro || "We supply museum shops and galleries in Australia with authentic Solomon Islands handicrafts. No minimum order. Bank transfer only. Here's how it works."}
-      </p>
+    <div>
+      <PageHeader
+        title="Wholesale"
+        intro={siteContent.wholesaleIntro || "We supply museum shops and galleries in Australia with authentic Solomon Islands handicrafts. No minimum order. Bank transfer only. Here's how it works."}
+      />
 
+      {/* Prose column is constrained to max-w-3xl but stays left-aligned so it
+          lines up with the PageHeader above it. */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">
+        <div className="max-w-3xl">
       {/* How it works — simple numbered steps */}
       <section className="mb-12">
-        <h2 className="font-heading text-xl md:text-2xl font-medium text-deep-blue mb-8">
+        <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-8">
           How it works
         </h2>
 
@@ -65,10 +68,10 @@ export default async function WholesalePage() {
                   <Icon className="w-6 h-6 text-ocean" />
                 </div>
                 <div>
-                  <h3 className="font-heading text-base font-semibold text-deep-blue mb-1">
+                  <h3 className="font-heading text-lg font-semibold text-deep-blue mb-1">
                     {i + 1}. {step.title}
                   </h3>
-                  <p className="text-sm text-warm-gray-600 leading-relaxed">
+                  <p className="text-base text-warm-gray-600 leading-relaxed">
                     {step.description}
                   </p>
                 </div>
@@ -79,8 +82,8 @@ export default async function WholesalePage() {
       </section>
 
       {/* Important note */}
-      <div className="bg-sand-light rounded-lg p-5 mb-12">
-        <p className="text-sm text-warm-gray-800 leading-relaxed">
+      <div className="bg-sand-light rounded-lg p-6 mb-12">
+        <p className="text-base text-warm-gray-800 leading-relaxed">
           <strong>Please note:</strong> Orders are expressions of interest, not confirmed
           purchases. Stock is limited and handmade — we&apos;ll confirm what&apos;s available
           after you submit. We send an invoice once confirmed and ship after payment (within
@@ -89,25 +92,25 @@ export default async function WholesalePage() {
       </div>
 
       {/* Common questions */}
-      <section className="mb-12">
-        <h2 className="font-heading text-xl md:text-2xl font-medium text-deep-blue mb-6">
+      <section>
+        <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-6">
           Common questions
         </h2>
 
         <dl className="space-y-6">
           <div>
-            <dt className="font-heading font-semibold text-deep-blue mb-1">
+            <dt className="font-heading text-lg font-semibold text-deep-blue mb-1">
               Can I return unsold goods?
             </dt>
-            <dd className="text-sm text-warm-gray-600 leading-relaxed">
+            <dd className="text-base text-warm-gray-600 leading-relaxed">
               No — orders are purchased outright at wholesale prices.
             </dd>
           </div>
           <div>
-            <dt className="font-heading font-semibold text-deep-blue mb-1">
+            <dt className="font-heading text-lg font-semibold text-deep-blue mb-1">
               Can I order custom or bulk items?
             </dt>
-            <dd className="text-sm text-warm-gray-600 leading-relaxed">
+            <dd className="text-base text-warm-gray-600 leading-relaxed">
               Yes — log in to your stockist account and submit a request under
               &ldquo;Requests&rdquo;. Not a retail business?{' '}
               <Link href="/contact" className="text-ocean hover:text-ocean-dark">
@@ -117,10 +120,10 @@ export default async function WholesalePage() {
             </dd>
           </div>
           <div>
-            <dt className="font-heading font-semibold text-deep-blue mb-1">
+            <dt className="font-heading text-lg font-semibold text-deep-blue mb-1">
               Is there a minimum order?
             </dt>
-            <dd className="text-sm text-warm-gray-600 leading-relaxed">
+            <dd className="text-base text-warm-gray-600 leading-relaxed">
               No minimum, but we encourage orders of at least 6 pieces for shipping efficiency.
             </dd>
           </div>
@@ -129,28 +132,26 @@ export default async function WholesalePage() {
         <div className="mt-6">
           <Link
             href="/faqs-and-shipping"
-            className="text-sm font-medium text-ocean hover:text-ocean-dark transition-colors"
+            className="text-base font-medium text-ocean hover:text-ocean-dark transition-colors"
           >
             More FAQs (returns, GST, shipping) →
           </Link>
         </div>
       </section>
-
-      {/* Actions */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Link
-          href="/login"
-          className="tap-target inline-flex items-center justify-center px-6 py-3 bg-terracotta hover:bg-terracotta-dark text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
-        >
-          Log in as stockist
-        </Link>
-        <Link
-          href="/stockist/apply"
-          className="tap-target inline-flex items-center justify-center px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
-        >
-          Apply to become a stockist
-        </Link>
+        </div>
       </div>
+
+      <PageCta
+        heading="Ready to stock SI Crafts?"
+        description="Apply for a wholesale account, or log in if you already have one."
+      >
+        <ButtonLink href="/stockist/apply" variant="primary">
+          Apply to become a stockist
+        </ButtonLink>
+        <ButtonLink href="/login" variant="secondary">
+          Log in as stockist
+        </ButtonLink>
+      </PageCta>
     </div>
   );
 }

@@ -14,7 +14,12 @@ export async function POST(request: NextRequest) {
   if (!sessionAdmin) {
     return NextResponse.json(null, { status: 401 });
   }
+  if (sessionAdmin.role !== 'super_admin') {
+    return NextResponse.json(null, { status: 403 });
+  }
 
-  const result = await deactivateAdmin(id, sessionAdmin.id);
+  // Pass the token through: this runs on the server, where there is no
+  // localStorage for the service layer to fall back on.
+  const result = await deactivateAdmin(id, sessionAdmin.id, token);
   return NextResponse.json(result);
 }

@@ -7,8 +7,7 @@ interface OGMetaParams {
   imageUrl?: string;
 }
 
-const SITE_URL = 'https://solomonislandsartsandcrafts.com.au';
-const DEFAULT_OG_IMAGE = '/images/og-default.jpg';
+export const SITE_URL = 'https://solomonislandsartsandcrafts.com.au';
 
 /**
  * Generate consistent Open Graph metadata for any page.
@@ -32,7 +31,10 @@ export function generatePageMetadata({
       title: ogTitle,
       description: ogDescription,
       url,
-      images: [{ url: imageUrl || DEFAULT_OG_IMAGE }],
+      // Only set `images` when the page supplies a real one (e.g. a product or
+      // article cover). Omitting it lets Next fall back to the generated card
+      // from src/app/opengraph-image.tsx.
+      ...(imageUrl ? { images: [{ url: imageUrl }] } : {}),
       siteName: 'Solomon Islands Arts Crafts',
       type: 'website',
     },

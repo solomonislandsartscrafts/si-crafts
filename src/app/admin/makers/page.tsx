@@ -1,11 +1,35 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Users } from 'lucide-react';
 import type { Maker } from '@/types';
 import { AdminLayout } from '@/components/admin';
 import { MakerFormModal, type MakerFormData } from '@/components/admin/maker-form-modal';
 import { useToast } from '@/components/ui/toast';
+import { pageTitleClasses } from '@/components/layout/page-header';
+import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { Skeleton, SkeletonRegion } from '@/components/ui/skeleton';
+
+/** Row-shaped placeholder while the makers table loads. */
+function TableSkeleton() {
+  return (
+    <SkeletonRegion
+      label="Loading makers"
+      className="bg-white rounded-lg shadow-card p-4 space-y-4"
+    >
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-4">
+          <Skeleton className="h-4 flex-1" />
+          <Skeleton className="h-4 w-32 hidden sm:block" />
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-16" />
+        </div>
+      ))}
+    </SkeletonRegion>
+  );
+}
 
 export default function AdminMakersPage() {
   const [makers, setMakers] = useState<Maker[]>([]);
@@ -83,16 +107,23 @@ export default function AdminMakersPage() {
   return (
     <AdminLayout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-heading text-2xl font-medium text-deep-blue">Makers</h1>
-        <button
-          onClick={handleAdd}
-          className="tap-target inline-flex items-center gap-2 px-4 py-2 btn-primary text-sm"
-        >
+        <h1 className={pageTitleClasses}>Makers</h1>
+        <Button size="sm" onClick={handleAdd}>
           <Plus className="w-4 h-4" /> Add Maker
-        </button>
+        </Button>
       </div>
 
-      {loading ? <p className="text-warm-gray-400">Loading...</p> : (
+      {loading ? <TableSkeleton /> : makers.length === 0 ? (
+        <EmptyState
+          icon={Users}
+          title="No makers yet."
+          action={
+            <Button size="sm" onClick={handleAdd}>
+              <Plus className="w-4 h-4" /> Add Maker
+            </Button>
+          }
+        />
+      ) : (
         <div className="bg-white rounded-lg shadow-card overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-sand-light border-b border-sand">
@@ -110,9 +141,14 @@ export default function AdminMakersPage() {
                   <td className="px-4 py-3 font-medium text-warm-gray-800">{maker.name}</td>
                   <td className="px-4 py-3 text-warm-gray-600 hidden sm:table-cell">{maker.village}, {maker.province}</td>
                   <td className="px-4 py-3">
-                    <button onClick={() => toggleConsent(maker.id, maker.consentStatus)}
-                      className={`px-2 py-1 rounded text-xs font-medium ${maker.consentStatus === 'Signed' ? 'bg-success/10 text-success' : 'bg-warm-gray-200 text-warm-gray-600'}`}>
-                      {maker.consentStatus}
+                    <button
+                      onClick={() => toggleConsent(maker.id, maker.consentStatus)}
+                      className="focus:outline-none focus:ring-2 focus:ring-ocean rounded-sm"
+                      aria-label={`Toggle consent for ${maker.name}`}
+                    >
+                      <StatusBadge status={maker.consentStatus === 'Signed' ? 'success' : 'neutral'}>
+                        {maker.consentStatus}
+                      </StatusBadge>
                     </button>
                   </td>
                   <td className="px-4 py-3">

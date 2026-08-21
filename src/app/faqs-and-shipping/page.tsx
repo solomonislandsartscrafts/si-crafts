@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
-import { PageHeader } from '@/components/layout';
+import { PageCta, PageHeader } from '@/components/layout';
+import { ButtonLink } from '@/components/ui/button';
 
 const FAQS = [
   {
@@ -83,6 +84,16 @@ export default function FaqsAndShippingPage() {
           </p>
         </div>
       </div>
+
+      <PageCta
+        heading="Become a stockist"
+        description="Submit an application through our Wholesale page with your business details and ABN. We review applications within a few business days."
+      >
+        <ButtonLink href="/wholesale">Learn about wholesale</ButtonLink>
+        <ButtonLink href="/contact" variant="secondary">
+          Contact us
+        </ButtonLink>
+      </PageCta>
     </div>
   );
 }
@@ -97,14 +108,14 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
         className="tap-target w-full flex items-center justify-between gap-4 px-5 py-4 text-left focus:outline-none focus:ring-2 focus:ring-ocean rounded-lg"
         aria-expanded={open}
       >
-        <span className="font-heading text-sm sm:text-base font-semibold text-deep-blue">
+        <span className="font-heading text-base font-semibold text-deep-blue">
           {question}
         </span>
         <ChevronDown className={`w-5 h-5 text-warm-gray-400 flex-shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
         <div className="px-5 pb-4">
-          <p className="text-sm text-warm-gray-600 leading-relaxed">{answer}</p>
+          <p className="text-base text-warm-gray-600 leading-relaxed">{answer}</p>
         </div>
       )}
     </div>

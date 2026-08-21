@@ -89,27 +89,10 @@ const config: Config = {
           800: '#3D362E',  // 11.9:1 on white — AAA ✅ (primary body text)
         },
 
-        // --- Aliases (preserve existing call sites) ---
-        // "terracotta" is a legacy alias for brand-green
-        terracotta: {
-          light: '#28994D',
-          DEFAULT: '#1E7A3D',
-          dark: '#166B30',
-        },
-
-        // "teal" is a legacy alias for ocean
-        teal: {
-          light: '#3D7AC4',
-          DEFAULT: '#1E5AA8',
-          dark: '#154A8C',
-        },
-
-        // "motto-gold" is a legacy alias for accent-gold
-        'motto-gold': {
-          light: '#F7C555',
-          DEFAULT: '#F4B728',
-          dark: '#D89412',
-        },
+        // NOTE: the legacy aliases `terracotta`, `teal` and `motto-gold` were
+        // removed. They pointed at brand-green / ocean / accent-gold, so class
+        // names like `bg-terracotta` rendered green — the names lied about the
+        // colour. Use the real token names above.
 
         // Semantic states
         success: '#1E7A3D',
@@ -121,27 +104,31 @@ const config: Config = {
         error: '#C0392B',
       },
       fontFamily: {
-        body: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Helvetica', 'Arial', 'sans-serif'],
+        // Both families are loaded via next/font in src/app/layout.tsx, which
+        // sets --font-body (DM Sans) and --font-heading (Poppins) on <html>.
+        body: ['var(--font-body)', 'DM Sans', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Helvetica', 'Arial', 'sans-serif'],
         heading: ['var(--font-heading)', 'Poppins', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
       },
       fontSize: {
-        // ⚠️ ACCESSIBILITY NOTE: xs (12px) and sm (13px) are below the 16px
-        // best-practice floor for body text. Use ONLY for non-essential,
-        // secondary content: timestamps, captions, metadata labels, badge text.
+        // Standard 16px-based scale. `base` is the 16px accessibility floor for
+        // body copy — never drop below it for reading text.
+        // ⚠️ xs (12px) and sm (14px) are below that floor. Use ONLY for
+        // non-essential secondary content: timestamps, captions, metadata
+        // labels, badge text. Never for paragraphs or maker stories.
         xs: '0.75rem',     // 12px — metadata, timestamps only
-        sm: '0.8125rem',   // 13px — captions, secondary labels only
-        base: '0.9375rem', // 15px — primary body text (compact, easy to read)
-        lg: '1.0625rem',   // 17px — body-large / intro text
-        xl: '1.1875rem',   // 19px — H3 small variant
-        '2xl': '1.375rem', // 22px — H3 / H2-small
-        '3xl': '1.75rem',  // 28px — H2 default
-        '4xl': '2.125rem', // 34px — H1 interior pages
-        '5xl': '2.75rem',  // 44px — H1 hero / landing pages
+        sm: '0.875rem',    // 14px — captions, secondary labels only
+        base: '1rem',      // 16px — primary body text (minimum for reading)
+        lg: '1.125rem',    // 18px — body-large / intro text
+        xl: '1.25rem',     // 20px — H3 small variant
+        '2xl': '1.5rem',   // 24px — H3 / H2-small
+        '3xl': '1.875rem', // 30px — H2 default
+        '4xl': '2.25rem',  // 36px — H1 interior pages
+        '5xl': '3rem',     // 48px — H1 hero / landing pages
       },
       lineHeight: {
-        body: '1.5',
+        body: '1.6',   // minimum for body copy — aids readability at 16px
         heading: '1.2',
-        relaxed: '1.6',
+        relaxed: '1.7',
       },
       spacing: {
         // Vertical page/section rhythm lives in the .page-y and .section-y

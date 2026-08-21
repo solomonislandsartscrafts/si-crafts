@@ -50,7 +50,7 @@ export function AcknowledgementFooterNote() {
         aria-label="Acknowledgement of Country"
         role="region"
       >
-        <p className="text-sm text-white/70 leading-relaxed max-w-3xl">
+        <p className="text-base text-white/70 leading-relaxed max-w-3xl">
           {ACKNOWLEDGEMENT_TEXT}{' '}
           <Link
             href="/about#acknowledgement"

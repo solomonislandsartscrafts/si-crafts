@@ -32,10 +32,13 @@ export function Footer() {
                 href={link.href}
                 className="group block p-5 rounded-lg border border-white/10 hover:border-white/20 hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
               >
-                <h3 className="font-heading text-base font-semibold text-white mb-1">
+                {/* h2, not h3: the footer has no section heading of its own, so
+                    an h3 here attaches itself to whatever the last section of
+                    the page happened to be. */}
+                <h2 className="font-heading text-base font-semibold text-white mb-1">
                   {link.title}
-                </h3>
-                <p className="text-sm text-white/60 leading-relaxed">
+                </h2>
+                <p className="text-base text-white/60 leading-relaxed">
                   {link.description}
                 </p>
               </Link>
@@ -50,7 +53,7 @@ export function Footer() {
       {/* Bottom bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-3 text-sm text-white/70">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-white/70">
             <p>&copy; {new Date().getFullYear()} Solomon Islands Arts Crafts.</p>
             <Link href="/for-makers" className="text-white/70 hover:text-white transition-colors underline underline-offset-2">
               For Makers

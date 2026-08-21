@@ -1,5 +1,6 @@
 import { generatePageMetadata } from '@/lib/metadata';
-import { PageHeader } from '@/components/layout';
+import { PageCta, PageHeader } from '@/components/layout';
+import { ButtonLink } from '@/components/ui/button';
 import { getSiteContentSafe } from '@/services/site-content';
 
 export const metadata = generatePageMetadata({
@@ -83,7 +84,7 @@ export default async function CareGuidePage() {
               <ul className="space-y-3 text-warm-gray-600 leading-relaxed">
                 {tips.map((tip, i) => (
                   <li key={i} className="flex gap-2">
-                    <span className="text-terracotta font-bold">•</span>
+                    <span className="text-brand-green font-bold">•</span>
                     {tip}
                   </li>
                 ))}
@@ -92,6 +93,13 @@ export default async function CareGuidePage() {
           );
         })}
       </div>
+
+      <PageCta
+        heading="Browse the catalogue"
+        description="See the pandanus, wood, shell, and bush-twine pieces these care tips apply to."
+      >
+        <ButtonLink href="/catalogue">View the catalogue</ButtonLink>
+      </PageCta>
     </div>
   );
 }

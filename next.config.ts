@@ -7,6 +7,11 @@ if (process.env.NODE_ENV === 'development') {
 
 const nextConfig: NextConfig = {
   images: {
+    // Next 16 refuses to optimize images served from a local IP by default, as
+    // an SSRF guard. Local dev points at the Django backend on localhost:8000
+    // for media, so every image 400s without this. Development only: deployed
+    // media comes from R2/Render over HTTPS and keeps the protection.
+    dangerouslyAllowLocalIP: process.env.NODE_ENV === 'development',
     remotePatterns: [
       {
         protocol: 'http',
@@ -39,6 +44,17 @@ const nextConfig: NextConfig = {
         hostname: 'upload.wikimedia.org',
       },
     ],
+  },
+  async redirects() {
+    return [
+      {
+        // /find-a-maker duplicated /makers (same data, worse implementation).
+        // Redirect rather than 404 so existing links and bookmarks still work.
+        source: '/find-a-maker',
+        destination: '/makers',
+        permanent: true,
+      },
+    ];
   },
   async headers() {
     return [

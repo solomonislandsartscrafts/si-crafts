@@ -67,16 +67,31 @@ describe('Property 1: Open Graph tags valid on all public pages', () => {
     );
   });
 
-  it('og:image is always present', () => {
+  it('og:image is omitted when no imageUrl is given, so the file-convention fallback (src/app/opengraph-image.tsx) applies', () => {
+    // generatePageMetadata deliberately does NOT set a default image path
+    // anymore — the old default pointed at /images/og-default.jpg, which does
+    // not exist. Next.js auto-injects og:image from opengraph-image.tsx for
+    // any page that doesn't set its own, so omitting `images` here is correct,
+    // not a regression.
     const meta = generatePageMetadata({
       title: 'Page',
       description: 'Description',
+    });
+    expect(meta.openGraph && 'images' in meta.openGraph ? meta.openGraph.images : undefined).toBeUndefined();
+  });
+
+  it('og:image is present and correct when a page supplies its own imageUrl', () => {
+    const meta = generatePageMetadata({
+      title: 'Page',
+      description: 'Description',
+      imageUrl: 'https://example.com/product.jpg',
     });
     const images = meta.openGraph && 'images' in meta.openGraph
       ? meta.openGraph.images
       : [];
     expect(Array.isArray(images)).toBe(true);
     expect((images as Array<{ url: string }>).length).toBeGreaterThan(0);
+    expect((images as Array<{ url: string }>)[0].url).toBe('https://example.com/product.jpg');
   });
 
   it('titles exactly 60 chars are not truncated', () => {

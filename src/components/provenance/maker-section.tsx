@@ -1,77 +1,107 @@
-import { SafeImage } from '@/components/ui/safe-image';
 import Link from 'next/link';
+import { MapPin } from 'lucide-react';
+import { SafeImage } from '@/components/ui/safe-image';
 import type { Maker, Craft } from '@/types';
 
+/**
+ * "Meet the Maker" — quote-first with compact attribution.
+ *
+ * The maker's voice leads. The portrait and identity metadata sit in a small
+ * attribution row beneath the quote. This ensures the story lands first,
+ * which matches the provenance page's core job: telling the visitor who
+ * made their piece, in that maker's own words.
+ *
+ * Consent: renders nothing at all unless `maker.publishedFlag` is true.
+ */
 interface MakerSectionProps {
-  maker: Maker | null;
+  maker?: Maker | null;
   craft?: Craft | null;
+  excerptLength?: number;
 }
 
-export function MakerSection({ maker, craft }: MakerSectionProps) {
-  if (!maker || !maker.publishedFlag) {
-    return (
-      <section className="mb-10">
-        <h2 className="font-heading text-xl font-medium text-deep-blue mb-3">Your Maker</h2>
-        <p className="text-warm-gray-400 italic">Maker details pending.</p>
-      </section>
-    );
-  }
+export function MakerSection({ maker, craft, excerptLength = 200 }: MakerSectionProps) {
+  if (!maker || !maker.publishedFlag) return null;
 
-  // Excerpt: max 300 characters
   const storyExcerpt = maker.story
-    ? maker.story.length > 300
-      ? maker.story.slice(0, 297) + '...'
+    ? maker.story.length > excerptLength
+      ? `${maker.story.slice(0, excerptLength - 1).trim()}\u2026`
       : maker.story
     : null;
 
   return (
-    <section className="mb-10">
-      <h2 className="font-heading text-xl font-medium text-deep-blue mb-4">Your Maker</h2>
+    <section className="mt-8">
+      <h2 className="font-heading text-2xl font-medium text-deep-blue mb-3">
+        Meet the Maker
+      </h2>
 
-      {/* Highlighted maker card — the unique selling point */}
-      <div className="bg-sand-light border-l-4 border-terracotta rounded-lg p-6">
-        <div className="flex gap-5 items-start">
-          {/* Portrait */}
-          <div className="w-20 h-20 sm:w-28 sm:h-28 flex-shrink-0 relative rounded-lg overflow-hidden bg-sand-light">
-            <SafeImage
-              src={maker.portraitUrl}
-              alt={`${maker.name} from ${maker.village}`}
-              fill
-              className="object-cover"
-              sizes="112px"
-            />
-          </div>
+      <div className="border-t border-sand pt-5">
+        {/* Quote — the maker's voice leads */}
+        {storyExcerpt ? (
+          <blockquote className="mb-4">
+            <p className="text-base text-warm-gray-800 italic leading-relaxed">
+              &ldquo;{storyExcerpt}&rdquo;
+            </p>
+          </blockquote>
+        ) : (
+          <p className="text-base text-warm-gray-600 leading-relaxed mb-4">
+            This piece was made by hand by {maker.name} from {maker.village},{' '}
+            {maker.province}, using skills passed down through generations.
+          </p>
+        )}
 
-          <div className="flex-1 min-w-0">
-            <Link
-              href={`/maker/${maker.slug}`}
-              className="font-heading text-lg font-semibold text-deep-blue hover:text-ocean transition-colors"
-            >
-              {maker.name}
-            </Link>
-            <p className="text-sm text-warm-gray-600 mt-0.5">
-              {maker.village}, {maker.province}
+        {/* Attribution row — avatar + name + location + craft */}
+        <div className="flex items-center gap-3">
+          <Link
+            href={`/maker/${maker.slug}`}
+            className="group flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-ocean rounded-full"
+            tabIndex={-1}
+            aria-hidden="true"
+          >
+            <div className="w-10 h-10 relative rounded-full overflow-hidden bg-sand">
+              <SafeImage
+                src={maker.portraitUrl}
+                alt=""
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                sizes="40px"
+              />
+            </div>
+          </Link>
+
+          <div className="min-w-0">
+            <p className="text-base font-medium text-deep-blue leading-tight">
+              <Link
+                href={`/maker/${maker.slug}`}
+                className="hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded-sm"
+              >
+                {maker.name}
+              </Link>
+            </p>
+            <p className="flex flex-wrap items-center gap-x-1.5 text-sm text-warm-gray-600 leading-tight mt-0.5">
+              <MapPin className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />
+              <span>{maker.village}, {maker.province}</span>
               {craft && (
-                <span> · <Link href={`/craft/${craft.slug}`} className="text-ocean hover:text-ocean-dark">{craft.name}</Link></span>
+                <>
+                  <span aria-hidden="true">·</span>
+                  <Link
+                    href={`/craft/${craft.slug}`}
+                    className="text-ocean hover:text-ocean-dark transition-colors"
+                  >
+                    {craft.name}
+                  </Link>
+                </>
               )}
             </p>
-            {storyExcerpt ? (
-              <blockquote className="text-sm text-warm-gray-600 mt-3 italic leading-relaxed">
-                &ldquo;{storyExcerpt}&rdquo;
-              </blockquote>
-            ) : (
-              <p className="text-sm text-warm-gray-400 mt-3 italic">
-                Story pending cultural review.
-              </p>
-            )}
-            <Link
-              href={`/maker/${maker.slug}`}
-              className="inline-block mt-3 text-sm font-medium text-ocean hover:text-ocean-dark transition-colors"
-            >
-              Read full story →
-            </Link>
           </div>
         </div>
+
+        {/* Read more link */}
+        <Link
+          href={`/maker/${maker.slug}`}
+          className="inline-block mt-4 text-base font-medium text-ocean hover:text-ocean-dark transition-colors"
+        >
+          Read {maker.name}&apos;s full story →
+        </Link>
       </div>
     </section>
   );

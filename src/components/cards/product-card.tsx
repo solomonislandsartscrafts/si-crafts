@@ -13,10 +13,10 @@ export function ProductCard({ product, makerName, showPrice = false }: ProductCa
   return (
     <Link
       href={`/piece/${product.productCode}`}
-      className="group block w-full overflow-hidden rounded-lg shadow-card hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-ocean"
+      className="group flex flex-col h-full w-full overflow-hidden rounded-lg bg-card-bg shadow-card hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-ocean"
     >
       {/* Image area */}
-      <div className="aspect-square relative bg-sand-light overflow-hidden rounded-t-lg">
+      <div className="aspect-square relative bg-sand-light overflow-hidden">
         <SafeImage
           src={product.imageUrls[0] || null}
           alt={`${product.name}${makerName ? ` by ${makerName}` : ''}`}
@@ -25,21 +25,22 @@ export function ProductCard({ product, makerName, showPrice = false }: ProductCa
           sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
       </div>
-      {/* Info bar — subtle grey background */}
-      <div className="bg-warm-gray-100 p-3 sm:p-4">
-        <h3 className="font-heading text-sm sm:text-base font-semibold text-deep-blue leading-tight line-clamp-2">
+      {/* Info bar. White like every other card — this was bg-warm-gray-100,
+          the only card on the site with a grey footer. */}
+      <div className="flex flex-col flex-1 p-4">
+        <h3 className="font-heading text-base font-semibold text-deep-blue leading-tight line-clamp-2">
           {product.name}
         </h3>
-        <div className="flex items-center gap-2 mt-1 text-xs text-warm-gray-600">
+        <div className="flex items-center gap-2 mt-1 text-sm text-warm-gray-600">
           <span className="capitalize">{product.materialCategory}</span>
-          <span>·</span>
+          <span aria-hidden="true">·</span>
           <span className="capitalize">{product.productType}</span>
         </div>
         {makerName && (
-          <p className="text-xs text-warm-gray-600 mt-1">by {makerName}</p>
+          <p className="text-sm text-warm-gray-600 mt-1">by {makerName}</p>
         )}
         {showPrice && (
-          <p className="text-sm font-semibold text-deep-blue mt-1">
+          <p className="text-base font-semibold text-deep-blue mt-1">
             {formatPrice(product.wholesalePrice)}
           </p>
         )}

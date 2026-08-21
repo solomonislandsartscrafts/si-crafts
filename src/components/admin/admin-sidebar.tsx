@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, UsersRound, Package, Palette, Store, ClipboardList, Shield, Inbox, Newspaper, LogOut, ExternalLink, ImageIcon, Tags, BookOpen, SlidersHorizontal } from 'lucide-react';
+import { LayoutDashboard, Users, UsersRound, Package, Palette, Store, ClipboardList, Shield, Inbox, Newspaper, LogOut, ExternalLink, ImageIcon, Tags, BookOpen, SlidersHorizontal, KeyRound } from 'lucide-react';
 import type { AdminRole } from '@/types';
 
 interface AdminSidebarProps {
@@ -66,6 +66,7 @@ const NAV_GROUPS: NavGroup[] = [
     title: 'Admin',
     roles: ['super_admin'],
     items: [
+      { href: '/admin/users', label: 'Accounts', icon: KeyRound, roles: ['super_admin'] },
       { href: '/admin/admins', label: 'Admin Users', icon: Shield, roles: ['super_admin'] },
       { href: '/admin/team', label: 'Team', icon: UsersRound, roles: ['super_admin'] },
       { href: '/admin/getting-started', label: 'Getting Started', icon: BookOpen, roles: ['super_admin', 'editor'] },
@@ -73,11 +74,21 @@ const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
-export function AdminSidebar({ role, adminName, onLogout }: AdminSidebarProps) {
+interface AdminSidebarNavProps extends AdminSidebarProps {
+  /** Called when a nav link is followed — used to close the mobile drawer. */
+  onNavigate?: () => void;
+}
+
+export function AdminSidebar({
+  role,
+  adminName,
+  onLogout,
+  onNavigate,
+}: AdminSidebarNavProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-56 flex-shrink-0 bg-deep-blue text-white min-h-screen flex flex-col">
+    <aside className="w-64 lg:w-56 flex-shrink-0 bg-deep-blue text-white min-h-screen flex flex-col">
       {/* Logo */}
       <div className="px-4 py-5 border-b border-white/10">
         <Link href="/" className="font-heading text-lg font-semibold text-white hover:text-white/80 transition-colors">
@@ -111,10 +122,11 @@ export function AdminSidebar({ role, adminName, onLogout }: AdminSidebarProps) {
                     <li key={item.href}>
                       <Link
                         href={item.href}
+                        onClick={onNavigate}
                         className={`tap-target flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${
                           active
-                            ? 'bg-white/10 text-white border-l-3 border-accent-gold'
-                            : 'text-white/60 hover:bg-white/5 hover:text-white border-l-3 border-transparent'
+                            ? 'bg-white/10 text-white border-l-[3px] border-accent-gold'
+                            : 'text-white/60 hover:bg-white/5 hover:text-white border-l-[3px] border-transparent'
                         }`}
                         aria-current={active ? 'page' : undefined}
                       >
@@ -134,6 +146,7 @@ export function AdminSidebar({ role, adminName, onLogout }: AdminSidebarProps) {
       <div className="border-t border-white/10 px-4 py-4 space-y-3">
         <Link
           href="/"
+          onClick={onNavigate}
           className="tap-target flex items-center gap-2 px-3 py-2 text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors"
         >
           <ExternalLink className="w-4 h-4" />

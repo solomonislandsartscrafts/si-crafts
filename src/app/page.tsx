@@ -8,9 +8,11 @@ import { getAllCrafts } from '@/services/crafts';
 import { getSlideshowSettingsSafe } from '@/services/slideshow';
 import { ProductCard } from '@/components/cards/product-card';
 import { MakerCard } from '@/components/cards/maker-card';
+import { ArticleCard } from '@/components/cards/article-card';
 import { HeroCodeToggle } from '@/components/shared/hero-code-toggle';
 import { HeroSlideshow, type SlideItem } from '@/components/shared/hero-slideshow';
-import { SafeImage } from '@/components/ui/safe-image';
+import { PageCta } from '@/components/layout/page-cta';
+import { ButtonLink } from '@/components/ui/button';
 import type { Product, Maker, Craft, SlideshowSettings } from '@/types';
 
 interface BuildHeroSlidesArgs {
@@ -53,6 +55,7 @@ function buildHeroSlides({
 
   return heroProducts.map((product) => {
     const maker = makers.find((m) => m.id === product.makerId);
+    const toggle = slideshowSettings.items.find((i) => i.id === product.id && i.kind === 'product');
     return {
       kind: 'product' as const,
       imageUrl: product.imageUrls[0],
@@ -62,6 +65,7 @@ function buildHeroSlides({
       subtitle: maker ? `by ${maker.name} · ${maker.village}, ${maker.province}` : undefined,
       tag: product.materialCategory,
       href: `/piece/${product.productCode}`,
+      objectPosition: toggle?.objectPosition || 'center',
     };
   });
 }
@@ -125,18 +129,12 @@ export default async function HomePage() {
                 </p>
 
                 <div className="mt-7 flex flex-wrap items-center gap-3">
-                  <Link
-                    href="/catalogue"
-                    className="tap-target inline-flex items-center px-6 py-3 btn-primary"
-                  >
+                  <ButtonLink href="/catalogue">
                     {siteContent.homepageCtaText || 'Browse Catalogue'}
-                  </Link>
-                  <Link
-                    href="/about"
-                    className="tap-target inline-flex items-center px-6 py-3 border-2 border-deep-blue text-deep-blue hover:bg-deep-blue hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
-                  >
+                  </ButtonLink>
+                  <ButtonLink href="/about" variant="secondary">
                     Our Story
-                  </Link>
+                  </ButtonLink>
                 </div>
 
                 <div className="mt-4">
@@ -156,20 +154,39 @@ export default async function HomePage() {
       {/* Featured Makers */}
       <section className="section-y">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Heading matters here: this is the first thing below the hero, and
+              three unlabelled portraits give a first-time visitor no context. */}
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
+                Meet the makers
+              </h2>
+              <p className="text-warm-gray-600 mt-1">
+                The weavers, carvers, and jewellers behind every piece.
+              </p>
+            </div>
+            <Link
+              href="/makers"
+              className="hidden sm:inline-flex items-center gap-1 text-base font-medium text-ocean hover:text-ocean-dark transition-colors"
+            >
+              View all
+            </Link>
+          </div>
+          {/* All three show on every breakpoint. Previously the third was
+              hidden below lg, which read as a loading fault on phones. */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {featuredMakers.map((maker, index) => (
-              <div key={maker.id} className={index === 2 ? 'hidden lg:block' : ''}>
-                <MakerCard maker={maker} craftName={craftNameMap[maker.craftId] || undefined} />
-              </div>
+            {featuredMakers.map((maker) => (
+              <MakerCard
+                key={maker.id}
+                maker={maker}
+                craftName={craftNameMap[maker.craftId] || undefined}
+              />
             ))}
           </div>
           <div className="text-center mt-8">
-            <Link
-              href="/makers"
-              className="tap-target inline-flex items-center gap-2 px-6 py-3 border-2 border-deep-blue text-deep-blue hover:bg-deep-blue hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
-            >
+            <ButtonLink href="/makers" variant="secondary">
               Meet all makers
-            </Link>
+            </ButtonLink>
           </div>
         </div>
       </section>
@@ -188,7 +205,7 @@ export default async function HomePage() {
             </div>
             <Link
               href="/catalogue"
-              className="hidden sm:inline-flex items-center gap-1 text-sm font-medium text-ocean hover:text-ocean-dark transition-colors"
+              className="hidden sm:inline-flex items-center gap-1 text-base font-medium text-ocean hover:text-ocean-dark transition-colors"
             >
               View all
             </Link>
@@ -206,31 +223,20 @@ export default async function HomePage() {
             })}
           </div>
           <div className="sm:hidden mt-6 text-center">
-            <Link href="/catalogue" className="tap-target inline-flex items-center gap-2 px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light">
+            <ButtonLink href="/catalogue" variant="secondary">
               View all products
-            </Link>
+            </ButtonLink>
           </div>
         </div>
       </section>
 
       {/* Wholesale CTA */}
-      <section className="section-y bg-ocean/5 border-t border-ocean/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-3">
-            Stock SI Crafts in your shop
-          </h2>
-          <p className="text-warm-gray-600 leading-relaxed mb-6 max-w-xl mx-auto">
-            We supply museum shops and galleries in Australia with authentic
-            Solomon Islands handicrafts at wholesale prices.
-          </p>
-          <Link
-            href="/wholesale"
-            className="tap-target inline-flex items-center gap-2 px-6 py-3 bg-terracotta hover:bg-terracotta-dark text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
-          >
-            Learn about wholesale →
-          </Link>
-        </div>
-      </section>
+      <PageCta
+        heading="Stock Solomon Islands Arts Crafts in your shop"
+        description="We supply museum shops and galleries in Australia with authentic Solomon Islands handicrafts at wholesale prices."
+      >
+        <ButtonLink href="/wholesale">Learn about wholesale</ButtonLink>
+      </PageCta>
 
       {/* Latest News */}
       {latestArticles.length > 0 && (
@@ -242,38 +248,14 @@ export default async function HomePage() {
               </h2>
               <Link
                 href="/news"
-                className="hidden sm:inline-flex items-center gap-1 text-sm font-medium text-ocean hover:text-ocean-dark transition-colors"
+                className="hidden sm:inline-flex items-center gap-1 text-base font-medium text-ocean hover:text-ocean-dark transition-colors"
               >
                 All articles
               </Link>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {latestArticles.map((article) => (
-                <Link key={article.id} href={`/news/${article.slug}`} className="group block">
-                  <div className="aspect-[3/2] relative overflow-hidden rounded-lg mb-3">
-                    <SafeImage
-                      src={article.coverImageUrl}
-                      alt={article.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                    />
-                  </div>
-                  <p className="text-xs text-warm-gray-400 mb-1">
-                    {new Date(article.publishedAt || article.createdAt).toLocaleDateString('en-AU', {
-                      day: 'numeric', month: 'long', year: 'numeric',
-                    })}
-                  </p>
-                  <h3 className="font-heading text-lg font-semibold text-deep-blue group-hover:text-ocean transition-colors mb-1 line-clamp-2">
-                    {article.title}
-                  </h3>
-                  <p className="text-sm text-warm-gray-600 line-clamp-2 leading-relaxed mb-2">
-                    {article.excerpt}
-                  </p>
-                  <span className="text-sm font-medium text-ocean group-hover:text-ocean-dark transition-colors">
-                    Read more
-                  </span>
-                </Link>
+                <ArticleCard key={article.id} article={article} />
               ))}
             </div>
           </div>

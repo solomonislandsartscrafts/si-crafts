@@ -1,10 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Loader2, Tag, User, Hammer, Eye, EyeOff } from 'lucide-react';
+import { Save, Tag, User, Hammer, Eye, EyeOff } from 'lucide-react';
 import { AdminLayout } from '@/components/admin';
 import { SafeImage } from '@/components/ui/safe-image';
 import { useToast } from '@/components/ui/toast';
+import { pageTitleClasses } from '@/components/layout/page-header';
+import { Button } from '@/components/ui/button';
+import { inputClasses } from '@/components/ui/form-field';
+import { SkeletonText } from '@/components/ui/skeleton';
 import {
   getSlideshowProductCandidates,
   getSlideshowMakerCandidates,
@@ -18,7 +22,7 @@ const DEFAULT_SETTINGS: SlideshowSettings = {
 };
 
 const CATEGORY_META: Record<SlideCategory, { label: string; icon: typeof Tag; color: string }> = {
-  product: { label: 'Products', icon: Tag, color: 'bg-terracotta' },
+  product: { label: 'Products', icon: Tag, color: 'bg-brand-green' },
   maker: { label: 'Makers', icon: User, color: 'bg-ocean' },
   craft: { label: 'Crafts', icon: Hammer, color: 'bg-deep-blue' },
 };
@@ -99,6 +103,27 @@ export default function AdminSlideshowPage() {
     });
   }
 
+  function getItemPosition(id: string, kind: SlideCategory): string {
+    const item = settings.items.find((i) => i.id === id && i.kind === kind);
+    return item?.objectPosition || 'center';
+  }
+
+  function setItemPosition(id: string, kind: SlideCategory, position: string) {
+    setSettings((prev) => {
+      const existing = prev.items.find((i) => i.id === id && i.kind === kind);
+      let newItems: SlideItemToggle[];
+      if (existing) {
+        newItems = prev.items.map((i) =>
+          i.id === id && i.kind === kind ? { ...i, objectPosition: position } : i
+        );
+      } else {
+        // Item has no toggle yet — create one (enabled by default) with the position
+        newItems = [...prev.items, { id, kind, enabled: true, objectPosition: position }];
+      }
+      return { ...prev, items: newItems };
+    });
+  }
+
   async function handleSave() {
     setSaving(true);
     try {
@@ -115,8 +140,8 @@ export default function AdminSlideshowPage() {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-6 h-6 text-ocean animate-spin" />
+        <div className="max-w-4xl py-8">
+          <SkeletonText lines={8} />
         </div>
       </AdminLayout>
     );
@@ -128,25 +153,21 @@ export default function AdminSlideshowPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="font-heading text-2xl font-medium text-deep-blue">Homepage Slideshow</h1>
-            <p className="text-sm text-warm-gray-600 mt-1">
+            <h1 className={pageTitleClasses}>Homepage Slideshow</h1>
+            <p className="text-base text-warm-gray-600 mt-1">
               Control which categories and items appear in the homepage hero slideshow.
             </p>
           </div>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="tap-target inline-flex items-center gap-2 px-6 py-3 btn-primary"
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            {saving ? 'Saving...' : 'Save'}
-          </button>
+          <Button onClick={handleSave} loading={saving} loadingText="Saving...">
+            <Save className="w-4 h-4" />
+            Save
+          </Button>
         </div>
 
         {/* Category toggles */}
         <section className="border border-sand rounded-lg p-6 mb-6">
           <h2 className="font-heading text-lg font-semibold text-deep-blue mb-1">Category Toggles</h2>
-          <p className="text-sm text-warm-gray-400 mb-4">
+          <p className="text-base text-warm-gray-400 mb-4">
             Enable or disable entire categories. Disabled categories won&apos;t appear in the slideshow at all.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -196,6 +217,8 @@ export default function AdminSlideshowPage() {
             }))}
             isItemEnabled={isItemEnabled}
             toggleItem={toggleItem}
+            setItemPosition={setItemPosition}
+            getItemPosition={getItemPosition}
           />
         )}
 
@@ -213,6 +236,8 @@ export default function AdminSlideshowPage() {
             }))}
             isItemEnabled={isItemEnabled}
             toggleItem={toggleItem}
+            setItemPosition={setItemPosition}
+            getItemPosition={getItemPosition}
           />
         )}
 
@@ -230,6 +255,8 @@ export default function AdminSlideshowPage() {
             }))}
             isItemEnabled={isItemEnabled}
             toggleItem={toggleItem}
+            setItemPosition={setItemPosition}
+            getItemPosition={getItemPosition}
           />
         )}
       </div>
@@ -245,6 +272,7 @@ interface ItemDisplay {
   label: string;
   subtitle: string;
   imageUrl: string | null;
+  objectPosition?: string;
 }
 
 interface ItemSectionProps {
@@ -253,14 +281,16 @@ interface ItemSectionProps {
   items: ItemDisplay[];
   isItemEnabled: (id: string, kind: SlideCategory) => boolean;
   toggleItem: (id: string, kind: SlideCategory) => void;
+  setItemPosition: (id: string, kind: SlideCategory, position: string) => void;
+  getItemPosition: (id: string, kind: SlideCategory) => string;
 }
 
-function ItemSection({ title, description, items, isItemEnabled, toggleItem }: ItemSectionProps) {
+function ItemSection({ title, description, items, isItemEnabled, toggleItem, setItemPosition, getItemPosition }: ItemSectionProps) {
   if (items.length === 0) {
     return (
       <section className="border border-sand rounded-lg p-6 mb-6">
         <h2 className="font-heading text-lg font-semibold text-deep-blue mb-1">{title}</h2>
-        <p className="text-sm text-warm-gray-400">No {title.toLowerCase()} with images available.</p>
+        <p className="text-base text-warm-gray-400">No {title.toLowerCase()} with images available.</p>
       </section>
     );
   }
@@ -268,45 +298,72 @@ function ItemSection({ title, description, items, isItemEnabled, toggleItem }: I
   return (
     <section className="border border-sand rounded-lg p-6 mb-6">
       <h2 className="font-heading text-lg font-semibold text-deep-blue mb-1">{title}</h2>
-      <p className="text-sm text-warm-gray-400 mb-4">{description}</p>
+      <p className="text-base text-warm-gray-400 mb-4">{description}</p>
       <div className="space-y-2">
         {items.map((item) => {
           const enabled = isItemEnabled(item.id, item.kind);
+          const position = getItemPosition(item.id, item.kind);
           return (
-            <button
+            <div
               key={item.id}
-              onClick={() => toggleItem(item.id, item.kind)}
-              aria-pressed={enabled}
-              className={`tap-target w-full flex items-center gap-3 p-3 rounded-lg border transition-colors text-left ${
+              className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
                 enabled
-                  ? 'border-sand bg-white hover:bg-sand-light'
+                  ? 'border-sand bg-white'
                   : 'border-sand-dark bg-warm-gray-100 opacity-50'
               }`}
             >
-              {/* Thumbnail */}
-              <div className="w-10 h-10 rounded overflow-hidden bg-sand-light flex-shrink-0 relative">
-                <SafeImage
-                  src={item.imageUrl}
-                  alt={item.label}
-                  fill
-                  className="object-cover"
-                  sizes="40px"
-                />
-              </div>
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-deep-blue truncate">{item.label}</p>
-                <p className="text-xs text-warm-gray-600 truncate capitalize">{item.subtitle}</p>
-              </div>
-              {/* Toggle indicator */}
-              <span className="flex-shrink-0">
-                {enabled ? (
-                  <Eye className="w-4 h-4 text-ocean" />
-                ) : (
-                  <EyeOff className="w-4 h-4 text-warm-gray-400" />
-                )}
-              </span>
-            </button>
+              {/* Toggle button */}
+              <button
+                onClick={() => toggleItem(item.id, item.kind)}
+                aria-pressed={enabled}
+                className="tap-target flex items-center gap-3 flex-1 min-w-0 text-left"
+              >
+                {/* Thumbnail */}
+                <div className="w-10 h-10 rounded overflow-hidden bg-sand-light flex-shrink-0 relative">
+                  <SafeImage
+                    src={item.imageUrl}
+                    alt={item.label}
+                    fill
+                    className="object-cover"
+                    style={{ objectPosition: position }}
+                    sizes="40px"
+                  />
+                </div>
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-deep-blue truncate">{item.label}</p>
+                  <p className="text-xs text-warm-gray-600 truncate capitalize">{item.subtitle}</p>
+                </div>
+                {/* Toggle indicator */}
+                <span className="flex-shrink-0">
+                  {enabled ? (
+                    <Eye className="w-4 h-4 text-ocean" />
+                  ) : (
+                    <EyeOff className="w-4 h-4 text-warm-gray-400" />
+                  )}
+                </span>
+              </button>
+              {/* Focal point selector */}
+              {enabled && (
+                <select
+                  value={position}
+                  onChange={(e) => setItemPosition(item.id, item.kind, e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  className={`${inputClasses} flex-shrink-0 max-w-40`}
+                  aria-label={`Image focal point for ${item.label}`}
+                >
+                  <option value="center">Center</option>
+                  <option value="top">Top</option>
+                  <option value="bottom">Bottom</option>
+                  <option value="left">Left</option>
+                  <option value="right">Right</option>
+                  <option value="top left">Top Left</option>
+                  <option value="top right">Top Right</option>
+                  <option value="bottom left">Bottom Left</option>
+                  <option value="bottom right">Bottom Right</option>
+                </select>
+              )}
+            </div>
           );
         })}
       </div>

@@ -25,10 +25,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const body = await request.json();
-  const businessName = (body.businessName || '').trim();
-  const contactName = (body.contactName || '').trim();
-  const email = (body.email || '').trim();
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== 'object') {
+    return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
+  }
+  const businessName = (typeof body.businessName === 'string' ? body.businessName : '').trim();
+  const contactName = (typeof body.contactName === 'string' ? body.contactName : '').trim();
+  const email = (typeof body.email === 'string' ? body.email : '').trim();
 
   if (!businessName || !contactName || !email) {
     return NextResponse.json(
@@ -43,10 +46,10 @@ export async function POST(request: NextRequest) {
         businessName,
         contactName,
         email,
-        abn: (body.abn || '').trim(),
-        phone: (body.phone || '').trim(),
-        description: (body.description || '').trim(),
-        password: (body.password || '').trim() || undefined,
+        abn: (typeof body.abn === 'string' ? body.abn : '').trim(),
+        phone: (typeof body.phone === 'string' ? body.phone : '').trim(),
+        description: (typeof body.description === 'string' ? body.description : '').trim(),
+        password: (typeof body.password === 'string' ? body.password : '').trim() || undefined,
       },
       auth.token
     );

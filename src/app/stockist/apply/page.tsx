@@ -3,6 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Send } from 'lucide-react';
+import { PageHeader } from '@/components/layout/page-header';
+import { Button } from '@/components/ui/button';
+import { FormField, inputClasses } from '@/components/ui/form-field';
+import { SuccessPanel } from '@/components/ui/success-panel';
 
 export default function StockistApplyPage() {
   const [form, setForm] = useState({
@@ -16,6 +20,7 @@ export default function StockistApplyPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   function validate() {
     const errs: Record<string, string> = {};
@@ -42,129 +47,124 @@ export default function StockistApplyPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    // An application creates a stockist record, so a double-click must not be
+    // able to send a second request while the first is still in flight.
+    if (submitting) return;
+
     const errs = validate();
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
     setSubmitError('');
-    const res = await fetch('/api/stockists/apply', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        businessName: form.businessName,
-        abn: form.abn.replace(/\s/g, ''),
-        contactName: form.contactName,
-        email: form.email,
-        phone: form.phone,
-        description: form.description,
-      }),
-    });
-    if (!res.ok) {
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/stockists/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          businessName: form.businessName,
+          abn: form.abn.replace(/\s/g, ''),
+          contactName: form.contactName,
+          email: form.email,
+          phone: form.phone,
+          description: form.description,
+        }),
+      });
+      if (!res.ok) {
+        setSubmitError('Something went wrong. Please try again.');
+        return;
+      }
+      setSubmitted(true);
+    } catch {
       setSubmitError('Something went wrong. Please try again.');
-      return;
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitted(true);
   }
 
   if (submitted) {
     return (
-      <div className="max-w-md mx-auto px-4 sm:px-6 page-y text-center">
-        <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6">
-          <Send className="w-8 h-8 text-success" />
-        </div>
-        <h1 className="font-heading text-2xl font-medium text-deep-blue mb-3">Application received</h1>
-        <p className="text-warm-gray-600">
-          Thanks for applying. We&apos;ll review your application and get back to you within a few business days.
-        </p>
-      </div>
+      <SuccessPanel
+        icon={Send}
+        title="Application received"
+        description="Thanks for applying. We'll review your application and get back to you within a few business days."
+      />
     );
   }
 
   return (
-    <div className="max-w-lg mx-auto px-4 sm:px-6 page-y">
-      <h1 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-2">
-        Apply to Become a Stockist
-      </h1>
-      <p className="text-warm-gray-600 mb-8">
-        Tell us about your business and we&apos;ll get you set up with wholesale access.
-      </p>
+    <PageHeader
+      title="Apply to Become a Stockist"
+      intro="Tell us about your business and we'll get you set up with wholesale access."
+      width="narrow"
+    >
+      <div className="max-w-lg mt-8">
+        <form onSubmit={handleSubmit} noValidate className="space-y-5">
+          <FormField label="Business Name" htmlFor="businessName" error={errors.businessName}>
+            <input id="businessName" type="text" value={form.businessName}
+              onChange={(e) => setForm({ ...form, businessName: e.target.value })}
+              className={inputClasses}
+              data-error={!!errors.businessName || undefined} />
+          </FormField>
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-5">
-        <Field label="Business Name" id="businessName" error={errors.businessName}>
-          <input id="businessName" type="text" value={form.businessName}
-            onChange={(e) => setForm({ ...form, businessName: e.target.value })}
-            className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean"
-            aria-describedby={errors.businessName ? 'businessName-error' : undefined}
-            aria-invalid={!!errors.businessName} />
-        </Field>
+          <FormField label="ABN (11 digits)" htmlFor="abn" error={errors.abn}>
+            <input id="abn" type="text" value={form.abn}
+              onChange={(e) => setForm({ ...form, abn: e.target.value })}
+              className={inputClasses}
+              data-error={!!errors.abn || undefined} />
+          </FormField>
 
-        <Field label="ABN (11 digits)" id="abn" error={errors.abn}>
-          <input id="abn" type="text" value={form.abn}
-            onChange={(e) => setForm({ ...form, abn: e.target.value })}
-            className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean"
-            aria-describedby={errors.abn ? 'abn-error' : undefined}
-            aria-invalid={!!errors.abn} />
-        </Field>
+          <FormField label="Contact Name" htmlFor="contactName" error={errors.contactName}>
+            <input id="contactName" type="text" value={form.contactName}
+              onChange={(e) => setForm({ ...form, contactName: e.target.value })}
+              className={inputClasses}
+              data-error={!!errors.contactName || undefined} />
+          </FormField>
 
-        <Field label="Contact Name" id="contactName" error={errors.contactName}>
-          <input id="contactName" type="text" value={form.contactName}
-            onChange={(e) => setForm({ ...form, contactName: e.target.value })}
-            className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean"
-            aria-describedby={errors.contactName ? 'contactName-error' : undefined}
-            aria-invalid={!!errors.contactName} />
-        </Field>
+          <FormField label="Email" htmlFor="email" error={errors.email}>
+            <input id="email" type="email" value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className={inputClasses}
+              data-error={!!errors.email || undefined} />
+          </FormField>
 
-        <Field label="Email" id="email" error={errors.email}>
-          <input id="email" type="email" value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean"
-            aria-describedby={errors.email ? 'email-error' : undefined}
-            aria-invalid={!!errors.email} />
-        </Field>
+          <FormField label="Phone" htmlFor="phone" error={errors.phone}>
+            <input id="phone" type="tel" value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              className={inputClasses}
+              data-error={!!errors.phone || undefined} />
+          </FormField>
 
-        <Field label="Phone" id="phone" error={errors.phone}>
-          <input id="phone" type="tel" value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean"
-            aria-describedby={errors.phone ? 'phone-error' : undefined}
-            aria-invalid={!!errors.phone} />
-        </Field>
-
-        <Field label="About your business (max 500 characters)" id="description" error={errors.description}>
-          <textarea id="description" rows={4} maxLength={500} value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean resize-y"
-            aria-describedby={errors.description ? 'description-error' : undefined}
-            aria-invalid={!!errors.description} />
-          <p className="text-xs text-warm-gray-400 mt-1">{form.description.length}/500</p>
-        </Field>
-
-        {submitError && (
-          <div className="bg-error/10 border border-error/20 text-error text-sm rounded-md p-3" role="alert" aria-live="assertive">
-            {submitError}
+          <div>
+            <FormField
+              label="About your business (max 500 characters)"
+              htmlFor="description"
+              error={errors.description}
+            >
+              <textarea id="description" rows={4} maxLength={500} value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                className={`${inputClasses} resize-y`}
+                data-error={!!errors.description || undefined} />
+            </FormField>
+            <p className="text-xs text-warm-gray-400 mt-1">{form.description.length}/500</p>
           </div>
-        )}
 
-        <button type="submit"
-          className="tap-target w-full flex items-center justify-center gap-2 px-6 py-3 btn-primary">
-          Submit application
-        </button>
-      </form>
+          {submitError && (
+            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert" aria-live="assertive">
+              {submitError}
+            </div>
+          )}
 
-      <p className="text-sm text-warm-gray-600 mt-6 text-center">
-        Already have an account?{' '}
-        <Link href="/login" className="text-ocean hover:underline font-medium">Log in</Link>
-      </p>
-    </div>
-  );
-}
+          <Button type="submit" fullWidth loading={submitting} loadingText="Submitting...">
+            Submit application
+          </Button>
+        </form>
 
-function Field({ label, id, error, children }: { label: string; id: string; error?: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-medium text-warm-gray-800 mb-1">{label}</label>
-      {children}
-      {error && <p id={`${id}-error`} className="text-sm text-error mt-1" aria-live="assertive">{error}</p>}
-    </div>
+        <p className="text-base text-warm-gray-600 mt-6 text-center">
+          Already have an account?{' '}
+          <Link href="/login" className="text-ocean hover:underline font-medium">Log in</Link>
+        </p>
+      </div>
+    </PageHeader>
   );
 }

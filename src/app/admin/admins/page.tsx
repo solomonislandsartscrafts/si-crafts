@@ -1,15 +1,43 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Shield, Edit, X } from 'lucide-react';
+import { Plus, Trash2, Shield, X } from 'lucide-react';
 import type { AdminUser, AdminRole } from '@/types';
 import { AdminLayout } from '@/components/admin';
 import { Select } from '@/components/ui/select';
+import { pageTitleClasses } from '@/components/layout/page-header';
+import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
+import { FormField, inputClasses } from '@/components/ui/form-field';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { Skeleton, SkeletonRegion } from '@/components/ui/skeleton';
+import { useToast } from '@/components/ui/toast';
+
+/** Row-shaped placeholder while the admin table loads. */
+function TableSkeleton() {
+  return (
+    <SkeletonRegion
+      label="Loading admin users"
+      className="bg-white rounded-lg shadow-card p-4 space-y-4"
+    >
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-4">
+          <Skeleton className="h-4 flex-1" />
+          <Skeleton className="h-4 w-40 hidden sm:block" />
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-12" />
+        </div>
+      ))}
+    </SkeletonRegion>
+  );
+}
 
 export default function AdminAdminsPage() {
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const { error: toastError } = useToast();
 
   useEffect(() => { loadAdmins(); }, []);
 
@@ -40,9 +68,19 @@ export default function AdminAdminsPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, token }),
     });
-    const result = await res.json();
+
+    // Check the status before parsing: a 5xx returns an HTML error page, and
+    // res.json() on that threw an unhandled rejection instead of showing the
+    // toast. A 4xx with a JSON body was worse — it parsed to a truthy object
+    // and the list reloaded as though the deactivation had worked.
+    if (!res.ok) {
+      toastError('Cannot deactivate this account.');
+      return;
+    }
+
+    const result = await res.json().catch(() => null);
     if (!result) {
-      alert('Cannot deactivate this account.');
+      toastError('Cannot deactivate this account.');
       return;
     }
     loadAdmins();
@@ -51,19 +89,26 @@ export default function AdminAdminsPage() {
   return (
     <AdminLayout requiredRole="super_admin">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-heading text-2xl font-medium text-deep-blue">
+        <h1 className={pageTitleClasses}>
           Admin Users
         </h1>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="tap-target inline-flex items-center gap-2 px-4 py-2 btn-primary text-sm"
-        >
+        <Button size="sm" onClick={() => setShowAddModal(true)}>
           <Plus className="w-4 h-4" /> Add Admin
-        </button>
+        </Button>
       </div>
 
       {loading ? (
-        <p className="text-warm-gray-400">Loading...</p>
+        <TableSkeleton />
+      ) : admins.length === 0 ? (
+        <EmptyState
+          icon={Shield}
+          title="No admin users yet."
+          action={
+            <Button size="sm" onClick={() => setShowAddModal(true)}>
+              <Plus className="w-4 h-4" /> Add Admin
+            </Button>
+          }
+        />
       ) : (
         <div className="bg-white rounded-lg shadow-card overflow-hidden">
           <table className="w-full text-sm">
@@ -88,9 +133,9 @@ export default function AdminAdminsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${admin.isActive ? 'bg-success/10 text-success' : 'bg-warm-gray-200 text-warm-gray-600'}`}>
+                    <StatusBadge status={admin.isActive ? 'success' : 'neutral'}>
                       {admin.isActive ? 'Active' : 'Inactive'}
-                    </span>
+                    </StatusBadge>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
@@ -192,47 +237,41 @@ function AddAdminModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
 
         <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
           {error && (
-            <div className="bg-error/10 border border-error/20 text-error text-sm rounded-md p-3" role="alert">
+            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert">
               {error}
             </div>
           )}
 
-          <div>
-            <label htmlFor="admin-name" className="block text-sm font-medium text-warm-gray-800 mb-1">Full Name *</label>
+          <FormField label="Full Name *" htmlFor="admin-name">
             <input
-              id="admin-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+              className={inputClasses}
             />
-          </div>
+          </FormField>
 
-          <div>
-            <label htmlFor="admin-email" className="block text-sm font-medium text-warm-gray-800 mb-1">Email *</label>
+          <FormField label="Email *" htmlFor="admin-email">
             <input
-              id="admin-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+              className={inputClasses}
             />
-          </div>
+          </FormField>
 
-          <div>
-            <label htmlFor="admin-password" className="block text-sm font-medium text-warm-gray-800 mb-1">Password *</label>
+          <FormField label="Password *" htmlFor="admin-password">
             <input
-              id="admin-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Minimum 8 characters"
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+              className={inputClasses}
             />
-          </div>
+          </FormField>
 
           <div>
-            <label htmlFor="admin-role" className="block text-sm font-medium text-warm-gray-800 mb-1">Role *</label>
+            <label htmlFor="admin-role" className="block text-base font-medium text-warm-gray-800 mb-1">Role *</label>
             <Select
               id="admin-role"
               value={role}
@@ -251,21 +290,12 @@ function AddAdminModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={saving}
-              className="tap-target px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light disabled:opacity-50"
-            >
+            <Button variant="secondary" onClick={onClose} disabled={saving}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="tap-target px-6 py-3 btn-primary"
-            >
-              {saving ? 'Creating...' : 'Create Admin'}
-            </button>
+            </Button>
+            <Button type="submit" loading={saving} loadingText="Creating...">
+              Create Admin
+            </Button>
           </div>
         </form>
       </div>

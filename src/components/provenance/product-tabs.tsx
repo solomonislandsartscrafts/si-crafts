@@ -1,7 +1,10 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
+import { ChevronDown } from 'lucide-react';
+import { ButtonLink } from '@/components/ui/button';
+import { materialLabel, productTypeLabel } from '@/lib/labels';
 import type { Product } from '@/types';
 
 interface ProductTabsProps {
@@ -10,184 +13,105 @@ interface ProductTabsProps {
   craftSlug?: string;
 }
 
-const TAB_IDS = ['specifications', 'authenticity', 'how-its-made', 'how-to-buy'] as const;
-type TabId = (typeof TAB_IDS)[number];
+const SECTION_IDS = ['details', 'how-its-made', 'authenticity', 'where-to-buy'] as const;
+type SectionId = (typeof SECTION_IDS)[number];
 
-const TAB_LABELS: Record<TabId, string> = {
-  specifications: 'Specifications',
-  authenticity: 'Authenticity',
+const SECTION_LABELS: Record<SectionId, string> = {
+  details: 'Details',
   'how-its-made': 'How it\u2019s made',
-  'how-to-buy': 'How to buy',
+  authenticity: 'Authenticity',
+  'where-to-buy': 'Where to buy',
 };
 
+/**
+ * Reference information for a piece, presented as an accordion on all screens.
+ *
+ * All labels are always visible, content opens directly beneath its trigger,
+ * and large tap targets make it comfortable at every screen size.
+ */
 export function ProductTabs({ product, craftName, craftSlug }: ProductTabsProps) {
-  const [activeTab, setActiveTab] = useState<TabId>('specifications');
-  const tabListRef = useRef<HTMLDivElement>(null);
-  const [showLeftGradient, setShowLeftGradient] = useState(false);
-  const [showRightGradient, setShowRightGradient] = useState(false);
+  const [active, setActive] = useState<SectionId | null>('details');
 
-  // Check overflow for scroll gradient indicators
-  const checkOverflow = useCallback(() => {
-    const el = tabListRef.current;
-    if (!el) return;
-    setShowLeftGradient(el.scrollLeft > 4);
-    setShowRightGradient(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
-  }, []);
-
-  useEffect(() => {
-    checkOverflow();
-    const el = tabListRef.current;
-    if (!el) return;
-    el.addEventListener('scroll', checkOverflow, { passive: true });
-    window.addEventListener('resize', checkOverflow);
-    return () => {
-      el.removeEventListener('scroll', checkOverflow);
-      window.removeEventListener('resize', checkOverflow);
-    };
-  }, [checkOverflow]);
-
-  // Keyboard navigation — left/right arrows move between tabs
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    const currentIndex = TAB_IDS.indexOf(activeTab);
-    let nextIndex = currentIndex;
-
-    if (e.key === 'ArrowRight') {
-      nextIndex = (currentIndex + 1) % TAB_IDS.length;
-    } else if (e.key === 'ArrowLeft') {
-      nextIndex = (currentIndex - 1 + TAB_IDS.length) % TAB_IDS.length;
-    } else {
-      return;
-    }
-
-    e.preventDefault();
-    const nextTab = TAB_IDS[nextIndex];
-    setActiveTab(nextTab);
-
-    // Focus the new tab button
-    const btn = document.getElementById(`tab-${nextTab}`);
-    btn?.focus();
+  const panels: Record<SectionId, React.ReactNode> = {
+    details: <DetailsContent product={product} />,
+    'how-its-made': (
+      <ProcessContent
+        materialCategory={product.materialCategory}
+        craftName={craftName}
+        craftSlug={craftSlug}
+      />
+    ),
+    authenticity: <AuthenticityContent />,
+    'where-to-buy': <WhereToBuyContent />,
   };
 
   return (
-    <div>
-      {/* Tab list with scroll container */}
-      <div className="relative">
-        {/* Left overflow gradient */}
-        {showLeftGradient && (
-          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-        )}
-
-        {/* Tab bar — horizontally scrollable, single line */}
-        <div
-          ref={tabListRef}
-          role="tablist"
-          aria-label="Product information"
-          onKeyDown={handleKeyDown}
-          className="flex overflow-x-auto scrollbar-hide border-b border-sand-dark -mb-px"
-        >
-          {TAB_IDS.map((id) => {
-            const isActive = activeTab === id;
-            return (
+    <div className="border-t border-sand">
+      {SECTION_IDS.map((id) => {
+        const isOpen = active === id;
+        return (
+          <div key={id} className="border-b border-sand">
+            {/* h2, not h3: these sections are siblings of "Meet the Maker",
+                not subsections of it. Nesting them under it told screen
+                reader users that "Where to buy" was part of the maker's bio. */}
+            <h2>
               <button
-                key={id}
-                role="tab"
-                aria-selected={isActive}
-                aria-controls={`panel-${id}`}
-                id={`tab-${id}`}
-                tabIndex={isActive ? 0 : -1}
-                onClick={() => setActiveTab(id)}
-                className={`tap-target relative whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean focus-visible:ring-offset-2 ${
-                  isActive
-                    ? 'text-deep-blue'
-                    : 'text-warm-gray-400 hover:text-warm-gray-800'
-                }`}
+                type="button"
+                id={`acc-trigger-${id}`}
+                aria-expanded={isOpen}
+                aria-controls={`acc-panel-${id}`}
+                onClick={() => setActive(isOpen ? null : id)}
+                className="tap-target w-full flex items-center justify-between gap-3 py-4 text-left font-heading text-base font-semibold text-deep-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
               >
-                {TAB_LABELS[id]}
-                {/* Active underline indicator */}
-                {isActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-deep-blue rounded-t-sm" />
-                )}
+                {SECTION_LABELS[id]}
+                <ChevronDown
+                  className={`w-5 h-5 flex-shrink-0 text-warm-gray-600 transition-transform duration-200 ${
+                    isOpen ? 'rotate-180' : ''
+                  }`}
+                  aria-hidden="true"
+                />
               </button>
-            );
-          })}
-        </div>
-
-        {/* Right overflow gradient */}
-        {showRightGradient && (
-          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-        )}
-      </div>
-
-      {/* Tab panels */}
-      <div className="pt-5">
-        <div
-          role="tabpanel"
-          id="panel-specifications"
-          aria-labelledby="tab-specifications"
-          hidden={activeTab !== 'specifications'}
-          tabIndex={0}
-        >
-          <SpecificationsContent product={product} />
-        </div>
-
-        <div
-          role="tabpanel"
-          id="panel-authenticity"
-          aria-labelledby="tab-authenticity"
-          hidden={activeTab !== 'authenticity'}
-          tabIndex={0}
-        >
-          <AuthenticityContent />
-        </div>
-
-        <div
-          role="tabpanel"
-          id="panel-how-its-made"
-          aria-labelledby="tab-how-its-made"
-          hidden={activeTab !== 'how-its-made'}
-          tabIndex={0}
-        >
-          <ProcessContent
-            materialCategory={product.materialCategory}
-            craftName={craftName}
-            craftSlug={craftSlug}
-          />
-        </div>
-
-        <div
-          role="tabpanel"
-          id="panel-how-to-buy"
-          aria-labelledby="tab-how-to-buy"
-          hidden={activeTab !== 'how-to-buy'}
-          tabIndex={0}
-        >
-          <HowToBuyContent />
-        </div>
-      </div>
+            </h2>
+            <div
+              role="region"
+              id={`acc-panel-${id}`}
+              aria-labelledby={`acc-trigger-${id}`}
+              hidden={!isOpen}
+              className="pb-5"
+            >
+              {panels[id]}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
 
-function SpecificationsContent({ product }: { product: Product }) {
+function DetailsContent({ product }: { product: Product }) {
   return (
     <dl className="grid grid-cols-2 gap-y-5 gap-x-8">
       <div>
         <dt className="text-xs text-ocean uppercase tracking-wider font-semibold mb-1">Material</dt>
-        <dd className="text-sm text-warm-gray-800 capitalize">{product.materialCategory}</dd>
+        <dd className="text-base text-warm-gray-800 capitalize">
+          {materialLabel(product.materialCategory)}
+        </dd>
       </div>
       <div>
         <dt className="text-xs text-ocean uppercase tracking-wider font-semibold mb-1">Type</dt>
-        <dd className="text-sm text-warm-gray-800 capitalize">{product.productType}</dd>
+        <dd className="text-base text-warm-gray-800 capitalize">
+          {productTypeLabel(product.productType)}
+        </dd>
       </div>
       {product.dimensions && (
         <div>
           <dt className="text-xs text-ocean uppercase tracking-wider font-semibold mb-1">Dimensions</dt>
-          <dd className="text-sm text-warm-gray-800">{product.dimensions}</dd>
+          <dd className="text-base text-warm-gray-800">{product.dimensions}</dd>
         </div>
       )}
       <div>
         <dt className="text-xs text-ocean uppercase tracking-wider font-semibold mb-1">Reference</dt>
-        <dd className="text-sm font-mono font-bold text-warm-gray-800">{product.productCode}</dd>
+        <dd className="text-base font-mono font-bold text-warm-gray-800">{product.productCode}</dd>
       </div>
     </dl>
   );
@@ -195,7 +119,7 @@ function SpecificationsContent({ product }: { product: Product }) {
 
 function AuthenticityContent() {
   return (
-    <div className="space-y-3 text-sm text-warm-gray-600 leading-relaxed">
+    <div className="space-y-3 text-base text-warm-gray-600 leading-relaxed">
       <p>
         Every piece comes with a product tag stating the maker&apos;s name and province in
         Solomon Islands, linking to this provenance page — your guarantee it was handmade by the
@@ -236,7 +160,7 @@ function ProcessContent({
     'This piece is made using traditional techniques passed down through generations.';
 
   return (
-    <div className="space-y-3 text-sm text-warm-gray-600 leading-relaxed">
+    <div className="space-y-3 text-base text-warm-gray-600 leading-relaxed">
       <p>{processText}</p>
       {craftSlug && craftName && (
         <Link
@@ -250,28 +174,43 @@ function ProcessContent({
   );
 }
 
-function HowToBuyContent() {
+function WhereToBuyContent() {
   return (
-    <div className="space-y-4 text-sm text-warm-gray-600 leading-relaxed">
-      <p>
-        Available exclusively to approved wholesale stockists. Apply for an account
-        to place orders. This piece is sold to approved stockists only. Retail
-        customers can find it through one of our stores.
+    <div className="space-y-5">
+      <p className="text-base text-warm-gray-600 leading-relaxed">
+        We supply museum and gallery shops in Australia. Visit a stockist to buy
+        a piece in person, or enquire about wholesale for your own shop.
       </p>
-      <div className="flex flex-wrap gap-3">
+
+      <div className="flex flex-col sm:flex-row flex-wrap gap-3">
+        <ButtonLink href="/stockists">Find a stockist</ButtonLink>
+        <ButtonLink href="/wholesale" variant="secondary">
+          Wholesale enquiries
+        </ButtonLink>
+      </div>
+
+      <p className="text-base text-warm-gray-600 leading-relaxed">
+        Run a museum or gallery shop?{' '}
         <Link
           href="/stockist/apply"
-          className="tap-target inline-flex items-center px-5 py-2.5 bg-terracotta hover:bg-terracotta-dark text-white text-sm font-medium rounded-md transition-colors"
+          className="text-ocean hover:text-ocean-dark font-medium"
         >
-          Apply for stockist account
-        </Link>
+          Apply for a stockist account
+        </Link>{' '}
+        to see wholesale pricing and place orders.
+      </p>
+
+      <p className="text-base text-warm-gray-600 border-l-2 border-sand pl-4 leading-relaxed">
+        When you buy this piece through a stockist, the maker receives the price
+        they set — paid upfront, before the piece reaches Australia. No
+        middlemen, no commission.{' '}
         <Link
-          href="/stockists"
-          className="tap-target inline-flex items-center px-5 py-2.5 border border-sand-dark text-warm-gray-800 text-sm font-medium rounded-md hover:border-deep-blue hover:text-deep-blue transition-colors"
+          href="/our-promise"
+          className="text-ocean hover:text-ocean-dark font-medium"
         >
-          Find a stockist
+          Learn about our values →
         </Link>
-      </div>
+      </p>
     </div>
   );
 }

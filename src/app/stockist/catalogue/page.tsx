@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { LogOut } from 'lucide-react';
 import type { Product, Maker } from '@/types';
 import { MakerFilter } from '@/components/catalogue/maker-filter';
@@ -11,6 +10,10 @@ import { StockistProductGrid } from '@/components/catalogue/stockist-product-gri
 import { validateStockistSession } from '@/lib/auth-client';
 import { getWholesaleProducts } from '@/services/products';
 import { getPublicMakers } from '@/services/makers';
+import { pageTitleClasses } from '@/components/layout/page-header';
+import { Button, ButtonLink } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
+import { SkeletonCardGrid } from '@/components/ui/skeleton';
 
 const MATERIAL_LABELS: Record<string, string> = { pandanus: 'Pandanus', wood: 'Wood', shells: 'Shells', 'bush-twine': 'Bush-twine' };
 
@@ -81,7 +84,7 @@ export default function StockistCataloguePage() {
   if (!authenticated || loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
-        <p className="text-warm-gray-400">Loading wholesale catalogue...</p>
+        <SkeletonCardGrid />
       </div>
     );
   }
@@ -91,27 +94,19 @@ export default function StockistCataloguePage() {
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
-            Wholesale Catalogue
-          </h1>
-          <p className="text-sm text-warm-gray-600 mt-1">Pricing shown in AUD (ex. GST)</p>
+          <h1 className={pageTitleClasses}>Wholesale Catalogue</h1>
+          <p className="text-base text-warm-gray-600 mt-1">Pricing shown in AUD (ex. GST)</p>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/stockist/requests"
-            className="tap-target inline-flex items-center gap-2 px-4 py-2 border border-sand-dark text-warm-gray-600 hover:bg-sand-light rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean">
+          <ButtonLink href="/stockist/requests" variant="secondary" size="sm">
             Requests
-          </Link>
-          <Link href="/stockist/orders"
-            className="tap-target inline-flex items-center gap-2 px-4 py-2 btn-primary text-sm">
+          </ButtonLink>
+          <ButtonLink href="/stockist/orders" size="sm">
             Order
-          </Link>
-          <button className="tap-target inline-flex items-center gap-2 px-4 py-2 border border-sand-dark text-warm-gray-600 hover:bg-sand-light rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean">
-            Price List
-          </button>
-          <button onClick={handleLogout}
-            className="tap-target inline-flex items-center gap-2 px-4 py-2 text-sm text-warm-gray-600 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean">
+          </ButtonLink>
+          <Button variant="secondary" size="sm" onClick={handleLogout}>
             <LogOut className="w-4 h-4" /> Logout
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -128,11 +123,18 @@ export default function StockistCataloguePage() {
       </p>
 
       {filteredProducts.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-warm-gray-600 mb-4">No products match your filters.</p>
-          <button onClick={() => { setSelectedMaker(null); setSearchQuery(''); }}
-            className="text-ocean hover:text-ocean-dark font-medium">Clear all filters</button>
-        </div>
+        <EmptyState
+          title="No products match your filters."
+          action={
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => { setSelectedMaker(null); setSearchQuery(''); }}
+            >
+              Clear all filters
+            </Button>
+          }
+        />
       ) : (
         <div className="space-y-12">
           {Object.entries(grouped).map(([key, groupProducts]) => (

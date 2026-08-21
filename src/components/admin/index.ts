@@ -8,3 +8,4 @@ export { ActivityFeed } from './activity-feed';
 export { SetupProgressCard } from './setup-progress-card';
 export { SetupWizard } from './setup-wizard';
 export { AdminGuide, GUIDE_SECTIONS } from './admin-guide';
+export { UserFormModal } from './user-form-modal';

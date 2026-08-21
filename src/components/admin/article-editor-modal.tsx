@@ -10,6 +10,9 @@ import { singleAltError, htmlHasImageMissingAlt } from '@/lib/image-alt';
 import { scrollToFirstError } from '@/lib/scroll-to-error';
 import { useToast } from '@/components/ui/toast';
 import { useModalA11y } from '@/lib/use-modal-a11y';
+import { Button } from '@/components/ui/button';
+import { FormField, inputClasses } from '@/components/ui/form-field';
+
 interface ArticleEditorModalProps {
   article: Article | null;
   onClose: () => void;
@@ -146,36 +149,32 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
         {/* Form */}
         <form ref={formRef} onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
           {saveError && (
-            <div className="bg-error/10 border border-error/20 text-error text-sm rounded-md p-3" role="alert">
+            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert">
               {saveError}
             </div>
           )}
 
           {/* Title */}
-          <div>
-            <label htmlFor="article-title" className="block text-sm font-medium text-warm-gray-800 mb-1">Title *</label>
+          <FormField label="Title *" htmlFor="article-title">
             <input
-              id="article-title"
               type="text"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               placeholder="Your article title"
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 text-lg font-heading focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+              className={`${inputClasses} text-lg font-heading`}
             />
-          </div>
+          </FormField>
 
           {/* Excerpt */}
-          <div>
-            <label htmlFor="article-excerpt" className="block text-sm font-medium text-warm-gray-800 mb-1">Excerpt</label>
+          <FormField label="Excerpt" htmlFor="article-excerpt">
             <textarea
-              id="article-excerpt"
               value={form.excerpt}
               onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
               rows={2}
               placeholder="Brief summary shown on cards (1-2 sentences)"
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent resize-y"
+              className={`${inputClasses} resize-y`}
             />
-          </div>
+          </FormField>
 
           {/* Cover image */}
           <ImageUpload
@@ -200,49 +199,41 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
 
           {/* Meta row */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div>
-              <label htmlFor="article-author" className="block text-sm font-medium text-warm-gray-800 mb-1">Author</label>
+            <FormField label="Author" htmlFor="article-author">
               <input
-                id="article-author"
                 type="text"
                 value={form.authorName}
                 onChange={(e) => setForm({ ...form, authorName: e.target.value })}
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+                className={inputClasses}
               />
-            </div>
-            <div>
-              <label htmlFor="article-author-role" className="block text-sm font-medium text-warm-gray-800 mb-1">Author Role</label>
+            </FormField>
+            <FormField label="Author Role" htmlFor="article-author-role">
               <input
-                id="article-author-role"
                 type="text"
                 value={form.authorRole}
                 onChange={(e) => setForm({ ...form, authorRole: e.target.value })}
                 placeholder="e.g. Editor, Volunteer"
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+                className={inputClasses}
               />
-            </div>
-            <div>
-              <label htmlFor="article-tags" className="block text-sm font-medium text-warm-gray-800 mb-1">Tags (comma-separated)</label>
+            </FormField>
+            <FormField label="Tags (comma-separated)" htmlFor="article-tags">
               <input
-                id="article-tags"
                 type="text"
                 value={form.tags}
                 onChange={(e) => setForm({ ...form, tags: e.target.value })}
                 placeholder="Behind the scenes, Makers"
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+                className={inputClasses}
               />
-            </div>
-            <div>
-              <label htmlFor="article-reading" className="block text-sm font-medium text-warm-gray-800 mb-1">Reading time (min)</label>
+            </FormField>
+            <FormField label="Reading time (min)" htmlFor="article-reading">
               <input
-                id="article-reading"
                 type="number"
                 min="1"
                 value={form.readingTimeMinutes}
                 onChange={(e) => setForm({ ...form, readingTimeMinutes: parseInt(e.target.value) || 3 })}
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+                className={inputClasses}
               />
-            </div>
+            </FormField>
           </div>
 
           {/* Toggles */}
@@ -254,7 +245,7 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
                 onChange={(e) => setForm({ ...form, published: e.target.checked })}
                 className="w-4 h-4 rounded border-sand-dark text-ocean focus:ring-ocean"
               />
-              <span className="text-sm text-warm-gray-800">Published</span>
+              <span className="text-base text-warm-gray-800">Published</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -263,27 +254,18 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
                 onChange={(e) => setForm({ ...form, featured: e.target.checked })}
                 className="w-4 h-4 rounded border-sand-dark text-ocean focus:ring-ocean"
               />
-              <span className="text-sm text-warm-gray-800">Featured (hero on news page)</span>
+              <span className="text-base text-warm-gray-800">Featured (hero on news page)</span>
             </label>
           </div>
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
-            <button
-              type="button"
-              onClick={handleDismiss}
-              disabled={saving}
-              className="tap-target px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light disabled:opacity-50"
-            >
+            <Button variant="secondary" onClick={handleDismiss} disabled={saving}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="tap-target px-6 py-3 btn-primary"
-            >
-              {saving ? 'Saving...' : article ? 'Update Article' : 'Publish Article'}
-            </button>
+            </Button>
+            <Button type="submit" loading={saving} loadingText="Saving...">
+              {article ? 'Update Article' : 'Publish Article'}
+            </Button>
           </div>
         </form>
       </div>

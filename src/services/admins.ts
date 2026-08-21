@@ -1,8 +1,9 @@
-import { apiGet, apiPost, getAdminToken } from '@/lib/api-client';
+import { apiGet, apiPost, apiPatch, getAdminToken } from '@/lib/api-client';
 import type { AdminUser, AdminRole } from '@/types';
 
 interface AdminResponse {
   id: number;
+  user_id?: number;
   email: string;
   name: string;
   role: string;
@@ -14,6 +15,7 @@ interface AdminResponse {
 function mapAdmin(raw: AdminResponse): AdminUser {
   return {
     id: String(raw.id),
+    userId: raw.user_id !== undefined ? String(raw.user_id) : undefined,
     name: raw.name,
     email: raw.email,
     role: raw.role as AdminRole,
@@ -62,16 +64,53 @@ export async function createAdmin(data: CreateAdminInput): Promise<AdminUser> {
   return mapAdmin(raw);
 }
 
-export async function updateAdmin(id: string, data: Partial<AdminUser>): Promise<AdminUser | null> {
-  // Admin updates go through the list endpoint — simplified for now
-  const admins = await getAllAdmins();
-  return admins.find((a) => a.id === id) ?? null;
+/**
+ * Update an admin.
+ *
+ * Admin profiles are edited through the accounts endpoint, because name, email
+ * and password live on the login account rather than the profile. `id` is the
+ * admin profile id, so the matching account id is looked up first.
+ */
+export async function updateAdmin(
+  id: string,
+  data: Partial<AdminUser>,
+  token?: string
+): Promise<AdminUser | null> {
+  const authToken = token || getAdminToken();
+  const admins = await getAllAdmins(authToken);
+  const target = admins.find((a) => a.id === id);
+  if (!target?.userId) return null;
+
+  const body: Record<string, unknown> = {};
+  if (data.name !== undefined) body.name = data.name;
+  if (data.email !== undefined) body.email = data.email;
+  // Removing admin access means dropping the role, not disabling the login.
+  if (data.isActive === false) body.role = 'user';
+  else if (data.role !== undefined) body.role = data.role;
+
+  if (Object.keys(body).length === 0) return target;
+
+  try {
+    await apiPatch(`/api/auth/users/${target.userId}/`, body, authToken);
+  } catch (err) {
+    // Returning null tells the caller "couldn't update", but swallowing the
+    // error left no way to tell a permission problem from an unreachable
+    // backend. Keep the same return, log the reason.
+    console.error(`[admins] Failed to update admin ${id}:`, err);
+    return null;
+  }
+
+  const refreshed = await getAllAdmins(authToken);
+  return refreshed.find((a) => a.id === id) ?? { ...target, ...data };
 }
 
-export async function deactivateAdmin(id: string, requestingAdminId: string): Promise<AdminUser | null> {
+export async function deactivateAdmin(
+  id: string,
+  requestingAdminId: string,
+  token?: string
+): Promise<AdminUser | null> {
   if (id === requestingAdminId) return null;
-  // Deactivation handled via backend admin interface
-  return updateAdmin(id, { isActive: false });
+  return updateAdmin(id, { isActive: false }, token);
 }
 
 

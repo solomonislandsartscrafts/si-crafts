@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, User, Shield, ShoppingCart } from 'lucide-react';
 import { MobileNav } from './mobile-nav';
+import { Logo } from './logo';
+import { ButtonLink } from '@/components/ui/button';
 import { getCart } from '@/lib/cart';
 
 const NAV_LINKS = [
@@ -49,9 +51,10 @@ export function Header() {
           <div className="flex items-center justify-between h-16">
             <Link
               href="/"
-              className="font-heading text-xl font-semibold text-deep-blue hover:text-ocean transition-colors"
+              className="tap-target inline-flex items-center rounded-sm transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-ocean"
+              aria-label="Solomon Islands Arts Crafts — home"
             >
-              SIAC
+              <Logo />
             </Link>
 
             <nav className="hidden md:flex items-center gap-1" aria-label="Primary">
@@ -70,41 +73,43 @@ export function Header() {
                 </Link>
               ))}
 
-              {/* Auth button - changes based on login state */}
+              {/* Auth control — changes based on login state. Uses ButtonLink so
+                  the header matches every other button on the site. */}
               {authState === 'admin' && (
-                <Link
+                <ButtonLink
                   href="/admin/dashboard"
-                  className="tap-target inline-flex items-center gap-1.5 ml-2 px-4 py-2 btn-admin text-sm"
+                  variant="admin"
+                  size="sm"
+                  className="ml-2"
                 >
-                  <Shield className="w-4 h-4" />
+                  <Shield className="w-4 h-4" aria-hidden="true" />
                   Admin
-                </Link>
+                </ButtonLink>
               )}
               {authState === 'stockist' && (
                 <>
                   <Link
                     href="/stockist/orders"
-                    className="tap-target relative ml-2 p-2 text-warm-gray-600 hover:text-deep-blue transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                    className="tap-target relative ml-2 flex items-center justify-center rounded-md text-warm-gray-600 hover:text-deep-blue hover:bg-sand-light transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
                     aria-label="View order"
                   >
-                    <ShoppingCart className="w-5 h-5" />
+                    <ShoppingCart className="w-5 h-5" aria-hidden="true" />
                     <CartBadge />
                   </Link>
-                  <Link
-                    href="/stockist/account"
-                    className="tap-target inline-flex items-center gap-1.5 ml-1 px-5 py-2 btn-primary text-sm"
-                  >
+                  <ButtonLink href="/stockist/account" size="sm" className="ml-1">
                     My Account
-                  </Link>
+                  </ButtonLink>
                 </>
               )}
               {authState === 'none' && (
-                <Link
+                <ButtonLink
                   href="/login"
-                  className="tap-target inline-flex items-center ml-2 px-5 py-2 btn-secondary text-sm"
+                  variant="secondary"
+                  size="sm"
+                  className="ml-2"
                 >
                   Login
-                </Link>
+                </ButtonLink>
               )}
             </nav>
 
@@ -153,7 +158,7 @@ function CartBadge() {
   if (count === 0) return null;
 
   return (
-    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center bg-terracotta text-white text-[10px] font-bold rounded-full px-1">
+    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center bg-brand-green text-white text-[10px] font-bold rounded-full px-1">
       {count}
     </span>
   );

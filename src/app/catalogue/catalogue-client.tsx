@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { Lock } from 'lucide-react';
+import { Lock, PackageSearch } from 'lucide-react';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import type { Product, Maker } from '@/types';
 import { MakerFilter } from '@/components/catalogue/maker-filter';
 import { MaterialFilter } from '@/components/catalogue/material-filter';
@@ -98,13 +100,22 @@ export function CatalogueClient({ products, makers, materialCategories }: Catalo
     return groups;
   }, [filteredProducts]);
 
+  const hasActiveFilters =
+    selectedMaker !== null || selectedMaterial !== null || searchQuery.trim() !== '';
+
+  function clearFilters() {
+    setSelectedMaker(null);
+    setSelectedMaterial(null);
+    setSearchQuery('');
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">
       {/* Login prompt — only show when NOT logged in */}
       {!isStockist && (
-        <div className="mb-8 flex items-center gap-2 text-sm">
-          <Lock className="w-4 h-4 text-ocean flex-shrink-0" />
-          <p className="text-warm-gray-600">
+        <div className="mb-8 flex items-center gap-2">
+          <Lock className="w-4 h-4 text-ocean flex-shrink-0" aria-hidden="true" />
+          <p className="text-base text-warm-gray-600">
             <Link href="/login" className="text-ocean font-medium hover:underline">
               Log in as a stockist
             </Link>{' '}
@@ -114,7 +125,7 @@ export function CatalogueClient({ products, makers, materialCategories }: Catalo
       )}
 
       {/* Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-10">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <MaterialFilter
             selected={selectedMaterial}
@@ -130,28 +141,44 @@ export function CatalogueClient({ products, makers, materialCategories }: Catalo
         </div>
       </div>
 
-      {/* Product groups */}
-      <p className="sr-only" aria-live="polite" aria-atomic="true">
-        {filteredProducts.length === 0
-          ? 'No products match your current filters.'
-          : `Showing ${filteredProducts.length} product${filteredProducts.length === 1 ? '' : 's'}.`}
-      </p>
-      {filteredProducts.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-warm-gray-600 mb-4">
-            No products match your current filters.
-          </p>
-          <button
-            onClick={() => {
-              setSelectedMaker(null);
-              setSelectedMaterial(null);
-              setSearchQuery('');
-            }}
-            className="text-ocean hover:text-ocean-dark font-medium transition-colors"
-          >
+      {/* Result count + clear. Both were previously missing for sighted users:
+          the count was sr-only, and Clear all filters only appeared once you
+          had already hit zero results. */}
+      <div className="flex flex-wrap items-center gap-4 mb-8">
+        <p
+          className="text-base text-warm-gray-600"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {filteredProducts.length === 0 ? (
+            'No pieces match your current filters.'
+          ) : (
+            <>
+              <span className="font-semibold text-warm-gray-800">
+                {filteredProducts.length}
+              </span>{' '}
+              {filteredProducts.length === 1 ? 'piece' : 'pieces'}
+            </>
+          )}
+        </p>
+        {hasActiveFilters && (
+          <Button variant="secondary" size="sm" onClick={clearFilters}>
             Clear all filters
-          </button>
-        </div>
+          </Button>
+        )}
+      </div>
+
+      {filteredProducts.length === 0 ? (
+        <EmptyState
+          icon={PackageSearch}
+          title="No pieces match your current filters."
+          description="Try a different material, maker, or search term."
+          action={
+            <Button variant="secondary" size="sm" onClick={clearFilters}>
+              Clear all filters
+            </Button>
+          }
+        />
       ) : (
         <div className="space-y-16">
           {materialCategories.map((category) => {
@@ -159,7 +186,7 @@ export function CatalogueClient({ products, makers, materialCategories }: Catalo
             if (!groupProducts || groupProducts.length === 0) return null;
             return (
               <section key={category.value}>
-                <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4 capitalize border-l-2 border-terracotta pl-3">
+                <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4 capitalize border-l-2 border-brand-green pl-3">
                   {category.label}
                 </h2>
                 {isStockist ? (

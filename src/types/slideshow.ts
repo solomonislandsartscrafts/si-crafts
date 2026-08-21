@@ -8,6 +8,8 @@ export interface SlideItemToggle {
   id: string;
   kind: SlideCategory;
   enabled: boolean;
+  /** CSS object-position to control image crop focus (e.g. 'top', 'center', 'bottom'). Defaults to 'center'. */
+  objectPosition?: string;
 }
 
 /**

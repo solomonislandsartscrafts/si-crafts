@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { X, LogIn, User, Shield, ShoppingBag, BookOpen, Users, Palette, Newspaper, Info, Package, Mail, Home } from 'lucide-react';
+import { X, LogIn, User, Shield, ShoppingBag, Users, Palette, Newspaper, Info, Package, Mail, Home } from 'lucide-react';
+
 
 const NAV_LINKS = [
   { href: '/', label: 'Home', icon: Home },
@@ -111,8 +112,10 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
       >
         {/* Top bar */}
         <div className="flex items-center justify-between px-5 py-5">
-          <span className="font-heading text-lg font-semibold text-deep-blue">
-            SIAC
+          <span className="inline-flex items-center">
+            <span className="font-heading text-lg font-semibold text-deep-blue leading-none">
+              SIAC
+            </span>
           </span>
           <button
             ref={closeButtonRef}
@@ -175,12 +178,12 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
           )}
           {authState === 'none' && (
             <Link
-              href="/stockist/login"
+              href="/login"
               onClick={onClose}
-              className="tap-target flex items-center justify-center gap-2 w-full px-4 py-3 bg-terracotta text-white rounded-lg font-medium transition-colors hover:bg-terracotta-dark focus:outline-none focus:ring-2 focus:ring-terracotta-light"
+              className="tap-target w-full btn-primary"
             >
               <LogIn className="w-5 h-5" />
-              Stockist Login
+              Login
             </Link>
           )}
         </div>

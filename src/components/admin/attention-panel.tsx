@@ -3,16 +3,17 @@
 import Link from 'next/link';
 import { AlertTriangle, CheckCircle2, Info, OctagonAlert, ChevronRight } from 'lucide-react';
 import type { AttentionItem, AttentionSeverity } from '@/types';
+import { StatusBadge } from '@/components/ui/status-badge';
 
 interface AttentionPanelProps {
   items: AttentionItem[];
 }
 
 const SEVERITY = {
-  error: { Icon: OctagonAlert, icon: 'text-error', chip: 'bg-error/10 text-error', label: 'Fix now' },
-  warning: { Icon: AlertTriangle, icon: 'text-accent-gold-dark', chip: 'bg-accent-gold/20 text-warm-gray-800', label: 'To do' },
-  info: { Icon: Info, icon: 'text-ocean', chip: 'bg-ocean/10 text-ocean', label: 'When you can' },
-} satisfies Record<AttentionSeverity, { Icon: React.ComponentType<{ className?: string }>; icon: string; chip: string; label: string }>;
+  error: { Icon: OctagonAlert, icon: 'text-error', badge: 'error', label: 'Fix now' },
+  warning: { Icon: AlertTriangle, icon: 'text-accent-gold-dark', badge: 'warning', label: 'To do' },
+  info: { Icon: Info, icon: 'text-ocean', badge: 'info', label: 'When you can' },
+} satisfies Record<AttentionSeverity, { Icon: React.ComponentType<{ className?: string }>; icon: string; badge: 'error' | 'warning' | 'info'; label: string }>;
 
 /**
  * Lists the things an admin should act on, worst first, each linking
@@ -25,7 +26,7 @@ export function AttentionPanel({ items }: AttentionPanelProps) {
         <h2 className="font-heading text-lg font-semibold text-deep-blue mb-3">Needs attention</h2>
         <div className="flex items-start gap-3 rounded-md bg-success/5 p-4">
           <CheckCircle2 className="w-5 h-5 text-success flex-shrink-0" />
-          <p className="text-sm text-warm-gray-800">
+          <p className="text-base text-warm-gray-800">
             Nothing outstanding. Enquiries are answered, consent is recorded and every image has alt text.
           </p>
         </div>
@@ -42,7 +43,7 @@ export function AttentionPanel({ items }: AttentionPanelProps) {
 
       <ul className="divide-y divide-sand">
         {items.map((item) => {
-          const { Icon, icon, chip, label } = SEVERITY[item.severity];
+          const { Icon, icon, badge, label } = SEVERITY[item.severity];
           return (
             <li key={item.id}>
               <Link
@@ -52,10 +53,10 @@ export function AttentionPanel({ items }: AttentionPanelProps) {
                 <Icon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${icon}`} aria-hidden="true" />
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-sm font-semibold text-warm-gray-800">{item.label}</p>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${chip}`}>{label}</span>
+                    <p className="text-base font-semibold text-warm-gray-800">{item.label}</p>
+                    <StatusBadge status={badge} size="compact">{label}</StatusBadge>
                   </div>
-                  <p className="text-xs text-warm-gray-600 mt-1 leading-body">{item.detail}</p>
+                  <p className="text-base text-warm-gray-600 mt-1 leading-body">{item.detail}</p>
                 </div>
                 <ChevronRight className="w-4 h-4 flex-shrink-0 mt-1 text-warm-gray-400 group-hover:text-ocean transition-colors" aria-hidden="true" />
               </Link>

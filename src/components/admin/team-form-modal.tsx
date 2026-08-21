@@ -10,6 +10,8 @@ import { scrollToFirstError } from '@/lib/scroll-to-error';
 import { useModalA11y } from '@/lib/use-modal-a11y';
 import { useToast } from '@/components/ui/toast';
 import { resolveImageUrl } from '@/lib/api-client';
+import { Button } from '@/components/ui/button';
+import { FormField, inputClasses } from '@/components/ui/form-field';
 
 interface TeamFormModalProps {
   member: TeamMember | null; // null = create mode
@@ -116,73 +118,57 @@ export function TeamFormModal({ member, onClose, onSave }: TeamFormModalProps) {
         {/* Form */}
         <form ref={formRef} onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
           {saveError && (
-            <p className="text-sm text-error bg-error/10 px-3 py-2 rounded" aria-live="assertive">
+            <p className="text-base text-error bg-error/10 px-3 py-2 rounded" role="alert" aria-live="assertive">
               {saveError}
             </p>
           )}
 
           {/* Name */}
-          <div>
-            <label htmlFor="team-name" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Name <span className="text-error">*</span>
-            </label>
+          <FormField label="Name *" htmlFor="team-name" error={errors.name}>
             <input
-              id="team-name"
               type="text"
               value={form.name}
               onChange={(e) => handleChange('name', e.target.value)}
               aria-invalid={Boolean(errors.name)}
-              className={`w-full px-4 py-3 rounded-md border bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent ${
-                errors.name ? 'border-error' : 'border-sand-dark'
-              }`}
+              className={inputClasses}
+              data-error={errors.name ? 'true' : undefined}
               placeholder="Full name"
             />
-            {errors.name && <p className="text-sm text-error mt-1" aria-live="assertive">{errors.name}</p>}
-          </div>
+          </FormField>
 
           {/* Location */}
-          <div>
-            <label htmlFor="team-location" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Location
-            </label>
+          <FormField label="Location" htmlFor="team-location">
             <input
-              id="team-location"
               type="text"
               value={form.location}
               onChange={(e) => handleChange('location', e.target.value)}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+              className={inputClasses}
               placeholder="e.g. Sydney, Australia"
             />
-          </div>
+          </FormField>
 
           {/* Bio */}
-          <div>
-            <label htmlFor="team-bio" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Bio / Details
-            </label>
+          <FormField label="Bio / Details" htmlFor="team-bio">
             <textarea
-              id="team-bio"
               value={form.bio}
               onChange={(e) => handleChange('bio', e.target.value)}
               rows={4}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent resize-y"
+              className={`${inputClasses} resize-y`}
               placeholder="A short description about this person and their role..."
             />
-          </div>
+          </FormField>
 
           {/* Sort Order */}
           <div>
-            <label htmlFor="team-sort-order" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Sort Order
-            </label>
-            <input
-              id="team-sort-order"
-              type="number"
-              min={0}
-              value={form.sortOrder}
-              onChange={(e) => handleChange('sortOrder', e.target.valueAsNumber || 0)}
-              className="w-24 px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-            />
+            <FormField label="Sort Order" htmlFor="team-sort-order">
+              <input
+                type="number"
+                min={0}
+                value={form.sortOrder}
+                onChange={(e) => handleChange('sortOrder', e.target.valueAsNumber || 0)}
+                className={`${inputClasses} max-w-24`}
+              />
+            </FormField>
             <p className="text-xs text-warm-gray-400 mt-1">Lower numbers appear first.</p>
           </div>
 
@@ -196,7 +182,7 @@ export function TeamFormModal({ member, onClose, onSave }: TeamFormModalProps) {
             aspectHint="1:1 square"
           />
           {errors.photoAlt && (
-            <p className="text-sm text-error mt-1" aria-live="assertive">{errors.photoAlt}</p>
+            <p className="text-base text-error mt-1" role="alert" aria-live="assertive">{errors.photoAlt}</p>
           )}
 
           {/* Photo Position Adjuster — shown when an image is uploaded */}
@@ -210,21 +196,12 @@ export function TeamFormModal({ member, onClose, onSave }: TeamFormModalProps) {
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
-            <button
-              type="button"
-              onClick={handleDismiss}
-              disabled={saving}
-              className="tap-target inline-flex items-center gap-2 px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
-            >
+            <Button variant="secondary" onClick={handleDismiss} disabled={saving}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="tap-target inline-flex items-center gap-2 px-6 py-3 bg-terracotta hover:bg-terracotta-dark text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light disabled:opacity-50"
-            >
-              {saving ? 'Saving...' : member ? 'Update' : 'Create'}
-            </button>
+            </Button>
+            <Button type="submit" loading={saving} loadingText="Saving...">
+              {member ? 'Update' : 'Create'}
+            </Button>
           </div>
         </form>
       </div>
@@ -295,7 +272,7 @@ function PhotoPositionControl({ imageUrl, position, onChange }: PhotoPositionCon
 
   return (
     <div>
-      <label className="block text-sm font-medium text-warm-gray-800 mb-1">
+      <label className="block text-base font-medium text-warm-gray-800 mb-1">
         <Move className="w-4 h-4 inline mr-1" />
         Adjust Photo Position
       </label>

@@ -3,18 +3,26 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Trash2, Minus, Plus, AlertTriangle, ArrowLeft, Send, X, MessageSquare } from 'lucide-react';
+import { Trash2, Minus, Plus, AlertTriangle, ArrowLeft, Send, X, MessageSquare, ShoppingCart } from 'lucide-react';
 import type { CartItem } from '@/types';
 import { getCart, updateQuantity, updateNote, removeFromCart, clearCart, getCartTotal, GST_THRESHOLD } from '@/lib/cart';
 import { validateStockistSession } from '@/lib/auth-client';
 import { createOrderRequest } from '@/services/orders';
-import { sbdToAud } from '@/lib/price';
+import { formatPrice } from '@/lib/price';
+import { PageHeader } from '@/components/layout/page-header';
+import { Button, ButtonLink } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
+import { inputClasses } from '@/components/ui/form-field';
+import { SkeletonText } from '@/components/ui/skeleton';
+import { SuccessPanel } from '@/components/ui/success-panel';
 
 export default function StockistOrdersPage() {
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [authenticated, setAuthenticated] = useState(false);
   const [submitted, setSubmitted] = useState<{ ref: string; time: string } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -49,8 +57,7 @@ export default function StockistOrdersPage() {
   }
 
   const total = getCartTotal(cart);
-  const totalAud = sbdToAud(total);
-  const showGstWarning = totalAud > GST_THRESHOLD;
+  const showGstWarning = total > GST_THRESHOLD;
 
   function handleQuantityChange(productId: string, qty: number) {
     const updated = updateQuantity(productId, qty);
@@ -63,135 +70,184 @@ export default function StockistOrdersPage() {
   }
 
   async function handleSubmit() {
-    const token = localStorage.getItem('stockist_session');
-    if (!token) return;
-    const stockist = await validateStockistSession(token);
-    if (!stockist) return;
+    // Submitting creates an order request, so guard against a second click
+    // landing while the first is still in flight.
+    if (submitting) return;
 
-    const order = await createOrderRequest(stockist.id, cart);
-    clearCart();
-    setSubmitted({ ref: order.referenceNumber, time: order.submittedAt });
+    setSubmitError('');
+    setSubmitting(true);
+    try {
+      const token = localStorage.getItem('stockist_session');
+      if (!token) return;
+      const stockist = await validateStockistSession(token);
+      if (!stockist) return;
+
+      const order = await createOrderRequest(stockist.id, cart);
+      clearCart();
+      setSubmitted({ ref: order.referenceNumber, time: order.submittedAt });
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error
+          ? err.message
+          : "We couldn't submit your order request. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (!authenticated || loading) {
-    return <div className="max-w-7xl mx-auto px-4 page-y"><p className="text-warm-gray-400">Loading...</p></div>;
-  }
-
-  if (submitted) {
     return (
-      <div className="max-w-md mx-auto px-4 page-y text-center">
-        <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6">
-          <Send className="w-8 h-8 text-success" />
-        </div>
-        <h1 className="font-heading text-2xl font-medium text-deep-blue mb-3">Order request submitted</h1>
-        <p className="text-warm-gray-600 mb-2">Reference: <strong>{submitted.ref}</strong></p>
-        <p className="text-sm text-warm-gray-400 mb-6">{new Date(submitted.time).toLocaleString()}</p>
-        <div className="bg-sand-light rounded-md p-4 text-sm text-warm-gray-600 mb-6">
-          This is an expression of interest. We&apos;ll confirm availability and send bank transfer details by email.
-        </div>
-        {showGstWarning && (
-          <div className="bg-warning/10 border border-warning/20 text-warning-text text-sm rounded-md p-3 mb-6 flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-            <span>This order exceeds A$1,000. GST registration obligations may apply.</span>
-          </div>
-        )}
-        <div className="flex flex-col gap-3">
-          <Link href="/stockist/order-history" className="text-ocean hover:underline font-medium">View order history</Link>
-          <Link href="/stockist/catalogue" className="text-ocean hover:underline font-medium">Continue shopping</Link>
-        </div>
+      <div className="max-w-7xl mx-auto px-4 page-y">
+        <SkeletonText lines={4} />
       </div>
     );
   }
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 page-y">
-      <Link href="/stockist/catalogue" className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark mb-6 transition-colors">
-        <ArrowLeft className="w-4 h-4" /> Back to catalogue
-      </Link>
-
-      <h1 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-2">Your Order</h1>
-      <p className="text-sm text-warm-gray-600 mb-8">
-        Review your order request. Orders are expressions of interest paid by bank transfer, not confirmed purchases.
-      </p>
-
-      {cart.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-warm-gray-600 mb-4">Your order is empty.</p>
-          <Link href="/stockist/catalogue" className="text-ocean hover:underline font-medium">Browse the catalogue</Link>
+  if (submitted) {
+    return (
+      <SuccessPanel
+        icon={Send}
+        title="Order request submitted"
+        actions={
+          <>
+            <ButtonLink href="/stockist/order-history" variant="secondary">
+              View order history
+            </ButtonLink>
+            <ButtonLink href="/stockist/catalogue" variant="secondary">
+              Continue shopping
+            </ButtonLink>
+          </>
+        }
+      >
+        <div className="text-center">
+          <p className="text-base text-warm-gray-600 mb-2">Reference: <strong>{submitted.ref}</strong></p>
+          <p className="text-sm text-warm-gray-400 mb-6">{new Date(submitted.time).toLocaleString()}</p>
         </div>
-      ) : (
-        <>
-          {/* Cart items */}
-          <div className="divide-y divide-sand mb-8">
-            {cart.map((item) => (
-              <div key={item.productId} className="flex items-center gap-4 py-4">
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-warm-gray-800 truncate">{item.productName}</p>
-                  <p className="text-xs text-warm-gray-400">{item.productCode} · A${sbdToAud(item.unitPrice)} each</p>
-                  {/* Note link */}
-                  <button
-                    onClick={() => openNoteModal(item.productId)}
-                    className="text-xs text-ocean hover:text-ocean-dark mt-1 transition-colors"
-                  >
-                    {item.note ? (
-                      <span className="inline-flex items-center gap-1"><MessageSquare className="w-3 h-3" /> Note added</span>
-                    ) : (
-                      'Add note'
-                    )}
+        <div className="bg-sand-light rounded-md p-4 text-base text-warm-gray-600">
+          This is an expression of interest. We&apos;ll confirm availability and send bank transfer details by email.
+        </div>
+        {showGstWarning && (
+          <div className="bg-warning/10 border border-warning/20 text-warning-text text-base rounded-md p-3 mt-6 flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+            <span>This order exceeds A$1,000. GST registration obligations may apply.</span>
+          </div>
+        )}
+      </SuccessPanel>
+    );
+  }
+
+  return (
+    <>
+      <PageHeader
+        title="Your Order"
+        intro="Review your order request. Orders are expressions of interest paid by bank transfer, not confirmed purchases."
+        eyebrow={
+          <Link href="/stockist/catalogue" className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Back to catalogue
+          </Link>
+        }
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        {cart.length === 0 ? (
+          <EmptyState
+            icon={ShoppingCart}
+            title="Your order is empty."
+            action={
+              <ButtonLink href="/stockist/catalogue" variant="secondary" size="sm">
+                Browse the catalogue
+              </ButtonLink>
+            }
+          />
+        ) : (
+          <>
+            {/* Cart items */}
+            <div className="divide-y divide-sand mb-8">
+              {cart.map((item) => (
+                <div key={item.productId} className="flex items-center gap-4 py-4">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-warm-gray-800 truncate">{item.productName}</p>
+                    <p className="text-sm text-warm-gray-600">{item.productCode} · {formatPrice(item.unitPrice)} each</p>
+                    {/* Note button */}
+                    <div className="mt-1">
+                      <Button variant="secondary" size="sm" onClick={() => openNoteModal(item.productId)}>
+                        {item.note ? (
+                          <>
+                            <MessageSquare className="w-4 h-4" /> Note added
+                          </>
+                        ) : (
+                          'Add note'
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
+                      disabled={item.quantity <= 1}
+                      className="tap-target p-2 rounded-md border border-sand-dark hover:bg-sand-light disabled:opacity-30 focus:outline-none focus:ring-2 focus:ring-ocean"
+                      aria-label={`Decrease quantity of ${item.productName}`}>
+                      <Minus className="w-3 h-3" />
+                    </button>
+                    <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
+                    <button onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}
+                      disabled={item.quantity >= 999}
+                      className="tap-target p-2 rounded-md border border-sand-dark hover:bg-sand-light disabled:opacity-30 focus:outline-none focus:ring-2 focus:ring-ocean"
+                      aria-label={`Increase quantity of ${item.productName}`}>
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <p className="w-20 text-right font-medium text-warm-gray-800">
+                    {formatPrice(item.quantity * item.unitPrice)}
+                  </p>
+                  <button onClick={() => handleRemove(item.productId)}
+                    className="tap-target p-2 text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                    aria-label={`Remove ${item.productName} from order`}>
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
-                    disabled={item.quantity <= 1}
-                    className="tap-target p-2 rounded-md border border-sand-dark hover:bg-sand-light disabled:opacity-30 focus:outline-none focus:ring-2 focus:ring-ocean"
-                    aria-label={`Decrease quantity of ${item.productName}`}>
-                    <Minus className="w-3 h-3" />
-                  </button>
-                  <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
-                  <button onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}
-                    disabled={item.quantity >= 999}
-                    className="tap-target p-2 rounded-md border border-sand-dark hover:bg-sand-light disabled:opacity-30 focus:outline-none focus:ring-2 focus:ring-ocean"
-                    aria-label={`Increase quantity of ${item.productName}`}>
-                    <Plus className="w-3 h-3" />
-                  </button>
-                </div>
-                <p className="w-20 text-right font-medium text-warm-gray-800">
-                  A${sbdToAud(item.quantity * item.unitPrice)}
-                </p>
-                <button onClick={() => handleRemove(item.productId)}
-                  className="tap-target p-2 text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
-                  aria-label={`Remove ${item.productName} from order`}>
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {/* Total */}
-          <div className="flex justify-between items-center py-4 border-t-2 border-deep-blue mb-4">
-            <span className="font-heading font-semibold text-deep-blue text-lg">Total (ex. GST)</span>
-            <span className="font-heading font-semibold text-deep-blue text-lg">A${sbdToAud(total)}</span>
-          </div>
-
-          {/* GST Warning */}
-          {showGstWarning && (
-            <div className="bg-warning/10 border border-warning/20 text-warning-text text-sm rounded-md p-3 mb-6 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-              <span>This order exceeds A$1,000. GST registration obligations may apply.</span>
+              ))}
             </div>
-          )}
 
-          {/* Bank transfer notice */}
-          <div className="bg-sand-light rounded-md p-4 text-sm text-warm-gray-600 mb-6">
-            Orders are expressions of interest paid by bank transfer. This is not a confirmed purchase.
-          </div>
+            {/* Total */}
+            <div className="flex justify-between items-center py-4 border-t-2 border-deep-blue mb-4">
+              <span className="font-heading font-semibold text-deep-blue text-lg">Total (ex. GST)</span>
+              <span className="font-heading font-semibold text-deep-blue text-lg">{formatPrice(total)}</span>
+            </div>
 
-          <button onClick={handleSubmit}
-            className="tap-target w-full flex items-center justify-center gap-2 px-6 py-3 btn-primary">
-            Submit order request
-          </button>
-        </>
-      )}
+            {/* GST Warning */}
+            {showGstWarning && (
+              <div className="bg-warning/10 border border-warning/20 text-warning-text text-base rounded-md p-3 mb-6 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                <span>This order exceeds A$1,000. GST registration obligations may apply.</span>
+              </div>
+            )}
+
+            {/* Bank transfer notice */}
+            <div className="bg-sand-light rounded-md p-4 text-base text-warm-gray-600 mb-6">
+              Orders are expressions of interest paid by bank transfer. This is not a confirmed purchase.
+            </div>
+
+            {submitError && (
+              <div
+                className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3 mb-4"
+                role="alert"
+                aria-live="assertive"
+              >
+                {submitError}
+              </div>
+            )}
+            <Button
+              onClick={handleSubmit}
+              fullWidth
+              loading={submitting}
+              loadingText="Submitting..."
+            >
+              Submit order request
+            </Button>
+          </>
+        )}
+      </div>
 
       {/* Note modal */}
       {noteModalItem && (
@@ -214,27 +270,21 @@ export default function StockistOrdersPage() {
                 onChange={(e) => setNoteText(e.target.value)}
                 placeholder="e.g. preferred colour, custom engraving, quantity notes..."
                 rows={3}
-                className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent resize-none"
+                className={`${inputClasses} resize-none`}
                 autoFocus
               />
             </div>
             <div className="flex justify-end gap-3 px-5 py-4 border-t border-sand">
-              <button
-                onClick={() => setNoteModalItem(null)}
-                className="tap-target px-4 py-2 text-sm text-warm-gray-600 hover:text-warm-gray-800 transition-colors"
-              >
+              <Button variant="secondary" size="sm" onClick={() => setNoteModalItem(null)}>
                 Cancel
-              </button>
-              <button
-                onClick={saveNote}
-                className="tap-target px-5 py-2 btn-primary text-sm"
-              >
+              </Button>
+              <Button size="sm" onClick={saveNote}>
                 Save
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

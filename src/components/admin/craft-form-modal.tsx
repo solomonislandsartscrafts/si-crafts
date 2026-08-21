@@ -9,7 +9,11 @@ import { singleAltError } from '@/lib/image-alt';
 import { scrollToFirstError } from '@/lib/scroll-to-error';
 import { useToast } from '@/components/ui/toast';
 import { Select } from '@/components/ui/select';
-import { useModalA11y } from '@/lib/use-modal-a11y';interface CraftFormModalProps {
+import { useModalA11y } from '@/lib/use-modal-a11y';
+import { Button } from '@/components/ui/button';
+import { FormField, inputClasses } from '@/components/ui/form-field';
+
+interface CraftFormModalProps {
   craft: Craft | null; // null = create mode
   onClose: () => void;
   onSave: (data: CraftFormData) => Promise<void>;
@@ -142,30 +146,25 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
         <form ref={formRef} onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
           {/* Save error banner */}
           {saveError && (
-            <div className="bg-error/10 border border-error/20 text-error text-sm rounded-md p-3" role="alert" aria-live="assertive">
+            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert" aria-live="assertive">
               {saveError}
             </div>
           )}
 
           {/* Name */}
-          <div>
-            <label htmlFor="craft-name" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Name *
-            </label>
+          <FormField label="Name *" htmlFor="craft-name" error={errors.name}>
             <input
-              id="craft-name"
               type="text"
               value={form.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-              aria-describedby={errors.name ? 'craft-name-error' : undefined}
+              className={inputClasses}
+              data-error={errors.name ? 'true' : undefined}
             />
-            {errors.name && <p id="craft-name-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.name}</p>}
-          </div>
+          </FormField>
 
           {/* Material Category */}
           <div>
-            <label htmlFor="craft-material" className="block text-sm font-medium text-warm-gray-800 mb-1">
+            <label htmlFor="craft-material" className="block text-base font-medium text-warm-gray-800 mb-1">
               Material Category *
             </label>
             <Select
@@ -180,35 +179,26 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
           </div>
 
           {/* Description */}
-          <div>
-            <label htmlFor="craft-description" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Description *
-            </label>
+          <FormField label="Description *" htmlFor="craft-description" error={errors.description}>
             <textarea
-              id="craft-description"
               value={form.description}
               onChange={(e) => handleChange('description', e.target.value)}
               rows={4}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent resize-y"
-              aria-describedby={errors.description ? 'craft-desc-error' : undefined}
+              className={`${inputClasses} resize-y`}
+              data-error={errors.description ? 'true' : undefined}
             />
-            {errors.description && <p id="craft-desc-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.description}</p>}
-          </div>
+          </FormField>
 
           {/* Cultural Context */}
-          <div>
-            <label htmlFor="craft-cultural" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Cultural Context
-            </label>
+          <FormField label="Cultural Context" htmlFor="craft-cultural">
             <textarea
-              id="craft-cultural"
               value={form.culturalContext}
               onChange={(e) => handleChange('culturalContext', e.target.value)}
               rows={3}
               placeholder="Describe the cultural significance of this craft..."
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent resize-y"
+              className={`${inputClasses} resize-y`}
             />
-          </div>
+          </FormField>
 
           {/* Cultural Review Flag */}
           <div className="flex items-center gap-3">
@@ -221,7 +211,7 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
               }
               className="w-4 h-4 rounded border-sand-dark text-ocean focus:ring-ocean"
             />
-            <label htmlFor="craft-cultural-review" className="text-sm text-warm-gray-800">
+            <label htmlFor="craft-cultural-review" className="text-base text-warm-gray-800">
               Cultural context reviewed by cultural partner
             </label>
           </div>
@@ -242,27 +232,18 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
               quality={0.8}
             />
             {errors.processImageAlt && (
-              <p className="text-sm text-error mt-1" aria-live="assertive">{errors.processImageAlt}</p>
+              <p className="text-base text-error mt-1" role="alert" aria-live="assertive">{errors.processImageAlt}</p>
             )}
           </div>
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
-            <button
-              type="button"
-              onClick={handleDismiss}
-              disabled={saving}
-              className="tap-target px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light disabled:opacity-50"
-            >
+            <Button variant="secondary" onClick={handleDismiss} disabled={saving}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="tap-target px-6 py-3 btn-primary"
-            >
-              {saving ? 'Saving...' : craft ? 'Update Craft' : 'Create Craft'}
-            </button>
+            </Button>
+            <Button type="submit" loading={saving} loadingText="Saving...">
+              {craft ? 'Update Craft' : 'Create Craft'}
+            </Button>
           </div>
         </form>
       </div>

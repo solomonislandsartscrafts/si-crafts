@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { ChevronRight, BookOpen } from 'lucide-react';
 import type { SetupProgress } from '@/types';
 import { buildSetupSteps, countComplete } from './setup-steps';
+import { ButtonLink } from '@/components/ui/button';
 
 interface SetupProgressCardProps {
   progress: SetupProgress;
@@ -42,36 +42,27 @@ export function SetupProgressCard({ progress }: SetupProgressCardProps) {
       {nextStep ? (
         <>
           <p className="text-xs text-warm-gray-400 uppercase tracking-wide mb-1">Next step</p>
-          <p className="text-sm font-medium text-warm-gray-800 mb-4">{nextStep.title}</p>
+          <p className="text-base font-medium text-warm-gray-800 mb-4">{nextStep.title}</p>
           <div className="flex flex-wrap gap-2">
-            <Link
-              href={nextStep.href}
-              className="tap-target inline-flex items-center gap-1 px-4 py-2 text-sm font-medium bg-ocean text-white rounded-md hover:bg-ocean-dark transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
-            >
+            <ButtonLink href={nextStep.href} variant="admin" size="sm">
               Continue
               <ChevronRight className="w-4 h-4" aria-hidden="true" />
-            </Link>
-            <Link
-              href="/admin/getting-started"
-              className="tap-target inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border-2 border-ocean text-ocean rounded-md hover:bg-ocean hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
-            >
+            </ButtonLink>
+            <ButtonLink href="/admin/getting-started" variant="secondary" size="sm">
               <BookOpen className="w-4 h-4" aria-hidden="true" />
               Guide
-            </Link>
+            </ButtonLink>
           </div>
         </>
       ) : (
         <>
-          <p className="text-sm text-warm-gray-800 mb-4">
+          <p className="text-base text-warm-gray-800 mb-4">
             Setup is complete. The guide covers day-to-day editing whenever you need it.
           </p>
-          <Link
-            href="/admin/getting-started"
-            className="tap-target inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border-2 border-ocean text-ocean rounded-md hover:bg-ocean hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light"
-          >
+          <ButtonLink href="/admin/getting-started" variant="secondary" size="sm">
             <BookOpen className="w-4 h-4" aria-hidden="true" />
             Open the guide
-          </Link>
+          </ButtonLink>
         </>
       )}
     </section>

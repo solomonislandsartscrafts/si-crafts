@@ -1,6 +1,7 @@
 'use client';
 
 import { Search, X } from 'lucide-react';
+import { inputClasses } from '@/components/ui/form-field';
 
 interface SearchInputProps {
   value: string;
@@ -13,7 +14,10 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
       <label htmlFor="product-search" className="sr-only">
         Search products
       </label>
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-warm-gray-400" aria-hidden="true" />
+      <Search
+        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-warm-gray-400 pointer-events-none z-10"
+        aria-hidden="true"
+      />
       <input
         id="product-search"
         type="search"
@@ -21,15 +25,16 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
         maxLength={200}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="tap-target w-full pl-10 pr-10 py-2 rounded-md border border-sand-dark bg-white text-sm text-warm-gray-800 placeholder:text-warm-gray-400 focus:outline-none focus:ring-2 focus:ring-ocean"
+        className={`${inputClasses} pl-10 pr-12`}
       />
       {value && (
+        /* tap-target: this was a p-1 hit area, well under 44px. */
         <button
           onClick={() => onChange('')}
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-warm-gray-400 hover:text-warm-gray-600"
+          className="tap-target absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-md text-warm-gray-400 hover:text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean"
           aria-label="Clear search"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4" aria-hidden="true" />
         </button>
       )}
     </div>

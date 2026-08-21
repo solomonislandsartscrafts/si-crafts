@@ -4,6 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:sandbox": "NEXT_PUBLIC_API_URL=http://localhost:8000 next dev --turbopack",
+    "sandbox:backend": "cd backend && .venv/bin/python manage.py runserver 8000",
+    "sandbox:seed": "cd backend && ./scripts/seed-sandbox.sh",
+    "backup:production": "cd backend && ./scripts/backup-production.sh",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

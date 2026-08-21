@@ -1,11 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Loader2, AlertTriangle } from 'lucide-react';
+import { Save, AlertTriangle } from 'lucide-react';
 import type { SiteContent } from '@/types';
 import { AdminLayout } from '@/components/admin';
 import { ImageUpload } from '@/components/admin/image-upload';
 import { useToast } from '@/components/ui/toast';
+import { pageTitleClasses } from '@/components/layout/page-header';
+import { Button } from '@/components/ui/button';
+import { FormField, inputClasses } from '@/components/ui/form-field';
+import { SkeletonText } from '@/components/ui/skeleton';
 
 type Tab = 'homepage' | 'about' | 'catalogue' | 'news' | 'stockists' | 'wholesale' | 'care-guide' | 'contact' | 'images';
 
@@ -129,8 +133,8 @@ export default function AdminSiteContentPage() {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-6 h-6 text-ocean animate-spin" />
+        <div className="max-w-3xl py-8">
+          <SkeletonText lines={8} />
         </div>
       </AdminLayout>
     );
@@ -142,19 +146,20 @@ export default function AdminSiteContentPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="font-heading text-2xl font-medium text-deep-blue">Site Content</h1>
-            <p className="text-sm text-warm-gray-600 mt-1">
+            <h1 className={pageTitleClasses}>Site Content</h1>
+            <p className="text-base text-warm-gray-600 mt-1">
               Edit text and images across all pages. Changes appear on the live site after saving.
             </p>
           </div>
-          <button
+          <Button
             onClick={handleSaveClick}
-            disabled={saving || loadFailed}
-            className="tap-target inline-flex items-center gap-2 px-6 py-3 btn-primary"
+            disabled={loadFailed}
+            loading={saving}
+            loadingText="Publishing..."
           >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            {saving ? 'Publishing...' : 'Save & Publish'}
-          </button>
+            <Save className="w-4 h-4" />
+            Save &amp; Publish
+          </Button>
         </div>
 
         {/* Tab navigation */}
@@ -207,22 +212,16 @@ export default function AdminSiteContentPage() {
                 Publish changes?
               </h2>
             </div>
-            <p id="confirm-desc" className="text-sm text-warm-gray-600 mb-6">
+            <p id="confirm-desc" className="text-base text-warm-gray-600 mb-6">
               This will update the live website immediately. All visitors will see the new content. Are you sure you want to publish these changes?
             </p>
             <div className="flex items-center justify-end gap-3">
-              <button
-                onClick={() => setShowConfirm(false)}
-                className="tap-target px-5 py-2.5 border-2 border-sand-dark text-warm-gray-600 hover:text-deep-blue rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
-              >
+              <Button variant="secondary" size="sm" onClick={() => setShowConfirm(false)}>
                 Cancel
-              </button>
-              <button
-                onClick={handleConfirmSave}
-                className="tap-target px-5 py-2.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta-light"
-              >
+              </Button>
+              <Button size="sm" onClick={handleConfirmSave}>
                 Yes, publish
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -388,7 +387,7 @@ function Section({ title, description, children }: { title: string; description:
   return (
     <div className="border border-sand rounded-lg p-6">
       <h2 className="font-heading text-lg font-semibold text-deep-blue mb-1">{title}</h2>
-      <p className="text-sm text-warm-gray-400 mb-4">{description}</p>
+      <p className="text-base text-warm-gray-400 mb-4">{description}</p>
       <div className="space-y-4">{children}</div>
     </div>
   );
@@ -397,33 +396,29 @@ function Section({ title, description, children }: { title: string; description:
 function Field({ label, value, onChange, placeholder, fieldId }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; fieldId?: string }) {
   const id = fieldId || `field-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
   return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-medium text-warm-gray-800 mb-1">{label}</label>
+    <FormField label={label} htmlFor={id}>
       <input
-        id={id}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 placeholder:text-warm-gray-400 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+        className={inputClasses}
       />
-    </div>
+    </FormField>
   );
 }
 
 function TextArea({ label, value, onChange, placeholder, rows = 4, fieldId }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; rows?: number; fieldId?: string }) {
   const id = fieldId || `textarea-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
   return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-medium text-warm-gray-800 mb-1">{label}</label>
+    <FormField label={label} htmlFor={id}>
       <textarea
-        id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 placeholder:text-warm-gray-400 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent resize-y"
+        className={`${inputClasses} resize-y`}
       />
-    </div>
+    </FormField>
   );
 }

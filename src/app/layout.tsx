@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Poppins } from 'next/font/google';
+import { Poppins, DM_Sans } from 'next/font/google';
 import { SkipLink } from '@/components/layout';
 import { LayoutShell } from '@/components/layout/layout-shell';
 import { AccessibilityWidget } from '@/components/shared/accessibility-widget';
@@ -12,6 +12,15 @@ const poppins = Poppins({
   weight: ['400', '500', '600', '700'],
   display: 'swap',
   variable: '--font-heading',
+});
+
+// Body typeface. Loaded here so `font-body` (tailwind.config.ts) resolves to a
+// real webfont rather than silently falling back to the OS UI font.
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-body',
 });
 
 export const metadata: Metadata = {
@@ -30,7 +39,8 @@ export const metadata: Metadata = {
     url: 'https://solomonislandsartsandcrafts.com.au',
     siteName: 'Solomon Islands Arts Crafts',
     type: 'website',
-    images: [{ url: '/images/og-default.jpg' }],
+    // No `images` entry: src/app/opengraph-image.tsx generates the card and
+    // Next injects the tags automatically. Listing a path here would override it.
   },
 };
 
@@ -40,7 +50,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={poppins.variable}>
+    <html lang="en" className={`${poppins.variable} ${dmSans.variable}`}>
       <head>
         <meta name="theme-color" content="#1B3A4B" />
       </head>

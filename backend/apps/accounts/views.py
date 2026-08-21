@@ -10,6 +10,7 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import AdminProfile
+from .password_policy import password_error
 from .serializers import LoginSerializer, AdminProfileSerializer
 
 
@@ -182,6 +183,16 @@ class StockistLoginView(APIView):
         if stockist is None:
             return invalid
 
+        # Resolve user and verify password BEFORE revealing account state.
+        user = stockist.user
+        if user is None:
+            return invalid
+        if not user.has_usable_password():
+            return invalid
+        if not user.check_password(password):
+            return invalid
+
+        # Password verified — now provide distinct status messages.
         if stockist.status == "pending":
             return Response(
                 {
@@ -195,24 +206,8 @@ class StockistLoginView(APIView):
         if stockist.status != "approved":
             return invalid
 
-        user = stockist.user
-        if user is None:
-            return Response(
-                {
-                    "error": "Your account isn't finished being set up. "
-                    "Please contact us so we can send you a new password link."
-                },
-                status=status.HTTP_403_FORBIDDEN,
-            )
         if not user.is_active:
             return Response({"error": self.PAUSED_MESSAGE}, status=status.HTTP_403_FORBIDDEN)
-        if not user.has_usable_password():
-            return Response(
-                {"error": self.NO_PASSWORD_MESSAGE}, status=status.HTTP_403_FORBIDDEN
-            )
-
-        if authenticate(username=user.username, password=password) is None:
-            return invalid
 
         refresh = RefreshToken.for_user(user)
         return Response({
@@ -297,7 +292,17 @@ class AdminListView(APIView):
         if not email or not password:
             return Response({"error": "Email and password required"}, status=400)
 
-        if User.objects.filter(email=email).exists():
+        valid_roles = [choice[0] for choice in AdminProfile.ROLE_CHOICES]
+        if role not in valid_roles:
+            return Response(
+                {"error": f"Role must be one of: {', '.join(valid_roles)}"}, status=400
+            )
+
+        password_problem = password_error(password)
+        if password_problem:
+            return Response({"error": password_problem}, status=400)
+
+        if User.objects.filter(email__iexact=email).exists():
             return Response({"error": "Email already in use"}, status=400)
 
         user = User.objects.create_user(

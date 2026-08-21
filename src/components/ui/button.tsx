@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 
 /**
@@ -13,8 +14,8 @@ import { Loader2 } from 'lucide-react';
  * States: default, hover, focus, active, disabled, loading
  */
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'admin';
-type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'admin';
+export type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -86,3 +87,45 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 );
 
 Button.displayName = 'Button';
+
+interface ButtonLinkProps
+  extends Omit<React.ComponentProps<typeof Link>, 'className'> {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  fullWidth?: boolean;
+  className?: string;
+  children: React.ReactNode;
+}
+
+/**
+ * A next/link styled exactly like <Button>.
+ *
+ * Use this for navigation CTAs so link-buttons and real buttons stay visually
+ * identical. Do not hand-roll `.btn-primary` onto a <Link>: the btn-* classes
+ * already set their own padding, and extra padding utilities fight them.
+ */
+export function ButtonLink({
+  variant = 'primary',
+  size = 'md',
+  fullWidth = false,
+  className = '',
+  children,
+  ...props
+}: ButtonLinkProps) {
+  return (
+    <Link
+      className={[
+        'tap-target',
+        VARIANT_CLASSES[variant],
+        SIZE_CLASSES[size],
+        fullWidth ? 'w-full' : '',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      {...props}
+    >
+      {children}
+    </Link>
+  );
+}

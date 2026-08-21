@@ -6,6 +6,23 @@ import Image from 'next/image';
 import { compressImage } from '@/lib/compress-image';
 import { resolveImageUrl } from '@/lib/api-client';
 
+/** Reads intrinsic width/height of an image file without uploading. */
+function getImageDimensions(file: File): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new window.Image();
+    img.onload = () => {
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Could not read image dimensions'));
+    };
+    img.src = url;
+  });
+}
+
 interface ImageUploadProps {
   value: string; // current image URL/path
   onChange: (url: string) => void;
@@ -13,6 +30,10 @@ interface ImageUploadProps {
   onAltTextChange?: (alt: string) => void;
   label?: string;
   aspectHint?: string; // e.g. "1:1 square" or "16:9 landscape"
+  /** Recommended minimum width in px — shows a warning if the uploaded image is smaller */
+  recommendedMinWidth?: number;
+  /** Recommended aspect ratio as width/height (e.g. 1.5 for 3:2). Shows warning if image deviates significantly. */
+  recommendedAspectRatio?: number;
   maxWidth?: number; // max compressed width in px (default 1200)
   quality?: number; // 0-1 compression quality (default 0.8)
 }
@@ -24,11 +45,14 @@ export function ImageUpload({
   onAltTextChange,
   label = 'Image',
   aspectHint,
+  recommendedMinWidth,
+  recommendedAspectRatio,
   maxWidth = 1200,
   quality = 0.8,
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sizeWarning, setSizeWarning] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -48,9 +72,29 @@ export function ImageUpload({
     }
 
     setError(null);
+    setSizeWarning(null);
     setUploading(true);
 
     try {
+      // Check image dimensions for guidance warnings
+      if (recommendedMinWidth || recommendedAspectRatio) {
+        const dims = await getImageDimensions(file);
+        const warnings: string[] = [];
+        if (recommendedMinWidth && dims.width < recommendedMinWidth) {
+          warnings.push(`Image is ${dims.width}px wide — recommended at least ${recommendedMinWidth}px for best quality.`);
+        }
+        if (recommendedAspectRatio) {
+          const actualRatio = dims.width / dims.height;
+          const deviation = Math.abs(actualRatio - recommendedAspectRatio) / recommendedAspectRatio;
+          if (deviation > 0.25) {
+            warnings.push(`Aspect ratio differs from recommended — image may be cropped in the slideshow.`);
+          }
+        }
+        if (warnings.length > 0) {
+          setSizeWarning(warnings.join(' '));
+        }
+      }
+
       // Compress client-side
       const compressed = await compressImage(file, maxWidth, quality);
 
@@ -109,6 +153,7 @@ export function ImageUpload({
   function handleRemove() {
     onChange('');
     onAltTextChange?.('');
+    setSizeWarning(null);
   }
 
   return (
@@ -164,8 +209,12 @@ export function ImageUpload({
         aria-label={`Upload ${label}`}
       />
 
-      {aspectHint && !value && (
+      {aspectHint && (
         <p className="text-xs text-warm-gray-400 mt-1">Recommended: {aspectHint}</p>
+      )}
+
+      {sizeWarning && (
+        <p className="text-xs text-warning mt-1" role="alert">{sizeWarning}</p>
       )}
 
       {/* Alt text input — shown when an image is uploaded or when handler is provided */}

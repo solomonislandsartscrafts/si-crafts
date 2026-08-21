@@ -14,6 +14,8 @@ import { altTextError, htmlHasImageMissingAlt } from '@/lib/image-alt';
 import { scrollToFirstError } from '@/lib/scroll-to-error';
 import { useToast } from '@/components/ui/toast';
 import { useModalA11y } from '@/lib/use-modal-a11y';
+import { Button } from '@/components/ui/button';
+import { FormField, inputClasses } from '@/components/ui/form-field';
 
 interface ProductFormModalProps {
   product: Product | null; // null = create mode
@@ -238,7 +240,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
         <form ref={formRef} onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
           {/* Save error banner */}
           {saveError && (
-            <div className="bg-error/10 border border-error/20 text-error text-sm rounded-md p-3" role="alert" aria-live="assertive">
+            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert" aria-live="assertive">
               {saveError}
             </div>
           )}
@@ -246,7 +248,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
           {/* Material + Maker first (so code auto-generates) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="product-material" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              <label htmlFor="product-material" className="block text-base font-medium text-warm-gray-800 mb-1">
                 Material Category *
               </label>
               <Select
@@ -260,7 +262,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
               />
             </div>
             <div>
-              <label htmlFor="product-maker" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              <label htmlFor="product-maker" className="block text-base font-medium text-warm-gray-800 mb-1">
                 Maker *
               </label>
               <Select
@@ -272,69 +274,57 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
                 label="Maker"
                 className="w-full"
               />
-              {errors.makerId && <p id="product-maker-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.makerId}</p>}
+              {errors.makerId && <p id="product-maker-error" className="text-base text-error mt-1" role="alert" aria-live="assertive">{errors.makerId}</p>}
             </div>
           </div>
 
           {/* Product Code — auto-generated but editable */}
-          <div>
-            <label htmlFor="product-code" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Product Code *
-            </label>
+          <FormField
+            label="Product Code *"
+            htmlFor="product-code"
+            error={errors.productCode}
+            helperText={
+              !product
+                ? 'Auto-generated from material + maker. You can edit it.'
+                : 'Format: P-J-1, B-J-1 (material initial - maker initial - number)'
+            }
+          >
             <input
-              id="product-code"
               type="text"
               value={form.productCode}
               onChange={(e) => handleChange('productCode', e.target.value.toUpperCase())}
               placeholder="P-J-1"
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 font-mono focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-              aria-describedby={errors.productCode ? 'product-code-error' : 'product-code-hint'}
+              className={`${inputClasses} font-mono`}
+              data-error={errors.productCode ? 'true' : undefined}
             />
-            {errors.productCode ? (
-              <p id="product-code-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.productCode}</p>
-            ) : (
-              <p id="product-code-hint" className="text-xs text-warm-gray-400 mt-1">
-                {!product ? 'Auto-generated from material + maker. You can edit it.' : 'Format: P-J-1, B-J-1 (material initial - maker initial - number)'}
-              </p>
-            )}
-          </div>
+          </FormField>
 
           {/* Name */}
-          <div>
-            <label htmlFor="product-name" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Name *
-            </label>
+          <FormField label="Name *" htmlFor="product-name" error={errors.name}>
             <input
-              id="product-name"
               type="text"
               value={form.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-              aria-describedby={errors.name ? 'product-name-error' : undefined}
+              className={inputClasses}
+              data-error={errors.name ? 'true' : undefined}
             />
-            {errors.name && <p id="product-name-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.name}</p>}
-          </div>
+          </FormField>
 
           {/* Description */}
-          <div>
-            <label htmlFor="product-description" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Description *
-            </label>
+          <FormField label="Description *" htmlFor="product-description" error={errors.description}>
             <textarea
-              id="product-description"
               value={form.description}
               onChange={(e) => handleChange('description', e.target.value)}
               rows={3}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent resize-y"
-              aria-describedby={errors.description ? 'product-desc-error' : undefined}
+              className={`${inputClasses} resize-y`}
+              data-error={errors.description ? 'true' : undefined}
             />
-            {errors.description && <p id="product-desc-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.description}</p>}
-          </div>
+          </FormField>
 
           {/* Type + Craft (row) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="product-type" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              <label htmlFor="product-type" className="block text-base font-medium text-warm-gray-800 mb-1">
                 Product Type *
               </label>
               <Select
@@ -348,7 +338,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
               />
             </div>
             <div>
-              <label htmlFor="product-craft" className="block text-sm font-medium text-warm-gray-800 mb-1">
+              <label htmlFor="product-craft" className="block text-base font-medium text-warm-gray-800 mb-1">
                 Craft *
               </label>
               <Select
@@ -360,42 +350,33 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
                 label="Craft"
                 className="w-full"
               />
-              {errors.craftId && <p id="product-craft-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.craftId}</p>}
+              {errors.craftId && <p id="product-craft-error" className="text-base text-error mt-1" role="alert" aria-live="assertive">{errors.craftId}</p>}
             </div>
           </div>
 
           {/* Price */}
-          <div>
-            <label htmlFor="product-price" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Wholesale Price (AUD) *
-            </label>
+          <FormField label="Wholesale Price (AUD) *" htmlFor="product-price" error={errors.wholesalePrice}>
             <input
-              id="product-price"
               type="number"
               min="0.01"
               step="0.01"
               value={form.wholesalePrice || ''}
               onChange={(e) => handleChange('wholesalePrice', parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
-              aria-describedby={errors.wholesalePrice ? 'product-price-error' : undefined}
+              className={inputClasses}
+              data-error={errors.wholesalePrice ? 'true' : undefined}
             />
-            {errors.wholesalePrice && <p id="product-price-error" className="text-sm text-error mt-1" aria-live="assertive">{errors.wholesalePrice}</p>}
-          </div>
+          </FormField>
 
           {/* Dimensions */}
-          <div>
-            <label htmlFor="product-dimensions" className="block text-sm font-medium text-warm-gray-800 mb-1">
-              Dimensions
-            </label>
+          <FormField label="Dimensions" htmlFor="product-dimensions">
             <input
-              id="product-dimensions"
               type="text"
               value={form.dimensions}
               onChange={(e) => handleChange('dimensions', e.target.value)}
               placeholder="30cm × 20cm × 10cm"
-              className="w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent"
+              className={inputClasses}
             />
-          </div>
+          </FormField>
 
           {/* Care Notes — rich text */}
           <div>
@@ -407,7 +388,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
               minRows={5}
             />
             {errors.careNotes && (
-              <p className="text-sm text-error mt-1" aria-live="assertive">{errors.careNotes}</p>
+              <p className="text-base text-error mt-1" role="alert" aria-live="assertive">{errors.careNotes}</p>
             )}
           </div>
 
@@ -419,11 +400,12 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
               altTexts={form.imageAlts}
               onAltTextsChange={(alts) => handleChange('imageAlts', alts)}
               label="Product Photos"
+              aspectHint="3:2 landscape (1200×800px) for best slideshow display"
               maxWidth={1200}
               quality={0.8}
             />
             {errors.imageAlts && (
-              <p className="text-sm text-error mt-1" aria-live="assertive">{errors.imageAlts}</p>
+              <p className="text-base text-error mt-1" role="alert" aria-live="assertive">{errors.imageAlts}</p>
             )}
           </div>
 
@@ -438,7 +420,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
                 className="w-5 h-5 rounded border-sand-dark text-ocean focus:ring-2 focus:ring-ocean accent-ocean"
               />
               <div>
-                <span className="text-sm font-medium text-warm-gray-800">Featured on Homepage</span>
+                <span className="text-base font-medium text-warm-gray-800">Featured on Homepage</span>
                 <p className="text-xs text-warm-gray-400 mt-0.5">
                   Show this product in the hero gallery slideshow (max 3 recommended).
                 </p>
@@ -448,21 +430,12 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
-            <button
-              type="button"
-              onClick={handleDismiss}
-              disabled={saving}
-              className="tap-target px-6 py-3 border-2 border-ocean text-ocean hover:bg-ocean hover:text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean-light disabled:opacity-50"
-            >
+            <Button variant="secondary" onClick={handleDismiss} disabled={saving}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="tap-target px-6 py-3 btn-primary"
-            >
-              {saving ? 'Saving...' : product ? 'Update Product' : 'Create Product'}
-            </button>
+            </Button>
+            <Button type="submit" loading={saving} loadingText="Saving...">
+              {product ? 'Update Product' : 'Create Product'}
+            </Button>
           </div>
         </form>
       </div>

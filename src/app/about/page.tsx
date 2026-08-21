@@ -1,5 +1,6 @@
 import { generatePageMetadata } from '@/lib/metadata';
-import { AcknowledgementOfCountry, PageHeader } from '@/components/layout';
+import { AcknowledgementOfCountry, PageCta, PageHeader } from '@/components/layout';
+import { ButtonLink } from '@/components/ui/button';
 import { SafeImage } from '@/components/ui/safe-image';
 import { SmartLink } from '@/components/ui/smart-link';
 import { getSiteContentSafe } from '@/services/site-content';
@@ -131,7 +132,7 @@ export default async function AboutPage() {
               </div>
             </div>
             <figure className="lg:col-span-2 order-1 lg:order-2">
-              <div className="relative aspect-square rounded-lg overflow-hidden bg-sand shadow-card">
+              <div className="relative aspect-square rounded-lg overflow-hidden bg-sand-light shadow-card">
                 <SafeImage
                   src={siteContent.aboutTeamImage}
                   alt={siteContent.aboutTeamImageAlt || "The SIAC volunteer team"}
@@ -214,6 +215,17 @@ export default async function AboutPage() {
           </div>
         </div>
       </section>
+
+      {/* Closing CTA */}
+      <PageCta
+        heading="Meet the makers behind the work"
+        description="Every product we bring to Australia carries the maker's name, village, and story."
+      >
+        <ButtonLink href="/makers">Meet the makers</ButtonLink>
+        <ButtonLink href="/catalogue" variant="secondary">
+          Browse the catalogue
+        </ButtonLink>
+      </PageCta>
 
       {/* Section 4: Acknowledgement of Country */}
       <AcknowledgementOfCountry />
