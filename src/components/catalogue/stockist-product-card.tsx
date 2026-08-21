@@ -8,12 +8,21 @@ import { addToCart } from '@/lib/cart';
 import { formatPrice } from '@/lib/price';
 import { Button } from '@/components/ui/button';
 import { inputClasses } from '@/components/ui/form-field';
-import { SafeImage } from '@/components/ui/safe-image';
+import { materialLabel } from '@/lib/labels';
+import {
+  PosterFrame,
+  posterMetaClasses,
+  posterTitleClasses,
+} from '@/components/cards/poster-card';
 
 /**
  * Product card for logged-in stockists — adds price and an Add to Order
- * control. Chrome deliberately matches ProductCard so the catalogue does not
- * change appearance when a stockist logs in.
+ * control.
+ *
+ * Uses `PosterFrame` rather than `PosterCard` because the caption contains
+ * buttons, and a button cannot be nested inside a link. The frame and caption
+ * typography come from the same shared source as ProductCard, so the catalogue
+ * does not change appearance when a stockist logs in.
  */
 interface StockistProductCardProps {
   product: Product;
@@ -44,25 +53,27 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
   const noteFieldId = `note-${product.id}`;
 
   return (
-    <div className="flex h-full flex-col rounded-lg overflow-hidden bg-card-bg shadow-card hover:shadow-md transition-shadow duration-200">
-      {/* Image — links to piece page */}
+    <div className="flex h-full flex-col">
+      {/* Shared poster frame — links to the piece page. Same frame, fit, and
+          hover as ProductCard, so the catalogue does not change shape when a
+          stockist logs in. */}
       <Link
         href={`/piece/${product.productCode}`}
-        className="group block focus:outline-none focus:ring-2 focus:ring-ocean rounded-t-lg"
+        className="group block rounded-lg focus:outline-none focus:ring-2 focus:ring-ocean"
       >
-        <div className="aspect-square relative bg-sand-light overflow-hidden">
-          <SafeImage
-            src={product.imageUrls[0] || null}
-            alt={`${product.name}${makerName ? ` by ${makerName}` : ''}`}
-            fill
-            className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          />
-        </div>
+        <PosterFrame
+          src={product.imageUrls[0] ?? null}
+          alt={`${product.name}${makerName ? ` by ${makerName}` : ''}`}
+          fit="contain"
+          pill={materialLabel(product.materialCategory)}
+          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+        />
       </Link>
 
-      <div className="flex flex-1 flex-col p-4">
-        <h3 className="font-heading text-base font-semibold text-deep-blue leading-tight line-clamp-2">
+      {/* Caption below the frame. Kept outside the link above because it holds
+          buttons, and a button cannot be nested inside a link. */}
+      <div className="flex flex-1 flex-col pt-3">
+        <h3 className={`${posterTitleClasses} line-clamp-2`}>
           <Link
             href={`/piece/${product.productCode}`}
             className="hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded-sm"
@@ -70,14 +81,7 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
             {product.name}
           </Link>
         </h3>
-        <div className="flex items-center gap-2 mt-1 text-sm text-warm-gray-600">
-          <span className="capitalize">{product.materialCategory}</span>
-          <span aria-hidden="true">·</span>
-          <span className="capitalize">{product.productType}</span>
-        </div>
-        {makerName && (
-          <p className="text-sm text-warm-gray-600 mt-1">by {makerName}</p>
-        )}
+        {makerName && <p className={`mt-1 ${posterMetaClasses}`}>by {makerName}</p>}
 
         {/* Price */}
         <p className="font-heading text-lg font-semibold text-deep-blue mt-auto pt-3">
@@ -90,13 +94,13 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
         {/* Add to order + notes */}
         <div className="mt-3 space-y-3">
           {!showNotes ? (
-            <Button
-              variant="secondary"
-              size="sm"
+            <button
+              type="button"
               onClick={() => setShowNotes(true)}
+              className="text-sm text-ocean hover:text-ocean-dark transition-colors duration-200 font-body cursor-pointer"
             >
               Add a note
-            </Button>
+            </button>
           ) : (
             <div>
               <label htmlFor={noteFieldId} className="sr-only">
@@ -114,9 +118,11 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
           )}
 
           {/* Quantity + Add button. Controls are tap-target sized — these were
-              roughly 24x26px and are the primary interaction in this grid. */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center border border-sand-dark rounded-md flex-shrink-0">
+              roughly 24x26px and are the primary interaction in this grid.
+              They stack on a phone because the grid is two columns there, and a
+              48px stepper alongside a button does not fit one column wide. */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+            <div className="flex items-center self-start border border-sand-dark rounded-md flex-shrink-0">
               <button
                 onClick={() => setQty(Math.max(1, qty - 1))}
                 className="tap-target flex items-center justify-center text-warm-gray-800 hover:bg-sand-light rounded-l-md focus:outline-none focus:ring-2 focus:ring-ocean"

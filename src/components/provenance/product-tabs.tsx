@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ChevronDown } from 'lucide-react';
 import { ButtonLink } from '@/components/ui/button';
 import { materialLabel, productTypeLabel } from '@/lib/labels';
 import type { Product } from '@/types';
@@ -13,27 +12,44 @@ interface ProductTabsProps {
   craftSlug?: string;
 }
 
-const SECTION_IDS = ['details', 'how-its-made', 'authenticity', 'where-to-buy'] as const;
-type SectionId = (typeof SECTION_IDS)[number];
+const TAB_IDS = [
+  'description',
+  'specifications',
+  'how-its-made',
+  'authenticity',
+  'where-to-buy',
+] as const;
+type TabId = (typeof TAB_IDS)[number];
 
-const SECTION_LABELS: Record<SectionId, string> = {
-  details: 'Details',
+const TAB_LABELS: Record<TabId, string> = {
+  description: 'Description',
+  specifications: 'Specifications',
   'how-its-made': 'How it\u2019s made',
   authenticity: 'Authenticity',
   'where-to-buy': 'Where to buy',
 };
 
 /**
- * Reference information for a piece, presented as an accordion on all screens.
+ * All the reference detail for a piece, gathered into one tabbed panel that
+ * sits BELOW the gallery/summary row — the full description, specifications,
+ * process, authenticity, and how to buy.
  *
- * All labels are always visible, content opens directly beneath its trigger,
- * and large tap targets make it comfortable at every screen size.
+ * The description tab carries the piece's complete text. The summary above the
+ * fold shows only a 120-character preview, so without this panel the rest of
+ * what the maker told us about the piece was unreadable.
+ *
+ * The tabs are an underlined row, not folder tabs: the active one is marked by
+ * a gold bottom border over the row's own sand rule. The row wraps on narrow
+ * screens rather than scrolling, so no tab can be hidden off the edge.
  */
 export function ProductTabs({ product, craftName, craftSlug }: ProductTabsProps) {
-  const [active, setActive] = useState<SectionId | null>('details');
+  // A piece with no description gets no empty tab.
+  const tabs = TAB_IDS.filter((id) => id !== 'description' || Boolean(product.description));
+  const [active, setActive] = useState<TabId>(tabs[0]);
 
-  const panels: Record<SectionId, React.ReactNode> = {
-    details: <DetailsContent product={product} />,
+  const panels: Record<TabId, React.ReactNode> = {
+    description: <DescriptionContent description={product.description} />,
+    specifications: <SpecificationsContent product={product} />,
     'how-its-made': (
       <ProcessContent
         materialCategory={product.materialCategory}
@@ -46,93 +62,107 @@ export function ProductTabs({ product, craftName, craftSlug }: ProductTabsProps)
   };
 
   return (
-    <div className="border-t border-sand">
-      {SECTION_IDS.map((id) => {
-        const isOpen = active === id;
-        return (
-          <div key={id} className="border-b border-sand">
-            {/* h2, not h3: these sections are siblings of "Meet the Maker",
-                not subsections of it. Nesting them under it told screen
-                reader users that "Where to buy" was part of the maker's bio. */}
-            <h2>
-              <button
-                type="button"
-                id={`acc-trigger-${id}`}
-                aria-expanded={isOpen}
-                aria-controls={`acc-panel-${id}`}
-                onClick={() => setActive(isOpen ? null : id)}
-                className="tap-target w-full flex items-center justify-between gap-3 py-4 text-left font-heading text-base font-semibold text-deep-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
-              >
-                {SECTION_LABELS[id]}
-                <ChevronDown
-                  className={`w-5 h-5 flex-shrink-0 text-warm-gray-600 transition-transform duration-200 ${
-                    isOpen ? 'rotate-180' : ''
-                  }`}
-                  aria-hidden="true"
-                />
-              </button>
-            </h2>
-            <div
-              role="region"
-              id={`acc-panel-${id}`}
-              aria-labelledby={`acc-trigger-${id}`}
-              hidden={!isOpen}
-              className="pb-5"
+    <div>
+      {/* Tab row — underline style with gold active indicator */}
+      <div
+        role="tablist"
+        aria-label="Piece information"
+        className="flex flex-wrap gap-x-1 gap-y-2 border-b-2 border-sand"
+      >
+        {tabs.map((id) => {
+          const isActive = active === id;
+          return (
+            <button
+              key={id}
+              role="tab"
+              type="button"
+              id={`tab-${id}`}
+              aria-selected={isActive}
+              // Only one panel is rendered at a time, so pointing an inactive
+              // tab at `panel-<its own id>` would be a dangling reference.
+              aria-controls={isActive ? `panel-${id}` : undefined}
+              tabIndex={isActive ? 0 : -1}
+              onClick={() => setActive(id)}
+              onKeyDown={(e) => {
+                if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+                e.preventDefault();
+                const i = tabs.indexOf(id);
+                const next =
+                  e.key === 'ArrowRight'
+                    ? tabs[(i + 1) % tabs.length]
+                    : tabs[(i - 1 + tabs.length) % tabs.length];
+                setActive(next);
+                document.getElementById(`tab-${next}`)?.focus();
+              }}
+              className={`tap-target relative -mb-[2px] whitespace-nowrap px-4 sm:px-5 py-2.5 text-base font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean rounded-t-md ${
+                isActive
+                  ? 'border-b-[3px] border-accent-gold text-deep-blue bg-ocean/5'
+                  : 'border-b-[3px] border-transparent text-warm-gray-600 hover:text-ocean hover:bg-ocean/5'
+              }`}
             >
-              {panels[id]}
-            </div>
-          </div>
-        );
-      })}
+              {TAB_LABELS[id]}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Panel */}
+      <div
+        role="tabpanel"
+        id={`panel-${active}`}
+        aria-labelledby={`tab-${active}`}
+        // Focusable so keyboard users can Tab from the tab row into the panel
+        // text, which is otherwise unreachable when it holds no links.
+        tabIndex={0}
+        className="rounded-b-md border border-t-0 border-sand bg-white p-5 sm:p-6"
+      >
+        {panels[active]}
+      </div>
     </div>
   );
 }
 
-function DetailsContent({ product }: { product: Product }) {
+/* ─── Panel content ─────────────────────────────────────────────────────── */
+
+/**
+ * The full description, untruncated. `whitespace-pre-line` keeps the paragraph
+ * breaks the admin typed, since this field is a plain textarea rather than rich
+ * text.
+ */
+function DescriptionContent({ description }: { description: string }) {
   return (
-    <dl className="grid grid-cols-2 gap-y-5 gap-x-8">
+    <p className="max-w-3xl whitespace-pre-line text-base leading-relaxed text-warm-gray-800">
+      {description}
+    </p>
+  );
+}
+
+function SpecificationsContent({ product }: { product: Product }) {
+  return (
+    <dl className="grid max-w-3xl grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
       <div>
-        <dt className="text-xs text-ocean uppercase tracking-wider font-semibold mb-1">Material</dt>
-        <dd className="text-base text-warm-gray-800 capitalize">
+        <dt className="mb-1 text-xs font-semibold uppercase tracking-wider text-ocean">Material</dt>
+        <dd className="text-base capitalize text-warm-gray-800">
           {materialLabel(product.materialCategory)}
         </dd>
       </div>
       <div>
-        <dt className="text-xs text-ocean uppercase tracking-wider font-semibold mb-1">Type</dt>
-        <dd className="text-base text-warm-gray-800 capitalize">
+        <dt className="mb-1 text-xs font-semibold uppercase tracking-wider text-ocean">Type</dt>
+        <dd className="text-base capitalize text-warm-gray-800">
           {productTypeLabel(product.productType)}
         </dd>
       </div>
       {product.dimensions && (
         <div>
-          <dt className="text-xs text-ocean uppercase tracking-wider font-semibold mb-1">Dimensions</dt>
+          <dt className="mb-1 text-xs font-semibold uppercase tracking-wider text-ocean">Dimensions</dt>
           <dd className="text-base text-warm-gray-800">{product.dimensions}</dd>
         </div>
       )}
       <div>
-        <dt className="text-xs text-ocean uppercase tracking-wider font-semibold mb-1">Reference</dt>
+        <dt className="mb-1 text-xs font-semibold uppercase tracking-wider text-ocean">Reference</dt>
         <dd className="text-base font-mono font-bold text-warm-gray-800">{product.productCode}</dd>
       </div>
     </dl>
-  );
-}
-
-function AuthenticityContent() {
-  return (
-    <div className="space-y-3 text-base text-warm-gray-600 leading-relaxed">
-      <p>
-        Every piece comes with a product tag stating the maker&apos;s name and province in
-        Solomon Islands, linking to this provenance page — your guarantee it was handmade by the
-        named maker.
-      </p>
-      <p>
-        For more information see{' '}
-        <Link href="/our-promise" className="text-ocean hover:text-ocean-dark font-medium">
-          Our Promise
-        </Link>
-        .
-      </p>
-    </div>
   );
 }
 
@@ -160,12 +190,12 @@ function ProcessContent({
     'This piece is made using traditional techniques passed down through generations.';
 
   return (
-    <div className="space-y-3 text-base text-warm-gray-600 leading-relaxed">
+    <div className="max-w-3xl space-y-3 text-base leading-relaxed text-warm-gray-800">
       <p>{processText}</p>
       {craftSlug && craftName && (
         <Link
           href={`/craft/${craftSlug}`}
-          className="inline-flex text-ocean hover:text-ocean-dark font-medium transition-colors"
+          className="inline-flex font-medium text-ocean transition-colors hover:text-ocean-dark"
         >
           Read more about {craftName} →
         </Link>
@@ -174,40 +204,53 @@ function ProcessContent({
   );
 }
 
+function AuthenticityContent() {
+  return (
+    <div className="max-w-3xl space-y-3 text-base leading-relaxed text-warm-gray-800">
+      <p>
+        Every piece comes with a product tag stating the maker&apos;s name and province in
+        Solomon Islands, linking to this provenance page — your guarantee it was handmade by the
+        named maker.
+      </p>
+      <p>
+        For more information see{' '}
+        <Link href="/our-promise" className="font-medium text-ocean hover:text-ocean-dark">
+          Our Promise
+        </Link>
+        .
+      </p>
+    </div>
+  );
+}
+
 function WhereToBuyContent() {
   return (
-    <div className="space-y-5">
-      <p className="text-base text-warm-gray-600 leading-relaxed">
+    <div className="max-w-3xl space-y-5">
+      <p className="text-base leading-relaxed text-warm-gray-800">
         We supply museum and gallery shops in Australia. Visit a stockist to buy
         a piece in person, or enquire about wholesale for your own shop.
       </p>
 
-      <div className="flex flex-col sm:flex-row flex-wrap gap-3">
+      <div className="flex flex-col flex-wrap gap-3 sm:flex-row">
         <ButtonLink href="/stockists">Find a stockist</ButtonLink>
         <ButtonLink href="/wholesale" variant="secondary">
           Wholesale enquiries
         </ButtonLink>
       </div>
 
-      <p className="text-base text-warm-gray-600 leading-relaxed">
+      <p className="text-base leading-relaxed text-warm-gray-800">
         Run a museum or gallery shop?{' '}
-        <Link
-          href="/stockist/apply"
-          className="text-ocean hover:text-ocean-dark font-medium"
-        >
+        <Link href="/stockist/apply" className="font-medium text-ocean hover:text-ocean-dark">
           Apply for a stockist account
         </Link>{' '}
         to see wholesale pricing and place orders.
       </p>
 
-      <p className="text-base text-warm-gray-600 border-l-2 border-sand pl-4 leading-relaxed">
+      <p className="border-l-[3px] border-accent-gold pl-4 text-base leading-relaxed text-warm-gray-600">
         When you buy this piece through a stockist, the maker receives the price
         they set — paid upfront, before the piece reaches Australia. No
         middlemen, no commission.{' '}
-        <Link
-          href="/our-promise"
-          className="text-ocean hover:text-ocean-dark font-medium"
-        >
+        <Link href="/our-promise" className="font-medium text-ocean hover:text-ocean-dark">
           Learn about our values →
         </Link>
       </p>

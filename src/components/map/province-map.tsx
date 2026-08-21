@@ -174,8 +174,11 @@ export function SolomonIslandsProvinceMap({
 
   return (
     <div className="w-full">
-      {/* Map wrapper — relative container for SVG + label overlay */}
-      <div className="relative w-full">
+      {/* Map wrapper — relative container for SVG + label overlay.
+          The scale-up sits HERE, not on the SVG alone: the labels are
+          positioned as a % of the same box, so scaling only the SVG slid every
+          province out from under its own label. */}
+      <div className="relative w-full min-h-[280px] transform scale-110 origin-center">
         {/* SVG map container */}
         <div ref={containerRef} className="w-full rounded-lg overflow-hidden" />
 
@@ -193,7 +196,7 @@ export function SolomonIslandsProvinceMap({
                   onClick={() => onProvinceSelect(province === selectedProvince ? null : province)}
                   onMouseEnter={() => handleLabelEnter(province)}
                   onMouseLeave={() => handleLabelLeave(province)}
-                  className={`absolute text-[8px] sm:text-[10px] md:text-xs font-bold uppercase tracking-wide transition-colors cursor-pointer tap-target flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-ocean rounded ${
+                  className={`absolute text-[9px] sm:text-[11px] md:text-sm font-bold uppercase tracking-wide transition-colors cursor-pointer tap-target flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-ocean rounded ${
                     isActive
                       ? 'text-ocean'
                       : isSelected
