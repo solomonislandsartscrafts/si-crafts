@@ -83,14 +83,14 @@ export default function StockistCataloguePage() {
 
   if (!authenticated || loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
+      <div className="site-container page-y">
         <SkeletonCardGrid />
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
+    <div className="site-container page-y">
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>

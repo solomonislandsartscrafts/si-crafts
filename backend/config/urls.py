@@ -33,8 +33,12 @@ urlpatterns = [
     path("api/enquiries/", include("apps.enquiries.urls")),
     path("api/categories/", include("apps.categories.urls")),
     path("api/site-content/", include("apps.site_content.urls")),
+    path("api/site-text/", include("apps.site_text.urls")),
+    path("api/retail-stockists/", include("apps.retail_stockists.urls")),
+    path("api/supporters/", include("apps.supporters.urls")),
     path("api/upload/", include("apps.site_content.upload_urls")),
     path("api/team/", include("apps.team.urls")),
+    path("api/faqs/", include("apps.faqs.urls")),
 
     # Writable page APIs (POST/PATCH/DELETE for Wagtail pages)
     path("api/write/products/", include("apps.products.urls")),

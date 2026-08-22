@@ -52,7 +52,11 @@ INSTALLED_APPS = [
     "apps.enquiries",
     "apps.categories",
     "apps.site_content",
+    "apps.site_text",
     "apps.team",
+    "apps.faqs",
+    "apps.retail_stockists",
+    "apps.supporters",
 ]
 
 MIDDLEWARE = [
@@ -128,7 +132,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Wagtail
-WAGTAIL_SITE_NAME = "Solomon Islands Arts Crafts"
+WAGTAIL_SITE_NAME = "Solomon Islands Arts & Crafts"
 WAGTAILADMIN_BASE_URL = os.environ.get("WAGTAILADMIN_BASE_URL", "http://localhost:8000")
 WAGTAILIMAGES_MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
 

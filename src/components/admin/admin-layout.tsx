@@ -139,7 +139,7 @@ export function AdminLayout({ children, requiredRole = null }: AdminLayoutProps)
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile top bar with the drawer trigger */}
-        <div className="lg:hidden sticky top-0 z-30 flex items-center gap-3 px-4 py-3 bg-deep-blue text-white">
+        <div className="lg:hidden sticky top-0 z-30 flex items-center gap-3 px-5 py-3 bg-deep-blue text-white">
           <button
             onClick={() => setNavOpen(true)}
             className="tap-target flex items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-accent-gold"
@@ -153,7 +153,10 @@ export function AdminLayout({ children, requiredRole = null }: AdminLayoutProps)
           </span>
         </div>
 
-        <div className="flex-1 p-4 sm:p-6 bg-warm-gray-100 overflow-x-hidden">
+        {/* Admin uses the 20px/30px steps of the shared scale but deliberately
+            NOT the public site's 70px gutter — admin is dense tabular data, and
+            140px of side padding would cost real column width. */}
+        <div className="flex-1 p-5 tabtop:p-8 bg-warm-gray-100 overflow-x-hidden">
           {children}
         </div>
       </div>

@@ -7,7 +7,13 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton, SkeletonRegion } from '@/components/ui/skeleton';
 import type { TeamMember } from '@/types';
 
-export function TeamList() {
+export function TeamList({
+  emptyTitle,
+  emptyDescription,
+}: {
+  emptyTitle: string;
+  emptyDescription: string;
+}) {
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -45,11 +51,7 @@ export function TeamList() {
 
   if (members.length === 0) {
     return (
-      <EmptyState
-        icon={Users}
-        title="Team information coming soon."
-        description="We're documenting our volunteer team. Check back soon."
-      />
+      <EmptyState icon={Users} title={emptyTitle} description={emptyDescription} />
     );
   }
 

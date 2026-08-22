@@ -83,35 +83,99 @@
 }
 
 @layer components {
-  /* --- Vertical rhythm -------------------------------------------------
-     Fluid responsive spacing using calc() + vw for smooth scaling
-     across all viewport sizes. Based on industry best practices:
-     - Mobile (320px): tighter spacing
-     - Tablet (768px): moderate spacing
-     - Desktop (1280px+): generous spacing
+  /* ====================================================================
+     SPACING SYSTEM
+     ======================================================================
+     The horizontal and vertical rhythm is a stepped scale on a 5px base,
+     with 920px as the breakpoint where the layout opens up. Values step
+     at breakpoints rather than scaling fluidly with vw — a fixed ladder is
+     easier to reason about and reproduces the same measurements on every
+     device at a given width.
 
+     The ladder:  10 · 15 · 20 · 25 · 30 · 40 · 70 px
+     Structural values (gutters, rhythm, container) use it exactly.
+     Values inside a component snap to Tailwind's own 4px scale, so the
+     project keeps one spacing scale rather than two competing ones.
+
+     Horizontal:  .site-px         20px → 70px @920
+     Container:   .site-container  .site-px + max-width 1440px + centred
+     Vertical:    .page-y          20px → 40px @920
+                  .section-y       40px → 80px @1024
+     ==================================================================== */
+
+  /* --- Horizontal gutters ---------------------------------------------
+     Every container on a page MUST use .site-px (directly, or via
+     .site-container). If a page header uses one gutter and the body below
+     uses another, the left edge of the content visibly steps in and out
+     as you scroll. This is the single most common way to break the layout.
+     -------------------------------------------------------------------- */
+  .site-px {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  @media (min-width: 920px) {
+    .site-px {
+      padding-left: 70px;
+      padding-right: 70px;
+    }
+  }
+
+  /* The standard page container: centred, capped at 1440px, with the
+     gutters above. Replaces the old `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`
+     class string so the container is defined in exactly one place.
+
+     For a narrower single-column page, pair the width utility with the
+     gutter utility instead: `max-w-2xl mx-auto site-px`. */
+  .site-container {
+    width: 100%;
+    max-width: 1440px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  @media (min-width: 920px) {
+    .site-container {
+      padding-left: 70px;
+      padding-right: 70px;
+    }
+  }
+
+  /* --- Vertical rhythm -------------------------------------------------
      .page-y     top/bottom padding for a whole page's content
      .section-y  padding for a band/section within a page
+
+     NOTE: these live in the `components` layer, so any Tailwind `py-*`,
+     `pt-*` or `pb-*` utility on the same element overrides them. That is
+     used deliberately (e.g. PageHeader tightens its own bottom padding),
+     but it also means adding `py-*` to a `.page-y` element silently
+     cancels the rhythm.
      -------------------------------------------------------------------- */
   .page-y {
-    padding-top: calc(1.5rem + 1.5vw);     /* ~24px mobile → ~44px tablet → ~60px desktop */
-    padding-bottom: calc(1.5rem + 1.5vw);
+    padding-top: 20px;
+    padding-bottom: 20px;
   }
 
-  .section-y {
-    padding-top: calc(2rem + 2vw);          /* ~32px mobile → ~52px tablet → ~72px desktop */
-    padding-bottom: calc(2rem + 2vw);
-  }
-
-  @media (min-width: 1280px) {
+  @media (min-width: 920px) {
     .page-y {
-      padding-top: 4rem;    /* cap at 64px on large screens */
-      padding-bottom: 4rem;
+      padding-top: 40px;
+      padding-bottom: 40px;
     }
+  }
 
+  /* Section bands sit one step above page padding, and take the full
+     80px only once there is room for it. */
+  .section-y {
+    padding-top: 40px;
+    padding-bottom: 40px;
+  }
+
+  @media (min-width: 1024px) {
     .section-y {
-      padding-top: 5rem;    /* cap at 80px on large screens */
-      padding-bottom: 5rem;
+      padding-top: 80px;
+      padding-bottom: 80px;
     }
   }
 
@@ -575,6 +639,7 @@
   line-height: 1.6;
   color: #5C5648;
   margin-top: 0.5rem;
+  text-align: center;
 }
 
 .article-content ul,
@@ -619,9 +684,21 @@
 }
 
 .article-content img {
+  display: block;
   width: 100%;
+  height: auto;
   border-radius: 0.5rem;
   margin: 2rem 0;
+}
+
+/* The figure already owns the vertical rhythm — don't stack two margins. */
+.article-content figure img {
+  margin: 0;
+}
+
+/* In the editor, clicking an image opens its alt text and caption fields. */
+[contenteditable] img {
+  cursor: pointer;
 }
 
 /* Accessibility widget overrides */

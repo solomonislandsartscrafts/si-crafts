@@ -1,6 +1,7 @@
 import secrets
 
 from django.contrib.auth.models import User
+from django.db import IntegrityError
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -133,15 +134,23 @@ class StockistViewSet(viewsets.ModelViewSet):
         data["email"] = email
         data.pop("password", None)
 
+        duplicate = Response(
+            {"error": "A stockist with that email already exists."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
         if email and Stockist.objects.filter(email__iexact=email).exists():
-            return Response(
-                {"error": "A stockist with that email already exists."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return duplicate
 
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
-        stockist = serializer.save(status=data.get("status") or "approved")
+        # The check above is a read-then-write, so two concurrent saves can both
+        # pass it. The case-insensitive unique constraint is the real guard —
+        # translate it into the same 400 rather than a 500.
+        try:
+            stockist = serializer.save(status=data.get("status") or "approved")
+        except IntegrityError:
+            return duplicate
 
         message = "Stockist added."
         if stockist.status == "approved":
@@ -222,9 +231,31 @@ class StockistApplyView(viewsets.GenericViewSet):
     permission_classes = [AllowAny]
 
     def create(self, request):
+        # Reject a repeat application before the serializer's unique validator
+        # gets to it. That one only compares the address exactly, so it let a
+        # differently-capitalised duplicate through, and it phrases the failure
+        # as a field error the apply form doesn't surface.
+        duplicate = Response(
+            {
+                "error": "We already have an application for this email address. "
+                "If you've applied before, contact us and we'll check on it."
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+        email = str(request.data.get("email") or "").strip()
+        if email and Stockist.objects.filter(email__iexact=email).exists():
+            return duplicate
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        stockist = serializer.save(status="pending")
+        # Two applications submitted at the same moment both clear the check
+        # above; the case-insensitive unique constraint catches the loser. Same
+        # message either way — a 500 on the public apply form is not acceptable.
+        try:
+            stockist = serializer.save(status="pending")
+        except IntegrityError:
+            return duplicate
 
         # Notify admins and applicant — don't let email failure break the submission
         try:
@@ -273,13 +304,17 @@ class SetPasswordView(APIView):
         if not token_obj.is_valid:
             return Response({"error": "This link has expired. Please contact us for a new one."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Set the password
-        user = token_obj.stockist.user
-        if not user:
-            return Response({"error": "Account not found."}, status=status.HTTP_400_BAD_REQUEST)
-
-        user.set_password(password)
-        user.save()
+        # Set the password. A stockist approved before their login was created
+        # has no user yet; provisioning here instead of erroring means a valid
+        # link is never a dead end.
+        stockist = token_obj.stockist
+        if stockist.user is None:
+            provision_stockist_login(stockist, password=password, send_invite=False)
+            stockist.refresh_from_db()
+        else:
+            user = stockist.user
+            user.set_password(password)
+            user.save()
 
         # Mark token as used
         token_obj.used = True
@@ -297,15 +332,22 @@ class ForgotPasswordView(APIView):
         import secrets
         from .models import PasswordSetToken
 
-        email = request.data.get("email", "").strip().lower()
+        email = request.data.get("email", "").strip()
         if not email:
             return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Always respond with success (don't reveal whether account exists)
-        try:
-            stockist = Stockist.objects.get(email=email, status="approved")
-        except Stockist.DoesNotExist:
-            return Response({"success": True, "message": "If that email is registered, a reset link has been sent."})
+        generic = Response({
+            "success": True,
+            "message": "If that email is registered, a reset link has been sent.",
+        })
+
+        # Match case-insensitively. Public applications store the address exactly
+        # as it was typed, so an exact match against a lower-cased input silently
+        # found nothing for anyone who capitalised their email — and the generic
+        # response meant they never learned why the link never arrived.
+        stockist = Stockist.objects.filter(email__iexact=email, status="approved").first()
+        if stockist is None:
+            return generic
 
         # Generate token
         token = secrets.token_urlsafe(48)

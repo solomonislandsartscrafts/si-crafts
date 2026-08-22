@@ -98,7 +98,7 @@ export default function StockistOrdersPage() {
 
   if (!authenticated || loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 page-y">
+      <div className="site-container page-y">
         <SkeletonText lines={4} />
       </div>
     );
@@ -149,7 +149,7 @@ export default function StockistOrdersPage() {
         }
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div className="site-container pb-16">
         {cart.length === 0 ? (
           <EmptyState
             icon={ShoppingCart}

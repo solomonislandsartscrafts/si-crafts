@@ -6,6 +6,23 @@ const config: Config = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    // =========================================================================
+    // BREAKPOINTS — declared in full (not `extend`) so `tabtop` is emitted in
+    // min-width order. Tailwind writes variants in declaration order, so a
+    // breakpoint added via `extend` lands after `2xl` and would then override
+    // `lg:`/`xl:` rules. Declaring the whole set keeps cascade order correct.
+    //
+    // `tabtop` (920px) is the reference site's primary layout breakpoint — the
+    // point at which page gutters widen and the grid gains a wider column gap.
+    // =========================================================================
+    screens: {
+      sm: '640px',
+      md: '768px',
+      tabtop: '920px',
+      lg: '1024px',
+      xl: '1280px',
+      '2xl': '1536px',
+    },
     extend: {
       colors: {
         // =====================================================================
@@ -130,12 +147,20 @@ const config: Config = {
         heading: '1.2',
         relaxed: '1.7',
       },
+      maxWidth: {
+        // The single page-content width. 1440px, wider than Tailwind's
+        // max-w-7xl (1280px), so the content column keeps breathing room on
+        // large displays instead of stranding it mid-screen.
+        // Applied via the .site-container utility in globals.css.
+        site: '1440px',
+      },
       spacing: {
-        // Vertical page/section rhythm lives in the .page-y and .section-y
-        // utilities in globals.css, which scale across breakpoints. These
-        // fixed tokens remain only for one-off use.
-        section: '32px',
-        'section-lg': '64px',
+        // Page gutters. These exist as tokens so a child can break out of the
+        // container with a matching negative margin (e.g. full-bleed carousels:
+        // `-mx-page-x tabtop:-mx-page-x-lg`). The container itself uses the
+        // .site-px utility in globals.css rather than these classes.
+        'page-x': '20px',
+        'page-x-lg': '70px',
       },
       boxShadow: {
         card: '0 2px 8px rgba(0, 0, 0, 0.06)',

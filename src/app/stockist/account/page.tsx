@@ -216,7 +216,7 @@ export default function StockistAccountPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 page-y">
+      <div className="site-container page-y">
         <SkeletonText lines={4} />
       </div>
     );
@@ -225,7 +225,7 @@ export default function StockistAccountPage() {
   if (!profile) return null;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
+    <div className="site-container page-y">
       {/* Welcome + Logout */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-10">
         <div className="flex items-center gap-4">

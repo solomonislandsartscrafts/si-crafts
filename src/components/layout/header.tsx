@@ -47,12 +47,12 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-40 bg-cream/95 backdrop-blur-sm border-b border-sand">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="site-container">
           <div className="flex items-center justify-between h-16">
             <Link
               href="/"
               className="tap-target inline-flex items-center rounded-sm transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-ocean"
-              aria-label="Solomon Islands Arts Crafts — home"
+              aria-label="Solomon Islands Arts & Crafts — home"
             >
               <Logo />
             </Link>

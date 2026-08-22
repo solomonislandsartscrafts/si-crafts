@@ -6,8 +6,9 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import type { Product, Maker, Craft } from '@/types';
 import { ImageGallery } from '@/components/provenance/image-gallery';
-import { ProductTabs } from '@/components/provenance/product-tabs';
+import { ProductTabs, type ProvenanceCopy } from '@/components/provenance/product-tabs';
 import { MakerSection } from '@/components/provenance/maker-section';
+import { CmsInline } from '@/components/ui/cms-text';
 import { ShareButtons } from '@/components/shared/share-buttons';
 import { addToCart } from '@/lib/cart';
 import { materialLabel, productTypeLabel } from '@/lib/labels';
@@ -20,9 +21,22 @@ interface PiecePageClientProps {
   craftSlug?: string;
   maker?: Maker | null;
   craft?: Craft | null;
+  /** Admin-editable provenance copy, resolved on the server. */
+  copy: ProvenanceCopy;
+  tradeOnlyNotice: string;
+  makerStoryFallback: string;
 }
 
-export function PiecePageClient({ product, craftName, craftSlug, maker, craft }: PiecePageClientProps) {
+export function PiecePageClient({
+  product,
+  craftName,
+  craftSlug,
+  maker,
+  craft,
+  copy,
+  tradeOnlyNotice,
+  makerStoryFallback,
+}: PiecePageClientProps) {
   const [isStockist, setIsStockist] = useState(false);
   const [added, setAdded] = useState(false);
   const [qty, setQty] = useState(1);
@@ -77,7 +91,7 @@ export function PiecePageClient({ product, craftName, craftSlug, maker, craft }:
   return (
     <div className="space-y-10">
       {/* ─── Top section: Gallery (left) + Product Info (right) ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* Left column — Image gallery with thumbnails */}
         <div className="w-full">
           <ImageGallery images={product.imageUrls} alt={product.name} />
@@ -180,18 +194,13 @@ export function PiecePageClient({ product, craftName, craftSlug, maker, craft }:
           </dl>
 
           {/* Trade-only badge */}
-          {!isStockist && (
+          {!isStockist && tradeOnlyNotice && (
             <div className="mt-5 px-4 py-3 bg-ocean/5 border border-ocean/20 rounded-lg">
               <p className="text-sm text-warm-gray-600">
-                This piece is available to approved wholesale stockists.{' '}
-                <Link href="/stockist/apply" className="text-ocean hover:text-ocean-dark font-medium">
-                  Apply for an account
-                </Link>{' '}
-                or{' '}
-                <Link href="/stockists" className="text-ocean hover:text-ocean-dark font-medium">
-                  find a retail stockist
-                </Link>
-                .
+                <CmsInline
+                  value={tradeOnlyNotice}
+                  linkClassName="text-ocean hover:text-ocean-dark font-medium"
+                />
               </p>
             </div>
           )}
@@ -200,11 +209,16 @@ export function PiecePageClient({ product, craftName, craftSlug, maker, craft }:
 
       {/* ─── Tabbed section: full width below the fold ─── */}
       <div>
-        <ProductTabs product={product} craftName={craftName} craftSlug={craftSlug} />
+        <ProductTabs
+          product={product}
+          craftName={craftName}
+          craftSlug={craftSlug}
+          copy={copy}
+        />
       </div>
 
       {/* ─── Meet the Maker ─── */}
-      <MakerSection maker={maker} craft={craft} />
+      <MakerSection maker={maker} craft={craft} storyFallback={makerStoryFallback} />
 
       {/* ─── Share — at the bottom after content ─── */}
       <div className="flex items-center justify-center py-4 border-t border-sand">
@@ -214,7 +228,7 @@ export function PiecePageClient({ product, craftName, craftSlug, maker, craft }:
       {/* Sticky bottom bar — mobile only, stockists only */}
       {isStockist && showStickyBar && (
         <div className="fixed bottom-0 inset-x-0 z-20 lg:hidden p-3 bg-white border-t border-sand shadow-md">
-          <div className="max-w-7xl mx-auto flex items-center gap-3">
+          <div className="max-w-site mx-auto flex items-center gap-3">
             <div className="flex-shrink-0">
               <p className="text-sm font-bold text-deep-blue">{formatPrice(product.wholesalePrice)}</p>
               <p className="text-xs text-warm-gray-600 truncate max-w-[120px]">{product.name}</p>

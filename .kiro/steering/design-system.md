@@ -34,7 +34,7 @@ lead; the UI stays quiet.
 | `footer-bg` | `#1B3A4B` | Footer (same as deep-blue) |
 | `footer-text` | `#FFFFFF` | Footer primary text |
 | `footer-muted` | `#CBD5DC` | Footer secondary text |
-| `sand-light` | `#F0F0F0` | Section backgrounds, image wells, note boxes |
+| `sand-light` | `#F0F0F0` | Section backgrounds, note boxes (**not** card image wells) |
 | `sand` | `#E5E5E5` | Borders, dividers |
 | `sand-dark` | `#D4D4D4` | Input borders |
 | `warm-gray-100` | `#FAFAFA` | Lightest surface — **background only** |
@@ -136,22 +136,67 @@ above.
 
 ## Spacing (LOCKED)
 
-Vertical rhythm uses the fluid utilities in `globals.css`, not fixed tokens:
+The scale is a stepped ladder on a 5px base, with **920px (`tabtop:`)** as the
+breakpoint where the layout opens up. Values step at breakpoints rather than
+scaling fluidly with `vw` — a fixed ladder produces the same measurement on
+every device at a given width, which makes layouts predictable to reason about.
+
+**The ladder: 10 · 15 · 20 · 25 · 30 · 40 · 70 px**
+
+Structural spacing (gutters, page rhythm, container) uses the ladder exactly.
+Spacing *inside* a component snaps to Tailwind's own 4px scale (so 15px → `4`,
+30px → `8`), which keeps one spacing scale in the project instead of two
+competing ones. Where the two disagree by 1–2px, prefer the Tailwind token.
+
+### Vertical rhythm — utilities in `globals.css`
 
 | Class | Value | Use |
 |-------|-------|-----|
-| `.page-y` | 24px → 64px | Top/bottom padding for a whole page |
-| `.section-y` | 32px → 80px | Padding for a band within a page |
+| `.page-y` | 20px → 40px @920 | Top/bottom padding for a whole page |
+| `.section-y` | 40px → 80px @1024 | Padding for a band within a page |
+
+Both live in the `components` layer, so **any Tailwind `py-*`/`pt-*`/`pb-*` on
+the same element silently overrides them.** That is used deliberately (e.g.
+`<PageHeader>` tightens its own bottom padding to `pb-5`), but it also means
+adding `py-*` to a `.page-y` element cancels the rhythm.
+
+### Horizontal — the container
+
+| Class | Value | Use |
+|-------|-------|-----|
+| `.site-px` | 20px → 70px @920 | Page gutters, nothing else |
+| `.site-container` | `.site-px` + `max-width:1440px` + centred | The standard page container |
+
+**Use `.site-container`. Never hand-roll a page container.** Every container on
+a page must resolve to the same gutter, or the left edge of the content visibly
+steps in and out as you scroll — the most common way to break this layout. A
+page header at one gutter above a body at another is a bug, not a style choice.
+
+For a narrower single-column page, pair the width utility with the gutter
+utility: `max-w-2xl mx-auto site-px`. Never `max-w-2xl mx-auto px-4`.
+
+To break a child out of the gutter (full-bleed carousel, edge-to-edge media),
+use the matching negative margin: `-mx-page-x tabtop:-mx-page-x-lg`.
 
 | Context | Class |
 |---------|-------|
-| Horizontal page padding | `px-4 sm:px-6 lg:px-8` |
-| Max content width | `max-w-7xl mx-auto` |
-| Grid gutters | `gap-6` (cards), `gap-4` (dense grids) |
-| Card padding | `p-4` or `p-6` |
+| Page container | `site-container` |
+| Max content width (bare) | `max-w-site` (1440px) |
+| Card grid gutters | `gap-x-8 gap-y-5` (30px col / 20px row) |
+| Dense grid gutters | `gap-5` (20px) |
+| Two-column text split | `gap-10` (40px) |
+| Page block bottom | `pb-10 lg:pb-20` (40 → 80px) |
+| Card padding | `p-4` (15px-equivalent) or `p-5` (20px) |
+| Card caption inset | `px-5 py-4` |
 | Prose column | `max-w-2xl` (intro), `max-w-3xl` (article body) |
 
-Every page uses `max-w-7xl`. Do not introduce `max-w-4xl` page containers.
+Every page container is `site-container`. Do not introduce `max-w-7xl` or
+`max-w-4xl` page containers — `max-w-7xl` was the old 1280px container and no
+longer appears in the codebase.
+
+**Admin is deliberately exempt from the 70px gutter.** Admin surfaces use
+`p-5 tabtop:p-8` instead: it is dense tabular data, and 140px of side padding
+would cost real column width.
 
 ## Component patterns (LOCKED)
 
@@ -181,6 +226,17 @@ Always use the shared component. Do not hand-roll an equivalent.
 - Image aspect: `aspect-square` (products), `aspect-[4/3]` (makers),
   `aspect-[3/2]` (articles), `aspect-[16/9]` (crafts)
 - Image hover `group-hover:scale-105 transition-transform duration-300`
+- **Image wells are `bg-card-bg` (white), never `bg-sand-light`, and carry no
+  padding.** Product and craft photos arrive at mixed aspect ratios, so
+  `object-contain` always leaves empty space inside the fixed aspect box. On a
+  grey well that space reads as a frame drawn around every photo, and the frame
+  is thicker the further the photo is from square — so the grid looks unevenly
+  ruled. White makes it disappear into the card.
+- Keep `object-contain` for products and crafts. `object-cover` would remove the
+  empty space entirely but crops, and it crops the edges — handles, spouts, weave
+  borders — which is exactly what a wholesale buyer is assessing. Use
+  `object-cover` only where the subject is central and the crop is safe (maker
+  portraits, article headers).
 - Hover must ADD shadow, never remove it
 - The whole card is one `<Link>` — not just the title
 
@@ -225,7 +281,7 @@ need a 44px+ hit area (`tap-target`).
 
 ## Layout (LOCKED)
 
-- Container `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`
+- Container `site-container` (1440px, 20px → 70px gutters)
 - Grids: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`
 - Mobile-first — start single column, add breakpoints up
 - Tap targets 48px minimum (`.tap-target`)
@@ -236,8 +292,13 @@ need a 44px+ hit area (`tap-target`).
 | default | 0–639 | Mobile, single column |
 | `sm:` | 640+ | 2-column grids |
 | `md:` | 768+ | Desktop nav appears, 2-col text |
-| `lg:` | 1024+ | 3-column grids, full wordmark |
+| `tabtop:` | 920+ | **Gutters widen 20→70px; grid gutter 20→30px** |
+| `lg:` | 1024+ | 3-column grids, full wordmark, `.section-y` reaches 80px |
 | `xl:` | 1280+ | 4-column grids |
+
+`tabtop` is declared in `theme.screens` (not `theme.extend.screens`) so it is
+emitted in min-width order. Added via `extend` it would land after `2xl` and
+then override `lg:`/`xl:` rules.
 
 ## Animation (LOCKED)
 

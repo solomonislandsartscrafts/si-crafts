@@ -30,7 +30,7 @@ export function SuccessPanel({
   actions,
 }: SuccessPanelProps) {
   return (
-    <div className="max-w-xl mx-auto px-4 sm:px-6 page-y text-center">
+    <div className="max-w-xl mx-auto site-px page-y text-center">
       <div
         className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6"
         aria-hidden="true"

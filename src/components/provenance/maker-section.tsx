@@ -17,9 +17,23 @@ interface MakerSectionProps {
   maker?: Maker | null;
   craft?: Craft | null;
   excerptLength?: number;
+  /**
+   * Shown when a maker has no story of their own.
+   *
+   * Admin-editable, and blankable on purpose: writing provenance narrative on a
+   * maker's behalf is exactly what the cultural guardrails warn against, so
+   * clearing this leaves the space empty rather than inventing a story.
+   * Supports {name}, {village} and {province} placeholders.
+   */
+  storyFallback?: string;
 }
 
-export function MakerSection({ maker, craft, excerptLength = 200 }: MakerSectionProps) {
+export function MakerSection({
+  maker,
+  craft,
+  excerptLength = 200,
+  storyFallback = '',
+}: MakerSectionProps) {
   if (!maker || !maker.publishedFlag) return null;
 
   const storyExcerpt = maker.story
@@ -43,10 +57,14 @@ export function MakerSection({ maker, craft, excerptLength = 200 }: MakerSection
             </p>
           </blockquote>
         ) : (
-          <p className="text-base text-warm-gray-600 leading-relaxed mb-4">
-            This piece was made by hand by {maker.name} from {maker.village},{' '}
-            {maker.province}, using skills passed down through generations.
-          </p>
+          storyFallback.trim() && (
+            <p className="text-base text-warm-gray-600 leading-relaxed mb-4">
+              {storyFallback
+                .replace(/\{name\}/g, maker.name)
+                .replace(/\{village\}/g, maker.village)
+                .replace(/\{province\}/g, maker.province)}
+            </p>
+          )
         )}
 
         {/* Attribution row — avatar + name + location + craft */}

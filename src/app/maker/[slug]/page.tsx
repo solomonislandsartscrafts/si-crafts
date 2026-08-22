@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { getPublicMakers, getPublicMakerBySlug } from '@/services/makers';
 import { getProductsByMaker } from '@/services/products';
 import { getCraftById } from '@/services/crafts';
+import { getSiteTextSafe } from '@/services/site-text';
 import { ProductCard } from '@/components/cards/product-card';
 import { pageTitleClasses } from '@/components/layout/page-header';
 import { ButtonLink } from '@/components/ui/button';
@@ -43,15 +44,17 @@ export default async function MakerPage({ params }: MakerPageProps) {
     notFound();
   }
 
-  const [products, craft] = await Promise.all([
+  const [products, craft, text] = await Promise.all([
     getProductsByMaker(maker.id),
     getCraftById(maker.craftId),
+    getSiteTextSafe(),
   ]);
 
   const productGroups = groupProductsByType(products);
+  const ctaPrompt = (text['makerDetail.ctaPrompt'] ?? '').replace(/\{name\}/g, maker.name);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
+    <div className="site-container page-y">
       {/* Breadcrumb */}
       <Breadcrumb
         items={[
@@ -63,7 +66,7 @@ export default async function MakerPage({ params }: MakerPageProps) {
       />
 
       {/* Maker profile */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mb-12 lg:mb-16">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10 lg:mb-20">
         {/* Portrait */}
         <div className="aspect-[4/5] relative rounded-lg overflow-hidden">
           <SafeImage
@@ -101,7 +104,7 @@ export default async function MakerPage({ params }: MakerPageProps) {
             </blockquote>
           ) : (
             <p className="text-base text-warm-gray-600 italic">
-              Story pending cultural review.
+              {text['makerDetail.storyPendingNotice']}
             </p>
           )}
 
@@ -135,7 +138,7 @@ export default async function MakerPage({ params }: MakerPageProps) {
           <EmptyState
             icon={Package}
             title={`No pieces by ${maker.name} are listed right now.`}
-            description="Stock is handmade and limited. Browse the full catalogue to see what else is available."
+            description={text['makerDetail.piecesEmptyDescription']}
             action={
               <ButtonLink href="/catalogue" variant="secondary" size="sm">
                 Browse the catalogue
@@ -153,7 +156,7 @@ export default async function MakerPage({ params }: MakerPageProps) {
                   <h3 className="font-heading text-lg font-semibold text-deep-blue mb-4 capitalize">
                     {group.type}
                   </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-5">
                     {group.items.map((product) => (
                       <ProductCard
                         key={product.id}
@@ -166,7 +169,7 @@ export default async function MakerPage({ params }: MakerPageProps) {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-5">
               {products.map((product) => (
                 <ProductCard
                   key={product.id}
@@ -180,14 +183,14 @@ export default async function MakerPage({ params }: MakerPageProps) {
           </>
         )}
 
-        {/* Wholesale enquiry CTA */}
+        {/* Wholesale enquiry CTA. The prompt is admin-editable and can be
+            cleared, so it is guarded — reading .replace off a missing key threw
+            and took the whole maker page down. */}
         <div className="mt-12 pt-8 border-t border-sand text-center">
-          <p className="text-base text-warm-gray-600 mb-4">
-            Interested in stocking {maker.name}&apos;s pieces?
-          </p>
+          {ctaPrompt && <p className="text-base text-warm-gray-600 mb-4">{ctaPrompt}</p>}
           <ButtonLink href="/wholesale" variant="secondary">
             <Store className="w-4 h-4" aria-hidden="true" />
-            Wholesale Enquiry
+            {text['makerDetail.ctaButton']}
           </ButtonLink>
         </div>
       </section>

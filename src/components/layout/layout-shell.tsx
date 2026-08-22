@@ -3,10 +3,21 @@
 import { Suspense } from 'react';
 import { usePathname } from 'next/navigation';
 import { Header } from './header';
-import { Footer } from './footer';
 import { RouteProgressBar } from '@/components/shared/route-progress-bar';
 
-export function LayoutShell({ children }: { children: React.ReactNode }) {
+/**
+ * The footer arrives as an already-rendered server component rather than being
+ * imported here. It reads admin-editable copy, and this shell is a client
+ * component (it needs the pathname to hide chrome on /admin routes), so
+ * rendering the footer itself would have forced that fetch into the browser.
+ */
+export function LayoutShell({
+  children,
+  footer,
+}: {
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+}) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith('/admin');
 
@@ -29,10 +40,13 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
       <Header />
       {/* Flag stripe — sits below the header, scrolls with page content */}
       <div className="flag-divider" aria-hidden="true" />
-      <main id="main-content" className="flex-1 pt-3 sm:pt-4 lg:pt-6">
+      {/* Small offset only — enough to lift shadowed content clear of the flag
+          divider. The real top spacing belongs to .page-y on each page, so
+          keeping this large would double up on every route. */}
+      <main id="main-content" className="flex-1 pt-2.5 tabtop:pt-4">
         {children}
       </main>
-      <Footer />
+      {footer}
     </>
   );
 }

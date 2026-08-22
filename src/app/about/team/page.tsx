@@ -2,19 +2,22 @@ import { generatePageMetadata } from '@/lib/metadata';
 import { PageHeader } from '@/components/layout';
 import { TeamList } from './team-list';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { getSiteTextSafe } from '@/services/site-text';
 
 export const metadata = generatePageMetadata({
   title: 'Our Team',
-  description: 'Meet the volunteer team behind Solomon Islands Arts Crafts.',
+  description: 'Meet the volunteer team behind Solomon Islands Arts & Crafts.',
   path: '/about/team',
 });
 
-export default function TeamPage() {
+export default async function TeamPage() {
+  const text = await getSiteTextSafe();
+
   return (
     <div>
       <PageHeader
-        title="Our Team"
-        intro="Solomon Islands Arts Crafts is run entirely by volunteers who share a connection to Solomon Islands."
+        title={text['aboutTeam.title']}
+        intro={text['aboutTeam.intro']}
         eyebrow={
           <Breadcrumb
             items={[
@@ -26,8 +29,11 @@ export default function TeamPage() {
         }
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">
-        <TeamList />
+      <div className="site-container pb-10 lg:pb-20">
+        <TeamList
+          emptyTitle={text['aboutTeam.emptyTitle']}
+          emptyDescription={text['aboutTeam.emptyDescription']}
+        />
       </div>
     </div>
   );

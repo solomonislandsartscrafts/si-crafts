@@ -15,13 +15,18 @@ export function ProductCard({ product, makerName, showPrice = false }: ProductCa
       href={`/piece/${product.productCode}`}
       className="group flex flex-col h-full w-full overflow-hidden rounded-lg bg-card-bg shadow-card hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-ocean"
     >
-      {/* Image area */}
-      <div className="aspect-square relative bg-sand-light overflow-hidden">
+      {/* Image area. White well, no inset: product photos arrive at mixed
+          aspect ratios, so object-contain always leaves some empty space in the
+          square. On a grey well that space read as a visible frame around every
+          photo; white makes it disappear into the card instead.
+          Deliberately still object-contain — cropping to fill would cut the
+          edges off handles, spouts and weave borders that buyers need to see. */}
+      <div className="aspect-square relative bg-card-bg overflow-hidden">
         <SafeImage
           src={product.imageUrls[0] || null}
           alt={`${product.name}${makerName ? ` by ${makerName}` : ''}`}
           fill
-          className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+          className="object-contain group-hover:scale-105 transition-transform duration-300"
           sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
       </div>

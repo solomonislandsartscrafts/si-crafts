@@ -29,14 +29,10 @@ export interface SiteContent {
   aboutWhyLinkText: string;
   aboutWhyLinkUrl: string;
 
-  // Catalogue
-  catalogueIntro: string;
-
-  // News
-  newsIntro: string;
-
-  // Stockists
-  stockistsIntro: string;
+  // NOTE: the catalogue, news and stockists intros are NOT here. They used to
+  // be, but they were never added to the Django model or serializer, so the
+  // admin form silently discarded every edit. They now live in the site-text
+  // manifest (catalogue.intro, news.intro, stockists.intro), which does persist.
 
   // Wholesale
   wholesaleIntro: string;

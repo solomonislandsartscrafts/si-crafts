@@ -183,12 +183,21 @@ class StockistLoginView(APIView):
         if stockist is None:
             return invalid
 
-        # Resolve user and verify password BEFORE revealing account state.
+        # An approved stockist with no login yet is a dead end, not a wrong
+        # password: there is nothing they can type that will work. Saying so is
+        # the only way they can act on it — the generic message sent them back
+        # to the same form indefinitely. This does confirm that an approved
+        # account exists for the address, which is the price of the account
+        # being usable at all.
         user = stockist.user
-        if user is None:
+        if user is None or not user.has_usable_password():
+            if stockist.status == "approved":
+                return Response(
+                    {"error": self.NO_PASSWORD_MESSAGE}, status=status.HTTP_403_FORBIDDEN
+                )
             return invalid
-        if not user.has_usable_password():
-            return invalid
+
+        # Verify the password BEFORE revealing any other account state.
         if not user.check_password(password):
             return invalid
 

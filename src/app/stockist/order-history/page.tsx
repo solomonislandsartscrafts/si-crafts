@@ -50,7 +50,7 @@ export default function OrderHistoryPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 page-y">
+      <div className="site-container page-y">
         <SkeletonText lines={4} />
       </div>
     );
@@ -67,7 +67,7 @@ export default function OrderHistoryPage() {
         }
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div className="site-container pb-16">
         {orders.length === 0 ? (
           <EmptyState
             icon={Package}

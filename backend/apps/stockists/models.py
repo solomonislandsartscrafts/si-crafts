@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.functions import Lower
 from django.contrib.auth.models import User
 
 
@@ -30,6 +31,15 @@ class Stockist(models.Model):
         verbose_name = "Stockist"
         verbose_name_plural = "Stockists"
         ordering = ["-created_at"]
+        constraints = [
+            # `unique=True` on the column is case-SENSITIVE, but every lookup
+            # (login, password reset, duplicate-application check) matches with
+            # `iexact`. Without this, two rows differing only in case could both
+            # exist and those lookups would pick between them arbitrarily.
+            models.UniqueConstraint(
+                Lower("email"), name="stockist_email_ci_unique"
+            ),
+        ]
 
     def __str__(self):
         return f"{self.business_name} ({self.status})"

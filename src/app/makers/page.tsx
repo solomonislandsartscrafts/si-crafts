@@ -1,6 +1,7 @@
 import { generatePageMetadata } from '@/lib/metadata';
 import { getPublicMakers } from '@/services/makers';
 import { getAllCrafts } from '@/services/crafts';
+import { getSiteTextSafe } from '@/services/site-text';
 import { MakersPageContent } from './makers-page-content';
 
 export const metadata = generatePageMetadata({
@@ -11,9 +12,10 @@ export const metadata = generatePageMetadata({
 });
 
 export default async function MakersPage() {
-  const [makers, crafts] = await Promise.all([
+  const [makers, crafts, text] = await Promise.all([
     getPublicMakers(),
     getAllCrafts(),
+    getSiteTextSafe(),
   ]);
 
   const makersWithCraft = makers.map((m) => ({
@@ -21,5 +23,15 @@ export default async function MakersPage() {
     craftName: crafts.find((c) => c.id === m.craftId)?.name || '',
   }));
 
-  return <MakersPageContent makers={makersWithCraft} />;
+  return (
+    <MakersPageContent
+      makers={makersWithCraft}
+      title={text['makers.title']}
+      intro={text['makers.intro']}
+      filterHeading={text['makers.filterHeading']}
+      filterHint={text['makers.filterHint']}
+      emptyTitle={text['makers.emptyTitle']}
+      emptyDescription={text['makers.emptyDescription']}
+    />
+  );
 }
