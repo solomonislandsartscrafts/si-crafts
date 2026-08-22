@@ -29,18 +29,30 @@ services:
       # Browser-side calls (the admin dashboard) are subject to CORS, so every
       # origin that serves the front end must be listed here — including
       # http://localhost:3000 so local dev can read/write the live data.
+      #
+      # The Worker is published on the *siacrafts* workers.dev subdomain. An
+      # earlier value here named an "isaactekulu" subdomain that returns 404 on
+      # every path; it was corrected in the Render dashboard but not in this
+      # file, so a blueprint sync would have reverted production to the dead
+      # origin and blocked the admin dashboard on CORS.
       - key: CORS_ALLOWED_ORIGINS
-        value: "https://si-crafts.isaactekulu.workers.dev,https://solomonislandsartsandcrafts.com.au,https://www.solomonislandsartsandcrafts.com.au,http://localhost:3000"
+        value: "https://si-crafts.siacrafts.workers.dev,https://solomonislandsartsandcrafts.com.au,https://www.solomonislandsartsandcrafts.com.au,http://localhost:3000"
       - key: CSRF_TRUSTED_ORIGINS
-        value: "https://si-crafts-iwcd.onrender.com,https://si-crafts.isaactekulu.workers.dev,https://solomonislandsartsandcrafts.com.au,https://www.solomonislandsartsandcrafts.com.au"
+        value: "https://si-crafts-iwcd.onrender.com,https://si-crafts.siacrafts.workers.dev,https://solomonislandsartsandcrafts.com.au,https://www.solomonislandsartsandcrafts.com.au"
+      # SITE_URL is not cosmetic: notifications/emails.py builds the stockist
+      # set-password and password-reset links from it. Pointing it at a host
+      # that 404s ships dead links in every approval and reset email.
       - key: FRONTEND_URL
-        value: "https://si-crafts.isaactekulu.workers.dev"
+        value: "https://si-crafts.siacrafts.workers.dev"
       - key: SITE_URL
-        value: "https://si-crafts.isaactekulu.workers.dev"
+        value: "https://si-crafts.siacrafts.workers.dev"
       - key: PYTHON_VERSION
         value: "3.12.2"
+      # Must be this service's own hostname — Wagtail builds absolute image and
+      # notification URLs from it. "si-crafts.onrender.com" (without the -iwcd
+      # suffix Render assigned) 404s.
       - key: WAGTAILADMIN_BASE_URL
-        value: "https://si-crafts.onrender.com"
+        value: "https://si-crafts-iwcd.onrender.com"
       - key: EMAIL_BACKEND
         value: "django.core.mail.backends.smtp.EmailBackend"
       - key: EMAIL_HOST
