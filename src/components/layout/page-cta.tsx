@@ -20,8 +20,10 @@ interface PageCtaProps {
 export function PageCta({ heading, description, children }: PageCtaProps) {
   return (
     <section className="section-y bg-ocean/5 border-t border-ocean/10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-3">
+      <div className="site-container text-center">
+        {/* Heading sits tight to its description (8px) so the two read as one
+            block, then a full 24px step down to the actions. */}
+        <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-2">
           {heading}
         </h2>
         {description && (
@@ -29,7 +31,7 @@ export function PageCta({ heading, description, children }: PageCtaProps) {
             {description}
           </p>
         )}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
           {children}
         </div>
       </div>

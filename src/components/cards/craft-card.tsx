@@ -16,13 +16,15 @@ export function CraftCard({ craft }: CraftCardProps) {
       href={`/craft/${craft.slug}`}
       className="group flex flex-col h-full w-full overflow-hidden rounded-lg bg-card-bg shadow-card hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-ocean"
     >
-      {/* Image area */}
-      <div className="aspect-square relative bg-sand-light overflow-hidden">
+      {/* Image area — matches ProductCard: white well, no inset, so the
+          letterboxing left by object-contain disappears into the card rather
+          than framing the photo in grey. */}
+      <div className="aspect-square relative bg-card-bg overflow-hidden">
         <SafeImage
           src={craft.processImageUrls[0] || null}
           alt={`${craft.name} process`}
           fill
-          className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+          className="object-contain group-hover:scale-105 transition-transform duration-300"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
         />
       </div>

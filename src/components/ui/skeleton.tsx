@@ -65,7 +65,7 @@ export function SkeletonCard() {
 export function SkeletonCardGrid({ count = 8 }: { count?: number }) {
   return (
     <SkeletonRegion label="Loading items">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-5">
         {Array.from({ length: count }).map((_, i) => (
           <SkeletonCard key={i} />
         ))}

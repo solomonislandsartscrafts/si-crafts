@@ -1,9 +1,16 @@
 import Link from 'next/link';
-import { IconJoinUs, IconWovenBasket, IconBankTransfer, IconParcelLeaf } from '@/components/icons/craft-icons';
+import {
+  IconJoinUs,
+  IconWovenBasket,
+  IconBankTransfer,
+  IconParcelLeaf,
+} from '@/components/icons/craft-icons';
 import { PageHeader, PageCta } from '@/components/layout';
 import { ButtonLink } from '@/components/ui/button';
+import { CmsText } from '@/components/ui/cms-text';
 import { generatePageMetadata } from '@/lib/metadata';
 import { getSiteContentSafe } from '@/services/site-content';
+import { getSiteTextSafe } from '@/services/site-text';
 
 export const metadata = generatePageMetadata({
   title: 'Wholesale',
@@ -12,144 +19,129 @@ export const metadata = generatePageMetadata({
   path: '/wholesale',
 });
 
-const steps = [
-  {
-    icon: IconJoinUs,
-    title: 'Apply',
-    description:
-      'Submit a short application with your business details and ABN. We review within a few business days.',
-  },
-  {
-    icon: IconWovenBasket,
-    title: 'Browse & order',
-    description:
-      'Once approved, log in to see wholesale pricing and build an order by material, type, or maker.',
-  },
-  {
-    icon: IconBankTransfer,
-    title: 'Pay by transfer',
-    description:
-      'We confirm availability and send an invoice. You pay by bank transfer — no card payments at this stage.',
-  },
-  {
-    icon: IconParcelLeaf,
-    title: 'Receive',
-    description:
-      'We ship from Sydney. Each piece arrives with a QR-coded tag linking to its maker\u2019s story. We will pay the shipping costs for your first order.',
-  },
-];
+/** One icon per step, in order. Kept in code — see the note on Our Promise. */
+const STEP_ICONS = [IconJoinUs, IconWovenBasket, IconBankTransfer, IconParcelLeaf];
 
 export default async function WholesalePage() {
-  const siteContent = await getSiteContentSafe();
+  const [siteContent, text] = await Promise.all([getSiteContentSafe(), getSiteTextSafe()]);
+
+  // `n` is the step's position in the manifest. Kept through the filter so it
+  // can serve as both the React key and the visible number — the index after
+  // filtering would renumber the remaining steps.
+  const steps = STEP_ICONS.map((Icon, i) => ({
+    Icon,
+    n: i + 1,
+    heading: text[`wholesale.step${i + 1}Heading`],
+    body: text[`wholesale.step${i + 1}Body`],
+  })).filter((step) => step.heading || step.body);
+
+  const faqs = [1, 2, 3]
+    .map((n) => ({
+      question: text[`wholesale.faq${n}Question`],
+      answer: text[`wholesale.faq${n}Answer`],
+    }))
+    .filter((faq) => faq.question);
 
   return (
     <div>
-      <PageHeader
-        title="Wholesale"
-        intro={siteContent.wholesaleIntro || "We supply museum shops and galleries in Australia with authentic Solomon Islands handicrafts. No minimum order. Bank transfer only. Here's how it works."}
-      />
+      <PageHeader title={text['wholesale.title']} intro={siteContent.wholesaleIntro} />
 
       {/* Prose column is constrained to max-w-3xl but stays left-aligned so it
           lines up with the PageHeader above it. */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">
+      <div className="site-container pb-10 lg:pb-20">
         <div className="max-w-3xl">
-      {/* How it works — simple numbered steps */}
-      <section className="mb-12">
-        <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-8">
-          How it works
-        </h2>
+          {/* How it works — simple numbered steps */}
+          {steps.length > 0 && (
+            <section className="mb-12">
+              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-8">
+                {text['wholesale.stepsHeading']}
+              </h2>
 
-        <ol className="space-y-8">
-          {steps.map((step, i) => {
-            const Icon = step.icon;
-            return (
-              <li key={step.title} className="flex gap-4 items-start">
-                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-ocean/10 flex items-center justify-center">
-                  <Icon className="w-6 h-6 text-ocean" />
+              <ol className="space-y-8">
+                {steps.map((step) => {
+                  const Icon = step.Icon;
+                  return (
+                    <li key={step.n} className="flex gap-4 items-start">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-ocean/10 flex items-center justify-center">
+                        <Icon className="w-6 h-6 text-ocean" />
+                      </div>
+                      <div>
+                        {step.heading && (
+                          <h3 className="font-heading text-lg font-semibold text-deep-blue mb-1">
+                            {step.n}. {step.heading}
+                          </h3>
+                        )}
+                        <CmsText
+                          value={step.body}
+                          className="space-y-3"
+                          paragraphClassName="text-base text-warm-gray-600 leading-relaxed"
+                        />
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
+          )}
+
+          {/* Important note */}
+          {text['wholesale.note'] && (
+            <div className="bg-sand-light rounded-lg p-6 mb-12">
+              <CmsText
+                value={text['wholesale.note']}
+                className="space-y-3"
+                paragraphClassName="text-base text-warm-gray-800 leading-relaxed"
+              />
+            </div>
+          )}
+
+          {/* Common questions */}
+          <section>
+            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-6">
+              {text['wholesale.faqHeading']}
+            </h2>
+
+            <dl className="space-y-6">
+              {faqs.map((faq) => (
+                <div key={faq.question}>
+                  <dt className="font-heading text-lg font-semibold text-deep-blue mb-1">
+                    {faq.question}
+                  </dt>
+                  <dd className="text-base text-warm-gray-600 leading-relaxed">
+                    <CmsText value={faq.answer} className="space-y-3" />
+                  </dd>
                 </div>
-                <div>
-                  <h3 className="font-heading text-lg font-semibold text-deep-blue mb-1">
-                    {i + 1}. {step.title}
-                  </h3>
-                  <p className="text-base text-warm-gray-600 leading-relaxed">
-                    {step.description}
-                  </p>
-                </div>
-              </li>
-            );
-          })}
-        </ol>
-      </section>
+              ))}
+            </dl>
 
-      {/* Important note */}
-      <div className="bg-sand-light rounded-lg p-6 mb-12">
-        <p className="text-base text-warm-gray-800 leading-relaxed">
-          <strong>Please note:</strong> Orders are expressions of interest, not confirmed
-          purchases. Stock is limited and handmade — we&apos;ll confirm what&apos;s available
-          after you submit. We send an invoice once confirmed and ship after payment (within
-          30 days). We absorb freight costs at this stage.
-        </p>
-      </div>
+            {/* Minimum-order note — lives on Site Content → Wholesale. */}
+            {siteContent.wholesaleMinimumOrder && (
+              <p className="mt-6 text-base text-warm-gray-600 leading-relaxed">
+                {siteContent.wholesaleMinimumOrder}
+              </p>
+            )}
 
-      {/* Common questions */}
-      <section>
-        <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-6">
-          Common questions
-        </h2>
-
-        <dl className="space-y-6">
-          <div>
-            <dt className="font-heading text-lg font-semibold text-deep-blue mb-1">
-              Can I return unsold goods?
-            </dt>
-            <dd className="text-base text-warm-gray-600 leading-relaxed">
-              No — orders are purchased outright at wholesale prices.
-            </dd>
-          </div>
-          <div>
-            <dt className="font-heading text-lg font-semibold text-deep-blue mb-1">
-              Can I order custom or bulk items?
-            </dt>
-            <dd className="text-base text-warm-gray-600 leading-relaxed">
-              Yes — log in to your stockist account and submit a request under
-              &ldquo;Requests&rdquo;. Not a retail business?{' '}
-              <Link href="/contact" className="text-ocean hover:text-ocean-dark">
-                Contact us
-              </Link>{' '}
-              about individual bulk orders.
-            </dd>
-          </div>
-          <div>
-            <dt className="font-heading text-lg font-semibold text-deep-blue mb-1">
-              Is there a minimum order?
-            </dt>
-            <dd className="text-base text-warm-gray-600 leading-relaxed">
-              No minimum, but we encourage orders of at least 6 pieces for shipping efficiency.
-            </dd>
-          </div>
-        </dl>
-
-        <div className="mt-6">
-          <Link
-            href="/faqs-and-shipping"
-            className="text-base font-medium text-ocean hover:text-ocean-dark transition-colors"
-          >
-            More FAQs (returns, GST, shipping) →
-          </Link>
-        </div>
-      </section>
+            <div className="mt-6">
+              <Link
+                href="/faqs-and-shipping"
+                className="text-base font-medium text-ocean hover:text-ocean-dark transition-colors"
+              >
+                {text['wholesale.moreFaqsLabel']}
+              </Link>
+            </div>
+          </section>
         </div>
       </div>
 
       <PageCta
-        heading="Ready to stock SI Crafts?"
-        description="Apply for a wholesale account, or log in if you already have one."
+        heading={text['wholesale.ctaHeading']}
+        description={text['wholesale.ctaDescription']}
       >
         <ButtonLink href="/stockist/apply" variant="primary">
-          Apply to become a stockist
+          {text['wholesale.ctaPrimaryButton']}
         </ButtonLink>
         <ButtonLink href="/login" variant="secondary">
-          Log in as stockist
+          {text['wholesale.ctaSecondaryButton']}
         </ButtonLink>
       </PageCta>
     </div>

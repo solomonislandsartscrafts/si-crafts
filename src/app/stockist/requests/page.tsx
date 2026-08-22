@@ -95,7 +95,7 @@ export default function StockistRequestsPage() {
 
   if (!authenticated || loading) {
     return (
-      <div className="max-w-2xl mx-auto px-4 page-y">
+      <div className="max-w-2xl mx-auto site-px page-y">
         <SkeletonText lines={4} />
       </div>
     );
@@ -132,7 +132,7 @@ export default function StockistRequestsPage() {
         width="narrow"
       />
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div className="max-w-2xl mx-auto site-px pb-16">
         <div className="max-w-lg">
           {/* Type selector.
               Native radios in a fieldset rather than role="radio" buttons: the

@@ -24,8 +24,8 @@ interface PageHeaderProps {
   /** Centre the title and intro. Used for narrow confirmation/lookup pages. */
   align?: 'left' | 'center';
   /**
-   * Narrow the container. `default` is the site-wide max-w-7xl; `narrow` is for
-   * single-column pages such as a code lookup or a confirmation screen.
+   * Narrow the container. `default` is the site-wide 1440px container; `narrow`
+   * is for single-column pages such as a code lookup or a confirmation screen.
    */
   width?: 'default' | 'narrow';
   /** Extra content rendered below the intro, inside the same container. */
@@ -45,8 +45,11 @@ export function PageHeader({
   return (
     <div
       className={[
-        width === 'narrow' ? 'max-w-2xl' : 'max-w-7xl',
-        'mx-auto px-4 sm:px-6 lg:px-8 page-y pb-8',
+        width === 'narrow' ? 'max-w-2xl' : 'max-w-site',
+        // Gutters come from .site-px so the title lines up exactly with the
+        // body container below it. pb-5 (20px) closes the gap to the content,
+        // which then owns its own bottom padding.
+        'mx-auto site-px page-y pb-5',
         centered ? 'text-center' : '',
       ]
         .filter(Boolean)

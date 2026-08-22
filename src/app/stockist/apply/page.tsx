@@ -71,7 +71,11 @@ export default function StockistApplyPage() {
         }),
       });
       if (!res.ok) {
-        setSubmitError('Something went wrong. Please try again.');
+        // Prefer the server's wording — "we already have an application for
+        // this email" is something the applicant can act on, whereas the
+        // generic retry message sends them round the same loop.
+        const data = await res.json().catch(() => ({}));
+        setSubmitError(data.error || 'Something went wrong. Please try again.');
         return;
       }
       setSubmitted(true);

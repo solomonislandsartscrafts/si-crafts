@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, UsersRound, Package, Palette, Store, ClipboardList, Shield, Inbox, Newspaper, LogOut, ExternalLink, ImageIcon, Tags, BookOpen, SlidersHorizontal, KeyRound } from 'lucide-react';
+import { LayoutDashboard, Users, UsersRound, Package, Palette, Store, ClipboardList, Shield, Inbox, Newspaper, LogOut, ExternalLink, ImageIcon, Tags, BookOpen, SlidersHorizontal, KeyRound, HelpCircle, MapPin, Handshake } from 'lucide-react';
 import type { AdminRole } from '@/types';
 
 interface AdminSidebarProps {
@@ -50,6 +50,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/admin/stockists', label: 'Stockists', icon: Store, roles: ['super_admin', 'editor'] },
       { href: '/admin/orders', label: 'Orders', icon: ClipboardList, roles: ['super_admin', 'editor'] },
+      { href: '/admin/retail-stockists', label: 'Where to Buy', icon: MapPin, roles: ['super_admin', 'editor'] },
     ],
   },
   {
@@ -58,7 +59,9 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/admin/site-content', label: 'Site Content', icon: ImageIcon, roles: ['super_admin', 'editor'] },
       { href: '/admin/slideshow', label: 'Slideshow', icon: SlidersHorizontal, roles: ['super_admin', 'editor'] },
+      { href: '/admin/supporters', label: 'Supporters', icon: Handshake, roles: ['super_admin', 'editor'] },
       { href: '/admin/news', label: 'News', icon: Newspaper, roles: ['super_admin', 'editor'] },
+      { href: '/admin/faqs', label: 'FAQs', icon: HelpCircle, roles: ['super_admin', 'editor'] },
       { href: '/admin/inbox', label: 'Inbox', icon: Inbox, roles: ['super_admin', 'editor'] },
     ],
   },

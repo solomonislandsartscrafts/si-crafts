@@ -13,7 +13,7 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="max-w-md mx-auto px-4 sm:px-6 page-y">
+        <div className="max-w-md mx-auto site-px page-y">
           <SkeletonText lines={4} />
         </div>
       }

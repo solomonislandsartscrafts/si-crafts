@@ -29,6 +29,7 @@ export type {
 } from './enquiry';
 export type { Article } from './article';
 export type { RetailStockist } from './retail-stockist';
+export type { Supporter } from './supporter';
 export type { SiteContent } from './site-content';
 export type {
   AttentionSeverity,
@@ -39,4 +40,5 @@ export type {
   DashboardSummary,
 } from './dashboard';
 export type { TeamMember } from './team';
+export type { Faq } from './faq';
 export type { SlideCategory, SlideItemToggle, SlideshowSettings } from './slideshow';

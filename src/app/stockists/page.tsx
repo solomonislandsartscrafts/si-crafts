@@ -1,83 +1,120 @@
-import { MapPin, Phone, Mail, Clock, ExternalLink } from 'lucide-react';
+import { ExternalLink, MapPin, Phone, Mail, Clock, Store } from 'lucide-react';
 import { generatePageMetadata } from '@/lib/metadata';
 import { PageCta, PageHeader } from '@/components/layout';
 import { ButtonLink } from '@/components/ui/button';
-import { getRetailStockists } from '@/services/retail-stockists';
+import { EmptyState } from '@/components/ui/empty-state';
+import { getRetailStockistsSafe } from '@/services/retail-stockists';
+import { getSiteTextSafe } from '@/services/site-text';
 
 export const metadata = generatePageMetadata({
   title: 'Stockists',
-  description: 'Find Solomon Islands Arts Crafts in museum and gallery shops across Australia.',
+  description: 'Find Solomon Islands Arts & Crafts in museum and gallery shops across Australia.',
   path: '/stockists',
 });
 
 export default async function StockistsPage() {
-  const stockists = await getRetailStockists();
+  const [stockists, text] = await Promise.all([getRetailStockistsSafe(), getSiteTextSafe()]);
 
   return (
     <div>
-      <PageHeader
-        title="Stockists"
-        intro="Find Solomon Islands Arts Crafts in these museum and gallery shops. Visit in person or contact them to ask about availability."
-      />
+      <PageHeader title={text['stockists.title']} intro={text['stockists.intro']} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">
-      <div className="space-y-8">
-        {stockists.map((stockist) => (
-          <div key={stockist.name} className="bg-card-bg rounded-lg shadow-card p-6 md:p-8">
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <div>
-                <p className="text-xs font-medium text-ocean uppercase tracking-wide mb-1">
-                  {stockist.city}
-                </p>
-                <h2 className="font-heading text-lg font-semibold text-deep-blue">
-                  {stockist.name}
-                </h2>
-              </div>
-              <ButtonLink
-                href={stockist.url}
-                variant="secondary"
-                size="sm"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <ExternalLink className="w-4 h-4" aria-hidden="true" />
-                Website
-              </ButtonLink>
-            </div>
+      <div className="site-container pb-10 lg:pb-20">
+        {stockists.length === 0 ? (
+          <EmptyState
+            icon={Store}
+            title={text['stockists.emptyTitle']}
+            description={text['stockists.emptyDescription']}
+          />
+        ) : (
+          <div className="space-y-8">
+            {stockists.map((stockist) => (
+              <div key={stockist.id} className="bg-card-bg rounded-lg shadow-card p-6 md:p-8">
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <div>
+                    {stockist.city && (
+                      <p className="text-xs font-medium text-ocean uppercase tracking-wide mb-1">
+                        {stockist.city}
+                      </p>
+                    )}
+                    <h2 className="font-heading text-lg font-semibold text-deep-blue">
+                      {stockist.name}
+                    </h2>
+                  </div>
+                  {stockist.url && (
+                    <ButtonLink
+                      href={stockist.url}
+                      variant="secondary"
+                      size="sm"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ExternalLink className="w-4 h-4" aria-hidden="true" />
+                      Website
+                    </ButtonLink>
+                  )}
+                </div>
 
-            <div className="space-y-2 text-base text-warm-gray-600">
-              <div className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-warm-gray-400 mt-0.5 flex-shrink-0" />
-                <span>{stockist.address}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-warm-gray-400 flex-shrink-0" />
-                <a href={`tel:${stockist.phone.replace(/\s/g, '')}`} className="hover:text-ocean transition-colors">
-                  {stockist.phone}
-                </a>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-warm-gray-400 flex-shrink-0" />
-                <a href={`mailto:${stockist.email}`} className="hover:text-ocean transition-colors">
-                  {stockist.email}
-                </a>
-              </div>
-              <div className="flex items-start gap-2">
-                <Clock className="w-4 h-4 text-warm-gray-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p>{stockist.hours}</p>
-                  <p className="text-warm-gray-400">{stockist.closed}</p>
+                <div className="space-y-2 text-base text-warm-gray-600">
+                  {stockist.address && (
+                    <div className="flex items-start gap-2">
+                      <MapPin
+                        className="w-4 h-4 text-warm-gray-400 mt-0.5 flex-shrink-0"
+                        aria-hidden="true"
+                      />
+                      <span>{stockist.address}</span>
+                    </div>
+                  )}
+                  {stockist.phone && (
+                    <div className="flex items-center gap-2">
+                      <Phone
+                        className="w-4 h-4 text-warm-gray-400 flex-shrink-0"
+                        aria-hidden="true"
+                      />
+                      <a
+                        href={`tel:${stockist.phone.replace(/\s/g, '')}`}
+                        className="hover:text-ocean transition-colors"
+                      >
+                        {stockist.phone}
+                      </a>
+                    </div>
+                  )}
+                  {stockist.email && (
+                    <div className="flex items-center gap-2">
+                      <Mail
+                        className="w-4 h-4 text-warm-gray-400 flex-shrink-0"
+                        aria-hidden="true"
+                      />
+                      <a
+                        href={`mailto:${stockist.email}`}
+                        className="hover:text-ocean transition-colors"
+                      >
+                        {stockist.email}
+                      </a>
+                    </div>
+                  )}
+                  {(stockist.hours || stockist.closed) && (
+                    <div className="flex items-start gap-2">
+                      <Clock
+                        className="w-4 h-4 text-warm-gray-400 mt-0.5 flex-shrink-0"
+                        aria-hidden="true"
+                      />
+                      <div>
+                        {stockist.hours && <p>{stockist.hours}</p>}
+                        {stockist.closed && <p className="text-warm-gray-400">{stockist.closed}</p>}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
+        )}
       </div>
 
       {/* CTA for stockists who want to stock us */}
-      <PageCta heading="Are you a museum or gallery shop interested in stocking SI Crafts?">
-        <ButtonLink href="/wholesale">Learn about wholesale</ButtonLink>
+      <PageCta heading={text['stockists.ctaHeading']}>
+        <ButtonLink href="/wholesale">{text['stockists.ctaButton']}</ButtonLink>
       </PageCta>
     </div>
   );

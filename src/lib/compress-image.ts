@@ -1,9 +1,13 @@
 /**
- * Compresses an image file using Canvas API.
+ * Compresses an image using the Canvas API.
  * Resizes to maxWidth (preserving aspect ratio) and outputs as WebP or JPEG.
+ *
+ * Takes a Blob rather than a File so pasted images — which arrive as blobs from
+ * a data: URI or a fetched URL, not as picked files — can go through the same
+ * path as an upload from the file picker.
  */
 export async function compressImage(
-  file: File,
+  file: Blob,
   maxWidth: number,
   quality: number
 ): Promise<Blob> {

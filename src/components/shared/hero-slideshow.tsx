@@ -2,17 +2,29 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { Pause, Play } from 'lucide-react';
 import { SafeImage } from '@/components/ui/safe-image';
+import { posterBodyClasses } from '@/components/cards/poster-card';
+
+/** What the slide is showing. Decides the image fit — see `imageFit` below. */
+export type SlideKind = 'product' | 'maker';
 
 export interface SlideItem {
   imageUrl: string;
   imageAlt: string;
-  /** Product name. */
+  kind: SlideKind;
+  /** Product name, or the maker's name. */
   title: string;
-  /** Who made it, e.g. "by Julie Mone · Atori, Guadalcanal Province". */
+  /** Second line: the maker credit on a product, the village on a maker. */
   subtitle?: string;
+  /**
+   * Small label above the title — the craft on a product slide, "Meet the
+   * maker" on a maker slide. Without it the two slide kinds look identical
+   * and a portrait reads as just another product photo.
+   */
+  eyebrow?: string;
   href: string;
-  /** CSS object-position value to control crop focus (e.g. 'top', 'center', 'bottom', '50% 30%'). Defaults to 'center'. */
+  /** CSS object-position to control crop focus (e.g. 'top', '50% 30%'). Admin-set. */
   objectPosition?: string;
 }
 
@@ -21,39 +33,101 @@ interface HeroSlideshowProps {
   interval?: number;
 }
 
-/** How much a neighbour shrinks. Paired with STEP_PCT below. */
-const SIDE_SCALE = 0.82;
-
 /**
- * Horizontal shift per step, as a % of the card's own width. At 50% a
- * neighbour's centre lands exactly on the centre card's edge, so precisely half
- * of it is tucked behind and half stays visible — whatever SIDE_SCALE is.
+ * The frame is capped and centred rather than filling its column.
+ *
+ * The hero has to fit the first viewport on a laptop, and at the hero column's
+ * full width a portrait frame would be tall enough to push the buttons and the
+ * sponsor row off screen. The cap holds the whole slideshow — frame, caption
+ * and controls — inside roughly 700px on every screen. The trade-off is quiet
+ * space either side on a wide display.
  */
-const STEP_PCT = 50;
+const frameWidth = 'w-full max-w-[380px] sm:max-w-[420px]';
 
 /**
- * Stage height is driven by the card width, so the two must change together.
- * Tuned so a card lands near the house 3/4 poster ratio — narrow and upright,
- * rather than the near-square block it was.
+ * 4:5 rather than the 3:4 the cards use. Same portrait feel, noticeably less
+ * height, which is what buys the room to run the frame wider than the cards do.
  */
-const stageAspect = 'aspect-[9/10] sm:aspect-[4/3] lg:aspect-[10/7]';
-// Sized so the exposed half of each neighbour, plus its shadow, still lands
-// inside the stage from sm up. On a phone the neighbours peek off the edge,
-// which is the expected mobile pattern.
-const cardWidth = 'w-[72%] sm:w-[50%] lg:w-[46%]';
+const frameAspect = 'aspect-[4/5]';
 
 /**
- * Hero gallery — a coverflow carousel. The centre card links through to its
- * piece; the dimmed neighbours are tucked half behind it and bring themselves
- * to the centre when clicked.
- * Images are contained in a sand well so a whole piece is always visible and
- * every photo reads at the same size, whatever its own background. The product
- * name and maker sit in a footer inside the card.
- * Auto-advances, pauses on hover/focus/touch, supports swipe and arrow keys.
+ * Reserves room for eyebrow + title + a two-line credit, so the label rule and
+ * the controls below it do not jump when a short caption follows a long one.
+ * Raised from 6.5rem when the label gained gallery spacing — the tallest case
+ * is now ~119px, and anything under that lets the rule shift between slides.
+ */
+const captionMinHeight = 'min-h-[7.5rem]';
+
+/**
+ * A maker is photographed as a person, expecting a crop, so the portrait fills
+ * the frame. A product is photographed as an object — most shots are cut-outs
+ * on white, and a cropped basket handle reads as a defect — so it sits contained
+ * inside the mat instead. Same rule the poster cards follow.
+ */
+function imageFit(kind: SlideKind): string {
+  return kind === 'maker' ? 'object-cover' : 'object-contain';
+}
+
+/**
+ * True for the active slide and the one either side of it — the only slides
+ * that need to be in the DOM.
+ *
+ * Wraps at both ends, because the slideshow does: on the last slide the "next"
+ * neighbour is index 0. With three or fewer slides every slide is a neighbour,
+ * so the window is the whole run.
+ */
+function isNearby(index: number, active: number, count: number): boolean {
+  if (count <= 3) return true;
+  const distance = Math.abs(index - active);
+  return Math.min(distance, count - distance) <= 1;
+}
+
+/**
+ * The frame, built as a gallery would hang the work rather than as a web card.
+ *
+ * Square corners and a hairline rule instead of `rounded-lg` + `shadow-card`:
+ * a radius and a cast shadow read as "UI card floating above a page", which is
+ * the opposite of a hung work. A single hairline is how a mounted piece meets
+ * the wall.
+ *
+ * The padding is a mat. It is white, not the grey well this used to have —
+ * grey turned every cut-out product shot into a framed grey rectangle, whereas
+ * a white mat reads as mount board and lets the object's own edge be the edge.
+ *
+ * `aspect-[4/5]` sits on the border box, so the mat is subtracted from the
+ * image area and the outer frame keeps its proportion at every width.
+ */
+const frameClasses =
+  'relative overflow-hidden border border-sand bg-card-bg p-2 sm:p-3 transition-colors duration-200 group-hover:border-warm-gray-400';
+
+/**
+ * Hero slideshow — one image at a time, cross-fading, products and makers in
+ * the same run.
+ *
+ * Deliberately not a multi-card or peeking carousel. A craft object's silhouette
+ * and a maker's face are both the thing being looked at, so a half-hidden
+ * neighbour only reads as a cropped photo. One image, whole, in a portrait frame.
+ *
+ * Presented as a gallery hangs a work rather than as a web carousel: a square
+ * hairline frame with a white mat, a tombstone label beneath it, and a plate
+ * number aligned to the frame's left edge. The chrome is kept quiet on purpose
+ * — the photograph is the only thing on this side of the hero that should pull
+ * the eye. See `frameClasses` for why the radius and shadow are gone.
+ *
+ * The caption sits below the frame on the page background — the same
+ * arrangement as `PosterCard`, and it keeps white text off arbitrary
+ * photographs.
+ *
+ * Auto-advances with an explicit pause control (WCAG 2.2.2), pauses on
+ * hover/focus, and supports swipe and arrow keys. Autoplay is off entirely
+ * under `prefers-reduced-motion`.
  */
 export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
   const [current, setCurrent] = useState(0);
-  const [paused, setPaused] = useState(false);
+  // Hover/focus pausing and the pause button are tracked separately, so moving
+  // the mouse away does not restart a slideshow the user deliberately stopped.
+  const [hovering, setHovering] = useState(false);
+  const [userPaused, setUserPaused] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
   const count = items.length;
 
@@ -74,15 +148,14 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
   );
 
   useEffect(() => {
-    if (count <= 1 || paused || reduceMotion) return;
+    if (count <= 1 || hovering || userPaused || reduceMotion) return;
     const timer = setInterval(() => go(1), interval);
     return () => clearInterval(timer);
-  }, [count, paused, interval, go, reduceMotion]);
+  }, [count, hovering, userPaused, interval, go, reduceMotion]);
 
   function handleTouchStart(e: React.TouchEvent) {
     touchStartX.current = e.touches[0].clientX;
     touchDeltaX.current = 0;
-    setPaused(true);
   }
 
   function handleTouchMove(e: React.TouchEvent) {
@@ -95,7 +168,6 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
     else if (touchDeltaX.current > 50) go(-1);
     touchStartX.current = null;
     touchDeltaX.current = 0;
-    setPaused(false);
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -105,8 +177,10 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
 
   if (count === 0) {
     return (
-      <div className={`w-full ${stageAspect} flex items-center justify-center rounded-lg bg-card-bg`}>
-        <p className="text-warm-gray-400 text-sm px-4 text-center">Images coming soon</p>
+      <div
+        className={`${frameWidth} mx-auto ${frameAspect} flex items-center justify-center border border-dashed border-sand-dark bg-card-bg`}
+      >
+        <p className="px-4 text-center text-base text-warm-gray-400">Images coming soon</p>
       </div>
     );
   }
@@ -117,149 +191,172 @@ export function HeroSlideshow({ items, interval = 5000 }: HeroSlideshowProps) {
   const safeIndex = current % count;
   const active = items[safeIndex];
 
+  // Square rather than `rounded-sm`, to match the frame. No `display` utility
+  // baked in: the caller applies `flex`, so this stays usable if a second
+  // control is ever added back alongside pause.
+  const iconButtonClasses =
+    'h-11 w-11 items-center justify-center text-warm-gray-400 transition-colors hover:text-deep-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean';
+
   return (
     <div
       className="relative"
       role="region"
       aria-roledescription="carousel"
-      aria-label="Handmade pieces from Solomon Islands"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocusCapture={() => setPaused(true)}
-      onBlurCapture={() => setPaused(false)}
+      aria-label="Handmade pieces and the makers behind them"
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+      onFocusCapture={() => setHovering(true)}
+      onBlurCapture={() => setHovering(false)}
       onKeyDown={handleKeyDown}
     >
-      {/* Stage. overflow-hidden stops the off-stage cards causing sideways
-          scroll on phones, where the gallery runs full-bleed. */}
-      <div
-        className={`relative w-full ${stageAspect} overflow-hidden`}
+      {/* One link wraps frame and caption, exactly as PosterCard does, and its
+          href follows the visible slide. Keeping a single stable link (rather
+          than one per slide) means React never tears the node down mid-fade. */}
+      <Link
+        href={active.href}
+        className={`group ${frameWidth} mx-auto block focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {items.map((item, index) => {
-          // Shortest way round the loop, so slide 0 sits to the right of the
-          // last slide rather than far off to the left.
-          const raw = (index - safeIndex + count) % count;
-          const offset = raw > count / 2 ? raw - count : raw;
-          const isActive = offset === 0;
-          // Cards more than one step out wait just off-stage, faded, so they
-          // slide in from the correct side. They must also be unreachable.
-          const onStage = Math.abs(offset) <= 1;
-          const shift = Math.max(-1.5, Math.min(1.5, offset)) * STEP_PCT;
+        <div className={`${frameAspect} ${frameClasses}`}>
+          {items.map((item, index) => {
+            // Only the visible slide and its two neighbours are mounted. The
+            // slide count is admin-set, and mounting all of them made the
+            // homepage request every hero image before the first one had
+            // painted. Both neighbours stay mounted so the cross-fade in either
+            // direction still has something to fade to.
+            if (!isNearby(index, safeIndex, count)) return null;
+            return (
+              <SafeImage
+                key={index}
+                src={item.imageUrl}
+                // Decorative on purpose: the caption directly below names the
+                // piece or the maker, and it sits inside this same link, so a
+                // real alt here would announce every slide twice. The descriptive
+                // alt belongs on the detail page.
+                alt=""
+                fill
+                className={`${imageFit(item.kind)} ${
+                  index === safeIndex ? 'opacity-100' : 'opacity-0'
+                } ${reduceMotion ? '' : 'transition-opacity duration-500 ease-out'}`}
+                style={{ objectPosition: item.objectPosition || 'center' }}
+                sizes="(max-width: 640px) 380px, 420px"
+                priority={index === 0}
+              />
+            );
+          })}
+        </div>
 
-          // Every card is the same shape whatever its state, so nothing
-          // resizes as a card moves into the centre — only depth cues change:
-          // scale, shadow, and how much the card is faded back.
-          const cardClasses = [
-            // inset-y-6 leaves room inside the clipped stage for the centre
-            // card's cast shadow, which would otherwise be cut off flat.
-            'group absolute inset-y-6 left-1/2 flex flex-col overflow-hidden rounded-lg',
-            'bg-card-bg border border-sand focus:outline-none focus:ring-2 focus:ring-ocean',
-            cardWidth,
-            // The centre card casts onto the two behind it, which is what makes
-            // the stack read as depth rather than as three flat panels.
-            isActive ? 'shadow-lift-lg' : 'shadow-lift opacity-60 hover:opacity-90',
-            reduceMotion ? '' : 'transition-all duration-500 ease-out',
-          ].join(' ');
+        {/* Tombstone label — the caption set the way a gallery captions a work:
+            a quiet category line, the work or artist named, then the material
+            and place. Sits on the page background with no panel, re-keyed per
+            slide so it fades in with the image instead of snapping.
 
-          const cardStyle = {
-            transform: `translateX(calc(-50% + ${shift}%)) scale(${isActive ? 1 : SIDE_SCALE})`,
-            zIndex: 10 - Math.abs(offset),
-            // Only the parked cards are forced transparent; the rest is handled
-            // by classes so a neighbour can lift on hover.
-            ...(onStage ? {} : { opacity: 0 }),
-          };
+            The category line is deliberately neutral rather than the site's
+            ocean accent. On a wall label the text is never the loud element;
+            colouring it competes with the photograph directly above it. */}
+        <div
+          key={safeIndex}
+          className={`pt-4 ${captionMinHeight} ${reduceMotion ? '' : 'animate-fade-in-up'}`}
+        >
+          {active.eyebrow && (
+            <span className="block text-xs font-medium uppercase tracking-[0.18em] text-warm-gray-400">
+              {active.eyebrow}
+            </span>
+          )}
+          {/* Italic for a product, roman for a person: the standard museum
+              label distinction between the title of a work and the name of its
+              maker. It is the cheapest possible signal that this is a
+              catalogued object rather than a listing. */}
+          <span
+            className={`mt-2 block font-heading text-lg font-semibold leading-tight text-deep-blue transition-colors group-hover:text-ocean ${
+              active.kind === 'product' ? 'italic' : ''
+            }`}
+          >
+            {active.title}
+          </span>
+          {/* The maker credit is the point of the page, so it gets body size
+              rather than the 14px it had as a footnote. */}
+          {active.subtitle && (
+            <span className={`mt-1.5 block ${posterBodyClasses}`}>{active.subtitle}</span>
+          )}
+        </div>
+      </Link>
 
-          const cardBody = (
-            <>
-              {/* Image well: gives every piece the same frame, so a cutout on
-                  white and a full photo sit at the same visual weight. */}
-              <div className="relative flex-1 bg-card-bg">
-                <SafeImage
-                  src={item.imageUrl}
-                  alt={isActive ? item.imageAlt : ''}
-                  fill
-                  className="object-contain p-5 sm:p-6"
-                  style={{ objectPosition: item.objectPosition || 'center' }}
-                  sizes="(max-width: 640px) 68vw, (max-width: 1024px) 54vw, 360px"
-                  priority={index === 0}
-                />
-              </div>
-
-              {/* Footer inside the card. Kept on every card so the image well
-                  is the same height throughout; the text only shows on the
-                  centre one, where it can be read. */}
-              <div
-                className={`border-t border-sand px-4 py-3 ${
-                  isActive ? '' : 'opacity-0'
-                } ${reduceMotion ? '' : 'transition-opacity duration-300'}`}
-              >
-                <span className="block font-heading text-base sm:text-lg font-semibold text-deep-blue leading-tight line-clamp-1 group-hover:text-ocean transition-colors">
-                  {item.title}
-                </span>
-                {/* Two lines, not one: this is the maker credit and the village
-                    it came from, and at phone card width a single clamped line
-                    cut the province off the end of the provenance. */}
-                {item.subtitle && (
-                  <span className="block text-sm text-warm-gray-600 mt-0.5 line-clamp-2">
-                    {item.subtitle}
-                  </span>
-                )}
-              </div>
-            </>
-          );
-
-          // Every card is a Link, active or not. Swapping the element type as a
-          // card reached the centre made React tear down the node and mount a
-          // fresh one, so the coverflow transition never ran — the card simply
-          // appeared in its new place. A neighbour's click is intercepted to
-          // bring it to the centre instead of navigating.
-          return (
-            <Link
-              key={index}
-              href={item.href}
-              className={cardClasses}
-              style={cardStyle}
-              tabIndex={onStage ? 0 : -1}
-              aria-hidden={!onStage}
-              aria-label={isActive ? undefined : `Show ${item.title}`}
-              onClick={(e) => {
-                if (isActive) return;
-                e.preventDefault();
-                setCurrent(index);
-              }}
-            >
-              {cardBody}
-            </Link>
-          );
-        })}
-      </div>
-
-      {/* Position dots — the only chrome. Without them there is nothing to say
-          the gallery holds more than one piece, or where you are in it. */}
       {count > 1 && (
         <>
-          {/* Hit boxes are 44px square and sit flush against each other, so the
-              dots are a reliable target on a phone while the visible dot stays
-              small. */}
-          <div className="flex items-center justify-center">
-            {items.map((item, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrent(index)}
-                className="flex h-11 w-11 items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean rounded-sm"
-                aria-label={`Show ${item.title}`}
-                aria-current={index === safeIndex}
-              >
-                <span
-                  className={`h-2 w-2 rounded-full transition-colors ${
-                    index === safeIndex ? 'bg-ocean' : 'bg-sand-dark hover:bg-warm-gray-400'
-                  }`}
-                />
-              </button>
-            ))}
+          {/* Control strip, aligned to the frame's own edges under a hairline.
+              A gallery aligns the label and the plate number to the left edge
+              of the work rather than centring them beneath it, so the whole
+              column reads as one hung item. The hairline is the only rule in
+              the composition — the frame supplies the other edges. */}
+          <div
+            className={`${frameWidth} mx-auto mt-1 flex items-center border-t border-sand pt-1`}
+          >
+            {/* Plate number. Mono and zero-padded so the strip does not reflow
+                as the index goes from 9 to 10, and because a catalogue number
+                is the one place a gallery does use a monospaced figure. */}
+            <span className="font-mono text-xs tabular-nums text-warm-gray-400">
+              {String(safeIndex + 1).padStart(2, '0')}
+              <span className="px-1">/</span>
+              {String(count).padStart(2, '0')}
+            </span>
+
+            {/* No prev/next arrows. Ticks already give direct access to every
+                slide, swipe covers touch, and the arrow keys are bound on the
+                region — so arrows only added a third control type to a 420px
+                strip. Eight controls in a row is the opposite of the restraint
+                this treatment is going for.
+
+                Scrolls rather than reflows: the slide count is admin-set, and
+                past seven the fixed 44px hit boxes would otherwise burst the
+                frame width. */}
+            <div className="ml-auto flex items-center overflow-x-auto scrollbar-hide">
+              {/* Hit boxes stay a full 44px square and sit flush against each
+                  other, so every slide is a reliable target on a phone. Only
+                  the visible mark changed: a tick that extends when active
+                  rather than a dot. Dots read as a generic web carousel; a rule
+                  that lengthens reads as an index. */}
+              {items.map((item, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => setCurrent(index)}
+                  className="group/tick flex h-11 w-11 flex-shrink-0 items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+                  aria-label={`Show ${item.title}`}
+                  aria-current={index === safeIndex}
+                >
+                  <span
+                    className={`h-0.5 transition-all duration-200 ${
+                      index === safeIndex
+                        ? 'w-5 bg-deep-blue'
+                        : 'w-2.5 bg-sand-dark group-hover/tick:bg-warm-gray-400'
+                    }`}
+                  />
+                </button>
+              ))}
+
+              {/* Only meaningful while something is actually moving. Under
+                  reduced motion the slideshow never advances on its own, so
+                  there is nothing to pause. */}
+              {!reduceMotion && (
+                <button
+                  type="button"
+                  onClick={() => setUserPaused((p) => !p)}
+                  className={`flex flex-shrink-0 ${iconButtonClasses}`}
+                  aria-label={userPaused ? 'Resume slideshow' : 'Pause slideshow'}
+                >
+                  {userPaused ? (
+                    <Play className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <Pause className="h-4 w-4" aria-hidden="true" />
+                  )}
+                </button>
+              )}
+            </div>
           </div>
+
           <p className="sr-only" aria-live="polite">
             Showing {active.title}, {safeIndex + 1} of {count}
           </p>

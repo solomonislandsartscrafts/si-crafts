@@ -3,6 +3,7 @@ import { Users, Package } from 'lucide-react';
 import { getAllCrafts, getCraftBySlug } from '@/services/crafts';
 import { getMakersByCraft } from '@/services/makers';
 import { getPublicProducts } from '@/services/products';
+import { getSiteTextSafe } from '@/services/site-text';
 import { MakerCard } from '@/components/cards/maker-card';
 import { ProductCard } from '@/components/cards/product-card';
 import { pageTitleClasses } from '@/components/layout/page-header';
@@ -32,16 +33,17 @@ export default async function CraftPage({ params }: CraftPageProps) {
     notFound();
   }
 
-  const [makers, products] = await Promise.all([
+  const [makers, products, text] = await Promise.all([
     getMakersByCraft(craft.id),
     getPublicProducts({ materialCategory: craft.materialCategory }),
+    getSiteTextSafe(),
   ]);
 
   const previewProducts = products.slice(0, PRODUCT_PREVIEW_COUNT);
   const hasMoreProducts = products.length > PRODUCT_PREVIEW_COUNT;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
+    <div className="site-container page-y">
       {/* Breadcrumb */}
       <Breadcrumb
         items={[
@@ -53,19 +55,19 @@ export default async function CraftPage({ params }: CraftPageProps) {
       />
 
       {/* Header with image */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center mb-12 lg:mb-16">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center mb-10 lg:mb-20">
         <div>
           <h1 className={`${pageTitleClasses} mb-4`}>{craft.name}</h1>
           <div className="text-base text-warm-gray-600 leading-relaxed space-y-4">
             <p>{craft.description}</p>
           </div>
         </div>
-        <div className="aspect-[4/3] relative rounded-lg overflow-hidden bg-sand-light">
+        <div className="aspect-[4/3] relative rounded-lg overflow-hidden bg-card-bg">
           <SafeImage
             src={craft.processImageUrls[0] || null}
             alt={craft.processImageAlt || `${craft.name} process`}
             fill
-            className="object-contain p-4"
+            className="object-contain"
             sizes="(max-width: 768px) 100vw, 50vw"
           />
         </div>
@@ -75,9 +77,9 @@ export default async function CraftPage({ params }: CraftPageProps) {
           cultural guardrails: if it has not been checked by a Solomon Islands
           cultural partner, we say so rather than publishing it. */}
       {craft.culturalContext && (
-        <section className="mb-12 lg:mb-16 bg-sand-light rounded-lg p-6 md:p-8">
+        <section className="mb-10 lg:mb-20 bg-sand-light rounded-lg p-5 md:p-8">
           <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-3">
-            Cultural Context
+            {text['craftDetail.culturalHeading']}
           </h2>
           {craft.culturalContextReviewFlag === 'reviewed' ? (
             <p className="text-base text-warm-gray-600 leading-relaxed">
@@ -85,20 +87,19 @@ export default async function CraftPage({ params }: CraftPageProps) {
             </p>
           ) : (
             <p className="text-base text-warm-gray-600 italic">
-              Cultural context pending review by a Solomon Islands cultural
-              partner.
+              {text['craftDetail.culturalPendingNotice']}
             </p>
           )}
         </section>
       )}
 
       {/* Makers who practise this craft */}
-      <section className="mb-12 lg:mb-16 border-t border-sand pt-10 lg:pt-12">
+      <section className="mb-10 lg:mb-20 border-t border-sand pt-10">
         <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-6">
-          Makers
+          {text['craftDetail.makersHeading']}
         </h2>
         {makers.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-5">
             {makers.map((maker) => (
               <MakerCard key={maker.id} maker={maker} craftName={craft.name} />
             ))}
@@ -106,8 +107,8 @@ export default async function CraftPage({ params }: CraftPageProps) {
         ) : (
           <EmptyState
             icon={Users}
-            title="No makers listed for this craft yet."
-            description="We're still documenting makers across Solomon Islands. Meet the makers we have published so far."
+            title={text['craftDetail.makersEmptyTitle']}
+            description={text['craftDetail.makersEmptyDescription']}
             action={
               <ButtonLink href="/makers" variant="secondary" size="sm">
                 Meet all makers
@@ -121,7 +122,7 @@ export default async function CraftPage({ params }: CraftPageProps) {
       <section>
         <div className="flex items-end justify-between gap-4 mb-6">
           <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
-            Pieces
+            {text['craftDetail.piecesHeading']}
           </h2>
           {/* The grid is capped, so always offer the way to see the rest.
               Deliberately not "View all N": N counts only this craft's material
@@ -135,7 +136,7 @@ export default async function CraftPage({ params }: CraftPageProps) {
           )}
         </div>
         {previewProducts.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 tabtop:gap-x-8">
             {previewProducts.map((product) => {
               const maker = makers.find((m) => m.id === product.makerId);
               return (
@@ -150,8 +151,8 @@ export default async function CraftPage({ params }: CraftPageProps) {
         ) : (
           <EmptyState
             icon={Package}
-            title="No pieces available in this category right now."
-            description="Stock is handmade and limited. Browse the full catalogue to see what else is available."
+            title={text['craftDetail.piecesEmptyTitle']}
+            description={text['craftDetail.piecesEmptyDescription']}
             action={
               <ButtonLink href="/catalogue" variant="secondary" size="sm">
                 Browse the catalogue

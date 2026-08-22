@@ -2,8 +2,8 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { Lock, PackageSearch } from 'lucide-react';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { CmsInline } from '@/components/ui/cms-text';
 import { EmptyState } from '@/components/ui/empty-state';
 import type { Product, Maker } from '@/types';
 import { MakerFilter } from '@/components/catalogue/maker-filter';
@@ -18,9 +18,20 @@ interface CatalogueClientProps {
   products: Product[];
   makers: Maker[];
   materialCategories: MaterialCategoryOption[];
+  /** Admin-editable copy, passed down so this stays a pure client component. */
+  pricingPrompt: string;
+  emptyTitle: string;
+  emptyDescription: string;
 }
 
-export function CatalogueClient({ products, makers, materialCategories }: CatalogueClientProps) {
+export function CatalogueClient({
+  products,
+  makers,
+  materialCategories,
+  pricingPrompt,
+  emptyTitle,
+  emptyDescription,
+}: CatalogueClientProps) {
   const [selectedMaker, setSelectedMaker] = useState<string | null>(null);
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -110,16 +121,13 @@ export function CatalogueClient({ products, makers, materialCategories }: Catalo
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">
+    <div className="site-container pb-10 lg:pb-20">
       {/* Login prompt — only show when NOT logged in */}
-      {!isStockist && (
+      {!isStockist && pricingPrompt && (
         <div className="mb-8 flex items-center gap-2">
           <Lock className="w-4 h-4 text-ocean flex-shrink-0" aria-hidden="true" />
           <p className="text-base text-warm-gray-600">
-            <Link href="/login" className="text-ocean font-medium hover:underline">
-              Log in as a stockist
-            </Link>{' '}
-            to view wholesale pricing.
+            <CmsInline value={pricingPrompt} linkClassName="text-ocean font-medium hover:underline" />
           </p>
         </div>
       )}
@@ -151,7 +159,7 @@ export function CatalogueClient({ products, makers, materialCategories }: Catalo
           aria-atomic="true"
         >
           {filteredProducts.length === 0 ? (
-            'No pieces match your current filters.'
+            emptyTitle
           ) : (
             <>
               <span className="font-semibold text-warm-gray-800">
@@ -171,8 +179,8 @@ export function CatalogueClient({ products, makers, materialCategories }: Catalo
       {filteredProducts.length === 0 ? (
         <EmptyState
           icon={PackageSearch}
-          title="No pieces match your current filters."
-          description="Try a different material, maker, or search term."
+          title={emptyTitle}
+          description={emptyDescription}
           action={
             <Button variant="secondary" size="sm" onClick={clearFilters}>
               Clear all filters

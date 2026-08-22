@@ -1,31 +1,29 @@
 import Link from 'next/link';
 import { AcknowledgementFooterNote } from './acknowledgement-of-country';
+import { getSiteTextSafe } from '@/services/site-text';
 
+/**
+ * The three quick-link cards.
+ *
+ * Titles and hrefs stay in code: they are navigation, and a mismatch between a
+ * card title and the page it opens is a bug, not an editorial choice. The
+ * descriptions beside them are copy, so those come from site text.
+ */
 const FOOTER_LINKS = [
-  {
-    title: 'Our Promise',
-    href: '/our-promise',
-    description: 'Fair pay, consent, cultural respect — how we work with makers.',
-  },
-  {
-    title: 'Care Guide',
-    href: '/care-guide',
-    description: 'How to look after each piece so it lasts a lifetime.',
-  },
-  {
-    title: 'FAQs & Shipping',
-    href: '/faqs-and-shipping',
-    description: 'Ordering, delivery, returns, and common questions.',
-  },
+  { title: 'Our Promise', href: '/our-promise', descriptionKey: 'footer.promiseDescription' },
+  { title: 'Care Guide', href: '/care-guide', descriptionKey: 'footer.careDescription' },
+  { title: 'FAQs & Shipping', href: '/faqs-and-shipping', descriptionKey: 'footer.faqsDescription' },
 ];
 
-export function Footer() {
+export async function Footer() {
+  const text = await getSiteTextSafe();
+
   return (
-    <footer className="bg-footer-bg text-white mt-12 lg:mt-16">
+    <footer className="bg-footer-bg text-white mt-10 lg:mt-20">
       {/* Quick-link cards */}
       <div className="border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="site-container py-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5">
             {FOOTER_LINKS.map((link) => (
               <Link
                 key={link.href}
@@ -39,7 +37,7 @@ export function Footer() {
                   {link.title}
                 </h2>
                 <p className="text-base text-white/60 leading-relaxed">
-                  {link.description}
+                  {text[link.descriptionKey]}
                 </p>
               </Link>
             ))}
@@ -48,20 +46,21 @@ export function Footer() {
       </div>
 
       {/* Acknowledgement of Country */}
-      <AcknowledgementFooterNote />
+      <AcknowledgementFooterNote
+        text={text['acknowledgement.text']}
+        linkLabel={text['acknowledgement.footerLinkLabel']}
+      />
 
       {/* Bottom bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="site-container py-5">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-white/70">
-            <p>&copy; {new Date().getFullYear()} Solomon Islands Arts Crafts.</p>
+            <p>&copy; {new Date().getFullYear()} Solomon Islands Arts & Crafts.</p>
             <Link href="/for-makers" className="text-white/70 hover:text-white transition-colors underline underline-offset-2">
               For Makers
             </Link>
           </div>
-          <p className="text-xs text-white/70">
-            Crafts belong to Solomon Islands peoples and communities. SIAC is a conduit, not an owner.
-          </p>
+          <p className="text-xs text-white/70">{text['footer.sovereigntyNote']}</p>
         </div>
       </div>
     </footer>

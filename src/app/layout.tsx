@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Poppins, DM_Sans } from 'next/font/google';
 import { SkipLink } from '@/components/layout';
 import { LayoutShell } from '@/components/layout/layout-shell';
+import { Footer } from '@/components/layout/footer';
 import { AccessibilityWidget } from '@/components/shared/accessibility-widget';
 import { SwRegister } from '@/components/shared/sw-register';
 import { Providers } from '@/components/providers';
@@ -26,18 +27,18 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL('https://solomonislandsartsandcrafts.com.au'),
   title: {
-    default: 'Solomon Islands Arts Crafts',
+    default: 'Solomon Islands Arts & Crafts',
     template: '%s | SI Crafts',
   },
   description:
     'Authentic Solomon Islands handicrafts — pandanus weaving, wood carving, and shell-money jewellery. Meet the makers, discover the stories.',
   manifest: '/manifest.json',
   openGraph: {
-    title: 'Solomon Islands Arts Crafts',
+    title: 'Solomon Islands Arts & Crafts',
     description:
       'Authentic Solomon Islands handicrafts — pandanus weaving, wood carving, and shell-money jewellery.',
     url: 'https://solomonislandsartsandcrafts.com.au',
-    siteName: 'Solomon Islands Arts Crafts',
+    siteName: 'Solomon Islands Arts & Crafts',
     type: 'website',
     // No `images` entry: src/app/opengraph-image.tsx generates the card and
     // Next injects the tags automatically. Listing a path here would override it.
@@ -72,7 +73,7 @@ export default function RootLayout({
         <SkipLink />
         <Providers>
           <div className="a11y-filter-scope flex flex-col flex-1">
-            <LayoutShell>
+            <LayoutShell footer={<Footer />}>
               {children}
             </LayoutShell>
           </div>

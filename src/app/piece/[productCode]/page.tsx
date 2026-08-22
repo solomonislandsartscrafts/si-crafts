@@ -2,6 +2,7 @@ import { getAllProducts, getProductByCode } from '@/services/products';
 import { getMakerById } from '@/services/makers';
 import { getCraftById } from '@/services/crafts';
 import { getAllMakers } from '@/services/makers';
+import { getSiteTextSafe } from '@/services/site-text';
 import { PiecePageClient } from './piece-page-client';
 import { ProductCard } from '@/components/cards/product-card';
 import { PageHeader } from '@/components/layout/page-header';
@@ -21,14 +22,32 @@ interface PiecePageProps {
   params: Promise<{ productCode: string }>;
 }
 
+/**
+ * Picks the "how it's made" copy for a piece's material.
+ *
+ * Material categories are a managed list, so the mapping is by convention:
+ * `provenance.process<Material>` in camelCase, falling back to the generic
+ * description when a material has no entry of its own.
+ */
+function processTextFor(text: Record<string, string>, materialCategory: string): string {
+  const suffix = materialCategory
+    .split('-')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
+  return text[`provenance.process${suffix}`] || text['provenance.processFallback'];
+}
+
 export default async function PiecePage({ params }: PiecePageProps) {
   const { productCode } = await params;
-  const product = await getProductByCode(productCode);
+  const [product, text] = await Promise.all([
+    getProductByCode(productCode),
+    getSiteTextSafe(),
+  ]);
 
   if (!product) {
     return (
       <PageHeader
-        title="Piece not found"
+        title={text['provenance.notFoundTitle']}
         align="center"
         width="narrow"
         intro={`We couldn't find a piece with the code "${productCode}". It may have been removed, or the code might be incorrect.`}
@@ -70,7 +89,7 @@ export default async function PiecePage({ params }: PiecePageProps) {
     category: productTypeLabel(product.productType),
     brand: {
       '@type': 'Organization',
-      name: 'Solomon Islands Arts Crafts',
+      name: 'Solomon Islands Arts & Crafts',
       url: SITE_URL,
     },
     ...(publishedMaker && {
@@ -111,7 +130,7 @@ export default async function PiecePage({ params }: PiecePageProps) {
     .slice(0, 4);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-10 sm:pt-8 sm:pb-12 lg:pt-10 lg:pb-16">
+    <div className="site-container page-y pb-10 lg:pb-20">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -134,16 +153,31 @@ export default async function PiecePage({ params }: PiecePageProps) {
       />
 
       {/* Top section: Gallery + Product Info + Maker */}
-      <PiecePageClient product={product} craftName={craft?.name} craftSlug={craft?.slug} maker={publishedMaker} craft={craft} />
+      <PiecePageClient
+        product={product}
+        craftName={craft?.name}
+        craftSlug={craft?.slug}
+        maker={publishedMaker}
+        craft={craft}
+        copy={{
+          processText: processTextFor(text, product.materialCategory),
+          authenticityBody: text['provenance.authenticityBody'],
+          whereToBuyIntro: text['provenance.whereToBuyIntro'],
+          whereToBuyShopPrompt: text['provenance.whereToBuyShopPrompt'],
+          whereToBuyQuote: text['provenance.whereToBuyQuote'],
+        }}
+        tradeOnlyNotice={text['provenance.tradeOnlyNotice']}
+        makerStoryFallback={text['provenance.makerStoryFallback']}
+      />
 
       {/* Related Products. Needs at least two to read as a set — a single card
           in a four-column grid looks like a rendering fault. */}
       {relatedProducts.length > 1 && (
         <section className="mt-12 pt-10 border-t border-sand">
           <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-6">
-            You might also like
+            {text['provenance.relatedHeading']}
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 tabtop:gap-x-8">
             {relatedProducts.map((relatedProduct) => {
               const relatedMaker = allMakers.find((m) => m.id === relatedProduct.makerId);
               return (

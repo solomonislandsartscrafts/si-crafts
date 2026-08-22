@@ -3,13 +3,31 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ButtonLink } from '@/components/ui/button';
+import { CmsText } from '@/components/ui/cms-text';
 import { materialLabel, productTypeLabel } from '@/lib/labels';
 import type { Product } from '@/types';
+
+/**
+ * Admin-editable copy for these tabs.
+ *
+ * Passed in as a resolved bundle rather than the whole site-text map: this is a
+ * client component, and shipping 150 unrelated strings to the browser on every
+ * provenance page would be wasteful. `processText` is already resolved for the
+ * piece's material by the server.
+ */
+export interface ProvenanceCopy {
+  processText: string;
+  authenticityBody: string;
+  whereToBuyIntro: string;
+  whereToBuyShopPrompt: string;
+  whereToBuyQuote: string;
+}
 
 interface ProductTabsProps {
   product: Product;
   craftName?: string;
   craftSlug?: string;
+  copy: ProvenanceCopy;
 }
 
 const TAB_IDS = [
@@ -42,7 +60,7 @@ const TAB_LABELS: Record<TabId, string> = {
  * a gold bottom border over the row's own sand rule. The row wraps on narrow
  * screens rather than scrolling, so no tab can be hidden off the edge.
  */
-export function ProductTabs({ product, craftName, craftSlug }: ProductTabsProps) {
+export function ProductTabs({ product, craftName, craftSlug, copy }: ProductTabsProps) {
   // A piece with no description gets no empty tab.
   const tabs = TAB_IDS.filter((id) => id !== 'description' || Boolean(product.description));
   const [active, setActive] = useState<TabId>(tabs[0]);
@@ -52,13 +70,13 @@ export function ProductTabs({ product, craftName, craftSlug }: ProductTabsProps)
     specifications: <SpecificationsContent product={product} />,
     'how-its-made': (
       <ProcessContent
-        materialCategory={product.materialCategory}
+        processText={copy.processText}
         craftName={craftName}
         craftSlug={craftSlug}
       />
     ),
-    authenticity: <AuthenticityContent />,
-    'where-to-buy': <WhereToBuyContent />,
+    authenticity: <AuthenticityContent body={copy.authenticityBody} />,
+    'where-to-buy': <WhereToBuyContent copy={copy} />,
   };
 
   return (
@@ -167,31 +185,17 @@ function SpecificationsContent({ product }: { product: Product }) {
 }
 
 function ProcessContent({
-  materialCategory,
+  processText,
   craftName,
   craftSlug,
 }: {
-  materialCategory: string;
+  processText: string;
   craftName?: string;
   craftSlug?: string;
 }) {
-  const PROCESS_TEXT: Record<string, string> = {
-    pandanus:
-      'The leaves of the pandanus tree are soaked in water with coconut husks for about a week to make them soft and pliable, then hung up to dry in the sun for several weeks and cut into strips using a special tool. The handles are made from the bark of the Wa\u2018ai tree. Black pandanus is made by boiling with leaves of the Talisay (Indian almond) tree for 2\u20133 hours before drying. The fine diagonal weaving takes days or weeks to complete.',
-    wood: 'Each piece is hand-carved from a single block of \u2018kerosene wood\u2019 (Cordia subcordata) or Pacific Rosewood (Thespesia populnea). The carver shapes the wood with hand tools, then inlays pearl shell and/or contrasting wood into the design. The finished piece is polished and sealed with lacquer.',
-    shells:
-      'Shells are collected and fashioned by hand into very small discs about 3\u20135mm in diameter. A hole is drilled in the centre and the discs are threaded on nylon (traditionally bush twine) to form strands. Different coloured shells have different values \u2014 red-orange shells are the most expensive because they need to be baked to achieve their colour. A single necklace can take weeks to produce.',
-    'bush-twine':
-      '\u2018Bush-twine\u2019 is made by combining the strands and fibres of two locally-grown vines (including the Asa vine) into a single cord that is very strong. It has traditionally been used to make shields, baskets and trays. The Kusa bag is knotted from bush twine with a wide shoulder strap that has no joins \u2014 made entirely from natural resources, it is eco-friendly and very durable.',
-  };
-
-  const processText =
-    PROCESS_TEXT[materialCategory] ||
-    'This piece is made using traditional techniques passed down through generations.';
-
   return (
     <div className="max-w-3xl space-y-3 text-base leading-relaxed text-warm-gray-800">
-      <p>{processText}</p>
+      <CmsText value={processText} className="space-y-3" />
       {craftSlug && craftName && (
         <Link
           href={`/craft/${craftSlug}`}
@@ -204,32 +208,24 @@ function ProcessContent({
   );
 }
 
-function AuthenticityContent() {
+function AuthenticityContent({ body }: { body: string }) {
   return (
-    <div className="max-w-3xl space-y-3 text-base leading-relaxed text-warm-gray-800">
-      <p>
-        Every piece comes with a product tag stating the maker&apos;s name and province in
-        Solomon Islands, linking to this provenance page — your guarantee it was handmade by the
-        named maker.
-      </p>
-      <p>
-        For more information see{' '}
-        <Link href="/our-promise" className="font-medium text-ocean hover:text-ocean-dark">
-          Our Promise
-        </Link>
-        .
-      </p>
-    </div>
+    <CmsText
+      value={body}
+      className="max-w-3xl space-y-3"
+      paragraphClassName="text-base leading-relaxed text-warm-gray-800"
+    />
   );
 }
 
-function WhereToBuyContent() {
+function WhereToBuyContent({ copy }: { copy: ProvenanceCopy }) {
   return (
     <div className="max-w-3xl space-y-5">
-      <p className="text-base leading-relaxed text-warm-gray-800">
-        We supply museum and gallery shops in Australia. Visit a stockist to buy
-        a piece in person, or enquire about wholesale for your own shop.
-      </p>
+      <CmsText
+        value={copy.whereToBuyIntro}
+        className="space-y-3"
+        paragraphClassName="text-base leading-relaxed text-warm-gray-800"
+      />
 
       <div className="flex flex-col flex-wrap gap-3 sm:flex-row">
         <ButtonLink href="/stockists">Find a stockist</ButtonLink>
@@ -238,22 +234,19 @@ function WhereToBuyContent() {
         </ButtonLink>
       </div>
 
-      <p className="text-base leading-relaxed text-warm-gray-800">
-        Run a museum or gallery shop?{' '}
-        <Link href="/stockist/apply" className="font-medium text-ocean hover:text-ocean-dark">
-          Apply for a stockist account
-        </Link>{' '}
-        to see wholesale pricing and place orders.
-      </p>
+      <CmsText
+        value={copy.whereToBuyShopPrompt}
+        className="space-y-3"
+        paragraphClassName="text-base leading-relaxed text-warm-gray-800"
+      />
 
-      <p className="border-l-[3px] border-accent-gold pl-4 text-base leading-relaxed text-warm-gray-600">
-        When you buy this piece through a stockist, the maker receives the price
-        they set — paid upfront, before the piece reaches Australia. No
-        middlemen, no commission.{' '}
-        <Link href="/our-promise" className="font-medium text-ocean hover:text-ocean-dark">
-          Learn about our values →
-        </Link>
-      </p>
+      {copy.whereToBuyQuote && (
+        <CmsText
+          value={copy.whereToBuyQuote}
+          className="border-l-[3px] border-accent-gold pl-4 space-y-3"
+          paragraphClassName="text-base leading-relaxed text-warm-gray-600"
+        />
+      )}
     </div>
   );
 }

@@ -3,14 +3,21 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
+from apps.accounts.permissions import IsAdminOrReadOnly
+
 from .models import SiteContent
 from .serializers import SiteContentSerializer, FIELD_MAP
 
 
 class SiteContentView(APIView):
-    """GET/PUT the singleton site content record."""
+    """GET/PUT the singleton site content record.
 
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    Writes require an admin profile, not merely a valid token: a logged-in
+    stockist also holds one, and IsAuthenticatedOrReadOnly would have let them
+    rewrite the whole public site.
+    """
+
+    permission_classes = [IsAdminOrReadOnly]
     parser_classes = [JSONParser, MultiPartParser, FormParser]
 
     def get(self, request):

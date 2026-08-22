@@ -32,7 +32,7 @@ export function Logo({ className = '' }: LogoProps) {
       height={151}
       /* Empty alt is deliberate, not an oversight. Every place this renders sits
          inside a link that already carries its own aria-label (e.g. "Solomon
-         Islands Arts Crafts — home"). An aria-label on the link overrides the
+         Islands Arts & Crafts — home"). An aria-label on the link overrides the
          image's alt for the accessible name, so a non-empty alt here would be
          dead text at best and a duplicated announcement at worst. */
       alt=""

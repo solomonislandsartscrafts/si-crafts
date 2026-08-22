@@ -11,7 +11,7 @@ import { ImageResponse } from 'next/og';
  * twitter:image tags automatically, so no metadata.openGraph.images entry is
  * needed for it.
  */
-export const alt = 'Solomon Islands Arts Crafts — handmade pandanus weaving, wood carving and shell-money jewellery';
+export const alt = 'Solomon Islands Arts & Crafts — handmade pandanus weaving, wood carving and shell-money jewellery';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -58,7 +58,7 @@ export default async function OpengraphImage() {
               marginBottom: 28,
             }}
           >
-            Solomon Islands Arts Crafts
+            Solomon Islands Arts & Crafts
           </div>
           <div style={{ fontSize: 34, lineHeight: 1.4, color: '#5C5648' }}>
             Meet the makers behind every piece — pandanus weaving, wood

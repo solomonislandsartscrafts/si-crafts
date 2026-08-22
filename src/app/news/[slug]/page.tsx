@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { Clock } from 'lucide-react';
 import { notFound } from 'next/navigation';
-import sanitizeHtml from 'sanitize-html';
 import { getArticleBySlug, getPublishedArticles } from '@/services/articles';
+import { renderArticleHtml } from '@/lib/article-html';
 import { generatePageMetadata } from '@/lib/metadata';
 import { ShareButtons } from '@/components/shared/share-buttons';
 import { NewsSidebar } from '@/components/news/news-sidebar';
@@ -41,9 +41,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   ).slice(0, 8);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-y">
+    <div className="site-container page-y">
       {/* Grid: sidebar (left, desktop only) | article content */}
-      <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8 lg:gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-10">
         {/* Sidebar — shows other articles to read */}
         <NewsSidebar tags={allTags} otherArticles={otherArticles} />
 
@@ -110,22 +110,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           {/* Article body */}
           <div
             className="article-content"
-            dangerouslySetInnerHTML={{
-              __html: sanitizeHtml(article.content, {
-                allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'figure', 'figcaption', 'h1', 'h2', 'h3']),
-                allowedAttributes: {
-                  ...sanitizeHtml.defaults.allowedAttributes,
-                  img: ['src', 'alt', 'width', 'height'],
-                  figure: [],
-                  figcaption: [],
-                },
-                allowedStyles: {
-                  img: { width: [/^(\d+(%|px|rem|em)|auto)$/], 'border-radius': [/^[\d.]+(px|rem|em|%)$/], margin: [/^[\d.]+(px|rem|em|%)\s?[\d.]*(px|rem|em|%)?$/] },
-                  figcaption: { 'text-align': [/^(left|center|right)$/], 'font-size': [/^[\d.]+(px|rem|em)$/], color: [/^#[0-9a-fA-F]{3,6}$/], 'margin-top': [/^[\d.]+(px|rem|em)$/] },
-                },
-                allowedSchemes: ['http', 'https', 'mailto'],
-              }),
-            }}
+            dangerouslySetInnerHTML={{ __html: renderArticleHtml(article.content) }}
           />
 
           {/* Footer */}

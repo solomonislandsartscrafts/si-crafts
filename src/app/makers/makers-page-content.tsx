@@ -16,9 +16,24 @@ interface MakerWithCraft extends Maker {
 
 interface Props {
   makers: MakerWithCraft[];
+  /** Admin-editable copy, passed down so this stays a pure client component. */
+  title: string;
+  intro: string;
+  filterHeading: string;
+  filterHint: string;
+  emptyTitle: string;
+  emptyDescription: string;
 }
 
-export function MakersPageContent({ makers }: Props) {
+export function MakersPageContent({
+  makers,
+  title,
+  intro,
+  filterHeading,
+  filterHint,
+  emptyTitle,
+  emptyDescription,
+}: Props) {
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
 
   const provinces = [...new Set(makers.map((m) => m.province))].sort();
@@ -29,10 +44,7 @@ export function MakersPageContent({ makers }: Props) {
 
   return (
     <div>
-      <PageHeader
-        title="Meet the Makers"
-        intro="Every piece carries a story. These are the weavers, carvers, and jewellers behind the work — their villages, their craft, and their hands."
-      >
+      <PageHeader title={title} intro={intro}>
         <div className="mt-4 flex flex-wrap gap-4 text-sm text-warm-gray-600">
           <span className="flex items-center gap-1.5">
             <Users className="w-4 h-4" aria-hidden="true" />
@@ -45,8 +57,8 @@ export function MakersPageContent({ makers }: Props) {
         </div>
       </PageHeader>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8 lg:gap-12 items-start">
+      <div className="site-container pb-10 lg:pb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-10 items-start">
           {/* Left: maker grid */}
           <div>
             {/* Filter bar. The province select stays mounted whether or not a
@@ -89,8 +101,8 @@ export function MakersPageContent({ makers }: Props) {
             {filteredMakers.length === 0 ? (
               <EmptyState
                 icon={Users}
-                title="No makers in this province yet."
-                description="We're still documenting makers across Solomon Islands. Try another province."
+                title={emptyTitle}
+                description={emptyDescription}
                 action={
                   <Button
                     variant="secondary"
@@ -120,11 +132,9 @@ export function MakersPageContent({ makers }: Props) {
           <div className="hidden lg:block lg:sticky lg:top-24 lg:self-start">
             <div className="pb-3">
               <h2 className="font-heading text-lg font-semibold text-deep-blue">
-                Filter by province
+                {filterHeading}
               </h2>
-              <p className="text-sm text-warm-gray-600 mt-0.5">
-                Select a province on the map to filter the list.
-              </p>
+              <p className="text-sm text-warm-gray-600 mt-0.5">{filterHint}</p>
             </div>
             <SolomonIslandsProvinceMap
               selectedProvince={selectedProvince}

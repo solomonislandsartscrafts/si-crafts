@@ -1,6 +1,7 @@
 import { generatePageMetadata } from '@/lib/metadata';
 import { PageHeader } from '@/components/layout/page-header';
 import { PieceLookup } from '@/components/shared/piece-lookup';
+import { getSiteTextSafe } from '@/services/site-text';
 
 export const metadata = generatePageMetadata({
   title: 'Find Your Piece',
@@ -8,20 +9,22 @@ export const metadata = generatePageMetadata({
   path: '/piece',
 });
 
-export default function PieceLookupPage() {
+export default async function PieceLookupPage() {
+  const text = await getSiteTextSafe();
+
   return (
     <PageHeader
-      title="Find your piece"
+      title={text['provenance.lookupTitle']}
       align="center"
       width="narrow"
-      intro="Enter the code from your product tag to meet the maker and discover the story behind your piece."
+      intro={text['provenance.lookupIntro']}
     >
       <div className="max-w-xs mx-auto mt-8">
         <PieceLookup />
       </div>
-      <p className="text-sm text-warm-gray-600 mt-4">
-        The code is printed on the tag attached to your product (e.g. P-J-1).
-      </p>
+      {text['provenance.lookupHint'] && (
+        <p className="text-sm text-warm-gray-600 mt-4">{text['provenance.lookupHint']}</p>
+      )}
     </PageHeader>
   );
 }

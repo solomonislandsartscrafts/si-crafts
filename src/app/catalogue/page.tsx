@@ -2,6 +2,7 @@ import { generatePageMetadata } from '@/lib/metadata';
 import { getPublicProducts } from '@/services/products';
 import { getPublicMakers } from '@/services/makers';
 import { getMaterialCategories } from '@/services/categories';
+import { getSiteTextSafe } from '@/services/site-text';
 import { PageHeader } from '@/components/layout';
 import { CatalogueClient } from './catalogue-client';
 
@@ -13,22 +14,23 @@ export const metadata = generatePageMetadata({
 });
 
 export default async function CataloguePage() {
-  const [products, makers, materialCategories] = await Promise.all([
+  const [products, makers, materialCategories, text] = await Promise.all([
     getPublicProducts(),
     getPublicMakers(),
     getMaterialCategories(),
+    getSiteTextSafe(),
   ]);
 
   return (
     <div>
-      <PageHeader
-        title="Catalogue"
-        intro="Browse our full collection of Solomon Islands handicrafts. All items are made from renewable, natural resources that are locally-sourced and sustainable."
-      />
+      <PageHeader title={text['catalogue.title']} intro={text['catalogue.intro']} />
       <CatalogueClient
         products={products}
         makers={makers}
         materialCategories={materialCategories}
+        pricingPrompt={text['catalogue.pricingPrompt']}
+        emptyTitle={text['catalogue.emptyTitle']}
+        emptyDescription={text['catalogue.emptyDescription']}
       />
     </div>
   );

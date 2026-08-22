@@ -36,7 +36,7 @@ export function generatePageMetadata({
       // article cover). Omitting it lets Next fall back to the generated card
       // from src/app/opengraph-image.tsx.
       ...(imageUrl ? { images: [{ url: imageUrl }] } : {}),
-      siteName: 'Solomon Islands Arts Crafts',
+      siteName: 'Solomon Islands Arts & Crafts',
       type: 'website',
     },
   };

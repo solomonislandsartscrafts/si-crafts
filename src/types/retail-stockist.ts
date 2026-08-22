@@ -1,4 +1,5 @@
 export interface RetailStockist {
+  id: string;
   city: string;
   name: string;
   url: string;
@@ -7,4 +8,5 @@ export interface RetailStockist {
   email: string;
   hours: string;
   closed: string;
+  sortOrder: number;
 }
