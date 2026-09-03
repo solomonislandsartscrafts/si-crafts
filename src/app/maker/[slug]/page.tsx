@@ -1,18 +1,19 @@
 import Link from 'next/link';
-import { Store, MapPin, ChevronDown, Package } from 'lucide-react';
+import { Store, MapPin, Package } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { getPublicMakers, getPublicMakerBySlug } from '@/services/makers';
 import { getProductsByMaker } from '@/services/products';
 import { getCraftById } from '@/services/crafts';
 import { getSiteTextSafe } from '@/services/site-text';
 import { ProductCard } from '@/components/cards/product-card';
+import { DetailPageLayout } from '@/components/layout/detail-page-layout';
 import { pageTitleClasses } from '@/components/layout/page-header';
 import { ButtonLink } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { SafeImage } from '@/components/ui/safe-image';
-import { Breadcrumb } from '@/components/ui/breadcrumb';
-import { BackLink } from '@/components/shared/back-link';
-import type { Product } from '@/types';
+import { generatePageMetadata, toPlainDescription } from '@/lib/metadata';
+import { resolveImageUrl } from '@/lib/api-client';
+import type { Metadata } from 'next';
 
 export async function generateStaticParams() {
   const makers = await getPublicMakers();
@@ -23,17 +24,31 @@ interface MakerPageProps {
   params: Promise<{ slug: string }>;
 }
 
-/** Group products by productType and return sorted groups */
-function groupProductsByType(products: Product[]): { type: string; items: Product[] }[] {
-  const groups: Record<string, Product[]> = {};
-  for (const product of products) {
-    const type = product.productType;
-    if (!groups[type]) groups[type] = [];
-    groups[type].push(product);
-  }
-  return Object.entries(groups)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([type, items]) => ({ type, items }));
+/**
+ * Per-maker metadata.
+ *
+ * The maker's real name, village and province go in the title because those are
+ * the specific terms a curator or researcher actually searches for, and they
+ * are the provenance claim this site exists to make. Sourced from
+ * getPublicMakerBySlug, so the consent gate applies here as it does to the page
+ * body — an unsigned maker resolves to null and gets no metadata.
+ */
+export async function generateMetadata({ params }: MakerPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const maker = await getPublicMakerBySlug(slug);
+
+  if (!maker) return { title: 'Maker not found' };
+
+  const place = [maker.village, maker.province].filter(Boolean).join(', ');
+
+  return generatePageMetadata({
+    title: place ? `${maker.name} — ${place}` : maker.name,
+    description:
+      toPlainDescription(maker.story) ||
+      `Meet ${maker.name}${place ? `, a maker from ${place}` : ''}, Solomon Islands. See their work and the story behind it.`,
+    path: `/maker/${maker.slug}`,
+    imageUrl: resolveImageUrl(maker.portraitUrl) || undefined,
+  });
 }
 
 export default async function MakerPage({ params }: MakerPageProps) {
@@ -50,23 +65,30 @@ export default async function MakerPage({ params }: MakerPageProps) {
     getSiteTextSafe(),
   ]);
 
-  const productGroups = groupProductsByType(products);
   const ctaPrompt = (text['makerDetail.ctaPrompt'] ?? '').replace(/\{name\}/g, maker.name);
 
-  return (
-    <div className="site-container page-y">
-      {/* Breadcrumb */}
-      <Breadcrumb
-        items={[
-          { name: 'Home', url: '/' },
-          { name: 'Makers', url: '/makers' },
-          { name: maker.name },
-        ]}
-        className="mb-8"
-      />
+  // Guard against placeholder / not-yet-written stories. A maker's story is
+  // their own voice and provenance is the point of the site, so a stub like
+  // "Test" or a single word must NOT render as a quote — that both looks broken
+  // and breaks the cultural rule against inventing/placeholder narrative. Treat
+  // anything under ~15 characters (after trimming) as not written yet, so it
+  // falls through to the admin-editable "story pending" notice instead.
+  const hasStory = (maker.story ?? '').trim().length >= 15;
 
-      {/* Maker profile */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10 lg:mb-20">
+  return (
+    <DetailPageLayout
+      breadcrumbs={[
+        { name: 'Home', url: '/' },
+        { name: 'Makers', url: '/makers' },
+        { name: maker.name },
+      ]}
+    >
+      {/* Maker profile. Portrait column is capped at 360px rather than a full
+          50/50 split: at half the container width the 4/5 portrait rendered
+          ~700px wide, which dwarfed the info beside it and left a large empty
+          column. A tidy profile-sized image + a wider info column reads as a
+          balanced header. */}
+      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,360px)_1fr] gap-block mb-block items-start">
         {/* Portrait */}
         <div className="aspect-[4/5] relative rounded-lg overflow-hidden">
           <SafeImage
@@ -74,32 +96,40 @@ export default async function MakerPage({ params }: MakerPageProps) {
             alt={`${maker.name} from ${maker.village}, ${maker.province}`}
             fill
             className="object-cover"
-            sizes="(max-width: 768px) 100vw, 50vw"
+            sizes="(max-width: 768px) 100vw, 360px"
             priority
           />
         </div>
 
-        {/* Info */}
-        <div className="flex flex-col justify-center">
-          <h1 className={`${pageTitleClasses} mb-2`}>{maker.name}</h1>
-          <p className="flex items-center gap-1.5 text-lg text-warm-gray-600 mb-3">
+        {/* Info — top-aligned (not centred) so a short profile sits at the top
+            of the column rather than floating in the middle of the portrait's
+            empty space. */}
+        <div className="flex flex-col">
+          <h1 className={`${pageTitleClasses} mb-xs`}>{maker.name}</h1>
+
+          {/* One identity line: place, then the craft as a link. Grouping them
+              reads as the maker's header rather than a stack of a place line and
+              a separate pill. */}
+          <p className="flex flex-wrap items-center gap-x-2xs gap-y-3xs text-lg text-warm-gray-600 mb-md">
             <MapPin className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
-            {maker.village}, {maker.province}
+            <span>{maker.village}, {maker.province}</span>
+            {craft && (
+              <>
+                <span aria-hidden="true">·</span>
+                <Link
+                  href={`/craft/${craft.slug}`}
+                  className="font-medium text-ocean hover:text-ocean-dark transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded-sm"
+                >
+                  {craft.name}
+                </Link>
+              </>
+            )}
           </p>
 
-          {/* Craft badge */}
-          {craft && (
-            <Link
-              href={`/craft/${craft.slug}`}
-              className="inline-block bg-ocean/10 text-ocean px-3 py-1 rounded text-sm font-medium hover:bg-ocean/20 transition-colors w-fit mb-6 focus:outline-none focus:ring-2 focus:ring-ocean"
-            >
-              {craft.name}
-            </Link>
-          )}
-
-          {/* Story — first-person voice */}
-          {maker.story ? (
-            <blockquote className="text-base text-warm-gray-800 leading-relaxed italic border-l-4 border-brand-green pl-4">
+          {/* Story — first-person voice. A too-short/placeholder story falls
+              back to the pending notice (see hasStory). */}
+          {hasStory ? (
+            <blockquote className="text-base text-warm-gray-800 leading-relaxed italic border-l-4 border-brand-green pl-sm">
               &ldquo;{maker.story}&rdquo;
             </blockquote>
           ) : (
@@ -107,28 +137,17 @@ export default async function MakerPage({ params }: MakerPageProps) {
               {text['makerDetail.storyPendingNotice']}
             </p>
           )}
-
-          {/* Scroll prompt */}
-          {products.length > 0 && (
-            <a
-              href="#pieces"
-              className="tap-target inline-flex items-center gap-1.5 mt-8 w-fit text-base font-medium text-ocean hover:text-ocean-dark transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded-sm"
-            >
-              <span>View pieces by {maker.name}</span>
-              <ChevronDown className="w-4 h-4 animate-bounce" aria-hidden="true" />
-            </a>
-          )}
         </div>
       </div>
 
       {/* Products section. Renders even when empty so a maker profile never
           just stops after the story with no explanation. */}
-      <section id="pieces" className="border-t border-sand pt-12 mt-12 lg:mt-16 scroll-mt-24">
+      <section id="pieces" className="border-t border-sand pt-block mt-block scroll-mt-24">
         {/* Heading with count */}
-        <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-8">
+        <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack">
           Pieces by {maker.name}
           {products.length > 0 && (
-            <span className="text-base font-normal text-warm-gray-600 ml-2">
+            <span className="text-base font-normal text-warm-gray-600 ml-2xs">
               ({products.length})
             </span>
           )}
@@ -146,59 +165,41 @@ export default async function MakerPage({ params }: MakerPageProps) {
             }
           />
         ) : (
-          <>
-
-          {/* Products grouped by type */}
-          {productGroups.length > 1 ? (
-            <div className="space-y-12">
-              {productGroups.map((group) => (
-                <div key={group.type}>
-                  <h3 className="font-heading text-lg font-semibold text-deep-blue mb-4 capitalize">
-                    {group.type}
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-5">
-                    {group.items.map((product) => (
-                      <ProductCard
-                        key={product.id}
-                        product={product}
-                        makerName={maker.name}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-5">
-              {products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  makerName={maker.name}
-                />
-              ))}
-            </div>
-          )}
-
-          </>
+          /* A single flat grid, matching the catalogue view — cards sit side
+             by side rather than being split into a stacked section per product
+             type. */
+          <div role="list" aria-label="Pieces" className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-grid">
+            {products.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                makerName={maker.name}
+              />
+            ))}
+          </div>
         )}
 
-        {/* Wholesale enquiry CTA. The prompt is admin-editable and can be
-            cleared, so it is guarded — reading .replace off a missing key threw
-            and took the whole maker page down. */}
-        <div className="mt-12 pt-8 border-t border-sand text-center">
-          {ctaPrompt && <p className="text-base text-warm-gray-600 mb-4">{ctaPrompt}</p>}
-          <ButtonLink href="/wholesale" variant="secondary">
-            <Store className="w-4 h-4" aria-hidden="true" />
-            {text['makerDetail.ctaButton']}
-          </ButtonLink>
-        </div>
       </section>
 
-      {/* Bottom back link */}
-      <div className="mt-12 pt-8 border-t border-sand text-center">
-        <BackLink href="/makers" label="All makers" />
+      {/* Wholesale enquiry — the primary conversion on a maker page, so it gets
+          a proper contained deep-blue CTA panel at the end of the content
+          (matching the site-wide PageCta band, scaled to fit inside the detail
+          container) rather than the thin centred link it used to be. The prompt
+          is admin-editable and can be cleared, so both it and the panel copy are
+          guarded. */}
+      <div className="mt-block rounded-lg bg-deep-blue px-md py-lg sm:px-lg text-center">
+        <p className="font-heading text-xl sm:text-2xl font-medium !text-white mb-2xs">
+          {ctaPrompt || `Interested in stocking ${maker.name}'s pieces?`}
+        </p>
+        <p className="text-white/80 leading-relaxed mb-md max-w-xl mx-auto">
+          {text['makerDetail.ctaSubtext'] ||
+            'Log in or apply as a stockist to see wholesale pricing and place an order request.'}
+        </p>
+        <ButtonLink href="/wholesale">
+          <Store className="w-4 h-4" aria-hidden="true" />
+          {text['makerDetail.ctaButton']}
+        </ButtonLink>
       </div>
-    </div>
+    </DetailPageLayout>
   );
 }

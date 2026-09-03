@@ -158,7 +158,7 @@ export function ImageUpload({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-warm-gray-800 mb-1">
+      <label className="block text-sm font-medium text-warm-gray-800 mb-3xs">
         {label}
       </label>
 
@@ -193,7 +193,7 @@ export function ImageUpload({
             <Loader2 className="w-6 h-6 text-ocean animate-spin" />
           ) : (
             <>
-              <Upload className="w-6 h-6 text-warm-gray-400 mb-1" />
+              <Upload className="w-6 h-6 text-warm-gray-400 mb-3xs" />
               <span className="text-xs text-warm-gray-400">Upload</span>
             </>
           )}
@@ -210,19 +210,19 @@ export function ImageUpload({
       />
 
       {aspectHint && (
-        <p className="text-xs text-warm-gray-400 mt-1">Recommended: {aspectHint}</p>
+        <p className="text-xs text-warm-gray-400 mt-3xs">Recommended: {aspectHint}</p>
       )}
 
       {sizeWarning && (
-        <p className="text-xs text-warning mt-1" role="alert">{sizeWarning}</p>
+        <p className="text-xs text-warning mt-3xs" role="alert">{sizeWarning}</p>
       )}
 
       {/* Alt text input — shown when an image is uploaded or when handler is provided */}
       {onAltTextChange && (
-        <div className="mt-3">
-          <label className="block text-xs font-medium text-warm-gray-600 mb-1">
+        <div className="mt-xs">
+          <label className="block text-xs font-medium text-warm-gray-600 mb-3xs">
             Alt text <span className="text-error">*</span>
-            <span className="font-normal text-warm-gray-400 ml-1">(describes the image for accessibility)</span>
+            <span className="font-normal text-warm-gray-400 ml-3xs">(describes the image for accessibility)</span>
           </label>
           <input
             type="text"
@@ -231,12 +231,12 @@ export function ImageUpload({
             placeholder="Describe what this image shows"
             required
             aria-invalid={Boolean(value) && !altText.trim()}
-            className={`w-full px-3 py-2 text-sm rounded-md border bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent ${
+            className={`w-full px-xs py-2xs text-sm rounded-md border bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent ${
               value && !altText.trim() ? 'border-error' : 'border-sand-dark'
             }`}
           />
           {value && !altText.trim() && (
-            <p className="text-sm text-error mt-1" aria-live="assertive">
+            <p className="text-sm text-error mt-3xs" aria-live="assertive">
               Alt text is required. You cannot save until this image is described.
             </p>
           )}
@@ -244,11 +244,11 @@ export function ImageUpload({
       )}
 
       {error && (
-        <p className="text-sm text-error mt-1" aria-live="assertive">{error}</p>
+        <p className="text-sm text-error mt-3xs" aria-live="assertive">{error}</p>
       )}
 
       {uploading && (
-        <p className="text-xs text-warm-gray-400 mt-1">Compressing and uploading...</p>
+        <p className="text-xs text-warm-gray-400 mt-3xs">Compressing and uploading...</p>
       )}
     </div>
   );

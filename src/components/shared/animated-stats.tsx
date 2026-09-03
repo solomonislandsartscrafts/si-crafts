@@ -53,7 +53,7 @@ export function AnimatedStats({ stats, variant = 'light' }: AnimatedStatsProps) 
         {stats.map((stat, index) => (
           <div
             key={index}
-            className={`py-6 sm:py-8 px-4 sm:px-6 text-center ${
+            className={`py-md sm:py-lg px-sm sm:px-md text-center ${
               reduceMotion ? '' : 'transition-all duration-700'
             } ${
               index > 0 ? `border-l ${borderColor}` : ''
@@ -67,7 +67,7 @@ export function AnimatedStats({ stats, variant = 'light' }: AnimatedStatsProps) 
             <p className={`font-heading text-base font-semibold tracking-wide ${valueColor}`}>
               {stat.value}
             </p>
-            <p className={`text-sm mt-1 ${labelColor}`}>
+            <p className={`text-sm mt-3xs ${labelColor}`}>
               {stat.label}
             </p>
           </div>
@@ -76,7 +76,7 @@ export function AnimatedStats({ stats, variant = 'light' }: AnimatedStatsProps) 
 
       {/* Mobile: horizontal scrolling marquee (below md) */}
       <div
-        className={`md:hidden overflow-hidden border-t border-b ${borderColor} py-4 transition-opacity duration-700 ${
+        className={`md:hidden overflow-hidden border-t border-b ${borderColor} py-sm transition-opacity duration-700 ${
           visible ? 'opacity-100' : 'opacity-0'
         }`}
       >
@@ -86,13 +86,13 @@ export function AnimatedStats({ stats, variant = 'light' }: AnimatedStatsProps) 
             {stats.map((stat, index) => (
               <div key={index} className="flex items-center">
                 {index > 0 && (
-                  <div className={`w-px h-8 mx-5 flex-shrink-0 ${dividerColor}`} aria-hidden="true" />
+                  <div className={`w-px h-8 mx-md flex-shrink-0 ${dividerColor}`} aria-hidden="true" />
                 )}
-                <div className="flex-shrink-0 text-center px-2">
+                <div className="flex-shrink-0 text-center px-2xs">
                   <p className={`font-heading text-sm font-semibold tracking-wide whitespace-nowrap ${valueColor}`}>
                     {stat.value}
                   </p>
-                  <p className={`text-xs mt-0.5 whitespace-nowrap ${labelColor}`}>
+                  <p className={`text-xs mt-3xs whitespace-nowrap ${labelColor}`}>
                     {stat.label}
                   </p>
                 </div>
@@ -106,13 +106,13 @@ export function AnimatedStats({ stats, variant = 'light' }: AnimatedStatsProps) 
             {stats.map((stat, index) => (
               <div key={index} className="flex items-center">
                 {index > 0 && (
-                  <div className={`w-px h-8 mx-5 flex-shrink-0 ${dividerColor}`} aria-hidden="true" />
+                  <div className={`w-px h-8 mx-md flex-shrink-0 ${dividerColor}`} aria-hidden="true" />
                 )}
-                <div className="flex-shrink-0 text-center px-2">
+                <div className="flex-shrink-0 text-center px-2xs">
                   <p className={`font-heading text-sm font-semibold tracking-wide whitespace-nowrap ${valueColor}`}>
                     {stat.value}
                   </p>
-                  <p className={`text-xs mt-0.5 whitespace-nowrap ${labelColor}`}>
+                  <p className={`text-xs mt-3xs whitespace-nowrap ${labelColor}`}>
                     {stat.label}
                   </p>
                 </div>
@@ -121,12 +121,12 @@ export function AnimatedStats({ stats, variant = 'light' }: AnimatedStatsProps) 
             {/* Duplicated set for seamless loop — hidden from assistive tech */}
             {stats.map((stat, index) => (
               <div key={`dup-${index}`} className="flex items-center" aria-hidden="true">
-                <div className={`w-px h-8 mx-5 flex-shrink-0 ${dividerColor}`} />
-                <div className="flex-shrink-0 text-center px-2">
+                <div className={`w-px h-8 mx-md flex-shrink-0 ${dividerColor}`} />
+                <div className="flex-shrink-0 text-center px-2xs">
                   <p className={`font-heading text-sm font-semibold tracking-wide whitespace-nowrap ${valueColor}`}>
                     {stat.value}
                   </p>
-                  <p className={`text-xs mt-0.5 whitespace-nowrap ${labelColor}`}>
+                  <p className={`text-xs mt-3xs whitespace-nowrap ${labelColor}`}>
                     {stat.label}
                   </p>
                 </div>

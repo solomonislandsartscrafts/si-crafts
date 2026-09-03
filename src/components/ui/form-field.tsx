@@ -44,9 +44,9 @@ export function FormField({
   const errorId = htmlFor ? `${htmlFor}-error` : undefined;
 
   return (
-    <div className={`space-y-1.5 ${className}`.trim()}>
+    <div className={`space-y-2xs ${className}`.trim()}>
       {/* Label row */}
-      <div className="flex items-baseline gap-1">
+      <div className="flex items-baseline gap-3xs">
         <label
           htmlFor={htmlFor}
           className="block text-base font-medium text-warm-gray-800"
@@ -87,7 +87,7 @@ export function FormField({
       {error && (
         <p
           id={errorId}
-          className="text-base text-error mt-1"
+          className="text-base text-error mt-3xs"
           role="alert"
           aria-live="assertive"
         >
@@ -111,7 +111,7 @@ export function FormField({
  *   <input className={inputClasses} data-error={!!error || undefined} />
  */
 export const inputClasses =
-  'w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 ' +
+  'w-full px-sm py-xs rounded-md border border-sand-dark bg-white text-warm-gray-800 ' +
   'placeholder:text-warm-gray-400 ' +
   'focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent ' +
   'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-warm-gray-100 ' +

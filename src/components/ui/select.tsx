@@ -168,9 +168,15 @@ export function Select({
         aria-haspopup="listbox"
         aria-label={label}
         aria-controls={id ? `${id}-listbox` : undefined}
+        // Point assistive tech at the currently highlighted option so arrowing
+        // through the list is announced, not just visually highlighted. Only
+        // set while open and pointing at a real option.
+        aria-activedescendant={
+          open && id && focusedIndex >= 0 ? `${id}-opt-${focusedIndex}` : undefined
+        }
         onClick={handleToggle}
         onKeyDown={handleKeyDown}
-        className={`tap-target w-full sm:w-auto inline-flex items-center justify-between gap-2 px-4 py-2 rounded-md border bg-white text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean ${
+        className={`h-11 w-full sm:w-auto inline-flex items-center justify-between gap-2xs px-sm rounded-md border bg-white text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean ${
           open
             ? 'border-ocean ring-1 ring-ocean'
             : 'border-sand-dark text-warm-gray-800 hover:border-ocean/50'
@@ -194,7 +200,7 @@ export function Select({
           role="listbox"
           id={id ? `${id}-listbox` : undefined}
           aria-label={label}
-          className="absolute left-0 top-full mt-1 z-50 w-full min-w-[180px] max-h-60 overflow-y-auto rounded-md border border-sand-dark bg-white shadow-lg py-1"
+          className="absolute left-0 top-full mt-3xs z-50 w-full min-w-[180px] max-h-60 overflow-y-auto rounded-md border border-sand-dark bg-white shadow-lg py-3xs"
           onKeyDown={handleKeyDown}
         >
           {allOptions.map((opt, index) => {
@@ -204,11 +210,12 @@ export function Select({
             return (
               <li
                 key={opt.value}
+                id={id ? `${id}-opt-${index}` : undefined}
                 role="option"
                 aria-selected={isSelected}
                 onClick={() => handleSelect(opt.value)}
                 onMouseEnter={() => setFocusedIndex(index)}
-                className={`flex items-center gap-2 px-3 py-2 text-sm cursor-pointer transition-colors ${
+                className={`flex items-center gap-2xs px-xs py-2xs text-sm cursor-pointer transition-colors ${
                   isFocused ? 'bg-ocean/5 text-deep-blue' : 'text-warm-gray-800'
                 } ${isSelected ? 'font-medium' : ''}`}
               >

@@ -19,9 +19,14 @@ export default async function FaqsAndShippingPage() {
 
   return (
     <div>
-      <PageHeader title={text['faqs.title']} intro={text['faqs.intro']} />
+      <PageHeader
+        banner="gold"
+        eyebrow="Questions & shipping"
+        title={text['faqs.title']}
+        intro={text['faqs.intro']}
+      />
 
-      <div className="site-container pb-10 lg:pb-20">
+      <div className="site-container pb-section">
         <h2 className="sr-only">Frequently asked questions</h2>
         {faqs.length === 0 ? (
           <EmptyState icon={HelpCircle} title={text['faqs.emptyTitle']} />
@@ -30,10 +35,10 @@ export default async function FaqsAndShippingPage() {
         )}
 
         {text['faqs.footerNote'] && (
-          <div className="mt-12 bg-sand-light rounded-lg p-6">
+          <div className="mt-xl bg-sand-light rounded-lg p-md">
             <CmsText
               value={text['faqs.footerNote']}
-              className="space-y-3"
+              className="space-y-xs"
               paragraphClassName="text-warm-gray-600 leading-relaxed"
             />
           </div>

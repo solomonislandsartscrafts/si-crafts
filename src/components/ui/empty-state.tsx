@@ -30,21 +30,21 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div
-      className={`rounded-lg border border-dashed border-sand-dark px-6 py-12 text-center ${className}`.trim()}
+      className={`rounded-lg border border-dashed border-sand-dark px-md py-xl text-center ${className}`.trim()}
     >
       {Icon && (
         <Icon
-          className="w-10 h-10 text-warm-gray-400 mx-auto mb-4"
+          className="w-10 h-10 text-warm-gray-400 mx-auto mb-sm"
           aria-hidden="true"
         />
       )}
       <p className="text-base font-medium text-deep-blue">{title}</p>
       {description && (
-        <p className="text-base text-warm-gray-600 mt-1.5 max-w-md mx-auto leading-relaxed">
+        <p className="text-base text-warm-gray-600 mt-2xs max-w-md mx-auto leading-relaxed">
           {description}
         </p>
       )}
-      {action && <div className="mt-5 flex justify-center">{action}</div>}
+      {action && <div className="mt-md flex justify-center">{action}</div>}
     </div>
   );
 }

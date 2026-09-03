@@ -1,29 +1,34 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Plus, Edit, Trash2, Handshake } from 'lucide-react';
+import { Plus, Edit, Trash2, Handshake, EyeOff, Eye } from 'lucide-react';
 import type { Supporter } from '@/types';
+import { getSupportersForAdmin, createSupporter, updateSupporter, deleteSupporter } from '@/services/supporters';
 import { AdminLayout } from '@/components/admin';
 import {
   SupporterFormModal,
   type SupporterFormData,
 } from '@/components/admin/supporter-form-modal';
-import { useToast } from '@/components/ui/toast';
+import { useAdminCrud } from '@/lib/use-admin-crud';
 import { pageTitleClasses } from '@/components/layout/page-header';
 import { resolveImageUrl } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { useToast } from '@/components/ui/toast';
 import { Skeleton, SkeletonRegion } from '@/components/ui/skeleton';
 
+/**
+ * Row-shaped placeholder skeleton displayed while the supporters table loads.
+ */
 function TableSkeleton() {
   return (
     <SkeletonRegion
       label="Loading supporters"
-      className="bg-white rounded-lg shadow-card p-4 space-y-4"
+      className="bg-white rounded-lg shadow-card p-sm space-y-sm"
     >
       {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4">
+        <div key={i} className="flex items-center gap-sm">
           <Skeleton className="h-4 w-8" />
           <Skeleton className="h-10 w-24" />
           <Skeleton className="h-4 flex-1" />
@@ -34,71 +39,54 @@ function TableSkeleton() {
   );
 }
 
+/**
+ * Admin page for managing supporters (logos displayed below the homepage hero).
+ * Uses the shared useAdminCrud hook to eliminate boilerplate CRUD logic.
+ */
 export default function AdminSupportersPage() {
-  const [supporters, setSupporters] = useState<Supporter[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<Supporter | null>(null);
-  const [showForm, setShowForm] = useState(false);
+  // Use shared CRUD hook instead of manual state management
+  const {
+    items: supporters,
+    loading,
+    editingItem: editing,
+    showForm,
+    reload,
+    handlers: { handleAdd, handleEdit, handleSave, handleDelete, handleCloseForm },
+  } = useAdminCrud<Supporter, SupporterFormData>({
+    loadFn: getSupportersForAdmin,
+    createFn: createSupporter,
+    updateFn: updateSupporter,
+    deleteFn: deleteSupporter,
+    entityName: 'supporter',
+  });
+
   const { success: toastSuccess, error: toastError } = useToast();
 
-  useEffect(() => {
-    load();
-  }, []);
-
-  async function load() {
+  // Suspend / reactivate without opening the form. Flips only the `active`
+  // flag, then reloads so the status column reflects the change.
+  async function handleToggleActive(supporter: Supporter) {
+    const next = !supporter.active;
     try {
-      const { getSupportersForAdmin } = await import('@/services/supporters');
-      setSupporters(await getSupportersForAdmin());
+      await updateSupporter(supporter.id, { active: next });
+      toastSuccess(`"${supporter.name}" ${next ? 'is now shown on the homepage' : 'suspended'}.`);
+      reload();
     } catch {
-      toastError('Failed to load supporters. Please refresh the page.');
-    } finally {
-      setLoading(false);
+      toastError(`Failed to update "${supporter.name}". Please try again.`);
     }
-  }
-
-  async function handleDelete(id: string, name: string) {
-    if (!confirm(`Remove "${name}" from the homepage? This cannot be undone.`)) return;
-    try {
-      const { deleteSupporter } = await import('@/services/supporters');
-      await deleteSupporter(id);
-      toastSuccess(`"${name}" removed.`);
-      load();
-    } catch {
-      toastError(`Failed to remove "${name}". Please try again.`);
-    }
-  }
-
-  async function handleSave(data: SupporterFormData) {
-    if (editing) {
-      const { updateSupporter } = await import('@/services/supporters');
-      await updateSupporter(editing.id, data);
-      toastSuccess(`"${data.name}" updated.`);
-    } else {
-      const { createSupporter } = await import('@/services/supporters');
-      await createSupporter(data);
-      toastSuccess(`"${data.name}" added.`);
-    }
-    setShowForm(false);
-    setEditing(null);
-    load();
-  }
-
-  function handleAdd() {
-    setEditing(null);
-    setShowForm(true);
   }
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-2xs">
         <h1 className={pageTitleClasses}>Supporters</h1>
         <Button size="sm" onClick={handleAdd}>
           <Plus className="w-4 h-4" /> Add Supporter
         </Button>
       </div>
-      <p className="text-base text-warm-gray-600 mb-6">
-        Logos shown below the homepage hero. Add only confirmed supporters — with none listed, the
-        band hides itself rather than implying backing that doesn&apos;t exist.
+      <p className="text-base text-warm-gray-600 mb-md">
+        Logos shown below the homepage hero. Add only confirmed supporters — with none shown, the
+        band hides itself rather than implying backing that doesn&apos;t exist. Suspend a supporter
+        to hide its logo without deleting the record.
       </p>
 
       {loading ? (
@@ -119,20 +107,24 @@ export default function AdminSupportersPage() {
           <table className="w-full text-sm">
             <thead className="bg-sand-light border-b border-sand">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600">Order</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600">Logo</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600">Name</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600 hidden md:table-cell">
+                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Order</th>
+                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Logo</th>
+                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Name</th>
+                <th className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden md:table-cell">
                   Links to
                 </th>
-                <th className="text-right px-4 py-3 font-medium text-warm-gray-600">Actions</th>
+                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Status</th>
+                <th className="text-right px-sm py-xs font-medium text-warm-gray-600">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-sand">
               {supporters.map((supporter) => (
-                <tr key={supporter.id} className="hover:bg-sand-light/50">
-                  <td className="px-4 py-3 text-warm-gray-400 text-xs">{supporter.sortOrder}</td>
-                  <td className="px-4 py-3">
+                <tr
+                  key={supporter.id}
+                  className={`hover:bg-sand-light/50 ${supporter.active ? '' : 'opacity-60'}`}
+                >
+                  <td className="px-sm py-xs text-warm-gray-400 text-xs">{supporter.sortOrder}</td>
+                  <td className="px-sm py-xs">
                     {supporter.logoUrl ? (
                       <div className="relative h-10 w-24 bg-warm-gray-100 rounded">
                         <Image
@@ -140,32 +132,52 @@ export default function AdminSupportersPage() {
                           alt=""
                           fill
                           sizes="96px"
-                          className="object-contain p-1"
+                          className="object-contain p-3xs"
                         />
                       </div>
                     ) : (
                       <span className="text-warm-gray-400 italic">no logo</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 font-medium text-warm-gray-800">{supporter.name}</td>
-                  <td className="px-4 py-3 text-warm-gray-600 hidden md:table-cell max-w-xs truncate">
+                  <td className="px-sm py-xs font-medium text-warm-gray-800">{supporter.name}</td>
+                  <td className="px-sm py-xs text-warm-gray-600 hidden md:table-cell max-w-xs truncate">
                     {supporter.href || <span className="text-warm-gray-400 italic">not linked</span>}
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                  <td className="px-sm py-xs">
+                    {supporter.active ? (
+                      <StatusBadge status="success" size="compact">Shown</StatusBadge>
+                    ) : (
+                      <StatusBadge status="neutral" size="compact">Suspended</StatusBadge>
+                    )}
+                  </td>
+                  <td className="px-sm py-xs text-right">
+                    <div className="flex items-center justify-end gap-2xs">
                       <button
-                        onClick={() => {
-                          setEditing(supporter);
-                          setShowForm(true);
-                        }}
-                        className="tap-target p-2 text-warm-gray-400 hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                        onClick={() => handleToggleActive(supporter)}
+                        className="tap-target p-2xs text-warm-gray-400 hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                        aria-label={
+                          supporter.active
+                            ? `Suspend ${supporter.name}`
+                            : `Show ${supporter.name} on the homepage`
+                        }
+                        title={supporter.active ? 'Suspend' : 'Show on homepage'}
+                      >
+                        {supporter.active ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => handleEdit(supporter)}
+                        className="tap-target p-2xs text-warm-gray-400 hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
                         aria-label={`Edit ${supporter.name}`}
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(supporter.id, supporter.name)}
-                        className="tap-target p-2 text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                        className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
                         aria-label={`Remove ${supporter.name}`}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -182,10 +194,7 @@ export default function AdminSupportersPage() {
       {showForm && (
         <SupporterFormModal
           supporter={editing}
-          onClose={() => {
-            setShowForm(false);
-            setEditing(null);
-          }}
+          onClose={handleCloseForm}
           onSave={handleSave}
         />
       )}

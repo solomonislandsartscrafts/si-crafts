@@ -1,42 +1,44 @@
-import Link from 'next/link';
-import { SafeImage } from '@/components/ui/safe-image';
 import type { Craft } from '@/types';
+import {
+  PosterCard,
+  posterBodyClasses,
+  posterTitleClasses,
+} from './poster-card';
 
-/**
- * Craft card. Chrome matches ProductCard / MakerCard / ArticleCard: white
- * surface, shadow-card, rounded-lg, shadow deepening on hover.
- */
 interface CraftCardProps {
   craft: Craft;
 }
 
+/**
+ * Craft card — the shared poster tile: the process photo in the house portrait
+ * frame, name and description captioned below it.
+ *
+ * This was the last card still wearing the old panel treatment: a bordered white
+ * box wrapping the image AND the caption, a square frame, `p-sm` of internal
+ * padding, and a 14px description. Every other card had moved to
+ * frame-plus-caption-on-the-page, so a visitor going from the catalogue to
+ * /crafts-and-techniques saw the card language change mid-visit. Composing
+ * `PosterCard` means the chrome, the frame ratio and the caption typography now
+ * come from the same place as products, makers and news, and it drops the site
+ * from four frame shapes to three.
+ *
+ * `contain` fit, as products use: a process photo of a part-finished piece must
+ * not have its edges clipped — the weave border is the subject.
+ *
+ * No pill. A craft's name already IS its material category ("Pandanus
+ * weaving"), so a material pill would just repeat the title back.
+ */
 export function CraftCard({ craft }: CraftCardProps) {
   return (
-    <Link
+    <PosterCard
       href={`/craft/${craft.slug}`}
-      className="group flex flex-col h-full w-full overflow-hidden rounded-lg bg-card-bg shadow-card hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-ocean"
+      src={craft.processImageUrls[0] || null}
+      alt={craft.processImageAlt || `${craft.name} process`}
+      fit="contain"
+      sizes="(max-width: 640px) 45vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
     >
-      {/* Image area — matches ProductCard: white well, no inset, so the
-          letterboxing left by object-contain disappears into the card rather
-          than framing the photo in grey. */}
-      <div className="aspect-square relative bg-card-bg overflow-hidden">
-        <SafeImage
-          src={craft.processImageUrls[0] || null}
-          alt={`${craft.name} process`}
-          fill
-          className="object-contain group-hover:scale-105 transition-transform duration-300"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
-        />
-      </div>
-      {/* Info */}
-      <div className="flex flex-col flex-1 p-4">
-        <h3 className="font-heading text-base font-semibold text-deep-blue leading-tight">
-          {craft.name}
-        </h3>
-        <p className="text-sm text-warm-gray-600 mt-1 line-clamp-2">
-          {craft.description}
-        </p>
-      </div>
-    </Link>
+      <h3 className={`${posterTitleClasses} line-clamp-2`}>{craft.name}</h3>
+      <p className={`mt-2xs ${posterBodyClasses}`}>{craft.description}</p>
+    </PosterCard>
   );
 }

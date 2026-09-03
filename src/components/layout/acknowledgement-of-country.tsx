@@ -35,11 +35,11 @@ export function AcknowledgementOfCountry({
         <div className="max-w-3xl">
           <h2
             id="acknowledgement-heading"
-            className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4"
+            className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack"
           >
             {heading}
           </h2>
-          <div className="space-y-4 text-warm-gray-600 leading-relaxed">
+          <div className="space-y-sm text-warm-gray-600 leading-relaxed">
             {text && <p>{text}</p>}
             {solomonText && <p>{solomonText}</p>}
           </div>
@@ -61,12 +61,16 @@ export function AcknowledgementFooterNote({
 
   return (
     <div className="border-b border-white/10">
+      {/* `.page-y` (24 → 32) rather than a flat 20px. Paired with the bottom
+          bar's matching padding this puts a clear 48px+ between the
+          acknowledgement and the copyright row, which used to sit almost on
+          top of it. */}
       <div
-        className="site-container py-5"
+        className="site-container page-y"
         aria-label="Acknowledgement of Country"
         role="region"
       >
-        <p className="text-base text-white/70 leading-relaxed max-w-3xl">
+        <p className="text-base text-white/70 leading-body max-w-3xl">
           {text}{' '}
           <Link
             href="/about#acknowledgement"

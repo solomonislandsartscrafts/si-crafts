@@ -100,10 +100,26 @@ const ACTIVITY_ITEMS: ActivityItem[] = [
 
 // --- Tests ---
 
+/**
+ * Cards carry `role="listitem"` (see PosterCard), which axe correctly reports as
+ * an orphan unless a `role="list"` ancestor is present. Every card grid on the
+ * site is a `role="list"`, so rendering a bare card is a context a visitor never
+ * meets. Wrap it the way the app does.
+ */
+function InList({ children }: { children: React.ReactNode }) {
+  return (
+    <div role="list" aria-label="Test list">
+      {children}
+    </div>
+  );
+}
+
 describe('Accessibility: Card Components', () => {
   it('MakerCard has no axe violations', async () => {
     const { container } = render(
-      <MakerCard maker={MAKER} craftName="Pandanus Weaving" />
+      <InList>
+        <MakerCard maker={MAKER} craftName="Pandanus Weaving" />
+      </InList>
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
@@ -111,7 +127,9 @@ describe('Accessibility: Card Components', () => {
 
   it('ProductCard has no axe violations', async () => {
     const { container } = render(
-      <ProductCard product={PRODUCT} makerName="Julie Mone" />
+      <InList>
+        <ProductCard product={PRODUCT} makerName="Julie Mone" />
+      </InList>
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
@@ -119,7 +137,9 @@ describe('Accessibility: Card Components', () => {
 
   it('CraftCard has no axe violations', async () => {
     const { container } = render(
-      <CraftCard craft={CRAFT} />
+      <InList>
+        <CraftCard craft={CRAFT} />
+      </InList>
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();

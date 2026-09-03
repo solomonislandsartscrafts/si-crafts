@@ -23,10 +23,10 @@ function TableSkeleton() {
   return (
     <SkeletonRegion
       label="Loading orders"
-      className="bg-white rounded-lg shadow-card p-4 space-y-4"
+      className="bg-white rounded-lg shadow-card p-sm space-y-sm"
     >
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4">
+        <div key={i} className="flex items-center gap-sm">
           <Skeleton className="h-4 flex-1" />
           <Skeleton className="h-4 w-28 hidden sm:block" />
           <Skeleton className="h-4 w-20" />
@@ -58,7 +58,7 @@ export default function AdminOrdersPage() {
 
   return (
     <AdminLayout>
-      <h1 className={`${pageTitleClasses} mb-6`}>Orders</h1>
+      <h1 className={`${pageTitleClasses} mb-md`}>Orders</h1>
       {loading ? <TableSkeleton /> : orders.length === 0 ? (
         <EmptyState
           icon={ClipboardList}
@@ -70,28 +70,28 @@ export default function AdminOrdersPage() {
           <table className="w-full text-sm">
             <thead className="bg-sand-light border-b border-sand">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600">Reference</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600 hidden sm:table-cell">Date</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600">Total</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600">Status</th>
-                <th className="text-right px-4 py-3 font-medium text-warm-gray-600">Update</th>
+                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Reference</th>
+                <th className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden sm:table-cell">Date</th>
+                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Total</th>
+                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Status</th>
+                <th className="text-right px-sm py-xs font-medium text-warm-gray-600">Update</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-sand">
               {orders.map((order) => (
                 <tr key={order.id} className="hover:bg-sand-light/50">
-                  <td className="px-4 py-3 font-medium text-warm-gray-800">{order.referenceNumber}</td>
-                  <td className="px-4 py-3 text-warm-gray-600 hidden sm:table-cell">
+                  <td className="px-sm py-xs font-medium text-warm-gray-800">{order.referenceNumber}</td>
+                  <td className="px-sm py-xs text-warm-gray-600 hidden sm:table-cell">
                     {new Date(order.submittedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </td>
-                  <td className="px-4 py-3 text-warm-gray-800">{formatPrice(order.totalAud)}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-sm py-xs text-warm-gray-800">{formatPrice(order.totalAud)}</td>
+                  <td className="px-sm py-xs">
                     <StatusBadge status={STATUS_BADGE[order.status] ?? 'neutral'}>{order.status}</StatusBadge>
                     {order.notes && (
-                      <p className="text-xs text-warm-gray-400 mt-1 max-w-xs whitespace-pre-line">{order.notes}</p>
+                      <p className="text-xs text-warm-gray-400 mt-3xs max-w-xs whitespace-pre-line">{order.notes}</p>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-sm py-xs text-right">
                     <Select
                       value={order.status}
                       onChange={(val) => handleStatusChange(order.id, val || 'Submitted')}

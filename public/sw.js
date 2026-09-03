@@ -1,20 +1,30 @@
 /**
  * Service Worker — SI Crafts PWA
  *
- * Provides an offline shell: caches the navigation layout and serves a
- * "you are offline" fallback page when the network is unavailable.
+ * Provides an offline shell: caches a "you are offline" fallback page and
+ * serves it when a NAVIGATION fails with no network. It deliberately does as
+ * little as possible otherwise.
+ *
+ * Why so conservative: an over-eager service worker is the classic cause of
+ * "the site works on my desktop but is dead on my phone". If the worker
+ * intercepts the app's JavaScript and returns a stale or empty response, the
+ * page never hydrates and every button — including the mobile menu — stops
+ * responding, with no visible error. So this worker NEVER touches Next's build
+ * output (`/_next/...`): those files are content-hashed, the browser and the
+ * Cloudflare edge already cache them correctly, and the worker has no business
+ * in that path.
  */
 
-const CACHE_NAME = 'si-crafts-v2';
+// Bump this string on every meaningful worker change. A new name makes the
+// `activate` handler below delete every previous cache, which is what forces a
+// phone that cached the old buggy worker to drop it. This is v3 specifically to
+// evict the v2 cache that was intercepting asset requests.
+const CACHE_NAME = 'si-crafts-v3';
 const OFFLINE_URL = '/offline.html';
 
-// Assets to pre-cache for the offline shell
-const PRECACHE_ASSETS = [
-  OFFLINE_URL,
-  '/manifest.json',
-];
+const PRECACHE_ASSETS = [OFFLINE_URL, '/manifest.json'];
 
-// Install: pre-cache the offline shell assets
+// Install: pre-cache the offline shell, then activate immediately.
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS))
@@ -22,48 +32,64 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Activate: clean up old caches
+// Activate: delete every cache that isn't the current version, then take
+// control of open pages right away. Deleting old caches is what recovers a
+// device stuck on a previous worker.
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+        )
       )
-    )
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Fetch: serve from network first, fall back to offline page for navigation requests
 self.addEventListener('fetch', (event) => {
   const { request } = event;
 
-  // Never intercept non-GET requests (POST/PUT/PATCH/DELETE) — API calls like
-  // login, uploads, and form submissions must always go straight to the
-  // network. The Cache API only supports GET, so attempting to fall back to
-  // cache for other methods returns undefined and breaks the request.
-  if (request.method !== 'GET') {
-    return;
-  }
+  // Only GET is cacheable; let everything else (POST/PUT/PATCH/DELETE) go
+  // straight to the network untouched.
+  if (request.method !== 'GET') return;
 
-  // Only handle navigation requests (page loads)
+  const url = new URL(request.url);
+
+  // NEVER intercept:
+  //  - cross-origin requests (API calls to Render, fonts, R2 images)
+  //  - Next.js build assets (`/_next/...`) — hashed JS/CSS the app needs to
+  //    hydrate. Touching these is what breaks the page on mobile.
+  //  - explicit API routes
+  // Returning without calling respondWith hands the request back to the
+  // browser's own network + HTTP cache, which is exactly what we want.
+  if (url.origin !== self.location.origin) return;
+  if (url.pathname.startsWith('/_next/')) return;
+  if (url.pathname.startsWith('/api/')) return;
+
+  // Navigations (page loads): network-first, fall back to the cached offline
+  // page only if the network genuinely fails. Never return undefined — if the
+  // offline page somehow isn't cached, re-throw so the browser shows its own
+  // error rather than a blank respondWith.
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request).catch(() => caches.match(OFFLINE_URL))
+      fetch(request).catch(async () => {
+        const cached = await caches.match(OFFLINE_URL);
+        if (cached) return cached;
+        return Response.error();
+      })
     );
     return;
   }
 
-  // Never intercept API calls — always hit the network directly so errors
-  // surface normally instead of being masked by a cache-fallback attempt.
-  if (request.url.includes('/api/')) {
-    return;
-  }
-
-  // For other GET requests, try network first then cache
+  // Any other same-origin GET (e.g. /manifest.json, icons): try the network,
+  // fall back to cache, and if neither has it return a proper error Response
+  // instead of undefined (which would abort the request).
   event.respondWith(
-    fetch(request).catch(() => caches.match(request))
+    fetch(request).catch(async () => {
+      const cached = await caches.match(request);
+      return cached || Response.error();
+    })
   );
 });

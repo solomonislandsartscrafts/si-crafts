@@ -33,8 +33,8 @@ const STATUS_STYLES: Record<BadgeStatus, string> = {
 };
 
 const SIZE_STYLES: Record<BadgeSize, string> = {
-  default: 'px-2.5 py-1 text-xs',
-  compact: 'px-2 py-0.5 text-[11px] leading-tight',
+  default: 'px-xs py-3xs text-xs',
+  compact: 'px-2xs py-3xs text-xs leading-heading',
 };
 
 export function StatusBadge({

@@ -17,9 +17,14 @@ export default async function StockistsPage() {
 
   return (
     <div>
-      <PageHeader title={text['stockists.title']} intro={text['stockists.intro']} />
+      <PageHeader
+        banner="green"
+        eyebrow="Where to find us"
+        title={text['stockists.title']}
+        intro={text['stockists.intro']}
+      />
 
-      <div className="site-container pb-10 lg:pb-20">
+      <div className="site-container pb-section">
         {stockists.length === 0 ? (
           <EmptyState
             icon={Store}
@@ -27,13 +32,13 @@ export default async function StockistsPage() {
             description={text['stockists.emptyDescription']}
           />
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-lg">
             {stockists.map((stockist) => (
-              <div key={stockist.id} className="bg-card-bg rounded-lg shadow-card p-6 md:p-8">
-                <div className="flex items-start justify-between gap-4 mb-4">
+              <div key={stockist.id} className="bg-card-bg rounded-lg shadow-card p-md md:p-lg">
+                <div className="flex items-start justify-between gap-sm mb-sm">
                   <div>
                     {stockist.city && (
-                      <p className="text-xs font-medium text-ocean uppercase tracking-wide mb-1">
+                      <p className="text-xs font-medium text-ocean uppercase tracking-wide mb-3xs">
                         {stockist.city}
                       </p>
                     )}
@@ -55,18 +60,18 @@ export default async function StockistsPage() {
                   )}
                 </div>
 
-                <div className="space-y-2 text-base text-warm-gray-600">
+                <div className="space-y-2xs text-base text-warm-gray-600">
                   {stockist.address && (
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-start gap-2xs">
                       <MapPin
-                        className="w-4 h-4 text-warm-gray-400 mt-0.5 flex-shrink-0"
+                        className="w-4 h-4 text-warm-gray-400 mt-3xs flex-shrink-0"
                         aria-hidden="true"
                       />
                       <span>{stockist.address}</span>
                     </div>
                   )}
                   {stockist.phone && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2xs">
                       <Phone
                         className="w-4 h-4 text-warm-gray-400 flex-shrink-0"
                         aria-hidden="true"
@@ -80,7 +85,7 @@ export default async function StockistsPage() {
                     </div>
                   )}
                   {stockist.email && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2xs">
                       <Mail
                         className="w-4 h-4 text-warm-gray-400 flex-shrink-0"
                         aria-hidden="true"
@@ -94,9 +99,9 @@ export default async function StockistsPage() {
                     </div>
                   )}
                   {(stockist.hours || stockist.closed) && (
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-start gap-2xs">
                       <Clock
-                        className="w-4 h-4 text-warm-gray-400 mt-0.5 flex-shrink-0"
+                        className="w-4 h-4 text-warm-gray-400 mt-3xs flex-shrink-0"
                         aria-hidden="true"
                       />
                       <div>

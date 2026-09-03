@@ -29,7 +29,7 @@ export default async function TeamPage() {
         }
       />
 
-      <div className="site-container pb-10 lg:pb-20">
+      <div className="site-container pb-section">
         <TeamList
           emptyTitle={text['aboutTeam.emptyTitle']}
           emptyDescription={text['aboutTeam.emptyDescription']}

@@ -71,10 +71,10 @@ export function ContactForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-6">
+    <form onSubmit={handleSubmit} noValidate className="space-y-md">
       {errors.form && (
         <div
-          className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3"
+          className="bg-error/10 border border-error/20 text-error text-base rounded-md p-xs"
           role="alert"
           aria-live="assertive"
         >

@@ -1,5 +1,6 @@
 import type { Product, Maker } from '@/types';
 import { ProductCard } from '@/components/cards/product-card';
+import { posterGridClasses } from '@/components/cards/poster-card';
 
 interface ProductGridProps {
   products: Product[];
@@ -9,9 +10,10 @@ interface ProductGridProps {
 
 export function ProductGrid({ products, makers, showPrice = false }: ProductGridProps) {
   return (
-    /* Grid config must match StockistProductGrid, otherwise the catalogue
-       reflows the moment a stockist logs in. */
-    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 tabtop:gap-x-8">
+    /* Shared poster grid — 2-up, 3-up at lg, 4-up at xl. Same constant as
+       StockistProductGrid so the catalogue never reflows when a stockist logs
+       in, and the same as every other listing on the site. */
+    <div role="list" aria-label="Products" className={posterGridClasses}>
       {products.map((product) => {
         const maker = makers.find((m) => m.id === product.makerId);
         return (

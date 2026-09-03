@@ -22,9 +22,9 @@ const SEVERITY = {
 export function AttentionPanel({ items }: AttentionPanelProps) {
   if (items.length === 0) {
     return (
-      <section className="bg-card-bg rounded-lg shadow-card p-5">
-        <h2 className="font-heading text-lg font-semibold text-deep-blue mb-3">Needs attention</h2>
-        <div className="flex items-start gap-3 rounded-md bg-success/5 p-4">
+      <section className="bg-card-bg rounded-lg shadow-card p-md">
+        <h2 className="font-heading text-lg font-semibold text-deep-blue mb-xs">Needs attention</h2>
+        <div className="flex items-start gap-xs rounded-md bg-success/5 p-sm">
           <CheckCircle2 className="w-5 h-5 text-success flex-shrink-0" />
           <p className="text-base text-warm-gray-800">
             Nothing outstanding. Enquiries are answered, consent is recorded and every image has alt text.
@@ -35,8 +35,8 @@ export function AttentionPanel({ items }: AttentionPanelProps) {
   }
 
   return (
-    <section className="bg-card-bg rounded-lg shadow-card p-5">
-      <div className="flex items-baseline justify-between gap-3 mb-3">
+    <section className="bg-card-bg rounded-lg shadow-card p-md">
+      <div className="flex items-baseline justify-between gap-xs mb-xs">
         <h2 className="font-heading text-lg font-semibold text-deep-blue">Needs attention</h2>
         <span className="text-xs text-warm-gray-400">{items.length} items</span>
       </div>
@@ -48,17 +48,17 @@ export function AttentionPanel({ items }: AttentionPanelProps) {
             <li key={item.id}>
               <Link
                 href={item.href}
-                className="tap-target group flex items-start gap-3 py-3 -mx-2 px-2 rounded-md hover:bg-sand-light focus:outline-none focus:ring-2 focus:ring-ocean"
+                className="tap-target group flex items-start gap-xs py-xs -mx-2xs px-2xs rounded-md hover:bg-sand-light focus:outline-none focus:ring-2 focus:ring-ocean"
               >
-                <Icon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${icon}`} aria-hidden="true" />
+                <Icon className={`w-5 h-5 flex-shrink-0 mt-3xs ${icon}`} aria-hidden="true" />
                 <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2xs">
                     <p className="text-base font-semibold text-warm-gray-800">{item.label}</p>
                     <StatusBadge status={badge} size="compact">{label}</StatusBadge>
                   </div>
-                  <p className="text-base text-warm-gray-600 mt-1 leading-body">{item.detail}</p>
+                  <p className="text-base text-warm-gray-600 mt-3xs leading-body">{item.detail}</p>
                 </div>
-                <ChevronRight className="w-4 h-4 flex-shrink-0 mt-1 text-warm-gray-400 group-hover:text-ocean transition-colors" aria-hidden="true" />
+                <ChevronRight className="w-4 h-4 flex-shrink-0 mt-3xs text-warm-gray-400 group-hover:text-ocean transition-colors" aria-hidden="true" />
               </Link>
             </li>
           );

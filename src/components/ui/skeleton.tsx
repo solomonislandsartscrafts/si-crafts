@@ -53,7 +53,7 @@ export function SkeletonCard() {
   return (
     <div className="overflow-hidden rounded-lg shadow-card">
       <Skeleton className="aspect-square rounded-none" />
-      <div className="p-4 space-y-2">
+      <div className="p-sm space-y-2xs">
         <Skeleton className="h-4 w-3/4" />
         <Skeleton className="h-3 w-1/2" />
       </div>
@@ -65,7 +65,7 @@ export function SkeletonCard() {
 export function SkeletonCardGrid({ count = 8 }: { count?: number }) {
   return (
     <SkeletonRegion label="Loading items">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-grid">
         {Array.from({ length: count }).map((_, i) => (
           <SkeletonCard key={i} />
         ))}
@@ -78,7 +78,7 @@ export function SkeletonCardGrid({ count = 8 }: { count?: number }) {
 export function SkeletonText({ lines = 3 }: { lines?: number }) {
   return (
     <SkeletonRegion label="Loading content">
-      <div className="space-y-3">
+      <div className="space-y-xs">
         {Array.from({ length: lines }).map((_, i) => (
           <Skeleton
             key={i}

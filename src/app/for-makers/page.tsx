@@ -18,40 +18,45 @@ export default async function ForMakersPage() {
 
   return (
     <div>
-      <PageHeader title={text['forMakers.title']} intro={text['forMakers.intro']} />
+      <PageHeader
+        banner="green"
+        eyebrow="Working with SIAC"
+        title={text['forMakers.title']}
+        intro={text['forMakers.intro']}
+      />
 
-      <div className="site-container pb-10 lg:pb-20">
+      <div className="site-container pb-section">
         {/* How we source */}
-        <section className="mb-12">
-          <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
+        <section className="mb-block">
+          <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack">
             {text['forMakers.sourcingHeading']}
           </h2>
           <CmsText
             value={text['forMakers.sourcingBody']}
-            className="space-y-4 text-warm-gray-600 leading-relaxed"
+            className="space-y-sm text-warm-gray-600 leading-relaxed"
           />
         </section>
 
         {/* Selection process */}
-        <section className="mb-12">
-          <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
+        <section className="mb-block">
+          <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack">
             {text['forMakers.capacityHeading']}
           </h2>
           <CmsText
             value={text['forMakers.capacityBody']}
-            className="space-y-4 text-warm-gray-600 leading-relaxed"
+            className="space-y-sm text-warm-gray-600 leading-relaxed"
           />
         </section>
 
         {/* Fair pay + consent */}
         {promises.length > 0 && (
-          <section className="mb-12">
-            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
+          <section className="mb-block">
+            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack">
               {text['forMakers.promisesHeading']}
             </h2>
-            <ul className="space-y-3 text-warm-gray-600">
+            <ul className="space-y-xs text-warm-gray-600">
               {promises.map((promise, i) => (
-                <li key={i} className="flex gap-2">
+                <li key={i} className="flex gap-2xs">
                   <span className="text-brand-green font-bold" aria-hidden="true">
                     •
                   </span>
@@ -71,7 +76,7 @@ export default async function ForMakersPage() {
         />
 
         {/* Back to home */}
-        <div className="mt-12 border-t border-sand pt-8">
+        <div className="mt-xl border-t border-sand pt-lg">
           <ButtonLink href="/" variant="secondary">
             ← Back to home
           </ButtonLink>

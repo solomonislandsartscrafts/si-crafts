@@ -4,6 +4,7 @@ import { PageHeader, PageCta } from '@/components/layout';
 import { getAllCrafts } from '@/services/crafts';
 import { getSiteTextSafe } from '@/services/site-text';
 import { CraftCard } from '@/components/cards/craft-card';
+import { posterGridClasses } from '@/components/cards/poster-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ButtonLink } from '@/components/ui/button';
 
@@ -18,9 +19,14 @@ export default async function CraftsAndTechniquesPage() {
 
   return (
     <div>
-      <PageHeader title={text['crafts.title']} intro={text['crafts.intro']} />
+      <PageHeader
+        banner="green"
+        eyebrow="How it's made"
+        title={text['crafts.title']}
+        intro={text['crafts.intro']}
+      />
 
-      <div className="site-container pb-10 lg:pb-20">
+      <div className="site-container pb-section">
         {crafts.length === 0 ? (
           <EmptyState
             icon={Palette}
@@ -33,9 +39,11 @@ export default async function CraftsAndTechniquesPage() {
             }
           />
         ) : (
-          /* Shared CraftCard — this page previously hand-rolled its own copy
-             with a grey info bar and an h2 where a card title belongs. */
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 tabtop:gap-x-8">
+          /* Shared poster grid — the same import every other listing uses. This
+             was a hand-typed copy of the same column ramp (with a redundant
+             `sm:grid-cols-2`), which is exactly the drift the shared constant
+             exists to prevent. */
+          <div role="list" aria-label="Crafts and techniques" className={posterGridClasses}>
             {crafts.map((craft) => (
               <CraftCard key={craft.id} craft={craft} />
             ))}

@@ -46,22 +46,27 @@ export default async function OurPromisePage() {
 
   return (
     <div>
-      <PageHeader title={text['ourPromise.title']} intro={text['ourPromise.intro']} />
+      <PageHeader
+        banner="gold"
+        eyebrow="Our commitment"
+        title={text['ourPromise.title']}
+        intro={text['ourPromise.intro']}
+      />
 
-      <div className="site-container pb-10 lg:pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10 lg:mb-20">
+      <div className="site-container pb-section">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-block mb-block">
           {cards.map(({ Icon, n, heading, body }) => (
-            <div key={n} className="flex gap-4">
+            <div key={n} className="flex gap-sm">
               <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-brand-green/10 flex items-center justify-center">
                 <Icon className="w-6 h-6 text-brand-green" />
               </div>
               <div>
-                <h2 className="font-heading text-lg font-semibold text-deep-blue mb-2">
+                <h2 className="font-heading text-lg font-semibold text-deep-blue mb-2xs">
                   {heading}
                 </h2>
                 <CmsText
                   value={body}
-                  className="space-y-3"
+                  className="space-y-xs"
                   paragraphClassName="text-warm-gray-600 leading-relaxed"
                 />
               </div>
@@ -70,33 +75,33 @@ export default async function OurPromisePage() {
         </div>
 
         {/* WHERE THE MONEY GOES */}
-        <section className="border-t border-sand pt-10 mb-10 lg:mb-20">
-          <div className="flex gap-4 mb-6">
+        <section className="border-t border-sand pt-block mb-block">
+          <div className="flex gap-sm mb-stack">
             <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-ocean/10 flex items-center justify-center">
               <IconShellMoney className="w-6 h-6 text-ocean" />
             </div>
             <div>
-              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-2">
+              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-2xs">
                 {text['ourPromise.moneyHeading']}
               </h2>
             </div>
           </div>
-          <div className="max-w-2xl space-y-4 text-warm-gray-600 leading-relaxed">
-            <CmsText value={text['ourPromise.moneyIntro']} className="space-y-4" />
+          <div className="max-w-2xl space-y-sm text-warm-gray-600 leading-relaxed">
+            <CmsText value={text['ourPromise.moneyIntro']} className="space-y-sm" />
             {moneyList.length > 0 && (
-              <ul className="list-disc pl-6 space-y-2">
+              <ul className="list-disc pl-md space-y-2xs">
                 {moneyList.map((item, i) => (
                   <li key={i}>{parseCmsInline(item)}</li>
                 ))}
               </ul>
             )}
-            <CmsText value={text['ourPromise.moneyClosing']} className="space-y-4" />
+            <CmsText value={text['ourPromise.moneyClosing']} className="space-y-sm" />
           </div>
         </section>
 
         {/* ARE YOU EXPLOITING MAKERS? */}
-        <section className="border-t border-sand pt-12">
-          <div className="flex gap-4 mb-6">
+        <section className="border-t border-sand pt-block">
+          <div className="flex gap-sm mb-stack">
             <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-ocean/10 flex items-center justify-center">
               <IconWovenQuestion className="w-6 h-6 text-ocean" />
             </div>
@@ -106,10 +111,10 @@ export default async function OurPromisePage() {
               </h2>
             </div>
           </div>
-          <div className="max-w-2xl space-y-4 text-warm-gray-600 leading-relaxed">
-            <CmsText value={text['ourPromise.questionIntro']} className="space-y-4" />
+          <div className="max-w-2xl space-y-sm text-warm-gray-600 leading-relaxed">
+            <CmsText value={text['ourPromise.questionIntro']} className="space-y-sm" />
             {questionList.length > 0 && (
-              <ul className="list-disc pl-6 space-y-2">
+              <ul className="list-disc pl-md space-y-2xs">
                 {questionList.map((item, i) => (
                   <li key={i}>{parseCmsInline(item)}</li>
                 ))}

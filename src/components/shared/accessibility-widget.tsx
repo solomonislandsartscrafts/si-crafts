@@ -3,13 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Volume2, VolumeX } from 'lucide-react';
 
-type ColorblindMode = 'none' | 'protanopia' | 'deuteranopia' | 'tritanopia';
-
 export function AccessibilityWidget() {
   const [open, setOpen] = useState(false);
   const [fontSize, setFontSize] = useState(100);
   const [highContrast, setHighContrast] = useState(false);
-  const [colorblindMode, setColorblindMode] = useState<ColorblindMode>('none');
   const [isReading, setIsReading] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -23,7 +20,6 @@ export function AccessibilityWidget() {
         const prefs = JSON.parse(saved);
         if (prefs.fontSize) setFontSize(prefs.fontSize);
         if (prefs.highContrast) setHighContrast(prefs.highContrast);
-        if (prefs.colorblindMode) setColorblindMode(prefs.colorblindMode);
       } catch {
         // Invalid stored prefs — ignore
       }
@@ -36,14 +32,8 @@ export function AccessibilityWidget() {
     html.style.fontSize = `${fontSize}%`;
     html.classList.toggle('a11y-high-contrast', highContrast);
 
-    // Colorblind modes
-    html.classList.remove('a11y-protanopia', 'a11y-deuteranopia', 'a11y-tritanopia');
-    if (colorblindMode !== 'none') {
-      html.classList.add(`a11y-${colorblindMode}`);
-    }
-
-    localStorage.setItem('a11y-prefs', JSON.stringify({ fontSize, highContrast, colorblindMode }));
-  }, [fontSize, highContrast, colorblindMode]);
+    localStorage.setItem('a11y-prefs', JSON.stringify({ fontSize, highContrast }));
+  }, [fontSize, highContrast]);
 
   // Read Aloud — Web Speech API
   function handleReadAloud() {
@@ -56,8 +46,15 @@ export function AccessibilityWidget() {
     const mainContent = document.getElementById('main-content');
     if (!mainContent) return;
 
-    const text = mainContent.innerText || mainContent.textContent || '';
-    if (!text.trim()) return;
+    // Collapse the runs of whitespace innerText leaves between blocks, and cap
+    // the length: reading the entire page in one utterance is unmanageable
+    // (no resume, stops on navigation), so this reads roughly the first screen
+    // or two of prose as a preview. A user who needs the whole page read is
+    // better served by their own screen reader.
+    const raw = (mainContent.innerText || mainContent.textContent || '').replace(/\s+/g, ' ').trim();
+    if (!raw) return;
+    const MAX = 3000;
+    const text = raw.length > MAX ? `${raw.slice(0, MAX).trimEnd()}…` : raw;
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 0.9;
@@ -130,7 +127,6 @@ export function AccessibilityWidget() {
   function resetAll() {
     setFontSize(100);
     setHighContrast(false);
-    setColorblindMode('none');
     window.speechSynthesis.cancel();
     setIsReading(false);
   }
@@ -141,7 +137,12 @@ export function AccessibilityWidget() {
       <button
         ref={triggerRef}
         onClick={() => setOpen(!open)}
-        className="fixed bottom-20 right-4 sm:bottom-4 z-50 w-12 h-12 bg-brand-green hover:bg-brand-green-dark text-white rounded-full shadow-lg flex items-center justify-center transition-colors focus:outline-none focus:ring-4 focus:ring-brand-green-light"
+        // Bottom-LEFT, not right: the bottom-right corner is used by toasts and
+        // the stockist sticky "Add to Order" bar, so a right-anchored button
+        // collided with them. deep-blue (not brand-green) so an accessibility
+        // utility does not wear the primary-CTA colour and compete with the
+        // real page actions.
+        className="fixed bottom-4 left-4 z-50 w-12 h-12 bg-deep-blue hover:bg-ocean-dark text-white rounded-full shadow-lg flex items-center justify-center transition-colors focus:outline-none focus:ring-4 focus:ring-ocean-light"
         aria-label="Accessibility options"
         aria-expanded={open}
       >
@@ -158,32 +159,33 @@ export function AccessibilityWidget() {
           <div
             className="fixed inset-0 z-50 bg-black/20 sm:hidden"
             onClick={closePanel}
+            aria-hidden="true"
           />
           <div
             ref={panelRef}
             tabIndex={-1}
-            className="fixed z-50 inset-x-0 bottom-0 sm:inset-auto sm:bottom-16 sm:right-4 sm:w-72 bg-white rounded-t-xl sm:rounded-lg shadow-xl border border-sand p-5 outline-none"
+            className="fixed z-50 inset-x-0 bottom-0 sm:inset-auto sm:bottom-16 sm:left-4 sm:w-72 bg-white rounded-t-xl sm:rounded-lg shadow-xl border border-sand p-md outline-none"
             role="dialog"
             aria-modal="true"
             aria-label="Accessibility settings"
           >
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-sm">
               <h2 className="font-heading text-base font-medium text-deep-blue">Accessibility</h2>
               <button
                 onClick={closePanel}
-                className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded-md"
+                className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded-md"
                 aria-label="Close accessibility panel"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-sm">
               {/* Read Aloud */}
               <div>
                 <button
                   onClick={handleReadAloud}
-                  className={`tap-target w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean ${
+                  className={`tap-target w-full flex items-center justify-center gap-2xs px-sm py-xs rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean ${
                     isReading
                       ? 'bg-error/10 text-error border border-error/30'
                       : 'bg-ocean/10 text-ocean border border-ocean/30 hover:bg-ocean/20'
@@ -200,8 +202,8 @@ export function AccessibilityWidget() {
 
               {/* Text Size */}
               <div>
-                <p className="text-sm font-medium text-warm-gray-800 mb-2">Text Size</p>
-                <div className="flex items-center gap-3">
+                <p className="text-sm font-medium text-warm-gray-800 mb-2xs">Text Size</p>
+                <div className="flex items-center gap-xs">
                   <button
                     onClick={() => setFontSize(Math.max(80, fontSize - 10))}
                     className="tap-target w-10 h-10 flex items-center justify-center rounded-md border border-sand-dark text-deep-blue font-bold hover:bg-sand-light focus:outline-none focus:ring-2 focus:ring-ocean"
@@ -220,22 +222,6 @@ export function AccessibilityWidget() {
                 </div>
               </div>
 
-              {/* Colour Vision */}
-              <div>
-                <p className="text-sm font-medium text-warm-gray-800 mb-2">Colour Vision</p>
-                <select
-                  value={colorblindMode}
-                  onChange={(e) => setColorblindMode(e.target.value as ColorblindMode)}
-                  className="w-full px-3 py-2 rounded-md border border-sand-dark bg-white text-warm-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-ocean"
-                  aria-label="Colour vision mode"
-                >
-                  <option value="none">Default colours</option>
-                  <option value="protanopia">Protanopia (red-blind)</option>
-                  <option value="deuteranopia">Deuteranopia (green-blind)</option>
-                  <option value="tritanopia">Tritanopia (blue-blind)</option>
-                </select>
-              </div>
-
               {/* High Contrast */}
               <label className="flex items-center justify-between cursor-pointer">
                 <span className="text-sm font-medium text-warm-gray-800">High Contrast</span>
@@ -250,7 +236,7 @@ export function AccessibilityWidget() {
               {/* Reset */}
               <button
                 onClick={resetAll}
-                className="w-full text-center text-sm font-medium text-ocean hover:text-ocean-dark transition-colors py-2 border-t border-sand pt-3"
+                className="w-full text-center text-sm font-medium text-ocean hover:text-ocean-dark transition-colors py-2xs border-t border-sand pt-xs"
               >
                 Reset to defaults
               </button>

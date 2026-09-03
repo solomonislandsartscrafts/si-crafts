@@ -14,10 +14,10 @@ import { Skeleton, SkeletonRegion } from '@/components/ui/skeleton';
 /** Card-shaped placeholder while the enquiry list loads. */
 function EnquiryListSkeleton() {
   return (
-    <SkeletonRegion label="Loading enquiries" className="space-y-4">
+    <SkeletonRegion label="Loading enquiries" className="space-y-sm">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="bg-white rounded-lg shadow-card p-4 sm:p-5 space-y-3">
-          <div className="flex items-center gap-3">
+        <div key={i} className="bg-white rounded-lg shadow-card p-sm sm:p-md space-y-xs">
+          <div className="flex items-center gap-xs">
             <Skeleton className="h-5 w-20" />
             <Skeleton className="h-4 w-24" />
           </div>
@@ -58,10 +58,10 @@ export default function AdminInboxPage() {
 
   return (
     <AdminLayout>
-      <h1 className={`${pageTitleClasses} mb-6`}>Inbox</h1>
+      <h1 className={`${pageTitleClasses} mb-md`}>Inbox</h1>
 
       {/* Type filter */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2xs mb-md">
         {FILTERS.map((f) => {
           const Icon = f.icon;
           const isActive = filter === f.id;
@@ -69,7 +69,7 @@ export default function AdminInboxPage() {
             <button
               key={f.id}
               onClick={() => setFilter(f.id)}
-              className={`tap-target inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`tap-target inline-flex items-center gap-2xs px-xs py-2xs rounded-md text-sm font-medium transition-colors ${
                 isActive
                   ? 'bg-ocean text-white'
                   : 'bg-white text-warm-gray-600 border border-sand-dark hover:bg-sand-light'
@@ -98,7 +98,7 @@ export default function AdminInboxPage() {
           }
         />
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-sm">
           {enquiries.map((item) => (
             <EnquiryCard
               key={item.data.id}
@@ -119,9 +119,9 @@ function EnquiryCard({ item, onMarkHandled }: { item: AnyEnquiry; onMarkHandled:
   });
 
   return (
-    <div className={`bg-white rounded-lg shadow-card p-4 sm:p-5 ${handled ? 'opacity-60' : ''}`}>
-      <div className="flex items-start justify-between gap-4 mb-3">
-        <div className="flex items-center gap-2">
+    <div className={`bg-white rounded-lg shadow-card p-sm sm:p-md ${handled ? 'opacity-60' : ''}`}>
+      <div className="flex items-start justify-between gap-sm mb-xs">
+        <div className="flex items-center gap-2xs">
           <TypeBadge type={item.type} />
           <span className="text-xs text-warm-gray-400">{date}</span>
         </div>
@@ -132,7 +132,7 @@ function EnquiryCard({ item, onMarkHandled }: { item: AnyEnquiry; onMarkHandled:
           </Button>
         )}
         {handled && (
-          <StatusBadge status="success" className="gap-1">
+          <StatusBadge status="success" className="gap-3xs">
             <CheckCircle className="w-3.5 h-3.5" /> Handled
           </StatusBadge>
         )}
@@ -143,9 +143,9 @@ function EnquiryCard({ item, onMarkHandled }: { item: AnyEnquiry; onMarkHandled:
         <div>
           <p className="font-medium text-warm-gray-800">{item.data.name}</p>
           <p className="text-xs text-warm-gray-400">{item.data.village}, {item.data.province}</p>
-          <p className="text-sm text-warm-gray-600 mt-2">{item.data.craft}</p>
-          {item.data.message && <p className="text-base text-warm-gray-600 mt-1 italic">{item.data.message}</p>}
-          <p className="text-xs text-ocean mt-2">Contact: {item.data.contact}</p>
+          <p className="text-sm text-warm-gray-600 mt-2xs">{item.data.craft}</p>
+          {item.data.message && <p className="text-base text-warm-gray-600 mt-3xs italic">{item.data.message}</p>}
+          <p className="text-xs text-ocean mt-2xs">Contact: {item.data.contact}</p>
         </div>
       )}
 
@@ -156,12 +156,12 @@ function EnquiryCard({ item, onMarkHandled }: { item: AnyEnquiry; onMarkHandled:
           </p>
           <p className="text-xs text-warm-gray-400">Stockist: {item.data.stockistId}</p>
           {item.data.request.kind === 'replacement-tag' && (
-            <p className="text-sm text-warm-gray-600 mt-2">
+            <p className="text-sm text-warm-gray-600 mt-2xs">
               Product: <span className="font-mono">{item.data.request.productCode}</span> × {item.data.request.quantity}
             </p>
           )}
           {item.data.request.kind === 'custom-bulk' && (
-            <div className="text-sm text-warm-gray-600 mt-2 space-y-1">
+            <div className="text-sm text-warm-gray-600 mt-2xs space-y-3xs">
               <p>Product: {item.data.request.product}</p>
               <p>Customisation: {item.data.request.customisation}</p>
               <p>Qty: {item.data.request.quantity}</p>
@@ -175,7 +175,7 @@ function EnquiryCard({ item, onMarkHandled }: { item: AnyEnquiry; onMarkHandled:
         <div>
           <p className="font-medium text-warm-gray-800">{item.data.name}</p>
           <p className="text-xs text-warm-gray-400">{item.data.email}</p>
-          <p className="text-base text-warm-gray-600 mt-2">{item.data.message}</p>
+          <p className="text-base text-warm-gray-600 mt-2xs">{item.data.message}</p>
         </div>
       )}
     </div>

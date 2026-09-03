@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import type { AccountRole, AccountUser } from '@/types';
 
 const FIELD_CLASS =
-  'w-full px-4 py-3 rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent';
+  'w-full px-sm py-xs rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent';
 
 const ROLE_OPTIONS = [
   { value: 'user', label: 'No role — sign-in only' },
@@ -158,36 +158,36 @@ export function UserFormModal({ user = null, onClose, onSuccess }: UserFormModal
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-deep-blue/50 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-start justify-center p-sm bg-deep-blue/50 overflow-y-auto"
       onClick={() => { if (!saving) onClose(); }}
     >
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className="bg-white rounded-lg shadow-md w-full max-w-lg my-8 outline-none"
+        className="bg-white rounded-lg shadow-md w-full max-w-lg my-lg outline-none"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="user-form-title"
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-sand">
+        <div className="flex items-center justify-between px-md py-sm border-b border-sand">
           <h2 id="user-form-title" className="font-heading text-xl font-medium text-deep-blue">
             {isEdit ? 'Edit Account' : 'Add Account'}
           </h2>
           <button
             onClick={() => { if (!saving) onClose(); }}
             disabled={saving}
-            className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-50"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-50"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+        <form onSubmit={handleSubmit} className="px-md py-sm space-y-sm">
           {error && (
             <div
-              className="bg-error/10 border border-error/20 text-error text-sm rounded-md p-3"
+              className="bg-error/10 border border-error/20 text-error text-sm rounded-md p-xs"
               role="alert"
               aria-live="assertive"
             >
@@ -196,7 +196,7 @@ export function UserFormModal({ user = null, onClose, onSuccess }: UserFormModal
           )}
 
           <div>
-            <label htmlFor="user-name" className="block text-sm font-medium text-warm-gray-800 mb-1">
+            <label htmlFor="user-name" className="block text-sm font-medium text-warm-gray-800 mb-3xs">
               Full Name
             </label>
             <input
@@ -209,7 +209,7 @@ export function UserFormModal({ user = null, onClose, onSuccess }: UserFormModal
           </div>
 
           <div>
-            <label htmlFor="user-email" className="block text-sm font-medium text-warm-gray-800 mb-1">
+            <label htmlFor="user-email" className="block text-sm font-medium text-warm-gray-800 mb-3xs">
               Email *
             </label>
             <input
@@ -219,15 +219,15 @@ export function UserFormModal({ user = null, onClose, onSuccess }: UserFormModal
               onChange={(e) => setEmail(e.target.value)}
               className={FIELD_CLASS}
             />
-            <p className="text-xs text-warm-gray-400 mt-1">This is the address they log in with.</p>
+            <p className="text-xs text-warm-gray-400 mt-3xs">This is the address they log in with.</p>
           </div>
 
           <div>
-            <label htmlFor="user-role" className="block text-sm font-medium text-warm-gray-800 mb-1">
+            <label htmlFor="user-role" className="block text-sm font-medium text-warm-gray-800 mb-3xs">
               Role *
             </label>
             {roleLocked ? (
-              <p className="text-sm text-warm-gray-600 bg-sand-light rounded-md px-4 py-3">
+              <p className="text-sm text-warm-gray-600 bg-sand-light rounded-md px-sm py-xs">
                 Super Admin — this is the site owner account and its role can&apos;t be changed here.
               </p>
             ) : (
@@ -241,14 +241,14 @@ export function UserFormModal({ user = null, onClose, onSuccess }: UserFormModal
                   label="Account role"
                   className="w-full"
                 />
-                <p className="text-xs text-warm-gray-400 mt-1">{ROLE_HELP[role]}</p>
+                <p className="text-xs text-warm-gray-400 mt-3xs">{ROLE_HELP[role]}</p>
               </>
             )}
           </div>
 
           {role === 'stockist' && (
-            <fieldset className="border border-sand rounded-md p-4 space-y-4">
-              <legend className="text-sm font-semibold text-deep-blue px-1">
+            <fieldset className="border border-sand rounded-md p-sm space-y-sm">
+              <legend className="text-sm font-semibold text-deep-blue px-3xs">
                 Stockist details
               </legend>
               <p className="text-sm text-warm-gray-600">
@@ -257,7 +257,7 @@ export function UserFormModal({ user = null, onClose, onSuccess }: UserFormModal
               </p>
 
               <div>
-                <label htmlFor="user-business" className="block text-sm font-medium text-warm-gray-800 mb-1">
+                <label htmlFor="user-business" className="block text-sm font-medium text-warm-gray-800 mb-3xs">
                   Business Name *
                 </label>
                 <input
@@ -270,7 +270,7 @@ export function UserFormModal({ user = null, onClose, onSuccess }: UserFormModal
               </div>
 
               <div>
-                <label htmlFor="user-contact" className="block text-sm font-medium text-warm-gray-800 mb-1">
+                <label htmlFor="user-contact" className="block text-sm font-medium text-warm-gray-800 mb-3xs">
                   Contact Name
                 </label>
                 <input
@@ -283,9 +283,9 @@ export function UserFormModal({ user = null, onClose, onSuccess }: UserFormModal
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
                 <div>
-                  <label htmlFor="user-phone" className="block text-sm font-medium text-warm-gray-800 mb-1">
+                  <label htmlFor="user-phone" className="block text-sm font-medium text-warm-gray-800 mb-3xs">
                     Phone
                   </label>
                   <input
@@ -297,7 +297,7 @@ export function UserFormModal({ user = null, onClose, onSuccess }: UserFormModal
                   />
                 </div>
                 <div>
-                  <label htmlFor="user-abn" className="block text-sm font-medium text-warm-gray-800 mb-1">
+                  <label htmlFor="user-abn" className="block text-sm font-medium text-warm-gray-800 mb-3xs">
                     ABN
                   </label>
                   <input
@@ -313,7 +313,7 @@ export function UserFormModal({ user = null, onClose, onSuccess }: UserFormModal
               </div>
 
               <div>
-                <label htmlFor="user-notes" className="block text-sm font-medium text-warm-gray-800 mb-1">
+                <label htmlFor="user-notes" className="block text-sm font-medium text-warm-gray-800 mb-3xs">
                   Notes
                 </label>
                 <textarea
@@ -329,7 +329,7 @@ export function UserFormModal({ user = null, onClose, onSuccess }: UserFormModal
           )}
 
           <div>
-            <label htmlFor="user-password" className="block text-sm font-medium text-warm-gray-800 mb-1">
+            <label htmlFor="user-password" className="block text-sm font-medium text-warm-gray-800 mb-3xs">
               Password {needsPassword ? '*' : ''}
             </label>
             <input
@@ -341,7 +341,7 @@ export function UserFormModal({ user = null, onClose, onSuccess }: UserFormModal
               placeholder={isEdit ? 'Leave blank to keep the current password' : 'Minimum 8 characters'}
               className={FIELD_CLASS}
             />
-            <p className="text-xs text-warm-gray-400 mt-1">
+            <p className="text-xs text-warm-gray-400 mt-3xs">
               {isEdit
                 ? 'Setting a password here replaces theirs immediately.'
                 : role === 'stockist'
@@ -351,12 +351,12 @@ export function UserFormModal({ user = null, onClose, onSuccess }: UserFormModal
           </div>
 
           {isEdit && !user!.isSuperuser && (
-            <label className="flex items-start gap-3 text-sm text-warm-gray-800">
+            <label className="flex items-start gap-xs text-sm text-warm-gray-800">
               <input
                 type="checkbox"
                 checked={isActive}
                 onChange={(e) => setIsActive(e.target.checked)}
-                className="mt-1 w-4 h-4 rounded border-sand-dark text-ocean focus:ring-2 focus:ring-ocean"
+                className="mt-3xs w-4 h-4 rounded border-sand-dark text-ocean focus:ring-2 focus:ring-ocean"
               />
               <span>
                 Account active
@@ -367,7 +367,7 @@ export function UserFormModal({ user = null, onClose, onSuccess }: UserFormModal
             </label>
           )}
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
+          <div className="flex items-center justify-end gap-xs pt-sm border-t border-sand">
             <Button variant="secondary" onClick={onClose} disabled={saving}>
               Cancel
             </Button>

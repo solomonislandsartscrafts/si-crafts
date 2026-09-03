@@ -1,25 +1,41 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { Lock, PackageSearch } from 'lucide-react';
+import { PackageSearch, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { CmsInline } from '@/components/ui/cms-text';
 import { EmptyState } from '@/components/ui/empty-state';
 import type { Product, Maker } from '@/types';
 import { MakerFilter } from '@/components/catalogue/maker-filter';
-import { MaterialFilter } from '@/components/catalogue/material-filter';
+import { CategoryChips } from '@/components/catalogue/category-chips';
 import { SearchInput } from '@/components/catalogue/search-input';
 import { ProductGrid } from '@/components/catalogue/product-grid';
 import { StockistProductGrid } from '@/components/catalogue/stockist-product-grid';
+import { Select } from '@/components/ui/select';
 import { validateStockistSession } from '@/lib/auth-client';
 import type { MaterialCategoryOption } from '@/services/categories';
+
+/**
+ * Sort options. Name and Maker are available to everyone; the two price sorts
+ * are added only for logged-in stockists, since public visitors never see
+ * pricing. `null` = the default order the products arrive in.
+ */
+type SortKey = 'name' | 'maker' | 'price-asc' | 'price-desc';
+
+const PUBLIC_SORTS: { value: SortKey; label: string }[] = [
+  { value: 'name', label: 'Name (A–Z)' },
+  { value: 'maker', label: 'Maker' },
+];
+
+const STOCKIST_SORTS: { value: SortKey; label: string }[] = [
+  { value: 'price-asc', label: 'Price (low to high)' },
+  { value: 'price-desc', label: 'Price (high to low)' },
+];
 
 interface CatalogueClientProps {
   products: Product[];
   makers: Maker[];
   materialCategories: MaterialCategoryOption[];
   /** Admin-editable copy, passed down so this stays a pure client component. */
-  pricingPrompt: string;
   emptyTitle: string;
   emptyDescription: string;
 }
@@ -28,14 +44,17 @@ export function CatalogueClient({
   products,
   makers,
   materialCategories,
-  pricingPrompt,
   emptyTitle,
   emptyDescription,
 }: CatalogueClientProps) {
   const [selectedMaker, setSelectedMaker] = useState<string | null>(null);
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [isStockist, setIsStockist] = useState(false);
+  // On mobile the filter rail is hidden behind a toggle so it doesn't push the
+  // grid down the page. On desktop (lg+) the sidebar is always visible.
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Confirm the session with the backend rather than trusting the presence of
   // a localStorage key, so an expired token stops showing wholesale pricing.
@@ -72,7 +91,8 @@ export function CatalogueClient({
     return map;
   }, [makers]);
 
-  // Filter products in real time as user types
+  // Filter, then sort. Filtering runs in real time as the user types; sorting
+  // is applied last so it orders whatever survived the filters.
   const filteredProducts = useMemo(() => {
     let result = products;
 
@@ -97,116 +117,179 @@ export function CatalogueClient({
       );
     }
 
-    return result;
-  }, [products, selectedMaker, selectedMaterial, searchQuery, makerNameMap]);
+    if (sortKey) {
+      // Copy before sorting so the source array is not mutated.
+      result = [...result].sort((a, b) => {
+        switch (sortKey) {
+          case 'name':
+            return a.name.localeCompare(b.name);
+          case 'maker':
+            return (makerNameMap[a.makerId] || '').localeCompare(
+              makerNameMap[b.makerId] || ''
+            );
+          case 'price-asc':
+            return a.wholesalePrice - b.wholesalePrice;
+          case 'price-desc':
+            return b.wholesalePrice - a.wholesalePrice;
+          default:
+            return 0;
+        }
+      });
+    }
 
-  // Group products by material
-  const grouped = useMemo(() => {
-    const groups: Record<string, Product[]> = {};
-    filteredProducts.forEach((product) => {
-      const key = product.materialCategory;
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(product);
-    });
-    return groups;
-  }, [filteredProducts]);
+    return result;
+  }, [products, selectedMaker, selectedMaterial, searchQuery, sortKey, makerNameMap]);
+
+  // Price sorts only exist for stockists. If a stockist sorts by price and then
+  // logs out (session expires), fall back to no sort rather than leaving a
+  // price sort active with no way to see or change it.
+  const sortOptions = isStockist ? [...PUBLIC_SORTS, ...STOCKIST_SORTS] : PUBLIC_SORTS;
+  useEffect(() => {
+    if (!isStockist && (sortKey === 'price-asc' || sortKey === 'price-desc')) {
+      setSortKey(null);
+    }
+  }, [isStockist, sortKey]);
 
   const hasActiveFilters =
-    selectedMaker !== null || selectedMaterial !== null || searchQuery.trim() !== '';
+    selectedMaker !== null ||
+    selectedMaterial !== null ||
+    searchQuery.trim() !== '' ||
+    sortKey !== null;
 
   function clearFilters() {
     setSelectedMaker(null);
     setSelectedMaterial(null);
     setSearchQuery('');
+    setSortKey(null);
   }
 
-  return (
-    <div className="site-container pb-10 lg:pb-20">
-      {/* Login prompt — only show when NOT logged in */}
-      {!isStockist && pricingPrompt && (
-        <div className="mb-8 flex items-center gap-2">
-          <Lock className="w-4 h-4 text-ocean flex-shrink-0" aria-hidden="true" />
-          <p className="text-base text-warm-gray-600">
-            <CmsInline value={pricingPrompt} linkClassName="text-ocean font-medium hover:underline" />
-          </p>
-        </div>
-      )}
+  // The filter controls, shared between the desktop sidebar and the mobile
+  // stacked layout (same panel, different container). Chips stack vertically so
+  // each craft type reads as a list option in the rail.
+  const filtersPanel = (
+    <div className="space-y-md">
+      <CategoryChips
+        selected={selectedMaterial}
+        onChange={setSelectedMaterial}
+        options={materialCategories}
+        direction="stack"
+      />
 
-      {/* Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <MaterialFilter
-            selected={selectedMaterial}
-            onChange={setSelectedMaterial}
-            options={materialCategories}
-          />
-          <MakerFilter
-            makers={makers}
-            selected={selectedMaker}
-            onChange={setSelectedMaker}
-          />
-          <SearchInput value={searchQuery} onChange={setSearchQuery} />
-        </div>
-      </div>
-
-      {/* Result count + clear. Both were previously missing for sighted users:
-          the count was sr-only, and Clear all filters only appeared once you
-          had already hit zero results. */}
-      <div className="flex flex-wrap items-center gap-4 mb-8">
-        <p
-          className="text-base text-warm-gray-600"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {filteredProducts.length === 0 ? (
-            emptyTitle
-          ) : (
-            <>
-              <span className="font-semibold text-warm-gray-800">
-                {filteredProducts.length}
-              </span>{' '}
-              {filteredProducts.length === 1 ? 'piece' : 'pieces'}
-            </>
-          )}
-        </p>
-        {hasActiveFilters && (
-          <Button variant="secondary" size="sm" onClick={clearFilters}>
-            Clear all filters
-          </Button>
-        )}
-      </div>
-
-      {filteredProducts.length === 0 ? (
-        <EmptyState
-          icon={PackageSearch}
-          title={emptyTitle}
-          description={emptyDescription}
-          action={
-            <Button variant="secondary" size="sm" onClick={clearFilters}>
-              Clear all filters
-            </Button>
-          }
+      <div className="flex flex-col gap-3xs">
+        <span className="text-xs font-semibold uppercase tracking-wide text-warm-gray-400">
+          Maker
+        </span>
+        <MakerFilter
+          makers={makers}
+          selected={selectedMaker}
+          onChange={setSelectedMaker}
         />
-      ) : (
-        <div className="space-y-16">
-          {materialCategories.map((category) => {
-            const groupProducts = grouped[category.value];
-            if (!groupProducts || groupProducts.length === 0) return null;
-            return (
-              <section key={category.value}>
-                <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4 capitalize border-l-2 border-brand-green pl-3">
-                  {category.label}
-                </h2>
-                {isStockist ? (
-                  <StockistProductGrid products={groupProducts} makers={makers} />
-                ) : (
-                  <ProductGrid products={groupProducts} makers={makers} />
-                )}
-              </section>
-            );
-          })}
-        </div>
+      </div>
+
+      <div className="flex flex-col gap-3xs">
+        <span className="text-xs font-semibold uppercase tracking-wide text-warm-gray-400">
+          Search
+        </span>
+        <SearchInput value={searchQuery} onChange={setSearchQuery} fullWidth />
+      </div>
+
+      <div className="flex flex-col gap-3xs">
+        <span className="text-xs font-semibold uppercase tracking-wide text-warm-gray-400">
+          Sort
+        </span>
+        <Select
+          id="sort"
+          value={sortKey}
+          onChange={(v) => setSortKey((v as SortKey) || null)}
+          options={sortOptions}
+          placeholder="Featured"
+          label="Sort products"
+        />
+      </div>
+
+      {hasActiveFilters && (
+        <Button variant="secondary" size="sm" fullWidth onClick={clearFilters}>
+          Clear all filters
+        </Button>
       )}
+    </div>
+  );
+
+  return (
+    <div className="site-container pb-section">
+      {/* Mobile-only toggle. The filter rail is hidden below lg so it doesn't
+          push the product grid down the page; this button reveals it. */}
+      <div className="mb-stack lg:hidden">
+        <Button
+          variant="secondary"
+          fullWidth
+          onClick={() => setFiltersOpen((open) => !open)}
+          aria-expanded={filtersOpen}
+          aria-controls="catalogue-filters"
+        >
+          <SlidersHorizontal className="w-4 h-4" />
+          {filtersOpen ? 'Hide filters' : 'Filters'}
+        </Button>
+      </div>
+
+      {/* Sidebar (desktop) + grid. On mobile this is one column, so the filter
+          panel stacks above the grid; from lg it becomes a fixed 260px rail on
+          the left with the products beside it, so the grid is visible at first
+          glance without scrolling past a control bar. */}
+      <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-block items-start">
+        {/* Filter sidebar. Sticky on desktop so it stays in view as the grid
+            scrolls. Hidden on mobile unless toggled open, so it never pushes
+            the grid down the page. */}
+        <aside
+          id="catalogue-filters"
+          aria-label="Filter products"
+          className={`${
+            filtersOpen ? 'block' : 'hidden'
+          } lg:block rounded-lg border border-sand bg-warm-gray-100 p-md lg:sticky lg:top-24`}
+        >
+          {filtersPanel}
+        </aside>
+
+        {/* Product column */}
+        <div>
+          {/* Result count strip above the grid. */}
+          <p
+            className="mb-stack text-base text-warm-gray-600"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {filteredProducts.length === 0 ? (
+              emptyTitle
+            ) : (
+              <>
+                <span className="font-semibold text-warm-gray-800">
+                  {filteredProducts.length}
+                </span>{' '}
+                {filteredProducts.length === 1 ? 'piece' : 'pieces'}
+              </>
+            )}
+          </p>
+
+          {/* A single flat grid — no per-material section headings. The craft
+              filter already narrows by category. */}
+          {filteredProducts.length === 0 ? (
+            <EmptyState
+              icon={PackageSearch}
+              title={emptyTitle}
+              description={emptyDescription}
+              action={
+                <Button variant="secondary" size="sm" onClick={clearFilters}>
+                  Clear all filters
+                </Button>
+              }
+            />
+          ) : isStockist ? (
+            <StockistProductGrid products={filteredProducts} makers={makers} />
+          ) : (
+            <ProductGrid products={filteredProducts} makers={makers} />
+          )}
+        </div>
+      </div>
     </div>
   );
 }

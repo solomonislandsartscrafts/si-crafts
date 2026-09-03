@@ -13,7 +13,7 @@ export default function LoginPage() {
       intro="Choose your account type. Stockists log in to see wholesale pricing and place order requests."
       width="narrow"
     >
-      <div className="max-w-md mt-8">
+      <div className="max-w-md mt-lg">
         <LoginForm showAccountTypeChooser defaultAccountType="stockist" />
       </div>
     </PageHeader>

@@ -43,11 +43,11 @@ export function ArticleCard({ article }: ArticleCardProps) {
           thing a reader wants. `posterMetaClasses` rather than the muted grey —
           at 4.7:1 the muted tone is borderline for a line that carries meaning. */}
       <p className={posterMetaClasses}>{formatArticleDate(date)}</p>
-      <h3 className={`mt-1 ${posterHeadlineClasses} line-clamp-2`}>{article.title}</h3>
+      <h3 className={`mt-3xs ${posterHeadlineClasses} line-clamp-2`}>{article.title}</h3>
       {/* Three lines, not the two a product caption gets. A standfirst is doing
           real work here — it is what decides whether the story gets opened. */}
       {article.excerpt && (
-        <p className="mt-2 text-base leading-body text-warm-gray-600 line-clamp-3">
+        <p className="mt-2xs text-base leading-body text-warm-gray-600 line-clamp-3">
           {article.excerpt}
         </p>
       )}

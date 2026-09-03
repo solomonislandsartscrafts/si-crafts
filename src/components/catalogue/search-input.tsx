@@ -6,11 +6,14 @@ import { inputClasses } from '@/components/ui/form-field';
 interface SearchInputProps {
   value: string;
   onChange: (value: string) => void;
+  /** Fill the container width instead of the default fixed 256px (sm+). Used in
+   *  the catalogue sidebar, where the rail is narrower than 256px. */
+  fullWidth?: boolean;
 }
 
-export function SearchInput({ value, onChange }: SearchInputProps) {
+export function SearchInput({ value, onChange, fullWidth = false }: SearchInputProps) {
   return (
-    <div className="relative w-full sm:w-64">
+    <div className={`relative w-full ${fullWidth ? '' : 'sm:w-64'}`}>
       <label htmlFor="product-search" className="sr-only">
         Search products
       </label>
@@ -25,10 +28,13 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
         maxLength={200}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`${inputClasses} pl-10 pr-12`}
+        /* h-11 + py-0 overrides the shared inputClasses py-xs so the search
+           box matches the 44px height of the chips and selects in the filter
+           bar; the rest of the input treatment (border, focus ring) stays. */
+        className={`${inputClasses} h-11 py-0 pl-lg pr-xl`}
       />
       {value && (
-        /* tap-target: this was a p-1 hit area, well under 44px. */
+        /* tap-target: this was a p-3xs hit area, well under 44px. */
         <button
           onClick={() => onChange('')}
           className="tap-target absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-md text-warm-gray-400 hover:text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean"

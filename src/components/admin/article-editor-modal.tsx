@@ -122,24 +122,24 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-deep-blue/50 overflow-y-auto" onClick={handleDismiss}>
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-sm bg-deep-blue/50 overflow-y-auto" onClick={handleDismiss}>
       <div
         ref={modalRef}
-        className="bg-white rounded-lg shadow-md w-full max-w-4xl my-8"
+        className="bg-white rounded-lg shadow-md w-full max-w-4xl my-lg"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="article-editor-title"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-sand">
+        <div className="flex items-center justify-between px-md py-sm border-b border-sand">
           <h2 id="article-editor-title" className="font-heading text-xl font-medium text-deep-blue">
             {article ? 'Edit Article' : 'New Article'}
           </h2>
           <button
             onClick={handleDismiss}
             disabled={saving}
-            className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-50"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-50"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -147,9 +147,9 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
         </div>
 
         {/* Form */}
-        <form ref={formRef} onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
+        <form ref={formRef} onSubmit={handleSubmit} className="px-md py-md space-y-md">
           {saveError && (
-            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert">
+            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-xs" role="alert">
               {saveError}
             </div>
           )}
@@ -198,7 +198,7 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
           />
 
           {/* Meta row */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-sm">
             <FormField label="Author" htmlFor="article-author">
               <input
                 type="text"
@@ -237,8 +237,8 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
           </div>
 
           {/* Toggles */}
-          <div className="flex items-center gap-6">
-            <label className="flex items-center gap-2 cursor-pointer">
+          <div className="flex items-center gap-md">
+            <label className="flex items-center gap-2xs cursor-pointer">
               <input
                 type="checkbox"
                 checked={form.published}
@@ -247,7 +247,7 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
               />
               <span className="text-base text-warm-gray-800">Published</span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex items-center gap-2xs cursor-pointer">
               <input
                 type="checkbox"
                 checked={form.featured}
@@ -259,7 +259,7 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
+          <div className="flex items-center justify-end gap-xs pt-sm border-t border-sand">
             <Button variant="secondary" onClick={handleDismiss} disabled={saving}>
               Cancel
             </Button>

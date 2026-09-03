@@ -18,10 +18,10 @@ function TableSkeleton() {
   return (
     <SkeletonRegion
       label="Loading admin users"
-      className="bg-white rounded-lg shadow-card p-4 space-y-4"
+      className="bg-white rounded-lg shadow-card p-sm space-y-sm"
     >
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4">
+        <div key={i} className="flex items-center gap-sm">
           <Skeleton className="h-4 flex-1" />
           <Skeleton className="h-4 w-40 hidden sm:block" />
           <Skeleton className="h-4 w-24" />
@@ -88,7 +88,7 @@ export default function AdminAdminsPage() {
 
   return (
     <AdminLayout requiredRole="super_admin">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-md">
         <h1 className={pageTitleClasses}>
           Admin Users
         </h1>
@@ -114,35 +114,35 @@ export default function AdminAdminsPage() {
           <table className="w-full text-sm">
             <thead className="bg-sand-light border-b border-sand">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600">Name</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600 hidden sm:table-cell">Email</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600">Role</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600">Status</th>
-                <th className="text-right px-4 py-3 font-medium text-warm-gray-600">Actions</th>
+                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Name</th>
+                <th className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden sm:table-cell">Email</th>
+                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Role</th>
+                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Status</th>
+                <th className="text-right px-sm py-xs font-medium text-warm-gray-600">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-sand">
               {admins.map((admin) => (
                 <tr key={admin.id} className="hover:bg-sand-light/50">
-                  <td className="px-4 py-3 font-medium text-warm-gray-800">{admin.name}</td>
-                  <td className="px-4 py-3 text-warm-gray-600 hidden sm:table-cell">{admin.email}</td>
-                  <td className="px-4 py-3">
-                    <span className="inline-flex items-center gap-1 text-xs font-medium">
+                  <td className="px-sm py-xs font-medium text-warm-gray-800">{admin.name}</td>
+                  <td className="px-sm py-xs text-warm-gray-600 hidden sm:table-cell">{admin.email}</td>
+                  <td className="px-sm py-xs">
+                    <span className="inline-flex items-center gap-3xs text-xs font-medium">
                       <Shield className="w-3 h-3" />
                       {admin.role === 'super_admin' ? 'Super Admin' : 'Editor'}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-sm py-xs">
                     <StatusBadge status={admin.isActive ? 'success' : 'neutral'}>
                       {admin.isActive ? 'Active' : 'Inactive'}
                     </StatusBadge>
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                  <td className="px-sm py-xs text-right">
+                    <div className="flex items-center justify-end gap-2xs">
                       {admin.isActive && (
                         <button
                           onClick={() => handleDeactivate(admin.id, admin.name)}
-                          className="tap-target p-2 text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                          className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
                           aria-label={`Deactivate ${admin.name}`}
                         >
                           <Trash2 className="w-4 h-4" />
@@ -214,7 +214,7 @@ function AddAdminModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-sm bg-deep-blue/50" onClick={onClose}>
       <div
         className="bg-white rounded-lg shadow-md w-full max-w-md"
         onClick={(e) => e.stopPropagation()}
@@ -222,22 +222,22 @@ function AddAdminModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
         aria-modal="true"
         aria-labelledby="add-admin-title"
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-sand">
+        <div className="flex items-center justify-between px-md py-sm border-b border-sand">
           <h2 id="add-admin-title" className="font-heading text-xl font-medium text-deep-blue">
             Add Admin User
           </h2>
           <button
             onClick={onClose}
-            className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+        <form onSubmit={handleSubmit} className="px-md py-sm space-y-sm">
           {error && (
-            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert">
+            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-xs" role="alert">
               {error}
             </div>
           )}
@@ -271,7 +271,7 @@ function AddAdminModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
           </FormField>
 
           <div>
-            <label htmlFor="admin-role" className="block text-base font-medium text-warm-gray-800 mb-1">Role *</label>
+            <label htmlFor="admin-role" className="block text-base font-medium text-warm-gray-800 mb-3xs">Role *</label>
             <Select
               id="admin-role"
               value={role}
@@ -284,12 +284,12 @@ function AddAdminModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
               label="Admin role"
               className="w-full"
             />
-            <p className="text-xs text-warm-gray-400 mt-1">
+            <p className="text-xs text-warm-gray-400 mt-3xs">
               Editors can manage content. Super Admins can also manage other admin users.
             </p>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
+          <div className="flex items-center justify-end gap-xs pt-sm border-t border-sand">
             <Button variant="secondary" onClick={onClose} disabled={saving}>
               Cancel
             </Button>

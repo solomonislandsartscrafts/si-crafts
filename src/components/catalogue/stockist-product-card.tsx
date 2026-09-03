@@ -11,13 +11,13 @@ import { inputClasses } from '@/components/ui/form-field';
 import { materialLabel } from '@/lib/labels';
 import {
   PosterFrame,
-  posterMetaClasses,
+  posterBodyClasses,
   posterTitleClasses,
 } from '@/components/cards/poster-card';
 
 /**
- * Product card for logged-in stockists — adds price and an Add to Order
- * control.
+ * Product card for logged-in stockists — the same image-forward poster tile as
+ * the public ProductCard, plus wholesale price and an Add to Order control.
  *
  * Uses `PosterFrame` rather than `PosterCard` because the caption contains
  * buttons, and a button cannot be nested inside a link. The frame and caption
@@ -53,7 +53,7 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
   const noteFieldId = `note-${product.id}`;
 
   return (
-    <div className="flex h-full flex-col">
+    <div role="listitem" className="flex h-full flex-col">
       {/* Shared poster frame — links to the piece page. Same frame, fit, and
           hover as ProductCard, so the catalogue does not change shape when a
           stockist logs in. */}
@@ -72,7 +72,11 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
 
       {/* Caption below the frame. Kept outside the link above because it holds
           buttons, and a button cannot be nested inside a link. */}
-      <div className="flex flex-1 flex-col pt-3">
+      <div className="flex flex-1 flex-col pt-xs">
+        {/* The title carries its OWN hover, not the `group-hover:text-ocean`
+            baked into `posterTitleClasses`: this caption sits outside the frame's
+            link, so it is outside that link's `group`. Same end result — the
+            title goes ocean when you point at it. */}
         <h3 className={`${posterTitleClasses} line-clamp-2`}>
           <Link
             href={`/piece/${product.productCode}`}
@@ -81,18 +85,21 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
             {product.name}
           </Link>
         </h3>
-        {makerName && <p className={`mt-1 ${posterMetaClasses}`}>by {makerName}</p>}
+        {/* Body size, matching the public ProductCard — the whole point of this
+            component is that the catalogue does not change when a stockist logs
+            in, and that includes the type sizes, not just the frame. */}
+        {makerName && <p className={`mt-2xs ${posterBodyClasses}`}>by {makerName}</p>}
 
         {/* Price */}
-        <p className="font-heading text-lg font-semibold text-deep-blue mt-auto pt-3">
+        <p className="font-heading text-lg font-semibold text-deep-blue mt-auto pt-xs">
           {formatPrice(product.wholesalePrice)}
-          <span className="text-xs font-body font-normal text-warm-gray-600 ml-1">
+          <span className="text-xs font-body font-normal text-warm-gray-600 ml-3xs">
             ex. GST
           </span>
         </p>
 
         {/* Add to order + notes */}
-        <div className="mt-3 space-y-3">
+        <div className="mt-xs space-y-xs">
           {!showNotes ? (
             <button
               type="button"
@@ -117,11 +124,10 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
             </div>
           )}
 
-          {/* Quantity + Add button. Controls are tap-target sized — these were
-              roughly 24x26px and are the primary interaction in this grid.
-              They stack on a phone because the grid is two columns there, and a
-              48px stepper alongside a button does not fit one column wide. */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          {/* Quantity + Add button, side by side. The button label is a short
+              "Add" (not "Add to Order") so it fits on one line next to the 48px
+              stepper even at the narrow 4-column card width. */}
+          <div className="flex items-center gap-2xs">
             <div className="flex items-center self-start border border-sand-dark rounded-md flex-shrink-0">
               <button
                 onClick={() => setQty(Math.max(1, qty - 1))}
@@ -130,7 +136,7 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
               >
                 <Minus className="w-4 h-4" aria-hidden="true" />
               </button>
-              <span className="px-2 text-base font-medium text-warm-gray-800 min-w-[2.5rem] text-center">
+              <span className="px-2xs text-base font-medium text-warm-gray-800 min-w-[2.5rem] text-center">
                 {qty}
               </span>
               <button
@@ -146,6 +152,11 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
               disabled={added}
               size="sm"
               fullWidth
+              aria-label={
+                added
+                  ? `${product.name} added to order`
+                  : `Add ${product.name} to order`
+              }
               className={added ? 'bg-success/10 text-success' : ''}
             >
               {added ? (
@@ -154,7 +165,7 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
                   Added
                 </>
               ) : (
-                'Add to Order'
+                'Add'
               )}
             </Button>
           </div>

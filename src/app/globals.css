@@ -17,11 +17,128 @@
    6. warm-gray-100/200 are surface colors, not text colors.
    ========================================================================== */
 
+/* ==========================================================================
+   SPACING TOKENS — the single source of truth for every margin, padding and gap
+   ============================================================================
+   BASE UNIT: 4px. Every value below is an exact multiple of it.
+
+   Two layers, and the distinction matters:
+
+   1. THE RAW SCALE (--space-*). A fixed ladder. Never write a length that is
+      not on it.
+
+        3xs   4px   hairline nudges, icon-to-baseline alignment
+        2xs   8px   heading → its own subtitle; icon → its label
+        xs   12px   button rows, chip rows, inline metadata
+        sm   16px   card padding, page gutter (mobile), tight stacks
+        md   24px   card padding (roomy), block internals, grid gutter (mobile)
+        lg   32px   grid gutter (desktop), section heading → content
+        xl   48px   section band padding (mobile), in-page block separation
+        2xl  64px   page gutter (desktop), in-page block separation (desktop)
+        3xl  96px   section band padding (desktop)
+
+   2. THE SEMANTIC LAYER (--gutter, --section-y, --block-y, --stack-y,
+      --grid-gap, --page-y). Each one POINTS AT a rung of the raw scale and
+      re-points at a different rung at a breakpoint. This is why a component
+      writes `pb-section` rather than `pb-10 lg:pb-20`: the responsive step is
+      owned by the token, in one place, not repeated at every call site.
+
+   HIERARCHY (largest gap → smallest). Enforced by the semantic tokens:
+
+        section  48 → 96   between major page sections
+        block    32 → 64   between blocks inside one section
+        stack    24 → 32   section heading/subtitle → the content below it
+        grid     24 → 32   card grid gutters
+        2xs       8        heading → subtitle, and other same-group pairs
+
+   INTERNAL ≤ EXTERNAL. Padding inside a card (sm 16 / md 24) is never larger
+   than the gap separating it from its neighbours (grid 24 → 32). Check this
+   whenever you add a card variant.
+
+   MOBILE IS THE SAME LADDER, ONE RUNG DOWN. Every semantic token steps to a
+   smaller rung of the SAME scale on small screens — it does not switch to a
+   different set of numbers. section 48→96 and block 32→64 are both exactly 1:2.
+
+   Tailwind's own numeric steps (`p-4`, `gap-2`, `mt-6` …) are all multiples of
+   4px and remain legal for micro-spacing inside a component. Anything
+   structural — page, section, block, heading-to-content, grid gutter — MUST use
+   a named token, so that changing the site's rhythm stays a one-line edit here.
+   ========================================================================== */
+
 @layer base {
   :root {
+    /* White page canvas. Kept in sync with the `page-bg` Tailwind token. */
     --page-bg: #FFFFFF;
     --card-bg: #FFFFFF;
     --footer-bg: #1B3A4B;
+
+    /* --- Raw scale. 4px base. Do not add values between these rungs. ------ */
+    --space-3xs: 0.25rem;  /*  4px — 1 × base */
+    --space-2xs: 0.5rem;   /*  8px — 2 × base */
+    --space-xs: 0.75rem;   /* 12px — 3 × base */
+    --space-sm: 1rem;      /* 16px — 4 × base */
+    --space-md: 1.5rem;    /* 24px — 6 × base */
+    --space-lg: 2rem;      /* 32px — 8 × base */
+    --space-xl: 3rem;      /* 48px — 12 × base */
+    --space-2xl: 4rem;     /* 64px — 16 × base */
+    --space-3xl: 6rem;     /* 96px — 24 × base */
+
+    /* --- Semantic layer (mobile values). Each points at a rung above. ----- */
+
+    /* Page side gutters. The one horizontal measurement on the site: if a
+       page header uses one gutter and the body below uses another, the left
+       edge of the content visibly steps in and out as you scroll. */
+    --gutter: var(--space-sm);       /* 16px */
+
+    /* Top/bottom padding for a whole page's content. */
+    --page-y: var(--space-md);       /* 24px */
+
+    /* Vertical padding inside a major section band. Two adjacent bands always
+       change background, so this reads as the band's own padding rather than
+       as a gap — which is why it is the largest value in the system. */
+    --section-y: var(--space-xl);    /* 48px */
+
+    /* Separation between blocks WITHIN one section (a prose block and the grid
+       under it, two rules-separated groups on a detail page). Deliberately half
+       of --section-y at both breakpoints, so a block break can never be
+       mistaken for a section break. */
+    --block-y: var(--space-lg);      /* 32px */
+
+    /* A section heading (+ its subtitle) down to the content it introduces. */
+    --stack-y: var(--space-md);      /* 24px */
+
+    /* Card grid gutters — row and column, the same value in both directions. */
+    --grid-gap: var(--space-md);     /* 24px */
+
+    /* Component-internal button padding. Exposed as variables so the four
+       .btn-* classes cannot drift apart. */
+    --btn-py: var(--space-xs);       /* 12px → 48px tall with 24px line box */
+    --btn-px: var(--space-sm);       /* 16px — tighter on phones so two
+                                        buttons fit side by side at 320px */
+  }
+
+  /* 920px (tabtop) — the point at which the layout opens up horizontally. */
+  @media (min-width: 920px) {
+    :root {
+      --gutter: var(--space-2xl);    /* 64px */
+      --page-y: var(--space-lg);     /* 32px */
+      --grid-gap: var(--space-lg);   /* 32px */
+    }
+  }
+
+  @media (min-width: 640px) {
+    :root {
+      --btn-px: var(--space-md);     /* 24px */
+    }
+  }
+
+  /* 1024px — the point at which there is room for the full vertical rhythm. */
+  @media (min-width: 1024px) {
+    :root {
+      --section-y: var(--space-3xl); /* 96px */
+      --block-y: var(--space-2xl);   /* 64px */
+      --stack-y: var(--space-lg);    /* 32px */
+    }
   }
 
   html {
@@ -38,7 +155,12 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading), 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    line-height: 1.2;
+    /* 4/3. Every heading size in the scale is a multiple of 3px (18, 24, 30, 36,
+       48), so this ratio puts every heading's line box on a multiple of 4px —
+       the same base unit the spacing scale uses. 1.2 did not: a 24px h3 took a
+       28.8px line box, which is what made multi-line headings sit slightly out
+       of step with the blocks around them. Matches `leading-heading`. */
+    line-height: 1.3333;
     letter-spacing: -0.01em;
     color: #1B3A4B;
   }
@@ -84,23 +206,18 @@
 
 @layer components {
   /* ====================================================================
-     SPACING SYSTEM
+     STRUCTURAL SPACING UTILITIES
      ======================================================================
-     The horizontal and vertical rhythm is a stepped scale on a 5px base,
-     with 920px as the breakpoint where the layout opens up. Values step
-     at breakpoints rather than scaling fluidly with vw — a fixed ladder is
-     easier to reason about and reproduces the same measurements on every
-     device at a given width.
+     Thin wrappers over the semantic tokens declared at the top of this
+     file. They exist so the four measurements that decide the whole page
+     rhythm are each written once:
 
-     The ladder:  10 · 15 · 20 · 25 · 30 · 40 · 70 px
-     Structural values (gutters, rhythm, container) use it exactly.
-     Values inside a component snap to Tailwind's own 4px scale, so the
-     project keeps one spacing scale rather than two competing ones.
+       .site-px         padding-left/right  = --gutter    16 → 64 @920
+       .site-container  .site-px + max-width 1440px + centred
+       .page-y          padding-top/bottom  = --page-y    24 → 32 @920
+       .section-y       padding-top/bottom  = --section-y 48 → 96 @1024
 
-     Horizontal:  .site-px         20px → 70px @920
-     Container:   .site-container  .site-px + max-width 1440px + centred
-     Vertical:    .page-y          20px → 40px @920
-                  .section-y       40px → 80px @1024
+     None of them carry a breakpoint of their own any more — the token does.
      ==================================================================== */
 
   /* --- Horizontal gutters ---------------------------------------------
@@ -108,39 +225,28 @@
      .site-container). If a page header uses one gutter and the body below
      uses another, the left edge of the content visibly steps in and out
      as you scroll. This is the single most common way to break the layout.
+
+     To break a child back out of the gutter (full-bleed media), use the
+     matching negative margin utility: `-mx-gutter`.
      -------------------------------------------------------------------- */
   .site-px {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-
-  @media (min-width: 920px) {
-    .site-px {
-      padding-left: 70px;
-      padding-right: 70px;
-    }
+    padding-left: var(--gutter);
+    padding-right: var(--gutter);
   }
 
   /* The standard page container: centred, capped at 1440px, with the
-     gutters above. Replaces the old `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`
+     gutter above. Replaces the old `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`
      class string so the container is defined in exactly one place.
 
      For a narrower single-column page, pair the width utility with the
      gutter utility instead: `max-w-2xl mx-auto site-px`. */
   .site-container {
     width: 100%;
-    max-width: 1440px;
+    max-width: theme('maxWidth.site');
     margin-left: auto;
     margin-right: auto;
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-
-  @media (min-width: 920px) {
-    .site-container {
-      padding-left: 70px;
-      padding-right: 70px;
-    }
+    padding-left: var(--gutter);
+    padding-right: var(--gutter);
   }
 
   /* --- Vertical rhythm -------------------------------------------------
@@ -149,43 +255,41 @@
 
      NOTE: these live in the `components` layer, so any Tailwind `py-*`,
      `pt-*` or `pb-*` utility on the same element overrides them. That is
-     used deliberately (e.g. PageHeader tightens its own bottom padding),
-     but it also means adding `py-*` to a `.page-y` element silently
-     cancels the rhythm.
+     used deliberately (e.g. PageHeader tightens its own bottom padding to
+     `pb-stack`), but it also means adding `py-*` to a `.page-y` element
+     silently cancels the rhythm.
      -------------------------------------------------------------------- */
   .page-y {
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding-top: var(--page-y);
+    padding-bottom: var(--page-y);
   }
 
-  @media (min-width: 920px) {
-    .page-y {
-      padding-top: 40px;
-      padding-bottom: 40px;
-    }
-  }
-
-  /* Section bands sit one step above page padding, and take the full
-     80px only once there is room for it. */
+  /* Section bands are the largest vertical measurement on the site — they
+     are what separates one major section from the next. */
   .section-y {
-    padding-top: 40px;
-    padding-bottom: 40px;
+    padding-top: var(--section-y);
+    padding-bottom: var(--section-y);
   }
 
-  @media (min-width: 1024px) {
-    .section-y {
-      padding-top: 80px;
-      padding-bottom: 80px;
-    }
+  /* Alternating body-section surface.
+     Add to a `.section-y` content section to give it the subtle warm band
+     (`section-warm`, a barely-there warm off-white) instead of plain white, so
+     successive sections read as distinct surfaces. Deliberately WARM, not the
+     cool `bg-sand-light` grey — that clashes with the craft palette and reads
+     as a disabled/wireframe surface. This is the single source of truth for the
+     band: alternate plain-white sections with `.section-band` ones rather than
+     hand-rolling `bg-section-warm` at call sites. It does NOT set padding — it
+     composes with `.section-y`, which owns the vertical rhythm. */
+  .section-band {
+    background-color: theme('colors.section-warm');
   }
 
   /* Solomon Islands flag divider — flag-blue base, diagonal white, gold, then green.
-     Decorative accent used below the header and between page sections. */
+     Decorative accent used below the header and between page sections.
+     Hidden: the full-bleed stripe seams across sections were removed by request.
+     The small `.flag-mark` heading stub is kept. */
   .flag-divider {
-    position: relative;
-    height: 6px;
-    overflow: hidden;
-    background-color: #0051A5;
+    display: none;
   }
 
   .flag-divider::before {
@@ -203,13 +307,10 @@
     );
   }
 
-  /* Hairline — same motif at 3px. Caps the top edge of dark bands so they
-     read as deliberate blocks. Quiet enough to repeat a few times per page. */
+  /* Hairline — same motif at 3px, caps the top edge of dark bands.
+     Hidden: the full-bleed stripe seams across sections were removed by request. */
   .flag-hairline {
-    position: relative;
-    height: 3px;
-    overflow: hidden;
-    background-color: #0051A5;
+    display: none;
   }
 
   .flag-hairline::before {
@@ -259,21 +360,15 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    /* Slightly tighter on phones so two buttons can sit side by side at
+    gap: var(--space-2xs);
+    /* --btn-px is tighter on phones so two buttons can sit side by side at
        320px without wrapping; tap-target still guarantees 48px height. */
-    padding: 0.6875rem 1.25rem;
+    padding: var(--btn-py) var(--btn-px);
     background-color: #1E7A3D;
     color: #FFFFFF;
     font-weight: 500;
     border-radius: 4px;
     transition: background-color 0.2s ease;
-  }
-
-  @media (min-width: 640px) {
-    .btn-primary {
-      padding: 0.75rem 1.5rem;
-    }
   }
 
   .btn-primary:hover {
@@ -300,8 +395,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
+    gap: var(--space-2xs);
+    padding: var(--btn-py) var(--btn-px);
     background-color: #1B3A4B;
     color: #FFFFFF;
     font-weight: 500;
@@ -330,20 +425,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 0.6875rem 1.25rem;
+    gap: var(--space-2xs);
+    padding: var(--btn-py) var(--btn-px);
     background-color: transparent;
     color: #1E5AA8;
     font-weight: 500;
     border-radius: 4px;
     border: 2px solid #1E5AA8;
     transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-  }
-
-  @media (min-width: 640px) {
-    .btn-secondary {
-      padding: 0.75rem 1.5rem;
-    }
   }
 
   .btn-secondary:hover {
@@ -373,19 +462,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 0.6875rem 1.25rem;
+    gap: var(--space-2xs);
+    padding: var(--btn-py) var(--btn-px);
     background-color: #C0392B;
     color: #FFFFFF;
     font-weight: 500;
     border-radius: 4px;
     transition: background-color 0.2s ease;
-  }
-
-  @media (min-width: 640px) {
-    .btn-danger {
-      padding: 0.75rem 1.5rem;
-    }
   }
 
   .btn-danger:hover {
@@ -439,9 +522,12 @@
      • Disabled: opacity 0.5 + not-allowed cursor + grey background
      • Required: asterisk indicator via <FormField required>
 
-   Cards (ProductCard, MakerCard, CraftCard):
-     ✅ Default, hover (translate-y + shadow + border-color), focus (ring)
+   Cards (all compose PosterCard — see components/cards/poster-card.tsx):
+     ✅ Default, hover (image scale + shadow + title turns ocean), focus (ring)
+     • No translate-y and no border-color change — the frame carries shadow-card
+       and the title carries group-hover:text-ocean
      • Empty/skeleton: use animate-pulse placeholder blocks matching card layout
+     • Missing image: SafeImage renders a bg-sand-light well + ImageOff glyph
      • Entire card is clickable (<Link> wrapper) — not just the title
 
    Status Badges:
@@ -548,23 +634,26 @@
 [contenteditable] h3 {
   font-size: 1.125rem;
   font-weight: 600;
-  margin-top: 1rem;
-  margin-bottom: 0.25rem;
+  margin-top: var(--space-sm);
+  margin-bottom: var(--space-3xs);
   color: #1B3A4B;
 }
 
 [contenteditable] h4 {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
-  margin-top: 0.75rem;
-  margin-bottom: 0.25rem;
+  margin-top: var(--space-xs);
+  margin-bottom: var(--space-3xs);
+  /* 16px × 1.5 = 24px — 6 × the 4px base. The global 4/3 heading ratio would
+     give 21.33px, off the grid at this size. */
+  line-height: 1.5;
   color: #3D362E;
 }
 
 [contenteditable] ul,
 [contenteditable] ol {
-  padding-left: 1.5rem;
-  margin: 0.5rem 0;
+  padding-left: var(--space-md);
+  margin: var(--space-2xs) 0;
 }
 
 [contenteditable] ul {
@@ -576,7 +665,7 @@
 }
 
 [contenteditable] li {
-  margin-bottom: 0.25rem;
+  margin-bottom: var(--space-3xs);
 }
 
 [contenteditable]:empty::before {
@@ -596,15 +685,33 @@
    The type scale mirrors the Tailwind scale: body 1.125rem (text-lg, slightly
    larger than base for long-form reading), h2 1.5rem (text-2xl),
    h3 1.25rem (text-xl).
+
+   Vertical rhythm is on the 4px base unit like everything else: the 18px body
+   takes a 32px line box (8 × base), and every margin below is a --space-* token
+   rather than a one-off rem value.
    ========================================================================== */
 .article-content {
   font-size: 1.125rem;
-  line-height: 1.7;
+  /* 18px × 1.7778 = 32px — 8 × the 4px base. Unitless so a nested larger or
+     smaller element still scales its own line box proportionally. */
+  line-height: 1.7778;
   color: #3D362E;
 }
 
 .article-content p {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-md);
+}
+
+/* Lead paragraph — the article's entry point. The opening paragraph is set a
+   step larger so the eye has somewhere to land before the body settles to its
+   reading size, the standard editorial "standfirst". Only the very first
+   paragraph, and only when it is the first child, so an article that opens with
+   an image or heading is not given a false lead. 1.25rem (20px) × 1.6 = 32px,
+   still on the 4px grid. */
+.article-content > p:first-child {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: #3D362E;
 }
 
 .article-content h2 {
@@ -612,9 +719,9 @@
   font-size: 1.5rem;
   font-weight: 500;
   color: #1B3A4B;
-  margin-top: 2.5rem;
-  margin-bottom: 0.75rem;
-  line-height: 1.2;
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-xs);
+  line-height: 1.3333;
   letter-spacing: -0.01em;
 }
 
@@ -623,29 +730,31 @@
   font-size: 1.25rem;
   font-weight: 600;
   color: #1B3A4B;
-  margin-top: 2rem;
-  margin-bottom: 0.5rem;
-  line-height: 1.2;
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-2xs);
+  /* 20px × 1.4 = 28px — 7 × the 4px base. The global 4/3 ratio would give
+     26.67px, off the grid at this size. */
+  line-height: 1.4;
   letter-spacing: -0.01em;
 }
 
 /* Figure captions — metadata, so smaller than body is correct here. */
 .article-content figure {
-  margin: 2rem 0;
+  margin: var(--space-lg) 0;
 }
 
 .article-content figcaption {
   font-size: 0.875rem;
   line-height: 1.6;
   color: #5C5648;
-  margin-top: 0.5rem;
+  margin-top: var(--space-2xs);
   text-align: center;
 }
 
 .article-content ul,
 .article-content ol {
-  padding-left: 1.5rem;
-  margin-bottom: 1.5rem;
+  padding-left: var(--space-md);
+  margin-bottom: var(--space-md);
 }
 
 .article-content ul {
@@ -657,7 +766,7 @@
 }
 
 .article-content li {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2xs);
 }
 
 .article-content strong {
@@ -677,23 +786,37 @@
 
 .article-content blockquote {
   border-left: 3px solid #1E7A3D;
-  padding-left: 1.25rem;
-  margin: 2rem 0;
+  padding-left: var(--space-md);
+  margin: var(--space-lg) 0;
   font-style: italic;
   color: #5C5648;
 }
 
 .article-content img {
   display: block;
-  width: 100%;
+  /* Cap the height so a portrait photo cannot fill (or exceed) the viewport
+     and turn the article into a photo gallery with captions between. A tall
+     image now sits centred at a readable height; a landscape one still spans
+     the column because its own aspect ratio keeps it under the cap. `width`
+     follows from `height:auto` up to 100% of the column, so nothing is
+     stretched. 32rem ≈ 512px keeps an inline photo clearly subordinate to the
+     720px reading column. */
+  max-width: 100%;
+  max-height: 32rem;
+  width: auto;
   height: auto;
   border-radius: 0.5rem;
-  margin: 2rem 0;
+  margin: var(--space-lg) auto;
 }
 
-/* The figure already owns the vertical rhythm — don't stack two margins. */
+/* The figure already owns the vertical rhythm — don't stack two margins — and
+   centres its own image within the column. */
+.article-content figure {
+  text-align: center;
+}
+
 .article-content figure img {
-  margin: 0;
+  margin: 0 auto;
 }
 
 /* In the editor, clicking an image opens its alt text and caption fields. */
@@ -736,17 +859,6 @@
   border: 2px solid currentColor !important;
 }
 
-/* Colorblind simulation modes */
-.a11y-protanopia .a11y-filter-scope {
-  filter: url('#a11y-protanopia-filter');
-}
 
-.a11y-deuteranopia .a11y-filter-scope {
-  filter: url('#a11y-deuteranopia-filter');
-}
-
-.a11y-tritanopia .a11y-filter-scope {
-  filter: url('#a11y-tritanopia-filter');
-}
 
 

@@ -20,7 +20,7 @@ export function BackLink({ href, label, className = '' }: BackLinkProps) {
   return (
     <Link
       href={href}
-      className={`inline-flex items-center gap-1.5 text-sm font-medium text-ocean hover:text-ocean-dark transition-colors tap-target ${className}`.trim()}
+      className={`inline-flex items-center gap-2xs text-sm font-medium text-ocean hover:text-ocean-dark transition-colors tap-target ${className}`.trim()}
     >
       <ArrowLeft className="w-4 h-4" aria-hidden="true" />
       <span>{label}</span>

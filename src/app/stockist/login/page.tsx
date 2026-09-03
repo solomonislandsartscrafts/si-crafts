@@ -14,10 +14,10 @@ export default function StockistLoginPage() {
       intro="Log in to view wholesale pricing and place orders."
       width="narrow"
     >
-      <div className="max-w-md mt-8">
+      <div className="max-w-md mt-lg">
         <LoginForm defaultAccountType="stockist" />
 
-        <p className="text-base text-warm-gray-400 mt-8 text-center">
+        <p className="text-base text-warm-gray-400 mt-lg text-center">
           Site administrator?{' '}
           <Link href="/admin/login" className="text-ocean hover:underline">
             Admin login

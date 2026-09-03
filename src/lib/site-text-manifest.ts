@@ -988,6 +988,18 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
               'Check back soon for stories and updates from Solomon Islands Arts & Crafts.',
             type: 'multiline',
           },
+          {
+            key: 'news.cta.title',
+            label: 'Closing banner heading',
+            defaultValue: 'Meet the makers behind the stories',
+          },
+          {
+            key: 'news.cta.description',
+            label: 'Closing banner description',
+            defaultValue:
+              'Every piece begins with a person. Get to know the weavers, carvers, and jewellers of Solomon Islands.',
+            type: 'multiline',
+          },
         ],
       },
     ],
@@ -1375,8 +1387,22 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
     label: 'Footer',
     sections: [
       {
+        title: 'Brand',
+        description: 'The short line beside the wordmark at the top of the footer.',
+        fields: [
+          {
+            key: 'footer.tagline',
+            label: 'Footer tagline',
+            defaultValue:
+              'Handmade in Solomon Islands. Brought to Australian museum and gallery shops with fair pay and maker consent.',
+            type: 'multiline',
+          },
+        ],
+      },
+      {
         title: 'Quick links',
-        description: 'The three cards at the top of the footer.',
+        description:
+          'Descriptions kept for the support links in the footer. (No longer shown as cards.)',
         fields: [
           {
             key: 'footer.promiseDescription',

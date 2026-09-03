@@ -207,7 +207,7 @@ function ToolButton({ onClick, label, children, active, disabled }: {
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
       disabled={disabled}
-      className={`tap-target p-2 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-40 ${
+      className={`tap-target p-2xs rounded transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-40 ${
         active ? 'bg-ocean/10 text-ocean' : 'text-warm-gray-400 hover:text-warm-gray-800 hover:bg-sand-light'
       }`}
       aria-label={label}
@@ -550,18 +550,18 @@ export function RichTextEditor({
     }
   }
 
-  const panelClasses = 'px-3 py-2 border-x border-sand-dark bg-sand-light/30';
+  const panelClasses = 'px-xs py-2xs border-x border-sand-dark bg-sand-light/30';
 
   return (
     <div>
       {label && (
-        <label className="block text-sm font-medium text-warm-gray-800 mb-1">
+        <label className="block text-sm font-medium text-warm-gray-800 mb-3xs">
           {label}
         </label>
       )}
 
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 border border-b-0 border-sand-dark rounded-t-md bg-sand-light/50">
+      <div className="flex flex-wrap items-center gap-3xs px-2xs py-2xs border border-b-0 border-sand-dark rounded-t-md bg-sand-light/50">
         {/* Text formatting */}
         <ToolButton onClick={() => execCommand('bold')} label="Bold (Ctrl+B)">
           <Bold className="w-4 h-4" />
@@ -570,7 +570,7 @@ export function RichTextEditor({
           <Italic className="w-4 h-4" />
         </ToolButton>
 
-        <div className="w-px h-5 bg-sand-dark mx-1" />
+        <div className="w-px h-5 bg-sand-dark mx-3xs" />
 
         {/* Block formatting */}
         <ToolButton onClick={() => execCommand('formatBlock', 'p')} label="Paragraph">
@@ -586,7 +586,7 @@ export function RichTextEditor({
           <Quote className="w-4 h-4" />
         </ToolButton>
 
-        <div className="w-px h-5 bg-sand-dark mx-1" />
+        <div className="w-px h-5 bg-sand-dark mx-3xs" />
 
         {/* Lists */}
         <ToolButton onClick={() => execCommand('insertUnorderedList')} label="Bullet list">
@@ -596,7 +596,7 @@ export function RichTextEditor({
           <ListOrdered className="w-4 h-4" />
         </ToolButton>
 
-        <div className="w-px h-5 bg-sand-dark mx-1" />
+        <div className="w-px h-5 bg-sand-dark mx-3xs" />
 
         {/* Insert */}
         <ToolButton onClick={handleInsertLink} label="Insert link" active={showLinkInput}>
@@ -611,7 +611,7 @@ export function RichTextEditor({
           <Minus className="w-4 h-4" />
         </ToolButton>
 
-        <div className="w-px h-5 bg-sand-dark mx-1" />
+        <div className="w-px h-5 bg-sand-dark mx-3xs" />
 
         {/* Undo/Redo */}
         <ToolButton onClick={() => execCommand('undo')} label="Undo">
@@ -622,7 +622,7 @@ export function RichTextEditor({
         </ToolButton>
 
         {busy && (
-          <span className="flex items-center gap-1.5 ml-auto pr-1 text-sm text-warm-gray-600">
+          <span className="flex items-center gap-2xs ml-auto pr-3xs text-sm text-warm-gray-600">
             <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
             Uploading images...
           </span>
@@ -631,7 +631,7 @@ export function RichTextEditor({
 
       {/* Link URL input (shown inline when link button is active) */}
       {showLinkInput && (
-        <div className="flex items-center gap-2 px-3 py-2 border-x border-sand-dark bg-sand-light/30">
+        <div className="flex items-center gap-2xs px-xs py-2xs border-x border-sand-dark bg-sand-light/30">
           <Link2 className="w-4 h-4 text-warm-gray-400" />
           <input
             type="url"
@@ -639,7 +639,7 @@ export function RichTextEditor({
             onChange={(e) => setLinkUrl(e.target.value)}
             onKeyDown={handleLinkKeyDown}
             placeholder="Paste URL and press Enter"
-            className="flex-1 px-2 py-1 text-sm bg-transparent text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-ocean"
+            className="flex-1 px-2xs py-3xs text-sm bg-transparent text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-ocean"
             autoFocus
           />
           <button
@@ -661,14 +661,14 @@ export function RichTextEditor({
 
       {/* Selected image — alt text and caption */}
       {selectedImage && (
-        <div className={`${panelClasses} space-y-2`}>
-          <div className="flex items-center justify-between gap-2">
+        <div className={`${panelClasses} space-y-2xs`}>
+          <div className="flex items-center justify-between gap-2xs">
             <p className="text-sm font-medium text-warm-gray-800">Selected image</p>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-3xs">
               <button
                 type="button"
                 onClick={removeSelectedImage}
-                className="tap-target flex items-center gap-1 px-2 py-1 rounded text-sm text-error hover:bg-error/10 focus:outline-none focus:ring-2 focus:ring-ocean"
+                className="tap-target flex items-center gap-3xs px-2xs py-3xs rounded text-sm text-error hover:bg-error/10 focus:outline-none focus:ring-2 focus:ring-ocean"
               >
                 <Trash2 className="w-4 h-4" />
                 Remove
@@ -676,7 +676,7 @@ export function RichTextEditor({
               <button
                 type="button"
                 onClick={() => setSelectedImage(null)}
-                className="tap-target px-2 py-1 rounded text-sm font-medium text-ocean hover:text-ocean-dark focus:outline-none focus:ring-2 focus:ring-ocean"
+                className="tap-target px-2xs py-3xs rounded text-sm font-medium text-ocean hover:text-ocean-dark focus:outline-none focus:ring-2 focus:ring-ocean"
               >
                 Done
               </button>
@@ -705,8 +705,8 @@ export function RichTextEditor({
 
       {/* Images still missing alt text — this blocks saving, so say so here */}
       {missingAltCount > 0 && (
-        <div className={`${panelClasses} flex items-start gap-2 bg-warning/10`} role="status">
-          <AlertTriangle className="w-4 h-4 text-warning-text shrink-0 mt-1" aria-hidden="true" />
+        <div className={`${panelClasses} flex items-start gap-2xs bg-warning/10`} role="status">
+          <AlertTriangle className="w-4 h-4 text-warning-text shrink-0 mt-3xs" aria-hidden="true" />
           <p className="flex-1 text-sm text-warning-text">
             {missingAltCount} image{missingAltCount > 1 ? 's' : ''} still need alt text.
             The article cannot be saved until every image is described.
@@ -714,7 +714,7 @@ export function RichTextEditor({
           <button
             type="button"
             onClick={selectFirstImageMissingAlt}
-            className="tap-target px-2 py-1 rounded text-sm font-medium text-warning-text underline hover:no-underline focus:outline-none focus:ring-2 focus:ring-ocean"
+            className="tap-target px-2xs py-3xs rounded text-sm font-medium text-warning-text underline hover:no-underline focus:outline-none focus:ring-2 focus:ring-ocean"
           >
             Fix
           </button>
@@ -723,13 +723,13 @@ export function RichTextEditor({
 
       {/* Upload / paste problems */}
       {notice && (
-        <div className={`${panelClasses} flex items-start gap-2 bg-ocean/5`} role="status">
-          <AlertTriangle className="w-4 h-4 text-ocean shrink-0 mt-1" aria-hidden="true" />
+        <div className={`${panelClasses} flex items-start gap-2xs bg-ocean/5`} role="status">
+          <AlertTriangle className="w-4 h-4 text-ocean shrink-0 mt-3xs" aria-hidden="true" />
           <p className="flex-1 text-sm text-warm-gray-800">{notice}</p>
           <button
             type="button"
             onClick={() => setNotice(null)}
-            className="tap-target px-2 py-1 rounded text-sm font-medium text-ocean hover:text-ocean-dark focus:outline-none focus:ring-2 focus:ring-ocean"
+            className="tap-target px-2xs py-3xs rounded text-sm font-medium text-ocean hover:text-ocean-dark focus:outline-none focus:ring-2 focus:ring-ocean"
           >
             Dismiss
           </button>
@@ -746,7 +746,7 @@ export function RichTextEditor({
         onMouseUp={rememberSelection}
         onBlur={rememberSelection}
         onClick={handleEditorClick}
-        className="w-full px-6 py-4 border border-sand-dark rounded-b-md bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent overflow-y-auto article-content"
+        className="w-full px-md py-sm border border-sand-dark rounded-b-md bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent overflow-y-auto article-content"
         style={{ minHeight: `${minRows * 1.6}rem` }}
         role="textbox"
         aria-multiline="true"
@@ -764,7 +764,7 @@ export function RichTextEditor({
         className="hidden"
       />
 
-      <p className="text-xs text-warm-gray-400 mt-2">
+      <p className="text-xs text-warm-gray-400 mt-2xs">
         <strong>Tip:</strong> Use the toolbar to format text, insert images, and add links.
         You can paste text and images straight from a document. Click any image in the
         editor to add its alt text and caption.

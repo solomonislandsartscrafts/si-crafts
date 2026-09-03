@@ -22,6 +22,7 @@ export interface SupporterFormData {
   logoAlt: string;
   href: string;
   sortOrder: number;
+  active: boolean;
 }
 
 export function SupporterFormModal({ supporter, onClose, onSave }: SupporterFormModalProps) {
@@ -38,12 +39,18 @@ export function SupporterFormModal({ supporter, onClose, onSave }: SupporterForm
     logoAlt: supporter?.logoAlt ?? '',
     href: supporter?.href ?? '',
     sortOrder: supporter?.sortOrder ?? 0,
+    // New supporters are shown by default; existing ones keep their state.
+    active: supporter?.active ?? true,
   });
 
   function validate(): boolean {
     const errs: Record<string, string> = {};
     if (!form.name.trim()) errs.name = 'Name is required';
     if (!form.logoUrl.trim()) errs.logoUrl = 'A logo is required — the banner skips entries without one';
+    // Logo alt text is intentionally OPTIONAL here: a supporter logo is a
+    // wordmark, and the banner falls back to the supporter name as the
+    // accessible name (see SponsorLogo). Leaving it blank is the documented,
+    // correct choice for a wordmark, so it must not block the save.
     if (form.href.trim() && !/^https?:\/\//i.test(form.href.trim())) {
       errs.href = 'Link must start with https://';
     }
@@ -69,7 +76,7 @@ export function SupporterFormModal({ supporter, onClose, onSave }: SupporterForm
     }
   }
 
-  function handleChange(field: keyof SupporterFormData, value: string | number) {
+  function handleChange(field: keyof SupporterFormData, value: string | number | boolean) {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => {
@@ -86,7 +93,7 @@ export function SupporterFormModal({ supporter, onClose, onSave }: SupporterForm
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50"
+      className="fixed inset-0 z-50 flex items-center justify-center p-sm bg-deep-blue/50"
       onClick={handleDismiss}
     >
       <div
@@ -97,7 +104,7 @@ export function SupporterFormModal({ supporter, onClose, onSave }: SupporterForm
         aria-modal="true"
         aria-labelledby="supporter-form-title"
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-sand">
+        <div className="flex items-center justify-between px-md py-sm border-b border-sand">
           <h2
             id="supporter-form-title"
             className="font-heading text-lg font-semibold text-deep-blue"
@@ -106,17 +113,17 @@ export function SupporterFormModal({ supporter, onClose, onSave }: SupporterForm
           </h2>
           <button
             onClick={handleDismiss}
-            className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form ref={formRef} onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="px-md py-sm space-y-sm">
           {saveError && (
             <p
-              className="text-base text-error bg-error/10 px-3 py-2 rounded"
+              className="text-base text-error bg-error/10 px-xs py-2xs rounded"
               role="alert"
               aria-live="assertive"
             >
@@ -158,7 +165,7 @@ export function SupporterFormModal({ supporter, onClose, onSave }: SupporterForm
                 className={`${inputClasses} max-w-24`}
               />
             </FormField>
-            <p className="text-xs text-warm-gray-400 mt-1">Lower numbers appear first.</p>
+            <p className="text-xs text-warm-gray-400 mt-3xs">Lower numbers appear first.</p>
           </div>
 
           <ImageUpload
@@ -170,7 +177,7 @@ export function SupporterFormModal({ supporter, onClose, onSave }: SupporterForm
             aspectHint="Wide or square, transparent PNG or SVG"
           />
           {errors.logoUrl && (
-            <p className="text-base text-error mt-1" role="alert" aria-live="assertive">
+            <p className="text-base text-error mt-3xs" role="alert" aria-live="assertive">
               {errors.logoUrl}
             </p>
           )}
@@ -178,7 +185,27 @@ export function SupporterFormModal({ supporter, onClose, onSave }: SupporterForm
             Leave the alt text blank to use the supporter name, which is right for a wordmark.
           </p>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
+          {/* Shown on homepage toggle — suspend hides the logo without deleting */}
+          <div className="flex items-center gap-xs py-xs px-sm bg-sand-light rounded-md">
+            <label htmlFor="sup-active" className="flex items-center gap-xs cursor-pointer flex-1">
+              <input
+                id="sup-active"
+                type="checkbox"
+                checked={form.active}
+                onChange={(e) => handleChange('active', e.target.checked)}
+                className="w-5 h-5 rounded border-sand-dark text-ocean focus:ring-2 focus:ring-ocean accent-ocean"
+              />
+              <div>
+                <span className="text-base font-medium text-warm-gray-800">Shown on homepage</span>
+                <p className="text-xs text-warm-gray-400 mt-3xs">
+                  Uncheck to suspend this supporter — the logo is hidden from the homepage but kept
+                  here so you can restore it later.
+                </p>
+              </div>
+            </label>
+          </div>
+
+          <div className="flex items-center justify-end gap-xs pt-sm border-t border-sand">
             <Button variant="secondary" onClick={handleDismiss} disabled={saving}>
               Cancel
             </Button>

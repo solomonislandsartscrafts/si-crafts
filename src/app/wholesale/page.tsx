@@ -44,36 +44,41 @@ export default async function WholesalePage() {
 
   return (
     <div>
-      <PageHeader title={text['wholesale.title']} intro={siteContent.wholesaleIntro} />
+      <PageHeader
+        banner="gold"
+        eyebrow="For stockists"
+        title={text['wholesale.title']}
+        intro={siteContent.wholesaleIntro}
+      />
 
       {/* Prose column is constrained to max-w-3xl but stays left-aligned so it
           lines up with the PageHeader above it. */}
-      <div className="site-container pb-10 lg:pb-20">
+      <div className="site-container pb-section">
         <div className="max-w-3xl">
           {/* How it works — simple numbered steps */}
           {steps.length > 0 && (
-            <section className="mb-12">
-              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-8">
+            <section className="mb-block">
+              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack">
                 {text['wholesale.stepsHeading']}
               </h2>
 
-              <ol className="space-y-8">
+              <ol className="space-y-lg">
                 {steps.map((step) => {
                   const Icon = step.Icon;
                   return (
-                    <li key={step.n} className="flex gap-4 items-start">
+                    <li key={step.n} className="flex gap-sm items-start">
                       <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-ocean/10 flex items-center justify-center">
                         <Icon className="w-6 h-6 text-ocean" />
                       </div>
                       <div>
                         {step.heading && (
-                          <h3 className="font-heading text-lg font-semibold text-deep-blue mb-1">
+                          <h3 className="font-heading text-lg font-semibold text-deep-blue mb-3xs">
                             {step.n}. {step.heading}
                           </h3>
                         )}
                         <CmsText
                           value={step.body}
-                          className="space-y-3"
+                          className="space-y-xs"
                           paragraphClassName="text-base text-warm-gray-600 leading-relaxed"
                         />
                       </div>
@@ -86,10 +91,10 @@ export default async function WholesalePage() {
 
           {/* Important note */}
           {text['wholesale.note'] && (
-            <div className="bg-sand-light rounded-lg p-6 mb-12">
+            <div className="bg-sand-light rounded-lg p-md mb-block">
               <CmsText
                 value={text['wholesale.note']}
-                className="space-y-3"
+                className="space-y-xs"
                 paragraphClassName="text-base text-warm-gray-800 leading-relaxed"
               />
             </div>
@@ -97,18 +102,18 @@ export default async function WholesalePage() {
 
           {/* Common questions */}
           <section>
-            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-6">
+            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack">
               {text['wholesale.faqHeading']}
             </h2>
 
-            <dl className="space-y-6">
+            <dl className="space-y-md">
               {faqs.map((faq) => (
                 <div key={faq.question}>
-                  <dt className="font-heading text-lg font-semibold text-deep-blue mb-1">
+                  <dt className="font-heading text-lg font-semibold text-deep-blue mb-3xs">
                     {faq.question}
                   </dt>
                   <dd className="text-base text-warm-gray-600 leading-relaxed">
-                    <CmsText value={faq.answer} className="space-y-3" />
+                    <CmsText value={faq.answer} className="space-y-xs" />
                   </dd>
                 </div>
               ))}
@@ -116,12 +121,12 @@ export default async function WholesalePage() {
 
             {/* Minimum-order note — lives on Site Content → Wholesale. */}
             {siteContent.wholesaleMinimumOrder && (
-              <p className="mt-6 text-base text-warm-gray-600 leading-relaxed">
+              <p className="mt-md text-base text-warm-gray-600 leading-relaxed">
                 {siteContent.wholesaleMinimumOrder}
               </p>
             )}
 
-            <div className="mt-6">
+            <div className="mt-md">
               <Link
                 href="/faqs-and-shipping"
                 className="text-base font-medium text-ocean hover:text-ocean-dark transition-colors"

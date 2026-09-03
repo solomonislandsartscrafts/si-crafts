@@ -92,12 +92,12 @@ export default function StockistCataloguePage() {
   return (
     <div className="site-container page-y">
       {/* Header bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-sm mb-lg">
         <div>
           <h1 className={pageTitleClasses}>Wholesale Catalogue</h1>
-          <p className="text-base text-warm-gray-600 mt-1">Pricing shown in AUD (ex. GST)</p>
+          <p className="text-base text-warm-gray-600 mt-3xs">Pricing shown in AUD (ex. GST)</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-xs">
           <ButtonLink href="/stockist/requests" variant="secondary" size="sm">
             Requests
           </ButtonLink>
@@ -111,14 +111,14 @@ export default function StockistCataloguePage() {
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-8">
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+      <div className="flex flex-col sm:flex-row gap-sm items-start sm:items-center justify-between mb-lg">
+        <div className="flex flex-col sm:flex-row gap-xs w-full sm:w-auto">
           <MakerFilter makers={makers} selected={selectedMaker} onChange={setSelectedMaker} />
           <SearchInput value={searchQuery} onChange={setSearchQuery} />
         </div>
       </div>
 
-      <p className="text-sm text-warm-gray-400 mb-6" aria-live="polite">
+      <p className="text-sm text-warm-gray-400 mb-md" aria-live="polite">
         {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
       </p>
 
@@ -136,10 +136,10 @@ export default function StockistCataloguePage() {
           }
         />
       ) : (
-        <div className="space-y-12">
+        <div className="space-y-block">
           {Object.entries(grouped).map(([key, groupProducts]) => (
             <section key={key}>
-              <h2 className="font-heading text-xl font-medium text-deep-blue mb-4 capitalize">
+              <h2 className="font-heading text-xl font-medium text-deep-blue mb-sm capitalize">
                 {labels[key] || key}
               </h2>
               <StockistProductGrid products={groupProducts} makers={makers} />

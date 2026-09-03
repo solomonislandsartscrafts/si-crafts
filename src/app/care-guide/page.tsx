@@ -32,17 +32,22 @@ export default async function CareGuidePage() {
 
   return (
     <div>
-      <PageHeader title={text['careGuide.title']} intro={siteContent.careGuideIntro} />
+      <PageHeader
+        banner="green"
+        eyebrow="Looking after your piece"
+        title={text['careGuide.title']}
+        intro={siteContent.careGuideIntro}
+      />
 
-      <div className="site-container pb-10 lg:pb-20 space-y-10">
+      <div className="site-container pb-section space-y-block">
         {sections.map((section) => (
           <section key={section.heading}>
-            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-4">
+            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack">
               {section.heading}
             </h2>
-            <ul className="space-y-3 text-warm-gray-600 leading-relaxed">
+            <ul className="space-y-xs text-warm-gray-600 leading-relaxed">
               {section.tips.map((tip, i) => (
-                <li key={i} className="flex gap-2">
+                <li key={i} className="flex gap-2xs">
                   <span className="text-brand-green font-bold" aria-hidden="true">
                     •
                   </span>

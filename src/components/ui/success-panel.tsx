@@ -32,13 +32,13 @@ export function SuccessPanel({
   return (
     <div className="max-w-xl mx-auto site-px page-y text-center">
       <div
-        className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6"
+        className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-md"
         aria-hidden="true"
       >
         <Icon className="w-8 h-8 text-success" />
       </div>
 
-      <h1 className={`${pageTitleClasses} mb-3`}>{title}</h1>
+      <h1 className={`${pageTitleClasses} mb-xs`}>{title}</h1>
 
       {description && (
         <p className="text-base text-warm-gray-600 leading-relaxed">
@@ -46,10 +46,10 @@ export function SuccessPanel({
         </p>
       )}
 
-      {children && <div className="mt-6 text-left">{children}</div>}
+      {children && <div className="mt-md text-left">{children}</div>}
 
       {actions && (
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div className="mt-lg flex flex-col sm:flex-row items-center justify-center gap-xs">
           {actions}
         </div>
       )}

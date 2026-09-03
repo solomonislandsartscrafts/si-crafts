@@ -96,7 +96,7 @@ function ToastContainer({
     <div
       aria-live="polite"
       aria-atomic="false"
-      className="fixed bottom-6 right-6 z-[9999] flex flex-col-reverse gap-3 max-w-sm w-full pointer-events-none"
+      className="fixed bottom-6 right-6 z-[9999] flex flex-col-reverse gap-xs max-w-sm w-full pointer-events-none"
     >
       {toasts.map((t) => (
         <ToastItem key={t.id} toast={t} onDismiss={onDismiss} />
@@ -127,13 +127,13 @@ function ToastItem({
   return (
     <div
       role="status"
-      className={`pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-lg border shadow-md animate-slide-up ${VARIANT_STYLES[toast.variant]}`}
+      className={`pointer-events-auto flex items-start gap-xs px-sm py-xs rounded-lg border shadow-md animate-slide-up ${VARIANT_STYLES[toast.variant]}`}
     >
       {VARIANT_ICON[toast.variant]}
-      <p className="text-sm leading-snug flex-1">{toast.message}</p>
+      <p className="text-base leading-body flex-1">{toast.message}</p>
       <button
         onClick={() => onDismiss(toast.id)}
-        className="tap-target p-1 text-warm-gray-400 hover:text-warm-gray-800 transition-colors shrink-0 -mr-1 -mt-0.5"
+        className="tap-target p-3xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors shrink-0 -mr-3xs -mt-3xs"
         aria-label="Dismiss notification"
       >
         <X className="w-4 h-4" />

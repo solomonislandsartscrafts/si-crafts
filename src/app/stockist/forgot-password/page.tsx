@@ -71,10 +71,10 @@ export default function ForgotPasswordPage() {
       intro="Enter your email address and we'll send you a link to reset your password."
       width="narrow"
     >
-      <div className="max-w-md mt-8">
-        <form onSubmit={handleSubmit} noValidate className="space-y-5">
+      <div className="max-w-md mt-lg">
+        <form onSubmit={handleSubmit} noValidate className="space-y-md">
           {error && (
-            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert" aria-live="assertive">
+            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-xs" role="alert" aria-live="assertive">
               {error}
             </div>
           )}
@@ -95,7 +95,7 @@ export default function ForgotPasswordPage() {
           </Button>
         </form>
 
-        <p className="text-base text-warm-gray-600 mt-6 text-center">
+        <p className="text-base text-warm-gray-600 mt-md text-center">
           <Link href="/login" className="text-ocean hover:underline font-medium">
             Back to login
           </Link>

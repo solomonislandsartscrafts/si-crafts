@@ -79,16 +79,16 @@ export function MakerEnquiryForm({
   }
 
   return (
-    <section className="border-t border-sand pt-12">
-      <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-2">
+    <section className="border-t border-sand pt-block">
+      <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-2xs">
         {heading}
       </h2>
-      {intro && <p className="text-base text-warm-gray-600 mb-8">{intro}</p>}
+      {intro && <p className="text-base text-warm-gray-600 mb-stack">{intro}</p>}
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-5 max-w-md">
+      <form onSubmit={handleSubmit} noValidate className="space-y-md max-w-md">
         {errors.form && (
           <p
-            className="text-base text-error bg-error/10 px-3 py-2 rounded"
+            className="text-base text-error bg-error/10 px-xs py-2xs rounded"
             role="alert"
             aria-live="assertive"
           >

@@ -3,7 +3,20 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-export function PieceLookup() {
+interface PieceLookupProps {
+  /**
+   * `dark` is for the homepage hero, where this form sits on the green band
+   * inside `<HeroCodeToggle tone="dark">`. The submit button defaults to
+   * `brand-green` — indistinguishable from that green backdrop — so `dark`
+   * swaps it to the ocean/deep-blue fill instead, giving the lookup its own
+   * distinct colour rather than disappearing into the hero. The standalone
+   * `/piece` lookup page is on white, where green reads fine, so it keeps the
+   * default.
+   */
+  tone?: 'light' | 'dark';
+}
+
+export function PieceLookup({ tone = 'light' }: PieceLookupProps) {
   const router = useRouter();
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
@@ -31,19 +44,23 @@ export function PieceLookup() {
           placeholder="ENTER CODE HERE"
           value={code}
           onChange={(e) => { setCode(e.target.value); setError(''); }}
-          className="flex-1 px-3 py-2 text-xs font-mono uppercase text-center text-warm-gray-800 placeholder:text-warm-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-ocean"
+          className="flex-1 px-xs py-2xs text-xs font-mono uppercase text-center text-warm-gray-800 placeholder:text-warm-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-ocean"
           aria-describedby={error ? 'piece-code-hero-error' : undefined}
           aria-invalid={!!error}
         />
         <button
           type="submit"
-          className="tap-target px-4 py-2 bg-brand-green text-white text-xs font-bold uppercase tracking-wider hover:bg-brand-green-dark transition-colors focus:outline-none focus:ring-2 focus:ring-brand-green-light"
+          className={`tap-target px-sm py-2xs text-white text-xs font-bold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 ${
+            tone === 'dark'
+              ? 'bg-ocean hover:bg-ocean-dark focus:ring-ocean-light'
+              : 'bg-brand-green hover:bg-brand-green-dark focus:ring-brand-green-light'
+          }`}
         >
           GO
         </button>
       </div>
       {error && (
-        <p id="piece-code-hero-error" className="text-xs text-error mt-1" aria-live="assertive">
+        <p id="piece-code-hero-error" className="text-xs text-error mt-3xs" aria-live="assertive">
           {error}
         </p>
       )}

@@ -99,7 +99,7 @@ export function RetailStockistFormModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50"
+      className="fixed inset-0 z-50 flex items-center justify-center p-sm bg-deep-blue/50"
       onClick={handleDismiss}
     >
       <div
@@ -110,7 +110,7 @@ export function RetailStockistFormModal({
         aria-modal="true"
         aria-labelledby="retail-stockist-form-title"
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-sand">
+        <div className="flex items-center justify-between px-md py-sm border-b border-sand">
           <h2
             id="retail-stockist-form-title"
             className="font-heading text-lg font-semibold text-deep-blue"
@@ -119,17 +119,17 @@ export function RetailStockistFormModal({
           </h2>
           <button
             onClick={handleDismiss}
-            className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form ref={formRef} onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="px-md py-sm space-y-sm">
           {saveError && (
             <p
-              className="text-base text-error bg-error/10 px-3 py-2 rounded"
+              className="text-base text-error bg-error/10 px-xs py-2xs rounded"
               role="alert"
               aria-live="assertive"
             >
@@ -233,10 +233,10 @@ export function RetailStockistFormModal({
                 className={`${inputClasses} max-w-24`}
               />
             </FormField>
-            <p className="text-xs text-warm-gray-400 mt-1">Lower numbers appear first.</p>
+            <p className="text-xs text-warm-gray-400 mt-3xs">Lower numbers appear first.</p>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
+          <div className="flex items-center justify-end gap-xs pt-sm border-t border-sand">
             <Button variant="secondary" onClick={handleDismiss} disabled={saving}>
               Cancel
             </Button>

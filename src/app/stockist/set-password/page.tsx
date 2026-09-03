@@ -41,7 +41,7 @@ function SetPasswordForm() {
         align="center"
         width="narrow"
       >
-        <div className="mt-6 flex justify-center">
+        <div className="mt-md flex justify-center">
           <ButtonLink href="/contact" variant="secondary">
             Contact us
           </ButtonLink>
@@ -108,10 +108,10 @@ function SetPasswordForm() {
       intro="Your stockist account has been approved. Choose a password to get started."
       width="narrow"
     >
-      <div className="max-w-md mt-8">
-        <form onSubmit={handleSubmit} noValidate className="space-y-5">
+      <div className="max-w-md mt-lg">
+        <form onSubmit={handleSubmit} noValidate className="space-y-md">
           {error && (
-            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert" aria-live="assertive">
+            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-xs" role="alert" aria-live="assertive">
               {error}
             </div>
           )}
