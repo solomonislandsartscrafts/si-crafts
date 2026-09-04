@@ -758,38 +758,11 @@
   color: #3D362E;
 }
 
-/* Drop cap — the classic long-read entry cue. The first letter of the opening
-   paragraph is enlarged and floated so the eye is drawn straight to the start
-   of the prose. Deep-blue (heading colour) and Poppins (the heading face) so it
-   reads as a deliberate typographic mark rather than an oversized body letter.
-   `initial-letter` sinks it 3 lines where supported (Safari, Chrome); the
-   float/font-size fallback covers Firefox with an approximation on the same
-   4px-ish rhythm. Applied only to the very first paragraph, so it never fires
-   mid-article. Reduced-motion is irrelevant here — this is static. */
-.article-content > p:first-of-type::first-letter {
-  font-family: var(--font-heading), 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  color: #1B3A4B;
-  font-weight: 600;
-  -webkit-initial-letter: 3;
-  initial-letter: 3;
-  /* Fallback for engines without initial-letter (Firefox): float a large cap. */
-  float: left;
-  font-size: 3.25rem;
-  line-height: 1;
-  padding-right: var(--space-2xs);
-  padding-top: 0.25rem;
-}
-
-/* Where initial-letter IS supported, drop the float fallback so the two
-   mechanisms don't fight — initial-letter handles the sink and spacing. */
-@supports (initial-letter: 3) or (-webkit-initial-letter: 3) {
-  .article-content > p:first-of-type::first-letter {
-    float: none;
-    font-size: inherit;
-    line-height: inherit;
-    padding-top: 0;
-  }
-}
+/* No drop cap. The opening paragraph's first letter used to be enlarged and
+   floated (an `initial-letter` sink with a Firefox float fallback) as a
+   long-read entry cue. It was removed in favour of plain, straightforward
+   body text so the article simply reads top to bottom. The lead-paragraph
+   size step above is the only entry treatment now. */
 
 .article-content h2 {
   font-family: var(--font-heading), 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;

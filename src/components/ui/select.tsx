@@ -46,6 +46,14 @@ interface SelectProps {
    * this: `sm:w-auto` is emitted after the base utilities, so it wins.
    */
   fullWidth?: boolean;
+  /**
+   * Which edge the dropdown panel is anchored to. `left` (default) is right for
+   * a full-width control in a rail. Use `right` when the trigger sits on the
+   * right edge of a row (e.g. the catalogue sort): a `left`-anchored panel with
+   * a min-width there extends past the right edge of the screen on a phone and
+   * causes horizontal overflow.
+   */
+  align?: 'left' | 'right';
 }
 
 export function Select({
@@ -57,6 +65,7 @@ export function Select({
   id,
   className = '',
   fullWidth = false,
+  align = 'left',
 }: SelectProps) {
   const [open, setOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -211,7 +220,13 @@ export function Select({
           role="listbox"
           id={id ? `${id}-listbox` : undefined}
           aria-label={label}
-          className="absolute left-0 top-full mt-3xs z-50 w-full min-w-[180px] max-h-60 overflow-y-auto rounded-md border border-sand-dark bg-white shadow-lg py-3xs"
+          /* `max-w-[calc(100vw-2rem)]` keeps the panel inside the viewport so
+             `min-w-[180px]` can never push it off-screen on a phone. Anchored
+             to the right edge when `align="right"` so a trigger sitting on the
+             right of a row opens leftward instead of overflowing. */
+          className={`absolute ${
+            align === 'right' ? 'right-0' : 'left-0'
+          } top-full mt-3xs z-50 w-full min-w-[180px] max-w-[calc(100vw-2rem)] max-h-60 overflow-y-auto rounded-md border border-sand-dark bg-white shadow-lg py-3xs`}
           onKeyDown={handleKeyDown}
         >
           {allOptions.map((opt, index) => {
