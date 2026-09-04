@@ -320,33 +320,12 @@ export default async function HomePage() {
 
       </div>
 
-      {/* Who we are — the mission statement. The first thing that tells a
-          first-time visitor what SIAC actually is, before the makers or the
-          pieces make sense. The statement IS the heading (no separate label
-          above it), and it is a real <h2> so the site's self-description is
-          reachable by heading navigation. Warm band, so the first move below
-          the white hero is a change of surface. */}
+      {/* Featured Makers — the warm band, so the first move below the white
+          hero is a change of surface. With the mission statement removed, the
+          page alternates hero (white) → Makers (warm) → Products (white) →
+          deep-blue CTA → News (white), keeping the gentle warm/white swap
+          rather than running two white sections together. */}
       <section className="section-y section-band">
-        <div className="site-container">
-          <div className="max-w-3xl">
-            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue leading-heading">
-              {text['homepage.missionStatement']}
-            </h2>
-            <FlagDivider variant="mark" className="mt-sm" />
-            <CmsText
-              value={text['homepage.missionBody']}
-              className="mt-stack space-y-md"
-              paragraphClassName="text-lg text-warm-gray-600 leading-body-lg"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Makers — white, so the page alternates hero (white) → Who we
-          are (warm) → Makers (white) → Products (warm) → deep-blue CTA → News
-          (white), keeping the gentle warm/white swap rather than running two
-          same-coloured sections together. */}
-      <section className="section-y">
         <div className="site-container">
           {/* Keeps its heading — unlabelled portraits give a first-time visitor
               no context — but no intro paragraph, because the mission statement
@@ -384,11 +363,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Featured Products — warm band, between the white Makers section above
-          and the deep-blue CTA below, so the body alternates
-          white → warm → deep-blue → white instead of running two same-coloured
-          sections together. */}
-      <section className="section-y section-band">
+      {/* Featured Products — white, between the warm Makers band above and the
+          deep-blue CTA below, so the body alternates
+          warm → white → deep-blue → white instead of running two warm sections
+          together. */}
+      <section className="section-y">
         <div className="site-container">
           {/* Light label, not a full titled section. The products speak for
               themselves, so instead of a big heading + flag-mark + intro
