@@ -14,7 +14,7 @@ import {
 import { ProductCard } from '@/components/cards/product-card';
 import { ArticleCard } from '@/components/cards/article-card';
 import {
-  featuredPosterGridClasses,
+  posterGridClasses,
   articleGridClasses,
   shortArticleGridClasses,
 } from '@/components/cards/poster-card';
@@ -27,6 +27,7 @@ import { SponsorBanner } from '@/components/shared/sponsor-banner';
 import { StockedByBand } from '@/components/shared/stocked-by-band';
 import { ButtonLink } from '@/components/ui/button';
 import { CmsText } from '@/components/ui/cms-text';
+import { Info } from 'lucide-react';
 import type { Product, Maker, SlideshowSettings } from '@/types';
 
 interface BuildHeroSlidesArgs {
@@ -150,10 +151,10 @@ export default async function HomePage() {
     getSlideshowSettingsSafe(),
   ]);
 
-  // Three, not four: the homepage featured grid is 3-up at desktop (bigger
-  // tiles), so three fills exactly one row rather than leaving a lone tile on a
-  // second row. The full four-column listing lives on /catalogue.
-  const featuredProducts = products.slice(0, 3);
+  // Four, so the homepage featured grid fills exactly one row at its 4-up
+  // desktop width rather than leaving a lone tile on a second row. The full
+  // listing lives on /catalogue.
+  const featuredProducts = products.slice(0, 4);
   const latestArticles = articles.slice(0, 3);
   // Up to eight makers feed the carousel — enough that there is always
   // somewhere to swipe/page to beyond the first screen of cards.
@@ -210,11 +211,9 @@ export default async function HomePage() {
                 nothing; from `lg` the gap is horizontal, between the text and
                 the gallery, where 48px is right.
 
-                `pt-block` / `pb-lg lg:pb-xl` give the hero its own vertical
-                rhythm. The bottom pad is deliberately one rung SHORTER than the
-                top: what follows is the flag stripe and the supporters band,
-                not a new section, so they should sit tight under the hero rather
-                than a full section break away.
+                `py-section` (48 → 96) gives the hero generous, balanced top and
+                bottom padding so the cover has room to breathe above the flag
+                stripe and below the header.
 
                 `lg:items-start` not `items-center`: the gallery column is
                 roughly twice the height of the text column, so centring left
@@ -226,7 +225,7 @@ export default async function HomePage() {
                 leaves a centre frame smaller than the one it replaced. An even
                 split at `lg` costs the h1 one extra line and buys the gallery
                 ~95px. From `xl` there is room for both. */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-5 gap-md lg:gap-x-xl items-center lg:items-start pt-block pb-lg lg:pb-xl">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-5 gap-md lg:gap-x-xl items-center lg:items-start py-section">
               {/* Text content — leads on mobile (order-1) so the primary hero
                   copy comes before the gallery, left on desktop. Half the row
                   at `lg`, then 3 of 5 columns from `xl` where the extra width
@@ -310,27 +309,69 @@ export default async function HomePage() {
             stripe on the site that is not under a `<PageHeader>`. */}
         <FlagDivider />
 
-        {/* Supporters — sits directly under the hero as the closing row of the
-            opening block, so a first-time visitor sees who backs SIAC alongside
-            the hero rather than at the very bottom of the page. Grouped inside
-            this `flex flex-col` block with the hero and flag stripe so the three
-            read as one unit. Renders `null` when there are no supporters, in
-            which case the block simply ends at the flag stripe. */}
-        <SponsorBanner />
-
       </div>
 
-      {/* Featured Makers — the warm band, so the first move below the white
-          hero is a change of surface. With the mission statement removed, the
-          page alternates hero (white) → Makers (warm) → Products (white) →
+      {/* Featured Products — the warm band, so the first move below the white
+          hero is a change of surface. Sits above Meet the makers now, so the
+          page alternates hero (white) → Products (warm) → Makers (white) →
           deep-blue CTA → News (white), keeping the gentle warm/white swap
-          rather than running two white sections together. */}
+          rather than running two same-coloured sections together. */}
       <section className="section-y section-band">
         <div className="site-container">
+          {/* No visible heading or "View all" link, so the frames read as a
+              clean grid of imagery on their own. The <h2> is kept but visually
+              hidden (`sr-only`) so the section still has a landmark in the
+              heading outline — a screen-reader user paging by heading would
+              otherwise jump straight from the hero to "Meet the makers", with
+              the featured products invisible to that navigation. The route to
+              the full catalogue lives on the mobile button below and in the
+              main nav. */}
+          <h2 className="sr-only">{text['homepage.productsHeading']}</h2>
+          <div role="list" aria-label="Featured products" className={posterGridClasses}>
+            {featuredProducts.map((product) => {
+              const maker = makers.find((m) => m.id === product.makerId);
+              return (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  makerName={maker?.name}
+                />
+              );
+            })}
+          </div>
+          {/* Why there are no prices. A visitor who has just scrolled a grid of
+              unpriced products has no way to tell whether the site is broken,
+              sold out, or not selling to them — the wholesale-only rule is a
+              business decision. Presented as an info callout (the design
+              system's `ocean` info treatment + an Info glyph) so it reads as a
+              deliberate notice rather than stray copy under the grid. Sits
+              directly under the grid, where the question occurs. Clearing the
+              CMS field hides it. */}
+          {text['homepage.productsPricingNote'] && (
+            <div className="mt-stack flex items-start gap-xs rounded-lg bg-ocean/10 p-md max-w-2xl">
+              <Info className="w-5 h-5 text-ocean shrink-0 mt-3xs" aria-hidden="true" />
+              <CmsText
+                value={text['homepage.productsPricingNote']}
+                paragraphClassName="text-base leading-body text-warm-gray-800"
+              />
+            </div>
+          )}
+          <div className="sm:hidden mt-stack text-center">
+            <ButtonLink href="/catalogue" variant="secondary">
+              {text['homepage.productsButton']}
+            </ButtonLink>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Makers — white, between the warm Products band above and the
+          deep-blue CTA below, so the body alternates
+          warm → white → deep-blue → white instead of running two warm sections
+          together. */}
+      <section className="section-y">
+        <div className="site-container">
           {/* Keeps its heading — unlabelled portraits give a first-time visitor
-              no context — but no intro paragraph, because the mission statement
-              directly above already introduces the makers and the provenance
-              promise. The faces carry the section.
+              no context. The faces carry the section.
 
               "Meet the makers" is this section's line alone now. The hero eyebrow
               used to default to "Meet the Makers Behind Every Piece", which said
@@ -360,68 +401,6 @@ export default async function HomePage() {
               always present. The full-list link is the "View all" beside the
               heading, shown at every width, so there is no second button below. */}
           <MakersCarousel makers={featuredMakers} craftNameMap={craftNameMap} />
-        </div>
-      </section>
-
-      {/* Featured Products — white, between the warm Makers band above and the
-          deep-blue CTA below, so the body alternates
-          warm → white → deep-blue → white instead of running two warm sections
-          together. */}
-      <section className="section-y">
-        <div className="site-container">
-          {/* Light label, not a full titled section. The products speak for
-              themselves, so instead of a big heading + flag-mark + intro
-              paragraph this is a quiet eyebrow with the "View all" link beside
-              it. The heading text still comes from the CMS so it stays editable.
-
-              It stays a real <h2>, only styled small: the section needs a
-              landmark in the heading outline or a screen-reader user paging by
-              heading gets h1 → "Meet the makers" → nothing → the CTA, with the
-              featured products invisible to that navigation. The grid's
-              aria-label only helps once you are already inside it. Visually
-              identical to a span — semantics and appearance are separate
-              decisions here. */}
-          <div className="flex items-center justify-between mb-stack">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-warm-gray-400">
-              {text['homepage.productsHeading']}
-            </h2>
-            <Link
-              href="/catalogue"
-              className="hidden sm:inline-flex items-center gap-3xs text-base font-medium text-ocean hover:text-ocean-dark transition-colors"
-            >
-              View all
-            </Link>
-          </div>
-          <div role="list" aria-label="Featured products" className={featuredPosterGridClasses}>
-            {featuredProducts.map((product) => {
-              const maker = makers.find((m) => m.id === product.makerId);
-              return (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  makerName={maker?.name}
-                />
-              );
-            })}
-          </div>
-          {/* Why there are no prices. A visitor who has just scrolled a grid of
-              unpriced products has no way to tell whether the site is broken,
-              sold out, or not selling to them — the wholesale-only rule is a
-              business decision, but until now the page never said so anywhere
-              above the CTA band. Sits directly under the grid, where the question
-              occurs. Clearing the CMS field hides it. */}
-          {text['homepage.productsPricingNote'] && (
-            <CmsText
-              value={text['homepage.productsPricingNote']}
-              className="mt-stack max-w-2xl"
-              paragraphClassName="text-base leading-body text-warm-gray-600"
-            />
-          )}
-          <div className="sm:hidden mt-stack text-center">
-            <ButtonLink href="/catalogue" variant="secondary">
-              {text['homepage.productsButton']}
-            </ButtonLink>
-          </div>
         </div>
       </section>
 
@@ -487,6 +466,12 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* Supporters — sits at the bottom of the page, directly above the footer,
+          where a credit belongs alongside the footer's other institutional
+          detail. Renders `null` when there are no supporters, in which case the
+          page simply ends on the news section. */}
+      <SponsorBanner />
 
     </div>
   );
