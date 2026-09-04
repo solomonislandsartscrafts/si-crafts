@@ -114,11 +114,11 @@ export default function AdminAdminsPage() {
           <table className="w-full text-sm">
             <thead className="bg-sand-light border-b border-sand">
               <tr>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Name</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden sm:table-cell">Email</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Role</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Status</th>
-                <th className="text-right px-sm py-xs font-medium text-warm-gray-600">Actions</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Name</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden sm:table-cell">Email</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Role</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Status</th>
+                <th scope="col" className="text-right px-sm py-xs font-medium text-warm-gray-600">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-sand">
@@ -142,7 +142,7 @@ export default function AdminAdminsPage() {
                       {admin.isActive && (
                         <button
                           onClick={() => handleDeactivate(admin.id, admin.name)}
-                          className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                          className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                           aria-label={`Deactivate ${admin.name}`}
                         >
                           <Trash2 className="w-4 h-4" />
@@ -228,7 +228,7 @@ function AddAdminModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
           </h2>
           <button
             onClick={onClose}
-            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
             aria-label="Close"
           >
             <X className="w-5 h-5" />

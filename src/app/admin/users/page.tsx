@@ -248,11 +248,11 @@ export default function AdminUsersPage() {
           <table className="w-full text-sm">
             <thead className="bg-sand-light border-b border-sand">
               <tr>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Name</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden md:table-cell">Email</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Role</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden sm:table-cell">Status</th>
-                <th className="text-right px-sm py-xs font-medium text-warm-gray-600">Actions</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Name</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden md:table-cell">Email</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Role</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden sm:table-cell">Status</th>
+                <th scope="col" className="text-right px-sm py-xs font-medium text-warm-gray-600">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-sand">
@@ -286,7 +286,7 @@ export default function AdminUsersPage() {
                       <div className="flex items-center justify-end gap-3xs">
                         <button
                           onClick={() => { setNotice(''); setEditing(u); }}
-                          className="tap-target p-2xs text-warm-gray-400 hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                          className="tap-target p-2xs text-warm-gray-400 hover:text-ocean transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                           aria-label={`Edit ${u.name}`}
                         >
                           <Pencil className="w-4 h-4" />
@@ -294,7 +294,7 @@ export default function AdminUsersPage() {
                         {u.stockist && (
                           <button
                             onClick={() => handleSendPasswordLink(u)}
-                            className="tap-target p-2xs text-warm-gray-400 hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                            className="tap-target p-2xs text-warm-gray-400 hover:text-ocean transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                             aria-label={`Email ${u.name} a password link`}
                           >
                             <Mail className="w-4 h-4" />
@@ -303,7 +303,7 @@ export default function AdminUsersPage() {
                         {!u.isSuperuser && (
                           <button
                             onClick={() => handleDelete(u)}
-                            className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                            className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                             aria-label={`Delete ${u.name}`}
                           >
                             <Trash2 className="w-4 h-4" />

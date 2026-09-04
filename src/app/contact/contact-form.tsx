@@ -130,7 +130,7 @@ export function ContactForm({
           ]}
           placeholder="Select a reason"
           label="Reason for contact"
-          className="w-full"
+          fullWidth
         />
       </FormField>
 

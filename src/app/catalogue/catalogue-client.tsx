@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import type { Product, Maker } from '@/types';
 import { MakerFilter } from '@/components/catalogue/maker-filter';
-import { CategoryChips } from '@/components/catalogue/category-chips';
+import { CategoryFilter } from '@/components/catalogue/category-filter';
 import { SearchInput } from '@/components/catalogue/search-input';
 import { ProductGrid } from '@/components/catalogue/product-grid';
 import { StockistProductGrid } from '@/components/catalogue/stockist-product-grid';
@@ -30,6 +30,14 @@ const STOCKIST_SORTS: { value: SortKey; label: string }[] = [
   { value: 'price-asc', label: 'Price (low to high)' },
   { value: 'price-desc', label: 'Price (high to low)' },
 ];
+
+/**
+ * The small caps label above each control in the filter rail. Defined once
+ * rather than retyped per section — the same reason `inputClasses` exists.
+ * `text-xs` is legitimate here: these are field labels, not reading content.
+ */
+const filterLabelClasses =
+  'text-xs font-semibold uppercase tracking-wide text-warm-gray-400';
 
 interface CatalogueClientProps {
   products: Product[];
@@ -163,47 +171,39 @@ export function CatalogueClient({
     setSortKey(null);
   }
 
-  // The filter controls, shared between the desktop sidebar and the mobile
-  // stacked layout (same panel, different container). Chips stack vertically so
-  // each craft type reads as a list option in the rail.
+  // The filter controls, shared between the desktop rail and the mobile stacked
+  // layout — same markup, different container.
+  //
+  // Order is deliberate and it is not the order these were originally in:
+  // Search, then Material, then Maker. Search is the shortest path for a visitor
+  // who already knows what they want ("bowl", a product code), so it goes first.
+  // It used to sit third, below a six-item material list, which buried the one
+  // control that can answer a specific question in one action.
+  //
+  // Sort is NOT here. It orders results rather than narrowing them, so it lives
+  // beside the result count above the grid — see the product column below.
   const filtersPanel = (
     <div className="space-y-md">
-      <CategoryChips
-        selected={selectedMaterial}
-        onChange={setSelectedMaterial}
-        options={materialCategories}
-        direction="stack"
-      />
+      <div className="flex flex-col gap-2xs">
+        <span className={filterLabelClasses}>Search</span>
+        <SearchInput value={searchQuery} onChange={setSearchQuery} fullWidth />
+      </div>
 
-      <div className="flex flex-col gap-3xs">
-        <span className="text-xs font-semibold uppercase tracking-wide text-warm-gray-400">
-          Maker
-        </span>
+      <div className="flex flex-col gap-2xs">
+        <span className={filterLabelClasses}>Material</span>
+        <CategoryFilter
+          selected={selectedMaterial}
+          onChange={setSelectedMaterial}
+          options={materialCategories}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2xs">
+        <span className={filterLabelClasses}>Maker</span>
         <MakerFilter
           makers={makers}
           selected={selectedMaker}
           onChange={setSelectedMaker}
-        />
-      </div>
-
-      <div className="flex flex-col gap-3xs">
-        <span className="text-xs font-semibold uppercase tracking-wide text-warm-gray-400">
-          Search
-        </span>
-        <SearchInput value={searchQuery} onChange={setSearchQuery} fullWidth />
-      </div>
-
-      <div className="flex flex-col gap-3xs">
-        <span className="text-xs font-semibold uppercase tracking-wide text-warm-gray-400">
-          Sort
-        </span>
-        <Select
-          id="sort"
-          value={sortKey}
-          onChange={(v) => setSortKey((v as SortKey) || null)}
-          options={sortOptions}
-          placeholder="Featured"
-          label="Sort products"
         />
       </div>
 
@@ -237,38 +237,57 @@ export function CatalogueClient({
           the left with the products beside it, so the grid is visible at first
           glance without scrolling past a control bar. */}
       <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-block items-start">
-        {/* Filter sidebar. Sticky on desktop so it stays in view as the grid
+        {/* Filter rail. Sticky on desktop so it stays in view as the grid
             scrolls. Hidden on mobile unless toggled open, so it never pushes
-            the grid down the page. */}
+            the grid down the page.
+            No panel: this was a `bg-warm-gray-100` (#FAFAFA) box with a
+            `border-sand` outline and `p-md`. On a white page a near-white fill
+            adds weight without adding separation — the same conclusion the
+            poster card reached when it dropped the panel around its caption.
+            The `gap-block` (32 → 64px) between rail and grid already separates
+            them, so the labels and options can do the work unboxed. */}
         <aside
           id="catalogue-filters"
           aria-label="Filter products"
-          className={`${
-            filtersOpen ? 'block' : 'hidden'
-          } lg:block rounded-lg border border-sand bg-warm-gray-100 p-md lg:sticky lg:top-24`}
+          className={`${filtersOpen ? 'block' : 'hidden'} lg:sticky lg:top-24 lg:block`}
         >
           {filtersPanel}
         </aside>
 
         {/* Product column */}
         <div>
-          {/* Result count strip above the grid. */}
-          <p
-            className="mb-stack text-base text-warm-gray-600"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {filteredProducts.length === 0 ? (
-              emptyTitle
-            ) : (
-              <>
-                <span className="font-semibold text-warm-gray-800">
-                  {filteredProducts.length}
-                </span>{' '}
-                {filteredProducts.length === 1 ? 'piece' : 'pieces'}
-              </>
-            )}
-          </p>
+          {/* Result count + sort, on one row above the grid.
+              Sort belongs here rather than in the filter rail: it reorders the
+              results instead of narrowing them, and this is where the visitor is
+              already looking once the count changes. It also keeps the rail to
+              three controls that all answer "show me fewer things". */}
+          <div className="mb-stack flex flex-wrap items-center justify-between gap-sm">
+            <p
+              className="text-base text-warm-gray-600"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {filteredProducts.length === 0 ? (
+                emptyTitle
+              ) : (
+                <>
+                  <span className="font-semibold text-warm-gray-800">
+                    {filteredProducts.length}
+                  </span>{' '}
+                  {filteredProducts.length === 1 ? 'piece' : 'pieces'}
+                </>
+              )}
+            </p>
+
+            <Select
+              id="sort"
+              value={sortKey}
+              onChange={(v) => setSortKey((v as SortKey) || null)}
+              options={sortOptions}
+              placeholder="Featured"
+              label="Sort products"
+            />
+          </div>
 
           {/* A single flat grid — no per-material section headings. The craft
               filter already narrows by category. */}

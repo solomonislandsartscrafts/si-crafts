@@ -108,7 +108,7 @@ export function TeamFormModal({ member, onClose, onSave }: TeamFormModalProps) {
           </h2>
           <button
             onClick={handleDismiss}
-            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean rounded"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -237,6 +237,42 @@ function PhotoPositionControl({ imageUrl, position, onChange }: PhotoPositionCon
     [onChange]
   );
 
+  // Keyboard equivalent of dragging: the control was mouse/touch-only, so a
+  // keyboard-only admin had no way to set a team member's photo focal point
+  // at all. Arrow keys nudge the focal point by 5% per press (Shift for a
+  // finer 1% step); Home/End jump to the left/top and right/bottom edges.
+  function handleKeyDown(e: React.KeyboardEvent) {
+    const step = e.shiftKey ? 1 : 5;
+    let nextX = posX;
+    let nextY = posY;
+    switch (e.key) {
+      case 'ArrowLeft':
+        nextX = Math.max(0, posX - step);
+        break;
+      case 'ArrowRight':
+        nextX = Math.min(100, posX + step);
+        break;
+      case 'ArrowUp':
+        nextY = Math.max(0, posY - step);
+        break;
+      case 'ArrowDown':
+        nextY = Math.min(100, posY + step);
+        break;
+      case 'Home':
+        nextX = 0;
+        nextY = 0;
+        break;
+      case 'End':
+        nextX = 100;
+        nextY = 100;
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+    onChange(`${Math.round(nextX)}% ${Math.round(nextY)}%`);
+  }
+
   function handleMouseDown(e: React.MouseEvent) {
     e.preventDefault();
     dragging.current = true;
@@ -277,18 +313,30 @@ function PhotoPositionControl({ imageUrl, position, onChange }: PhotoPositionCon
         Adjust Photo Position
       </label>
       <p className="text-xs text-warm-gray-400 mb-2xs">
-        Click or drag on the circle to position the focal point of the image.
+        Click or drag on the circle to position the focal point of the image, or
+        tab to it and use the arrow keys.
       </p>
 
       <div className="flex items-center gap-sm">
-        {/* Draggable circle preview */}
+        {/* Draggable circle preview. Also a keyboard control: arrow keys nudge
+            the focal point (Shift for a finer step), Home/End jump to the
+            corners — mouse/touch dragging alone left this unusable without a
+            pointer. */}
         <div
           ref={containerRef}
-          className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-ocean cursor-crosshair select-none flex-shrink-0"
+          role="slider"
+          tabIndex={0}
+          aria-label="Photo focal point"
+          aria-valuetext={`${posX}% from left, ${posY}% from top`}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={posX}
+          className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-ocean cursor-crosshair select-none flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean focus-visible:ring-offset-2"
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onKeyDown={handleKeyDown}
         >
           <Image
             src={resolveImageUrl(imageUrl)}

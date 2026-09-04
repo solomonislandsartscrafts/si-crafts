@@ -156,7 +156,7 @@ Defined in `globals.css`. Use these rather than inventing new dividers:
 
 | Class | Height | Use |
 |-------|--------|-----|
-| `.flag-divider` | 6px | Below the site header |
+| `.flag-divider` | 6px | Seam at the bottom of the homepage opening block. NOT under the site header — see Page banners |
 | `.flag-hairline` | 3px | Caps the top edge of dark bands |
 | `.flag-mark` | 4px × 64px | Stub under interior page titles |
 
@@ -167,9 +167,12 @@ the "Solomon Islands Arts & Crafts" wordmark. Never set text beside it.
 - Sized by height with `w-auto` (`h-10 sm:h-11`) so the artwork cannot distort.
 - Renders `alt=""` on purpose: it always sits inside a link that carries its own
   `aria-label`, and that label wins over `alt` for the accessible name.
-- There is no `light` variant. The artwork is dark ink on transparency, so it
-  disappears on dark surfaces. The footer and admin sidebar render their own
-  white text instead of using `<Logo>`.
+- The artwork is dark ink on transparency, so it disappears on a dark surface.
+  `onDark` is the one variant: a `brightness-0 invert` filter that renders the
+  mark crisp white, reusing the single PNG rather than shipping a reversed asset.
+  The footer uses it; the admin sidebar renders its own white text instead. An
+  `onDarkFromLg` variant (white only from `lg` up) existed for the old
+  transparent-over-hero header and has been removed with it.
 
 There is no `<FlagMark>` component; the flag device is CSS-only via the classes
 above.
@@ -192,11 +195,11 @@ bugs.
 | `3xs` | 4px | Hairline nudges, icon-to-baseline alignment |
 | `2xs` | 8px | Heading → its own subtitle; icon → its label |
 | `xs` | 12px | Button rows, chip rows, inline metadata |
-| `sm` | 16px | Card padding, tight stacks |
-| `md` | 24px | Roomier card padding, block internals |
-| `lg` | 32px | Grid gutters (desktop), heading → content (desktop) |
-| `xl` | 48px | Section band padding (mobile) |
-| `2xl` | 64px | Page gutter (desktop), block separation (desktop) |
+| `sm` | 16px | Card padding, tight stacks, grid gutters (mobile) |
+| `md` | 24px | Roomier card padding, block internals, grid gutters (desktop) |
+| `lg` | 32px | Heading → content (desktop) |
+| `xl` | 48px | Section band padding (mobile), page gutter (desktop) |
+| `2xl` | 64px | Block separation (desktop) |
 | `3xl` | 96px | Section band padding (desktop) |
 
 Usable as `p-md`, `gap-lg`, `mt-2xs`, `space-y-md`, `-mx-2xl`, and so on.
@@ -218,12 +221,18 @@ reintroduces the per-call-site drift they exist to prevent.
 
 | Token | Mobile | Desktop | Use |
 |-------|--------|---------|-----|
-| `gutter` | 16px | 64px @920 | Page side gutters (via `.site-px`) |
+| `gutter` | 16px | 48px @920 | Page side gutters (via `.site-px`) |
 | `page` | 24px | 32px @920 | Whole-page top/bottom padding (via `.page-y`) |
 | `section` | 48px | 96px @1024 | Between major page sections (via `.section-y`) |
 | `block` | 32px | 64px @1024 | Between blocks inside one section |
 | `stack` | 24px | 32px @1024 | Section heading/subtitle → the content below |
-| `grid` | 24px | 32px @920 | Card grid gutters, both axes |
+| `grid` | 16px | 24px @920 | Card grid gutters, both axes |
+
+The desktop `gutter` is 48px, not 64px. The gutter is pure margin — every pixel
+of it comes off the content column, and on an image-led wholesale catalogue that
+column IS the product photography. 64px on the 1440px canvas left the grids
+noticeably narrower than they needed to be. 48px is still three rungs above the
+16px mobile gutter, so the page never reads as edge-to-edge.
 
 ### The hierarchy
 
@@ -237,7 +246,14 @@ new spacing against it:
    for a section break.
 3. **`stack`** (24 → 32) from a section heading down to the content it
    introduces.
-4. **`grid`** (24 → 32) between cards in a grid.
+4. **`grid`** (16 → 24) between cards in a grid — the smallest structural gap,
+   and a clear rung below `stack`. That gap between rungs 3 and 4 is
+   load-bearing. The two used to be equal (24 → 32 each), which meant the space
+   under a section heading was exactly the space between two cards: nothing
+   marked where the heading ended and the grid began, and a row of tiles read as
+   separate objects rather than one block of imagery. Roughly 1:2 between the
+   grid gutter and the heading gap is what makes a grid cohere under its
+   heading. If you widen `grid`, widen `stack` with it.
 5. **`2xs`** (8px) between a heading and its own subtitle, an icon and its label,
    or any other pair that has to read as one unit.
 
@@ -250,7 +266,14 @@ step down to the content grid. If a heading has no subtitle it still takes
 
 Padding inside a component is never larger than the gap separating it from its
 neighbours. Card padding is `sm` (16) or `md` (24) against a `grid` gutter of
-24 → 32. Check this whenever you add a card or panel variant.
+16 → 24. Check this whenever you add a card or panel variant.
+
+Note the margin here is now zero rather than comfortable: `sm` padding EQUALS the
+gutter at both breakpoints, and `md` padding exceeds the mobile gutter. So `p-md`
+is no longer safe on a panel that sits inside a card grid. Poster cards have no
+panel padding at all — their only internal spacing is the 12px frame → caption —
+so this only bites if you add a padded panel variant to a grid. `p-md` remains
+correct everywhere else (note boxes, admin panels, standalone panels).
 
 ### Mobile is the same ladder, one rung down
 
@@ -304,7 +327,7 @@ longer appears in the codebase.
 
 **Admin is deliberately exempt from the desktop gutter.** Admin surfaces use
 `p-md tabtop:p-lg` (24 → 32) instead of `.site-px`: it is dense tabular data, and
-128px of side padding would cost real column width. Same scale, two rungs lower.
+96px of side padding would cost real column width. Same scale, one rung lower.
 
 ### The only permitted exceptions
 
@@ -399,101 +422,122 @@ component:
 - The banner is deliberately suppressed when `align="center"` or
   `width="narrow"`: form and confirmation pages (login, code lookup, stockist
   auth) always use the plain header, never a coloured band.
-- The homepage hero (`src/app/page.tsx`) is NOT a `<PageHeader>` — it has its
-  own split layout with the image gallery — but it wears the same `green` band
-  eyebrow rule, white heading/intro — but its background is NOT a flat band.
-  It is an artistic multi-stop gradient blending the full flag palette
-  (deep-blue #1B3A4B → ocean #1E5AA8 → brand-green #1E7A3D → accent-gold
-  #F4B728), set inline as `backgroundImage` on the hero `<section>` with
-  `bg-brand-green` kept as the solid fallback. This is the ONE background
-  gradient on the site and is explicitly the sanctioned "subtle overlay on hero
-  images" exception in the DO NOT list — do not add background gradients
-  elsewhere. All stops are locked palette hex values; no new colours. A flat
-  `bg-brand-green` band was replaced because it read heavy and collided with the
-  green `.btn-primary`. It is built from a `linear-gradient` colour wash plus
-  one or more low-opacity `radial-gradient` blooms for a dyed-textile / scenic
-  depth rather than a flat CSS ramp; the exact direction and bloom placement
-  are an art-directed choice that has been iterated on, so treat the values in
-  `page.tsx` as the source of truth rather than any specific angle quoted here.
-  The load-bearing INVARIANT, not the styling: deep-blue must stay dominant
-  wherever the heading/intro column sits (currently the top of the band) so the
-  white hero text keeps its ~11.9:1 contrast, and an aria-hidden deep-blue
-  `linear-gradient` scrim reinforces exactly that region so text stays AA-safe
-  even as the gradient warms to light gold elsewhere. Any new gradient version
-  MUST preserve that dark text region. Over the gradient sits the SAME `waves`
-  motif the interior `<PageHeader banner>` uses (the white, right-anchored,
-  `opacity-[0.12]` wave SVG — see `BannerMotif` in `page-header.tsx`), layered
-  above the gradient + scrim but under the content column, so the hero carries
-  the wave device the interior banners do. A `<FlagDivider variant="mark">` also
-  sits above the h1, echoing the same stub used under every section heading
-  below (Featured Makers, Featured Products, News) and picking up the same flag
-  colours the gradient blends.
-  Components placed on that band take their dark-background variant:
-  `<HeroSlideshow tone="dark">` and `<HeroCodeToggle tone="dark">`. The white
-  slideshow frames are unchanged — a white control pops on the band.
-  **The primary CTA ("Browse Catalogue") is NOT the site-wide green
-  `.btn-primary`.** `.btn-primary`'s fill is `brand-green` — identical to this
-  hero's own background — so the default button rendered as text with no
-  visible box at all. It is overridden inline to a gold fill with deep-blue
-  text (`!bg-accent-gold !text-deep-blue hover:!bg-accent-gold-dark
-  focus-visible:!outline-deep-blue`), the flag's own green/gold pairing, so the
-  hero keeps one unmistakable primary action. The secondary "Our Story" button
-  keeps the white-outline override (outline buttons have no fill-collision
-  problem). The same collision exists in miniature on `<PieceLookup>`'s "GO"
-  submit button, which also defaults to `bg-brand-green`: `<PieceLookup>` takes
-  a `tone` prop, and `dark` (passed by `<HeroCodeToggle tone="dark">`, used only
-  on this hero) swaps it to `bg-ocean`/`bg-ocean-dark` instead. The standalone
-  `/piece` lookup page renders `<PieceLookup>` at the default `light` tone, on
-  white, where the green fill has no such collision. **The slideshow is hidden
-  below `lg` (`hidden lg:block` on its wrapper in `page.tsx`) and appears only
-  when the hero splits into two columns.** On a phone the hero is the heading,
-  intro, buttons and code lookup alone; the makers and products each have their
-  own dedicated section directly below, so nothing is lost by dropping the
-  gallery there. Hiding it is what keeps the mobile hero short enough that the
-  sponsor row stays in the first viewport (a hard requirement — see
-  First-viewport layout), and it drops the images the gallery would otherwise
-  load on mobile. The gallery's visibility is a homepage layout decision, so it
-  lives on the wrapper, not inside `<HeroSlideshow>` (which stays
-  layout-agnostic and simply renders wherever it is placed). The sponsor logos
-  sit BELOW the band on white (grey label + ink logos need the light
-  background).
-- **First-viewport layout.** The hero, the flag stripe capping it, and the
-  "Supported by" (`<SponsorBanner>`) row are wrapped in one
-  `flex flex-col min-h-screen min-h-[100svh]` block, so on a normal screen the
-  sponsor row is visible without scrolling. The hero `<section>` is `flex-1` so
-  it absorbs the slack and pushes the stripe + sponsors to the bottom. The hero
-  content itself is top-aligned on mobile (`items-start`, `lg:items-center`):
-  centring it inside the tall `flex-1` band on a phone added vertical slack that
-  pushed the sponsor row below the fold on shorter viewports, so on mobile the
-  content sits at the top of the band and all the slack is below it, keeping the
-  stripe + sponsor row inside the first viewport. Height is
-  a MINIMUM (`min-h`, not fixed): on a short/landscape viewport where the hero
-  content is taller than the screen, the block grows and scrolls rather than
-  clipping the hero — do not change this to a fixed `h-screen`. `100svh` (small
-  viewport height, URL bar showing) is used with a `100vh` (`min-h-screen`)
-  fallback first, so the sponsor row lands inside the visible area on a phone
-  rather than behind the browser chrome. If the supporters list is empty,
-  `<SponsorBanner>` renders `null` and the block simply ends at the flag stripe
-  — a graceful, gap-free degradation.
+### Homepage section order
 
-  Keeping the sponsor row inside the first viewport on mobile is a hard
-  requirement, and two things protect it: the slideshow is hidden below `lg` (so
-  the mobile hero is text-only — heading, intro, buttons, code toggle), and the
-  hero grid's bottom padding is `pb-lg` (32) on mobile rather than `pb-section`
-  (48). If you add anything to the mobile hero, it comes out of this budget —
-  measure the first viewport on a ~640px-tall phone before and after, and do not
-  reintroduce the gallery on mobile without re-checking the sponsor row.
+Fixed, and each position is load-bearing. Do not reorder without re-reading why:
+
+| # | Section | Surface |
+|---|---------|---------|
+| 1 | Hero (+ `<FlagDivider>` closing it) | white |
+| 2 | **Who we are** — the mission statement | warm band |
+| 3 | Meet the makers (carousel) | white |
+| 4 | Featured products (+ pricing note) | warm band |
+| 5 | Wholesale CTA (`<PageCta>`) | deep-blue |
+| 6 | Latest news | white |
+| 7 | Supporters (`<SponsorBanner>`) | white, `border-y` |
+
+- **Position 2 is the mission statement, not the supporters band.** A first-time
+  visitor needs to be told what SIAC is — a volunteer-run wholesale supplier to
+  Australian museum and gallery shops — before anything else makes sense. The
+  supporters band used to hold this slot and, with one logo in it, read as an
+  unfinished placeholder in the most valuable position on the page.
+- **The mission statement has no section label.** The statement IS the heading, so
+  there is no title to read past — the move Bilum & Bilas uses. It is still a real
+  `<h2>` so the site's self-description is reachable by heading navigation.
+- **The products grid is followed by a pricing note**
+  (`homepage.productsPricingNote`). A visitor who has just scrolled a grid of
+  unpriced products cannot tell whether the site is broken, sold out, or not
+  selling to them. Wholesale-only is a business rule; the page has to say so.
+  Clearing the CMS field hides the note.
+- **Supporters go last, above the footer**, where a credit belongs alongside the
+  footer's other institutional detail. The band renders `null` with no
+  supporters, so the page ends on news.
+
+### The hero
+
+- **The homepage hero is WHITE, and it is not a `<PageHeader>`.** It has its own
+  split layout (text left, image gallery right) in `src/app/page.tsx`, and its
+  `<section>` is plain `bg-white`. This makes the homepage the least-branded page
+  on the site, since every interior page opens with a full coloured banner — a
+  deliberate editorial choice, but keep it in mind when judging the page. The
+  brand cues in the opening block are the `<FlagDivider variant="mark">` under
+  the eyebrow (the same stub used under every section heading below) and the
+  `<FlagDivider>` capping the bottom of the block.
+- **The hero eyebrow leads with what the business IS**
+  (`homepageHeading`, default "Wholesale Solomon Islands handicrafts"). It used to
+  default to "Meet the Makers Behind Every Piece", which said almost exactly what
+  the "Meet the makers" section heading one screen below says. That line now
+  belongs to the makers section alone.
+- **Two homepage CMS field names read backwards from where they render.**
+  `homepageHeading` is the hero EYEBROW; `homepageMakersHeading` is the hero H1
+  and has nothing to do with the makers section (which uses the
+  `homepage.makersHeading` site-text key). The admin form labels them correctly,
+  so an editor is not misled — only the code reads oddly. Both are Django
+  columns, so renaming needs a migration.
+
+  Because the surface is light, everything on it takes its light-background
+  treatment, and these go together — changing one alone is a contrast bug:
+  `text-deep-blue` heading and eyebrow, `<HeroSlideshow tone="light">`,
+  `<HeroCodeToggle tone="light">`, and a plain `.btn-primary` for the "Browse
+  Catalogue" CTA (green on white has no fill collision, so no override).
+
+  **History, so the old rationale is not reintroduced piecemeal.** The hero used
+  to be a multi-stop gradient blending the flag palette (deep-blue → ocean →
+  brand-green → accent-gold) set inline as `backgroundImage`, with white text, an
+  aria-hidden deep-blue scrim protecting the text region, a `waves` motif, a gold
+  primary CTA (because `.btn-primary`'s green fill vanished into the green band),
+  a white-outline secondary, `tone="dark"` on the slideshow and code toggle, and
+  `<PieceLookup tone="dark">` swapping its GO button to `bg-ocean`. None of that
+  is in the code now. If a coloured hero is restored, all of those pieces have to
+  come back together.
+
+  There is currently **no background gradient anywhere on the site.** The DO NOT
+  list's gradient exception exists for a hero band; nothing is using it.
+- **The slideshow is hidden below `lg`** (`hidden lg:block` on its wrapper in
+  `page.tsx`) and appears only when the hero splits into two columns. On a phone
+  the hero is the heading, intro, buttons and code lookup alone; the makers and
+  the products each have their own section directly below, so nothing is lost.
+  Two reasons: the gallery plus caption is the tallest thing in the hero, so on a
+  phone it pushes the flag stripe and the supporters band out of the opening
+  screen; and it is the only part of the hero that requests images, so dropping
+  it saves a phone every hero image before first paint. The visibility decision
+  lives on the wrapper, not inside `<HeroSlideshow>`, which stays
+  layout-agnostic.
+- **Opening-block layout.** The hero, the flag stripe, and the "Supported by"
+  (`<SponsorBanner>`) row are wrapped in one `flex flex-col` block so they read
+  as one unit. That block sizes to its CONTENT and does **not** stretch to fill
+  the viewport. An earlier version made it `min-h-screen min-h-[100svh]` with the
+  hero `flex-1` to "push the sponsor row to the bottom", but the hero content is
+  far shorter than a desktop viewport, so filling 100vh pushed the sponsor row to
+  the very bottom edge — below the fold, the exact problem it was meant to solve.
+  Do not reintroduce a forced viewport height here.
+
+  The hero grid is `pt-block` / `pb-lg lg:pb-xl` — bottom deliberately one rung
+  shorter than top, because what follows is the flag stripe and the supporters
+  band, not a new section, so they sit tight under the hero rather than a full
+  section break away. `lg:items-start` aligns the text and gallery columns on a
+  shared top edge; centring left the heading floating below the top of the taller
+  gallery column.
+
+  If the supporters list is empty, `<SponsorBanner>` renders `null` and the block
+  simply ends at the flag stripe — a graceful, gap-free degradation. Note that
+  with only one or two supporters the band sits very high on the page for what it
+  says; `<SponsorBanner>` softens this by dropping to a modest inline credit line
+  below three logos, but moving it nearer the footer is the better fix if the list
+  stays short.
 - `<HeroSlideshow>` is a **centre-stage carousel**: one large frame in the middle
-  with the previous and next slides peeking in either side, scaled to `0.8` and
-  at `opacity-70`, so the hero shows at a glance that it holds more than one
-  piece. Every frame is `rounded-lg bg-card-bg shadow-card` and `aspect-[4/5]`.
-  The geometry lives in three constants at the top of the file — `trackWidth`
-  (`w-full max-w-[620px]`), `frameWidth` (`w-[68%]`), `PEEK_STEP` (95,
-  in units of one frame's own width) and `PEEK_SCALE` (0.8). Tune the look there,
-  never at a call site. Two things follow from that geometry and are load-bearing:
+  with the previous and next slides peeking in either side, scaled down and
+  dimmed, so the hero shows at a glance that it holds more than one piece. Every
+  frame is `bg-card-bg shadow-card` and square (`frameAspect = 'aspect-square'`),
+  matching the card frames elsewhere. The geometry lives in constants at the top
+  of the file — `trackWidth`, `frameWidth`, `frameAspect`, `PEEK_STEP` (in units
+  of one frame's own width) and `PEEK_SCALE`. **Treat the file as the source of
+  truth for these values, not this doc** — they are an art-directed choice that
+  has been retuned more than once. Tune the look there, never at a call site. Two
+  things follow from that geometry and are load-bearing:
   - **`frameWidth` is one share at EVERY width — no breakpoint.** The component
-    is width-agnostic: 68% leaves ~13% of the track visible either side, so the
-    peek reads the same at whatever size the component is rendered. (On the
+    is width-agnostic, so the peek reads the same at whatever size it is
+    rendered. (On the
     homepage that size is always `lg`+, because the hero hides the whole
     slideshow below `lg` — see the homepage-hero notes above — but that is the
     call site's decision, not the component's.) An earlier version set `w-full`
@@ -519,8 +563,10 @@ component:
   two slide kinds share one carousel, so the pattern has to work for both. Below
   the frame the text is always legible on a solid background and the photo is
   never touched. Because it is now on the band/page rather than on a scrim, the
-  caption DOES follow `tone`: light text on the dark hero band, ink-on-white
-  (`text-deep-blue` title, `text-ocean` eyebrow) elsewhere. The caption row is
+  caption follows `tone`: ink-on-white (`text-deep-blue` title, `text-ocean`
+  eyebrow) at the `light` tone, which is what the homepage passes now that the
+  hero is white; `dark` gives light text for a dark surface but nothing uses it
+  today. The caption row is
   itself a `<Link>` to the active piece — a second, larger target for the same
   destination — capped to `frameWidth` and centred so it sits under the centre
   frame and breaks where the image edges are. It is re-keyed per slide so it
@@ -537,28 +583,26 @@ component:
   2-of-5 column is ~330px, and 68% of that is a centre frame smaller than the
   single frame it replaced. The even split costs the h1 one extra line at `lg`
   and buys the gallery ~95px.
-- On the homepage the header floats over that band: `<Header
-  transparentOverHero>` (set from `LayoutShell` when `pathname === '/'`) starts
-  transparent with light content — the `<Logo>` in its white `onDark` variant
-  (a `lg:brightness-0 lg:invert` filter on the dark-ink PNG), white nav links and
-  a white-outline Login — then flips to the solid `bg-cream` treatment once
-  `window.scrollY` passes ~64px. **This transparent-over-hero treatment is
-  DESKTOP-only (`lg`+).** Below `lg` the header is solid white from the start on
-  the homepage too, exactly like every other page: the header's transparent
-  classes are pinned solid with `max-lg:` overrides, the `<Logo>` white filter is
-  gated to `lg` (so the dark ink logo shows on the white mobile bar), and the
-  mobile menu button always takes its dark treatment. The reasons: the mobile
-  hero is a shorter, text-only band (the slideshow is `lg`+), the flip-on-scroll
-  was unreliable across mobile browsers, and a solid white bar reads as
-  consistent with the rest of the site on a phone. Do not reintroduce the
-  transparent header on mobile. `LayoutShell` still pulls the hero up under the
-  header with `-mt-20` on `/`; the hero adds `pt-20` back so its content clears
-  the 80px nav (the opaque mobile bar simply sits over the top 80px of the
-  gradient band, which the padding already keeps clear of content). On the homepage the flag divider does NOT sit
-  under the header (a strip there would cut a line across the gradient hero) — it
-  caps the BOTTOM edge of the hero cover instead, as the seam between the hero
-  and the "Supported by" row (`<FlagDivider>` rendered in `page.tsx`). No other
-  route has a flag stripe under the header (see below).
+- **The header is solid on every route, including the homepage** —
+  `sticky top-0 border-b border-sand bg-cream/95 backdrop-blur-sm`, with the
+  dark-ink `<Logo>` at every width. `<Header>` takes no props.
+
+  It used to take a `transparentOverHero` prop, set from `LayoutShell` on `/`:
+  the bar started transparent with white nav content over the coloured hero band
+  and flipped to solid once `window.scrollY` passed ~64px, desktop-only, with
+  `LayoutShell` pulling the hero up under it via `-mt-20` and the hero adding
+  `pt-20` back. That is all removed — the hero is white, so there is no dark band
+  to float over and white nav content would be invisible. The prop had gone
+  unused for a while, leaving ~10 unreachable style branches and a scroll listener
+  that could never fire. The `<Logo onDarkFromLg>` variant that served it is gone
+  too; only `onDark` remains, used by the footer. Recover from git history rather
+  than rebuilding if a coloured hero returns.
+
+  On the homepage the flag divider does NOT sit under the header — it caps the
+  BOTTOM edge of the opening block, as the seam between the hero and the
+  "Supported by" row (`<FlagDivider>` rendered in `page.tsx`). On a white hero
+  that stripe is the main piece of brand colour in the opening block. No route
+  has a flag stripe under the header (see below).
 
 **Banner size.** Every banner is the SAME height regardless of how much text it
 holds, so the bands read as one consistent device across the site. The band has
@@ -613,19 +657,58 @@ white page a border round the caption added weight without adding separation.
 
 | Constant | Ratio | Used by |
 |----------|-------|---------|
-| `FRAME_ASPECT` | `3/4` | products, crafts |
-| `MAKER_ASPECT` | `4/5` | makers — a scene of a person with their work, cropped calmer than the house portrait |
-| `ARTICLE_ASPECT` | `3/2` | news — a cover photo is a scene, and landscape stops a story reading as a product tile |
+| `FRAME_ASPECT` | `aspect-square` | products, crafts — the house shape |
+| `MAKER_ASPECT` | `aspect-square` | makers |
+| `ARTICLE_ASPECT` | `aspect-video` (16:9) | news |
+
+**Products, makers and crafts share the square; news is 16:9 landscape.** One
+shape across products, makers and crafts means those grids share a rhythm and a
+page holding two of those kinds does not change card language halfway down. News
+is the deliberate exception: a landscape thumbnail over a date + headline +
+standfirst is the shape every news list uses, so a row of news cards reads as an
+article list rather than a product grid. This is the divergence the three
+separate NAMES were kept for — a call site reads as `aspect={MAKER_ASPECT}` and
+one subject can be given its own shape by editing one line in `poster-card.tsx`,
+which is exactly what news now does.
+
+Products, makers and crafts used to differ too — `3/4` products, `4/5` makers,
+`3/2` landscape news — before being unified. If you are reintroducing a distinct
+shape for one of those subjects, that is the history. News now carries a landscape
+ratio again AND the caption that distinguishes it (date kicker, headline at
+`posterHeadlineClasses`, three-line standfirst) — the two together are what make
+it read as news. When a story has no cover image, `ArticleCard` /
+`FeaturedArticleCard` pass a branded deep-blue `fallback` to `PosterFrame` (a
+`Newspaper` glyph + the first tag) instead of the generic grey `SafeImage` well.
 
 Pass one of these or nothing. A free-form ratio per caller is how a grid loses
-its rhythm, and a fourth shape is what this set replaced: crafts used to be
-`aspect-square` inside a hand-rolled panel card, so `/crafts-and-techniques`
-changed card language mid-visit.
+its rhythm. Crafts used to be `aspect-square` inside a hand-rolled panel card, so
+`/crafts-and-techniques` changed card language mid-visit — the shared frame
+replaced that.
 
 **Grids.** Import the shared recipe; never retype a column ramp.
-`posterGridClasses` (2-up → 3 at `lg` → 4 at `xl`) for portrait listings,
-`articleGridClasses` (1 → 2 → 3) for news, `centeredArticleGridClasses` for a
-news list too short to fill a row.
+
+| Recipe | Ramp | Use |
+|--------|------|-----|
+| `posterGridClasses` | 1 → 2 at `sm` → 3 at `lg` → 4 at `xl` | full listings — catalogue, makers, crafts |
+| `featuredPosterGridClasses` | 1 → 2 at `sm` → 3 at `lg` | the homepage showcase — same ramp, capped at 3 |
+| `articleGridClasses` | 1 → 2 at `sm` → 3 at `lg` | news listings |
+| `centeredArticleGridClasses` | 1 → 2 at `sm`, centred, `max-w-3xl` | a news list too short to fill a row |
+
+One column on a phone, not two: a full-width square gives each piece real
+presence, which is the editorial look the site is after. Density returns as the
+screen widens.
+
+`featuredPosterGridClasses` is homepage-only and differs from
+`posterGridClasses` **only at `xl`**. The catalogue wants density; the homepage is
+a showcase, where four small tiles read as an index and three larger ones read as
+"here are a few pieces worth looking at". Because only the ceiling differs, the
+two still sit in the same rhythm on a page showing both. Pair it with a count that
+fills the row — the homepage shows 3 featured products, so there is no lone tile
+on a second row.
+
+Use `centeredArticleGridClasses` whenever the list is short: fewer than 3 stories
+on the homepage, or a `/news` page with no featured lead card. A 3-up grid holding
+one or two cards leaves an empty column and the row hugs the left edge.
 
 **Hover — two signals, both required.**
 `group-hover:scale-105 transition-transform duration-300` on the image, and
@@ -634,6 +717,22 @@ and `posterHeadlineClasses`). Shadow alone is not enough: `shadow-card` is
 `0 2px 8px rgba(0,0,0,0.06)` and hover is `shadow-md`, which on a white card on a
 white page is a few percent of opacity — a change you have to look for. Hover must
 ADD shadow, never remove it.
+
+**No "View" overlay on the frame — and do not reintroduce one.** The two hover
+signals above are the whole affordance. `PosterFrame` used to add a third, a
+`deep-blue` "View" label on the image, and it went through three versions: a
+full-bleed `bg-deep-blue/30` veil with the label centred, then a full-width bar
+inset at the bottom of the frame, then a small pill in the bottom-left corner.
+Shrinking it never fixed it, because the problem was not its size — it was that
+opaque chrome sat on top of the photograph. On a wholesale catalogue the
+photograph IS the product information (weave, finish, grain, colour), and on a
+`contain`-fit shot the object floats mid-frame so there is no reliably empty
+corner to tuck a label into. It was redundant on top of that: the card is a
+link, the title already turns `ocean`, and the image already scales — two
+signals that cost no image area, against a third that cost real ones.
+
+If a card genuinely needs a control, it goes BELOW the frame in the caption,
+the way `StockistProductCard` puts its Add to Order controls there.
 
 **Fit.** Keep `object-contain` for products and crafts. `object-cover` would
 remove the letterboxing but it crops the edges — handles, spouts, weave borders —
@@ -659,6 +758,12 @@ generic image tells a screen reader the wrong thing about a named maker.
 `deep-blue` with white text at `right-xs top-xs`. Never a white or translucent
 pill: `contain`-fit product shots frequently have white backgrounds, so a light
 chip vanishes on exactly the images it is labelling.
+
+It is now the **only** thing drawn over the photograph, so it is kept as tight as
+its label allows: `px-xs` (12) not `px-sm`, `text-xs`, and no `shadow-card` (the
+shadow was invisible against a dark fill and only made the chip's footprint read
+larger than it is). It earns the space because material category and article tag
+are content a buyer scans. Do not add anything else on top of the image.
 
 **Caption typography — compose the exported constants, never retype the strings:**
 
@@ -696,6 +801,79 @@ have already been broken once:
 
 A card rendered with no list ancestor at all is also a violation, so a test that
 renders a bare card must wrap it in a `role="list"` the way the site does.
+
+### The catalogue filter rail
+
+`/catalogue` puts its controls in a 260px left rail
+(`lg:grid-cols-[260px_1fr] gap-block`), sticky at `lg:top-24`, hidden behind a
+"Filters" toggle below `lg`. Four rules, each of which replaced the opposite:
+
+- **Filters narrow; sort does not. Keep them apart.** The rail holds Search,
+  Material and Maker — three controls that all answer "show me fewer things".
+  **Sort sits beside the result count above the grid**, because it reorders
+  results rather than narrowing them, and that is where the visitor is already
+  looking when the count changes.
+- **Search first, then Material, then Maker.** Search is the shortest path for a
+  visitor who knows what they want (a product type, a product code). It used to
+  sit third, below a six-item material list.
+- **No panel around the rail.** It was a `bg-warm-gray-100` box with a
+  `border-sand` outline and `p-md`. On a white page a near-white fill adds weight
+  without adding separation — the same conclusion the poster card reached about
+  its caption. `gap-block` already separates rail from grid. Do not re-box it.
+- **Rail controls are all full width**, so their left and right edges line up.
+  `<Select>` shrinks to its label from `sm` up by default, so a select in a rail
+  needs `fullWidth` (the same prop `SearchInput` has). Passing `w-full` via
+  `className` does NOT work — Tailwind emits `sm:w-auto` after the base
+  utilities, so the responsive variant wins.
+
+The material list is `<CategoryFilter>`
+(`components/catalogue/category-filter.tsx`) — a plain vertical list of text
+options, active state `brand-green` + semibold, no pill chrome. A single-select
+filter in a rail is a list. Options are `text-base`: they are content a visitor
+reads and chooses between, so they sit on the 16px floor. Only the small caps
+field labels above each control are `text-xs`.
+
+### Long-form articles
+
+The news article page (`src/app/news/[slug]/page.tsx`) has an editorial reading
+treatment that no other page uses. The body itself is admin-authored HTML
+injected into a `.article-content` container, so its rules live in `globals.css`
+(the `.article-content` block), NOT in a component — that CSS is the source of
+truth for body styling. The parts:
+
+- **Measure (line length).** Body prose (`p`, `ul`, `ol`, `blockquote`, `h2`,
+  `h3` inside `.article-content`) is capped at `68ch` — the readable band, ~68
+  characters — while the article column stays `max-w-3xl` (720px) so figures and
+  images break wider than the text and read as a deliberate change. Text stays
+  left-aligned; only the right edge pulls in. `ch`, not `px`, so the cap tracks
+  the reader's font size. Do not remove the cap to "use the full width" — an
+  over-long measure is the change that hurts readability most.
+- **Lead paragraph.** The first paragraph (`> p:first-of-type`, so it survives an
+  opening image or heading) is set one step up at 20px/1.6 — the editorial
+  standfirst treatment. `first-of-type`, never `first-child`.
+- **Drop cap.** The first letter of that opening paragraph
+  (`> p:first-of-type::first-letter`) is enlarged in `deep-blue` Poppins (the
+  heading colour and face, so it reads as a typographic mark, not an oversized
+  body letter). `initial-letter: 3` sinks it three lines on Safari/Chrome; a
+  `float` + `font-size` fallback approximates it on Firefox, and an
+  `@supports (initial-letter)` block turns the fallback OFF where the real
+  property works so the two never fight. It fires only on the very first
+  paragraph. This is the one decorative typographic flourish on the site — do
+  not extend the drop cap to other pages or to mid-article paragraphs.
+- **Pull quote.** `.article-content blockquote` is a rest point set at the lead
+  size (20px) with the `brand-green` left rule and `deep-blue` text — not small
+  italic. Italic is deliberately dropped (hard to read in long runs; the size
+  already sets it apart).
+- **Standfirst / dek.** An optional `Article.standfirst` field, rendered between
+  the h1 and the byline via `<CmsText>` at `text-lg leading-body-lg
+  text-warm-gray-600`. It is a real data field wired end to end (frontend type +
+  service, backend model/serializer/API/write-view, admin editor). It renders
+  only when non-empty. Distinct from `excerpt`, which is the card summary and the
+  meta description — do not conflate the two.
+- **"Keep reading" block.** The article foot carries up to three related stories
+  as `<ArticleCard>`s in `articleGridClasses`, ranked by shared tags with a
+  recency fallback. Reuses the shared card so it cannot drift from the /news
+  index; wrap it in `role="list"` like every other card grid.
 
 ### Buttons
 
@@ -744,9 +922,11 @@ the warm craft palette. The band is `section-warm`, never `sand-light`.
 panels), just not as a full-width section band.
 
 Alternate deliberately — do not band every section. A page of solid warm bands
-is as flat as a page of solid white. The pattern is one warm section between
-white ones (on the homepage: white Makers → warm Products → deep-blue CTA →
-white News), so the warm surface reads as a change rather than the default.
+is as flat as a page of solid white. Warm and white take turns, so the warm
+surface reads as a change rather than the default. The homepage runs white hero →
+warm "Who we are" → white Makers → warm Products → deep-blue CTA → white News →
+supporters, which alternates the whole way down rather than dropping a single warm
+band into a white page.
 `section-y` spacing plus a `<FlagDivider variant="mark">` under the heading
 still does the separating work within a run of same-coloured sections.
 
@@ -773,7 +953,7 @@ need a 44px+ hit area (`tap-target`).
 
 ## Layout (LOCKED)
 
-- Container `site-container` (1440px, 16px → 64px gutters)
+- Container `site-container` (1440px, 16px → 48px gutters)
 - Grids: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`
 - Mobile-first — start single column, add breakpoints up
 - Tap targets 48px minimum (`.tap-target`)
@@ -787,7 +967,7 @@ need a 44px+ hit area (`tap-target`).
 | default | 0–639 | Mobile, single column |
 | `sm:` | 640+ | 2-column grids |
 | `md:` | 768+ | 2-col text splits |
-| `tabtop:` | 920+ | **`--gutter` 16→64px; `--grid-gap` 24→32px; `--page-y` 24→32px** |
+| `tabtop:` | 920+ | **`--gutter` 16→48px; `--grid-gap` 16→24px; `--page-y` 24→32px** |
 | `lg:` | 1024+ | 3-column grids, **desktop nav appears**; `--section-y` 48→96px, `--block-y` 32→64px, `--stack-y` 24→32px |
 | `xl:` | 1280+ | 4-column grids |
 
@@ -814,9 +994,11 @@ no bouncing, sliding, or attention-grabbing motion.
   (`gap-1.5`, `py-2.5`) for spacing — use the scale
 - Prefix a semantic spacing token with a breakpoint (`lg:pb-section`)
 - Add CSS animation libraries
-- Use gradients on text or backgrounds (the ONLY exceptions: the homepage hero's
-  flag-palette gradient band — see Page banners — and subtle overlays on hero
-  images)
+- Use gradients on text or backgrounds. The one sanctioned exception is the
+  `<PageHeader banner>` band, whose four variants are each a soft radial bloom
+  over a diagonal linear wash (`BANNER_GRADIENT` in `page-header.tsx`). The
+  homepage hero used to be the other exception; it is plain `bg-white` now, so
+  there is no background gradient outside the page banners
 - Add borders heavier than 2px or shadows heavier than `shadow-md`
 - Ship `[NEEDS REVIEW]` or other placeholder strings in rendered output
 - Add decorative complexity — the crafts and stories lead, not the UI

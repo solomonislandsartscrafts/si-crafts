@@ -11,6 +11,7 @@ import { FormField, inputClasses } from '@/components/ui/form-field';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Skeleton, SkeletonRegion } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast';
+import { useModalA11y } from '@/lib/use-modal-a11y';
 
 const STATUS_BADGE: Record<string, 'success' | 'warning' | 'error' | 'neutral'> = {
   approved: 'success',
@@ -363,38 +364,10 @@ function AddStockistModal({
   const [password, setPassword] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const dialogRef = useRef<HTMLDivElement>(null);
 
-  // Focus the dialog on mount and trap focus within it
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    dialog.focus();
-
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        if (!saving) onClose();
-        return;
-      }
-      if (e.key !== 'Tab') return;
-      const focusable = dialog!.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [saving, onClose]);
+  // Shared modal a11y: focus trap, Escape to close, body-scroll lock, and
+  // focus restored to the trigger element on close.
+  const dialogRef = useModalA11y(true, () => { if (!saving) onClose(); });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -462,7 +435,7 @@ function AddStockistModal({
           <button
             onClick={() => { if (!saving) onClose(); }}
             disabled={saving}
-            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-50"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean disabled:opacity-50"
             aria-label="Close"
           >
             <X className="w-5 h-5" />

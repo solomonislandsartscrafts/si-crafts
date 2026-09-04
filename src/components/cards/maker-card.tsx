@@ -28,10 +28,8 @@ interface MakerCardProps {
  * 11.9:1, needs no scrim, and cannot collide with the photo — plain
  * `PosterCard` with nothing added.
  *
- * `cover` fit — a portrait is framed expecting a crop — on the shorter
- * `MAKER_ASPECT` (4/5) frame. Makers are a seated-with-their-work scene, and
- * the taller house `3/4` made those tiles read as oversized posters; the 4/5
- * frame keeps the same subject at a calmer height. See `MAKER_ASPECT`.
+ * `cover` fit — a portrait is framed expecting a crop — on the `MAKER_ASPECT`
+ * frame (square, like every other card). See `MAKER_ASPECT`.
  */
 export function MakerCard({ maker, craftName }: MakerCardProps) {
   return (
@@ -41,7 +39,7 @@ export function MakerCard({ maker, craftName }: MakerCardProps) {
       alt={`${maker.name}, ${craftName || 'maker'} from ${maker.village}`}
       fit="cover"
       aspect={MAKER_ASPECT}
-      sizes="(max-width: 640px) 45vw, (max-width: 1024px) 50vw, 25vw"
+      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
     >
       {/* Name + a small arrow cue. The arrow is always visible (not hover-only),
           so the card signals it is tappable at rest too — which matters on
@@ -50,7 +48,7 @@ export function MakerCard({ maker, craftName }: MakerCardProps) {
           reinforce "go to this maker". aria-hidden: the whole card is one link
           whose accessible name already comes from the heading, so the arrow is
           decorative to a screen reader. */}
-      <h3 className={`${posterTitleClasses} flex items-center gap-2xs`}>
+      <h3 className={`${posterTitleClasses} flex items-center justify-center sm:justify-start gap-2xs`}>
         <span className="line-clamp-2">{maker.name}</span>
         <ArrowRight
           className="h-4 w-4 shrink-0 text-ocean transition-transform duration-200 group-hover:translate-x-3xs"

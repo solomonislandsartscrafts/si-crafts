@@ -131,7 +131,7 @@ export default function AdminCategoriesPage() {
                 </div>
                 <button
                   onClick={() => handleDeleteCategory(cat.value, cat.label)}
-                  className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-error rounded"
+                  className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error rounded"
                   aria-label={`Delete ${cat.label}`}
                 >
                   <Trash2 className="w-4 h-4" />
@@ -188,7 +188,7 @@ export default function AdminCategoriesPage() {
                 </div>
                 <button
                   onClick={() => handleDeleteType(type.value, type.label)}
-                  className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-error rounded"
+                  className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error rounded"
                   aria-label={`Delete ${type.label}`}
                 >
                   <Trash2 className="w-4 h-4" />

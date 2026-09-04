@@ -9,6 +9,7 @@ class ArticlePageAPIViewSet(PagesAPIViewSet):
 
     body_fields = PagesAPIViewSet.body_fields + [
         "excerpt",
+        "standfirst",
         "body",
         "author_name",
         "author_role",
@@ -23,6 +24,7 @@ class ArticlePageAPIViewSet(PagesAPIViewSet):
 
     listing_default_fields = PagesAPIViewSet.listing_default_fields + [
         "excerpt",
+        "standfirst",
         "body",
         "author_name",
         "author_role",

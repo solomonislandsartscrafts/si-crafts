@@ -26,7 +26,7 @@ export function SetupWizard({ progress }: SetupWizardProps) {
           <li key={step.number}>
             <Link
               href={step.href}
-              className="group block rounded-lg border border-sand bg-white p-sm hover:border-ocean hover:bg-ocean/5 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+              className="group block rounded-lg border border-sand bg-white p-sm hover:border-ocean hover:bg-ocean/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
             >
               <div className="flex flex-col sm:flex-row sm:items-start gap-xs sm:gap-sm">
                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-ocean/10 text-ocean flex items-center justify-center text-sm font-bold">

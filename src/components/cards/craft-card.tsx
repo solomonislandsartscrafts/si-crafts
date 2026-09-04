@@ -35,7 +35,7 @@ export function CraftCard({ craft }: CraftCardProps) {
       src={craft.processImageUrls[0] || null}
       alt={craft.processImageAlt || `${craft.name} process`}
       fit="contain"
-      sizes="(max-width: 640px) 45vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
     >
       <h3 className={`${posterTitleClasses} line-clamp-2`}>{craft.name}</h3>
       <p className={`mt-2xs ${posterBodyClasses}`}>{craft.description}</p>

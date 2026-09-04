@@ -137,7 +137,7 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
 
   if (images.length === 0) {
     return (
-      <div className="aspect-square rounded-lg bg-card-bg shadow-card flex items-center justify-center">
+      <div className="aspect-square bg-card-bg shadow-card flex items-center justify-center">
         <span className="text-warm-gray-400 text-sm">Image coming soon</span>
       </div>
     );
@@ -151,14 +151,14 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
             any border reads as an uneven frame drawn around each photo. The
             card shadow gives the well its edge instead. */}
         <div
-          className="group relative w-full aspect-square overflow-hidden rounded-lg bg-card-bg shadow-card touch-pan-y"
+          className="group relative w-full aspect-square overflow-hidden bg-card-bg shadow-card touch-pan-y"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
           <button
             onClick={() => setFullscreen(true)}
-            className="w-full h-full relative cursor-zoom-in focus:outline-none focus:ring-2 focus:ring-ocean rounded-lg"
+            className="w-full h-full relative cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
             aria-label="View fullscreen"
           >
             <SafeImage
@@ -178,14 +178,14 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
             <>
               <button
                 onClick={goPrev}
-                className="absolute left-3 top-1/2 -translate-y-1/2 hidden md:flex tap-target items-center justify-center bg-white/90 hover:bg-white text-deep-blue rounded-full shadow-card opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+                className="absolute left-3 top-1/2 -translate-y-1/2 hidden md:flex tap-target items-center justify-center bg-white/90 hover:bg-white text-deep-blue rounded-full shadow-card opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                 aria-label="Previous image"
               >
                 <ChevronLeft className="w-5 h-5" aria-hidden="true" />
               </button>
               <button
                 onClick={goNext}
-                className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:flex tap-target items-center justify-center bg-white/90 hover:bg-white text-deep-blue rounded-full shadow-card opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+                className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:flex tap-target items-center justify-center bg-white/90 hover:bg-white text-deep-blue rounded-full shadow-card opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                 aria-label="Next image"
               >
                 <ChevronRight className="w-5 h-5" aria-hidden="true" />
@@ -217,7 +217,7 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
               <button
                 key={idx}
                 onClick={() => { setZoomed(false); setActiveIndex(idx); }}
-                className={`tap-target flex-shrink-0 w-20 h-20 relative overflow-hidden rounded-md border-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean ${
+                className={`tap-target flex-shrink-0 w-20 h-20 relative overflow-hidden border-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean ${
                   idx === activeIndex
                     ? 'border-ocean'
                     : 'border-sand hover:border-ocean/50'
@@ -249,7 +249,7 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
               <button
                 key={idx}
                 onClick={() => { setZoomed(false); setActiveIndex(idx); }}
-                className="flex h-11 w-11 items-center justify-center rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+                className="flex h-11 w-11 items-center justify-center rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                 aria-label={`View image ${idx + 1}`}
                 aria-current={idx === activeIndex ? 'true' : undefined}
               >
@@ -285,12 +285,12 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
               dimmed backdrop dismisses. Bounded so the image never fills the
               screen: capped width and height, centred, with the card shadow. */}
           <div
-            className="relative w-full max-w-2xl max-h-[85vh] bg-card-bg rounded-lg shadow-md overflow-hidden"
+            className="relative w-full max-w-2xl max-h-[85vh] bg-card-bg shadow-md overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setFullscreen(false)}
-              className="absolute top-3 right-3 z-10 tap-target flex items-center justify-center bg-white/90 hover:bg-white text-warm-gray-600 hover:text-deep-blue rounded-full shadow-card focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+              className="absolute top-3 right-3 z-10 tap-target flex items-center justify-center bg-white/90 hover:bg-white text-warm-gray-600 hover:text-deep-blue rounded-full shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
@@ -305,7 +305,7 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
             {images.length > 1 && (
               <button
                 onClick={(e) => { e.stopPropagation(); goPrev(); }}
-                className="absolute left-3 top-1/2 -translate-y-1/2 z-10 tap-target flex items-center justify-center bg-white/90 hover:bg-white text-warm-gray-600 hover:text-deep-blue rounded-full shadow-card focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+                className="absolute left-3 top-1/2 -translate-y-1/2 z-10 tap-target flex items-center justify-center bg-white/90 hover:bg-white text-warm-gray-600 hover:text-deep-blue rounded-full shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                 aria-label="Previous image"
               >
                 <ChevronLeft className="w-6 h-6" />
@@ -313,11 +313,28 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
             )}
 
             {/* Pan-to-zoom stage. Click magnifies to 2x centred on the pointer;
-                moving the pointer pans the enlarged view; clicking again resets. */}
+                moving the pointer pans the enlarged view; clicking again resets.
+                Also reachable by keyboard: Enter/Space toggles zoom centred on
+                the image (pointer-based panning has no keyboard equivalent, but
+                the magnified view itself does not require one to be useful —
+                it still shows twice the detail). Without this, a keyboard-only
+                buyer could open the lightbox and page through images but never
+                actually magnify the weave/grain/finish the feature exists for. */}
             <div
-              className={`relative w-full aspect-square max-h-[85vh] overflow-hidden ${zoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'}`}
+              role="button"
+              tabIndex={0}
+              aria-label={zoomed ? 'Zoom out' : 'Zoom in'}
+              aria-pressed={zoomed}
+              className={`relative w-full aspect-square max-h-[85vh] overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ocean ${zoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'}`}
               onClick={toggleZoom}
               onMouseMove={handleZoomMove}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setOrigin('center');
+                  setZoomed((z) => !z);
+                }
+              }}
             >
               <SafeImage
                 src={images[activeIndex]}
@@ -335,7 +352,7 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
             {images.length > 1 && (
               <button
                 onClick={(e) => { e.stopPropagation(); goNext(); }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 z-10 tap-target flex items-center justify-center bg-white/90 hover:bg-white text-warm-gray-600 hover:text-deep-blue rounded-full shadow-card focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+                className="absolute right-3 top-1/2 -translate-y-1/2 z-10 tap-target flex items-center justify-center bg-white/90 hover:bg-white text-warm-gray-600 hover:text-deep-blue rounded-full shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                 aria-label="Next image"
               >
                 <ChevronRight className="w-6 h-6" />

@@ -6,6 +6,7 @@ import { getProductsByMaker } from '@/services/products';
 import { getCraftById } from '@/services/crafts';
 import { getSiteTextSafe } from '@/services/site-text';
 import { ProductCard } from '@/components/cards/product-card';
+import { posterGridClasses } from '@/components/cards/poster-card';
 import { DetailPageLayout } from '@/components/layout/detail-page-layout';
 import { pageTitleClasses } from '@/components/layout/page-header';
 import { ButtonLink } from '@/components/ui/button';
@@ -118,7 +119,7 @@ export default async function MakerPage({ params }: MakerPageProps) {
                 <span aria-hidden="true">·</span>
                 <Link
                   href={`/craft/${craft.slug}`}
-                  className="font-medium text-ocean hover:text-ocean-dark transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded-sm"
+                  className="font-medium text-ocean hover:text-ocean-dark transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean rounded-sm"
                 >
                   {craft.name}
                 </Link>
@@ -168,7 +169,7 @@ export default async function MakerPage({ params }: MakerPageProps) {
           /* A single flat grid, matching the catalogue view — cards sit side
              by side rather than being split into a stacked section per product
              type. */
-          <div role="list" aria-label="Pieces" className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-grid">
+          <div role="list" aria-label="Pieces" className={posterGridClasses}>
             {products.map((product) => (
               <ProductCard
                 key={product.id}

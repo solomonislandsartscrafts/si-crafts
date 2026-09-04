@@ -38,6 +38,14 @@ interface SelectProps {
   id?: string;
   /** Additional class names on the wrapper */
   className?: string;
+  /**
+   * Fill the container width at every breakpoint instead of shrinking to the
+   * label's width from `sm` up. For a select in a narrow rail, where it has to
+   * line up with a full-width search box beside it — the same reason
+   * `SearchInput` carries this prop. Passing `w-full` via `className` cannot do
+   * this: `sm:w-auto` is emitted after the base utilities, so it wins.
+   */
+  fullWidth?: boolean;
 }
 
 export function Select({
@@ -48,6 +56,7 @@ export function Select({
   label,
   id,
   className = '',
+  fullWidth = false,
 }: SelectProps) {
   const [open, setOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -176,7 +185,9 @@ export function Select({
         }
         onClick={handleToggle}
         onKeyDown={handleKeyDown}
-        className={`h-11 w-full sm:w-auto inline-flex items-center justify-between gap-2xs px-sm rounded-md border bg-white text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean ${
+        className={`h-11 ${
+          fullWidth ? 'w-full' : 'w-full sm:w-auto'
+        } inline-flex items-center justify-between gap-2xs px-sm rounded-md border bg-white text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean ${
           open
             ? 'border-ocean ring-1 ring-ocean'
             : 'border-sand-dark text-warm-gray-800 hover:border-ocean/50'
@@ -215,7 +226,7 @@ export function Select({
                 aria-selected={isSelected}
                 onClick={() => handleSelect(opt.value)}
                 onMouseEnter={() => setFocusedIndex(index)}
-                className={`flex items-center gap-2xs px-xs py-2xs text-sm cursor-pointer transition-colors ${
+                className={`flex items-center gap-2xs px-xs py-2xs text-base cursor-pointer transition-colors ${
                   isFocused ? 'bg-ocean/5 text-deep-blue' : 'text-warm-gray-800'
                 } ${isSelected ? 'font-medium' : ''}`}
               >

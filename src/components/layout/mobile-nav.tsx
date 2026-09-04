@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { X, LogIn, User, Shield, ShoppingBag, Users, Palette, Newspaper, Info, Package, Mail, Home } from 'lucide-react';
 import { useModalA11y } from '@/lib/use-modal-a11y';
+import { Logo } from './logo';
 
 
 const NAV_LINKS = [
@@ -83,6 +84,7 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
       {/* Navigation panel */}
       <div
         ref={navRef}
+        id="mobile-nav-panel"
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
@@ -91,16 +93,20 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
         }`}
         style={{ zIndex: 9999 }}
       >
-        {/* Top bar */}
-        <div className="flex items-center justify-between px-md py-md">
-          <span className="inline-flex items-center">
-            <span className="font-heading text-lg font-semibold text-deep-blue leading-heading">
-              SIAC
-            </span>
-          </span>
+        {/* Top bar — the brand lockup, matching the header, and a close button.
+            The logo is a link home so the drawer's header is not a dead end. */}
+        <div className="flex items-center justify-between gap-sm border-b border-sand px-md py-sm">
+          <Link
+            href="/"
+            onClick={onClose}
+            className="tap-target inline-flex flex-shrink-0 items-center rounded-sm transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+            aria-label="Solomon Islands Arts & Crafts — home"
+          >
+            <Logo />
+          </Link>
           <button
             onClick={onClose}
-            className="tap-target flex items-center justify-center w-10 h-10 rounded-full bg-sand-light text-deep-blue hover:bg-sand hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+            className="tap-target flex items-center justify-center w-10 h-10 rounded-full text-warm-gray-600 hover:bg-sand-light hover:text-deep-blue transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
             aria-label="Close menu"
           >
             <X className="h-5 w-5" />
@@ -108,7 +114,7 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
         </div>
 
         {/* Nav links */}
-        <nav className="flex-1 overflow-y-auto px-sm pt-2xs pb-sm" aria-label="Main navigation">
+        <nav className="flex-1 overflow-y-auto px-sm py-sm" aria-label="Main navigation">
           <ul className="space-y-3xs">
             {NAV_LINKS.map((link) => {
               const Icon = link.icon;
@@ -118,14 +124,17 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
                   <Link
                     href={link.href}
                     onClick={onClose}
-                    className={`tap-target flex items-center gap-sm px-sm py-sm rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-ocean ${
+                    className={`tap-target flex items-center gap-sm px-sm py-xs rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean ${
                       active
-                        ? 'bg-ocean/10 text-ocean border-l-[3px] border-ocean'
+                        ? 'bg-ocean/10 text-ocean'
                         : 'text-deep-blue hover:bg-sand-light active:bg-sand'
                     }`}
                     aria-current={active ? 'page' : undefined}
                   >
-                    <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-ocean' : 'text-warm-gray-400'}`} />
+                    <Icon
+                      className={`w-5 h-5 flex-shrink-0 ${active ? 'text-ocean' : 'text-warm-gray-600'}`}
+                      aria-hidden="true"
+                    />
                     <span className="text-base font-medium">{link.label}</span>
                   </Link>
                 </li>
@@ -134,15 +143,16 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
           </ul>
         </nav>
 
-        {/* Bottom auth section */}
-        <div className="border-t border-sand px-sm py-md bg-sand-light/50">
+        {/* Bottom auth section — one button, sized and centred the same way
+            across all three states so the drawer always ends on a solid CTA. */}
+        <div className="border-t border-sand px-sm py-md">
           {authState === 'admin' && (
             <Link
               href="/admin/dashboard"
               onClick={onClose}
-              className="tap-target flex items-center gap-xs w-full px-sm py-xs bg-deep-blue text-white rounded-lg font-medium transition-colors hover:bg-deep-blue/90 focus:outline-none focus:ring-2 focus:ring-ocean"
+              className="tap-target flex items-center justify-center gap-2xs w-full px-sm py-xs bg-deep-blue text-white rounded-lg font-medium transition-colors hover:bg-deep-blue/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
             >
-              <Shield className="w-5 h-5" />
+              <Shield className="w-5 h-5" aria-hidden="true" />
               Admin Dashboard
             </Link>
           )}
@@ -150,9 +160,9 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
             <Link
               href="/stockist/account"
               onClick={onClose}
-              className="tap-target flex items-center gap-xs w-full px-sm py-xs bg-ocean text-white rounded-lg font-medium transition-colors hover:bg-ocean-dark focus:outline-none focus:ring-2 focus:ring-ocean-light"
+              className="tap-target flex items-center justify-center gap-2xs w-full px-sm py-xs bg-ocean text-white rounded-lg font-medium transition-colors hover:bg-ocean-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-light"
             >
-              <User className="w-5 h-5" />
+              <User className="w-5 h-5" aria-hidden="true" />
               My Account
             </Link>
           )}
@@ -162,7 +172,7 @@ export function MobileNav({ isOpen, onClose, authState }: MobileNavProps) {
               onClick={onClose}
               className="tap-target w-full btn-primary"
             >
-              <LogIn className="w-5 h-5" />
+              <LogIn className="w-5 h-5" aria-hidden="true" />
               Login
             </Link>
           )}

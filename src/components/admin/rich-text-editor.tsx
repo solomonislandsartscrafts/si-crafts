@@ -207,7 +207,7 @@ function ToolButton({ onClick, label, children, active, disabled }: {
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
       disabled={disabled}
-      className={`tap-target p-2xs rounded transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-40 ${
+      className={`tap-target p-2xs rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean disabled:opacity-40 ${
         active ? 'bg-ocean/10 text-ocean' : 'text-warm-gray-400 hover:text-warm-gray-800 hover:bg-sand-light'
       }`}
       aria-label={label}
@@ -639,7 +639,7 @@ export function RichTextEditor({
             onChange={(e) => setLinkUrl(e.target.value)}
             onKeyDown={handleLinkKeyDown}
             placeholder="Paste URL and press Enter"
-            className="flex-1 px-2xs py-3xs text-sm bg-transparent text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-ocean"
+            className="flex-1 px-2xs py-3xs text-sm bg-transparent text-warm-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ocean"
             autoFocus
           />
           <button
@@ -668,7 +668,7 @@ export function RichTextEditor({
               <button
                 type="button"
                 onClick={removeSelectedImage}
-                className="tap-target flex items-center gap-3xs px-2xs py-3xs rounded text-sm text-error hover:bg-error/10 focus:outline-none focus:ring-2 focus:ring-ocean"
+                className="tap-target flex items-center gap-3xs px-2xs py-3xs rounded text-sm text-error hover:bg-error/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
               >
                 <Trash2 className="w-4 h-4" />
                 Remove
@@ -676,7 +676,7 @@ export function RichTextEditor({
               <button
                 type="button"
                 onClick={() => setSelectedImage(null)}
-                className="tap-target px-2xs py-3xs rounded text-sm font-medium text-ocean hover:text-ocean-dark focus:outline-none focus:ring-2 focus:ring-ocean"
+                className="tap-target px-2xs py-3xs rounded text-sm font-medium text-ocean hover:text-ocean-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
               >
                 Done
               </button>
@@ -714,7 +714,7 @@ export function RichTextEditor({
           <button
             type="button"
             onClick={selectFirstImageMissingAlt}
-            className="tap-target px-2xs py-3xs rounded text-sm font-medium text-warning-text underline hover:no-underline focus:outline-none focus:ring-2 focus:ring-ocean"
+            className="tap-target px-2xs py-3xs rounded text-sm font-medium text-warning-text underline hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
           >
             Fix
           </button>
@@ -729,7 +729,7 @@ export function RichTextEditor({
           <button
             type="button"
             onClick={() => setNotice(null)}
-            className="tap-target px-2xs py-3xs rounded text-sm font-medium text-ocean hover:text-ocean-dark focus:outline-none focus:ring-2 focus:ring-ocean"
+            className="tap-target px-2xs py-3xs rounded text-sm font-medium text-ocean hover:text-ocean-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
           >
             Dismiss
           </button>
@@ -746,7 +746,7 @@ export function RichTextEditor({
         onMouseUp={rememberSelection}
         onBlur={rememberSelection}
         onClick={handleEditorClick}
-        className="w-full px-md py-sm border border-sand-dark rounded-b-md bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent overflow-y-auto article-content"
+        className="w-full px-md py-sm border border-sand-dark rounded-b-md bg-white text-warm-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean focus-visible:border-transparent overflow-y-auto article-content"
         style={{ minHeight: `${minRows * 1.6}rem` }}
         role="textbox"
         aria-multiline="true"

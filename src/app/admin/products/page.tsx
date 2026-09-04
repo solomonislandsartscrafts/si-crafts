@@ -255,15 +255,15 @@ export default function AdminProductsPage() {
           <table className="w-full text-sm">
             <thead className="bg-sand-light border-b border-sand">
               <tr>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600 w-14">Image</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Code</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Name</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden md:table-cell">Material</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden md:table-cell">Type</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden lg:table-cell">Price</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Status</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden lg:table-cell">Created</th>
-                <th className="text-right px-sm py-xs font-medium text-warm-gray-600">Actions</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 w-14">Image</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Code</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Name</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden md:table-cell">Material</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden md:table-cell">Type</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden lg:table-cell">Price</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Status</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden lg:table-cell">Created</th>
+                <th scope="col" className="text-right px-sm py-xs font-medium text-warm-gray-600">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-sand">
@@ -304,7 +304,7 @@ export default function AdminProductsPage() {
                       <div className="flex items-center justify-end gap-2xs">
                         <button
                           onClick={() => handleTogglePublished(product)}
-                          className="tap-target p-2xs text-warm-gray-400 hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                          className="tap-target p-2xs text-warm-gray-400 hover:text-ocean transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                           aria-label={
                             product.publishedFlag
                               ? `Suspend ${product.name} from the catalogue`
@@ -320,13 +320,13 @@ export default function AdminProductsPage() {
                         </button>
                         <button
                           onClick={() => handleEdit(product)}
-                          className="tap-target p-2xs text-warm-gray-400 hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                          className="tap-target p-2xs text-warm-gray-400 hover:text-ocean transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                           aria-label={`Edit ${product.name}`}
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button onClick={() => handleDelete(product.id, product.name)}
-                          className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                          className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                           aria-label={`Delete ${product.name}`}>
                           <Trash2 className="w-4 h-4" />
                         </button>

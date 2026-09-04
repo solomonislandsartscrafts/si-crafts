@@ -44,16 +44,16 @@ export function PieceLookup({ tone = 'light' }: PieceLookupProps) {
           placeholder="ENTER CODE HERE"
           value={code}
           onChange={(e) => { setCode(e.target.value); setError(''); }}
-          className="flex-1 px-xs py-2xs text-xs font-mono uppercase text-center text-warm-gray-800 placeholder:text-warm-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-ocean"
+          className="flex-1 px-xs py-2xs text-xs font-mono uppercase text-center text-warm-gray-800 placeholder:text-warm-gray-400 bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ocean"
           aria-describedby={error ? 'piece-code-hero-error' : undefined}
           aria-invalid={!!error}
         />
         <button
           type="submit"
-          className={`tap-target px-sm py-2xs text-white text-xs font-bold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 ${
+          className={`tap-target px-sm py-2xs text-white text-xs font-bold uppercase tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 ${
             tone === 'dark'
-              ? 'bg-ocean hover:bg-ocean-dark focus:ring-ocean-light'
-              : 'bg-brand-green hover:bg-brand-green-dark focus:ring-brand-green-light'
+              ? 'bg-ocean hover:bg-ocean-dark focus-visible:ring-ocean-light'
+              : 'bg-brand-green hover:bg-brand-green-dark focus-visible:ring-brand-green-light'
           }`}
         >
           GO

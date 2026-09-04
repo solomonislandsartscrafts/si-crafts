@@ -8,7 +8,7 @@ class ArticlePageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArticlePage
         fields = [
-            "id", "title", "slug", "excerpt", "body",
+            "id", "title", "slug", "excerpt", "standfirst", "body",
             "author_name", "author_role", "tags",
             "published_flag", "featured", "reading_time_minutes",
             "published_at", "cover_image_url", "cover_image_alt",

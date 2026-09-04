@@ -113,7 +113,7 @@ export function SupporterFormModal({ supporter, onClose, onSave }: SupporterForm
           </h2>
           <button
             onClick={handleDismiss}
-            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean rounded"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -193,7 +193,7 @@ export function SupporterFormModal({ supporter, onClose, onSave }: SupporterForm
                 type="checkbox"
                 checked={form.active}
                 onChange={(e) => handleChange('active', e.target.checked)}
-                className="w-5 h-5 rounded border-sand-dark text-ocean focus:ring-2 focus:ring-ocean accent-ocean"
+                className="w-5 h-5 rounded border-sand-dark text-ocean focus-visible:ring-2 focus-visible:ring-ocean accent-ocean"
               />
               <div>
                 <span className="text-base font-medium text-warm-gray-800">Shown on homepage</span>

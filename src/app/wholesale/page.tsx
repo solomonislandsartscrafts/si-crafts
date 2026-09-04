@@ -51,44 +51,48 @@ export default async function WholesalePage() {
         intro={siteContent.wholesaleIntro}
       />
 
+      {/* How it works breaks the full container width — a 2-up step grid on
+          desktop reads as a row rather than one tall column and uses the space
+          a single max-w-3xl column left empty. */}
+      {steps.length > 0 && (
+        <div className="site-container mb-block">
+          <section>
+            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack">
+              {text['wholesale.stepsHeading']}
+            </h2>
+
+            <ol className="grid grid-cols-1 lg:grid-cols-2 gap-grid">
+              {steps.map((step) => {
+                const Icon = step.Icon;
+                return (
+                  <li key={step.n} className="flex gap-sm items-start">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-ocean/10 flex items-center justify-center">
+                      <Icon className="w-6 h-6 text-ocean" />
+                    </div>
+                    <div>
+                      {step.heading && (
+                        <h3 className="font-heading text-lg font-semibold text-deep-blue mb-3xs">
+                          {step.n}. {step.heading}
+                        </h3>
+                      )}
+                      <CmsText
+                        value={step.body}
+                        className="space-y-xs"
+                        paragraphClassName="text-base text-warm-gray-600 leading-relaxed"
+                      />
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+        </div>
+      )}
+
       {/* Prose column is constrained to max-w-3xl but stays left-aligned so it
           lines up with the PageHeader above it. */}
       <div className="site-container pb-section">
         <div className="max-w-3xl">
-          {/* How it works — simple numbered steps */}
-          {steps.length > 0 && (
-            <section className="mb-block">
-              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack">
-                {text['wholesale.stepsHeading']}
-              </h2>
-
-              <ol className="space-y-lg">
-                {steps.map((step) => {
-                  const Icon = step.Icon;
-                  return (
-                    <li key={step.n} className="flex gap-sm items-start">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-ocean/10 flex items-center justify-center">
-                        <Icon className="w-6 h-6 text-ocean" />
-                      </div>
-                      <div>
-                        {step.heading && (
-                          <h3 className="font-heading text-lg font-semibold text-deep-blue mb-3xs">
-                            {step.n}. {step.heading}
-                          </h3>
-                        )}
-                        <CmsText
-                          value={step.body}
-                          className="space-y-xs"
-                          paragraphClassName="text-base text-warm-gray-600 leading-relaxed"
-                        />
-                      </div>
-                    </li>
-                  );
-                })}
-              </ol>
-            </section>
-          )}
-
           {/* Important note */}
           {text['wholesale.note'] && (
             <div className="bg-sand-light rounded-lg p-md mb-block">

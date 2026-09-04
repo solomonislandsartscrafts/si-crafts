@@ -52,7 +52,6 @@ const EMPTY: SiteContent = {
   homepageIntro: '',
   homepageCtaText: '',
   homepageMakersHeading: '',
-  homepageMakersIntro: '',
   aboutPageIntro: '',
   aboutSolomonIslandsHeading: '',
   aboutSolomonIslandsText: '',
@@ -373,7 +372,7 @@ function HomepageTab({ content, update }: TabProps) {
   return (
     <>
       <Section title="Hero Section" description="The main heading and intro text visitors see first.">
-        <Field label="Eyebrow text (small blue line above the heading)" value={content.homepageHeading} onChange={(v) => update('homepageHeading', v)} placeholder="Meet the Makers Behind Every Piece" />
+        <Field label="Eyebrow text (small blue line above the heading)" value={content.homepageHeading} onChange={(v) => update('homepageHeading', v)} placeholder="Wholesale Solomon Islands handicrafts" />
         <Field label="Heading" value={content.homepageMakersHeading} onChange={(v) => update('homepageMakersHeading', v)} placeholder="Handmade in Solomon Islands" />
         <TextArea label="Intro paragraph" value={content.homepageIntro} onChange={(v) => update('homepageIntro', v)} placeholder="Every product is handmade. When you buy from us..." rows={3} />
         <Field label="Primary CTA button text" value={content.homepageCtaText} onChange={(v) => update('homepageCtaText', v)} placeholder="Browse Catalogue" />

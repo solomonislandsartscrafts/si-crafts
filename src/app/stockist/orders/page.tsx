@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Trash2, Minus, Plus, AlertTriangle, ArrowLeft, Send, X, MessageSquare, ShoppingCart } from 'lucide-react';
+import { Trash2, AlertTriangle, ArrowLeft, Send, X, MessageSquare, ShoppingCart } from 'lucide-react';
 import type { CartItem } from '@/types';
 import { getCart, updateQuantity, updateNote, removeFromCart, clearCart, getCartTotal, GST_THRESHOLD } from '@/lib/cart';
 import { validateStockistSession } from '@/lib/auth-client';
@@ -13,6 +13,7 @@ import { PageHeader } from '@/components/layout/page-header';
 import { Button, ButtonLink } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { inputClasses } from '@/components/ui/form-field';
+import { QuantityStepper } from '@/components/ui/quantity-stepper';
 import { SkeletonText } from '@/components/ui/skeleton';
 import { SuccessPanel } from '@/components/ui/success-panel';
 import { useModalA11y } from '@/lib/use-modal-a11y';
@@ -187,26 +188,18 @@ export default function StockistOrdersPage() {
                       </Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2xs">
-                    <button onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
-                      disabled={item.quantity <= 1}
-                      className="tap-target p-2xs rounded-md border border-sand-dark hover:bg-sand-light disabled:opacity-30 focus:outline-none focus:ring-2 focus:ring-ocean"
-                      aria-label={`Decrease quantity of ${item.productName}`}>
-                      <Minus className="w-3 h-3" />
-                    </button>
-                    <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
-                    <button onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}
-                      disabled={item.quantity >= 999}
-                      className="tap-target p-2xs rounded-md border border-sand-dark hover:bg-sand-light disabled:opacity-30 focus:outline-none focus:ring-2 focus:ring-ocean"
-                      aria-label={`Increase quantity of ${item.productName}`}>
-                      <Plus className="w-3 h-3" />
-                    </button>
-                  </div>
-                  <p className="w-20 text-right font-medium text-warm-gray-800">
+                  <QuantityStepper
+                    value={item.quantity}
+                    onChange={(next) => handleQuantityChange(item.productId, next)}
+                    itemLabel={item.productName}
+                    buttonClassName="tap-target flex items-center justify-center text-warm-gray-800 hover:bg-sand-light disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+                    valueClassName="w-8 text-center text-sm font-medium"
+                  />
+                  <p className="w-20 text-right font-medium text-warm-gray-800" role="status" aria-live="polite">
                     {formatPrice(item.quantity * item.unitPrice)}
                   </p>
                   <button onClick={() => handleRemove(item.productId)}
-                    className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                    className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                     aria-label={`Remove ${item.productName} from order`}>
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -272,7 +265,11 @@ export default function StockistOrdersPage() {
               </button>
             </div>
             <div className="px-md py-sm">
+              <label htmlFor="order-note-textarea" className="sr-only">
+                Note for this item
+              </label>
               <textarea
+                id="order-note-textarea"
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
                 placeholder="e.g. preferred colour, custom engraving, quantity notes..."

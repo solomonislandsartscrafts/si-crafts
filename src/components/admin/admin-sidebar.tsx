@@ -161,7 +161,7 @@ export function AdminSidebar({
         {onLogout && (
           <button
             onClick={onLogout}
-            className="tap-target w-full flex items-center gap-2xs px-xs py-2xs text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+            className="tap-target w-full flex items-center gap-2xs px-xs py-2xs text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
           >
             <LogOut className="w-4 h-4" />
             Logout

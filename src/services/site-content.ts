@@ -10,11 +10,28 @@ const EMPTY_SITE_CONTENT: SiteContent = {
   whyWeDoThisImage: '',
   whyWeDoThisImageAlt: '',
   // Homepage
-  homepageHeading: 'Meet the Makers Behind Every Piece',
+  // NOTE: the two homepage heading field names do not match where they render.
+  // `homepageHeading` is the hero EYEBROW (the small line above the h1) and
+  // `homepageMakersHeading` is the hero H1 — nothing to do with the makers
+  // section, which takes its heading from the `homepage.makersHeading` site-text
+  // key instead. The admin form labels them correctly ("Eyebrow text",
+  // "Heading"), so an editor is not misled; only the code reads backwards. Both
+  // names are Django columns, so fixing them needs a migration.
+  //
+  // This eyebrow used to default to "Meet the Makers Behind Every Piece", which
+  // said almost exactly what the "Meet the makers" section heading one screen
+  // below says. The hero now leads with what the business IS, and the makers
+  // section keeps the "meet the makers" line for itself.
+  //
+  // IMPORTANT: this is only the fallback. A value stored in the Django
+  // `homepage_heading` column wins over it, and production currently HAS the old
+  // "Meet the Makers Behind Every Piece" stored — so changing this constant does
+  // not change the live page. Edit it in Admin → Site Content → Hero Section →
+  // "Eyebrow text" to take effect.
+  homepageHeading: 'Wholesale Solomon Islands handicrafts',
   homepageIntro: 'Every product is handmade. When you buy from us, you invest directly in Solomon Islands artisans, their communities, their traditions, and their futures.',
   homepageCtaText: 'Browse Catalogue',
   homepageMakersHeading: 'Handmade in Solomon Islands',
-  homepageMakersIntro: 'Scan the QR code on any product tag to discover the story of the maker who created it.',
   // About
   aboutPageIntro: 'Solomon Islands Arts & Crafts connects makers in Solomon Islands with museum and gallery shops in Australia — telling authentic stories and building respectful trade relationships.',
   aboutSolomonIslandsHeading: 'About Solomon Islands',

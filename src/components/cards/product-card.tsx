@@ -30,7 +30,7 @@ export function ProductCard({ product, makerName, showPrice = false }: ProductCa
       alt={`${product.name}${makerName ? ` by ${makerName}` : ''}`}
       fit="contain"
       pill={materialLabel(product.materialCategory)}
-      sizes="(max-width: 640px) 45vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
     >
       <h3 className={`${posterTitleClasses} line-clamp-2`}>{product.name}</h3>
       {/* Body size, not the 14px meta size. The maker's name IS the provenance

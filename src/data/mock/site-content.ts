@@ -11,7 +11,6 @@ export let mockSiteContent: SiteContent = {
   homepageIntro: '',
   homepageCtaText: '',
   homepageMakersHeading: '',
-  homepageMakersIntro: '',
   aboutPageIntro: '',
   aboutSolomonIslandsHeading: '',
   aboutSolomonIslandsText: '',

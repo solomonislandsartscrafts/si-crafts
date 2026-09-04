@@ -16,7 +16,7 @@ export function HeroCodeToggle({ tone = 'light' }: HeroCodeToggleProps) {
 
   if (showInput) {
     return (
-      <div className="mt-lg max-w-xs">
+      <div id="hero-code-lookup" className="mt-lg max-w-xs">
         <PieceLookup tone={tone} />
       </div>
     );
@@ -30,6 +30,7 @@ export function HeroCodeToggle({ tone = 'light' }: HeroCodeToggleProps) {
   return (
     <div className="mt-lg">
       <button
+        type="button"
         onClick={() => setShowInput(true)}
         className={`text-sm font-medium transition-colors ${linkClasses}`}
       >

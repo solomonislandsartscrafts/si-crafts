@@ -70,11 +70,11 @@ export default function AdminOrdersPage() {
           <table className="w-full text-sm">
             <thead className="bg-sand-light border-b border-sand">
               <tr>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Reference</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden sm:table-cell">Date</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Total</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Status</th>
-                <th className="text-right px-sm py-xs font-medium text-warm-gray-600">Update</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Reference</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden sm:table-cell">Date</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Total</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Status</th>
+                <th scope="col" className="text-right px-sm py-xs font-medium text-warm-gray-600">Update</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-sand">

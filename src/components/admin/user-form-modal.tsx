@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { X } from 'lucide-react';
 import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { useModalA11y } from '@/lib/use-modal-a11y';
 import type { AccountRole, AccountUser } from '@/types';
 
 const FIELD_CLASS =
-  'w-full px-sm py-xs rounded-md border border-sand-dark bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent';
+  'w-full px-sm py-xs rounded-md border border-sand-dark bg-white text-warm-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean focus-visible:border-transparent';
 
 const ROLE_OPTIONS = [
   { value: 'user', label: 'No role — sign-in only' },
@@ -54,40 +55,13 @@ export function UserFormModal({ user = null, onClose, onSuccess }: UserFormModal
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const dialogRef = useRef<HTMLDivElement>(null);
 
   const roleLocked = isEdit && user!.isSuperuser;
 
-  // Focus the dialog on mount, close on Escape, keep Tab inside it.
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    dialog.focus();
-
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        if (!saving) onClose();
-        return;
-      }
-      if (e.key !== 'Tab') return;
-      const focusable = dialog!.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [saving, onClose]);
+  // Shared modal a11y: focus trap, Escape to close, body-scroll lock, and
+  // focus restored to the trigger element on close. `onClose` is only called
+  // while not saving, matching the previous hand-rolled behaviour.
+  const dialogRef = useModalA11y(true, () => { if (!saving) onClose(); });
 
   const isAdminRole = role === 'super_admin' || role === 'editor';
   const needsPassword = !isEdit && isAdminRole;
@@ -177,7 +151,7 @@ export function UserFormModal({ user = null, onClose, onSuccess }: UserFormModal
           <button
             onClick={() => { if (!saving) onClose(); }}
             disabled={saving}
-            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-50"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean disabled:opacity-50"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -356,7 +330,7 @@ export function UserFormModal({ user = null, onClose, onSuccess }: UserFormModal
                 type="checkbox"
                 checked={isActive}
                 onChange={(e) => setIsActive(e.target.checked)}
-                className="mt-3xs w-4 h-4 rounded border-sand-dark text-ocean focus:ring-2 focus:ring-ocean"
+                className="mt-3xs w-4 h-4 rounded border-sand-dark text-ocean focus-visible:ring-2 focus-visible:ring-ocean"
               />
               <span>
                 Account active

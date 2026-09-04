@@ -13,6 +13,9 @@ import { DetailPageLayout } from '@/components/layout/detail-page-layout';
 import { pageTitleClasses } from '@/components/layout/page-header';
 import { SafeImage } from '@/components/ui/safe-image';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { CmsText } from '@/components/ui/cms-text';
+import { ArticleCard } from '@/components/cards/article-card';
+import { articleGridClasses } from '@/components/cards/poster-card';
 import { formatArticleDate } from '@/lib/format-date';
 
 export async function generateStaticParams() {
@@ -67,6 +70,21 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     new Set(allArticles.flatMap((a) => a.tags ?? []))
   ).slice(0, 8);
 
+  // Related articles for the closing "Keep reading" block. Rank the other
+  // articles by how many tags they share with this one, so a reader who
+  // finished a makers story is offered more makers stories first; ties and
+  // articles with no shared tag fall back to the existing recency order
+  // (getPublishedArticles already sorts newest-first). Cap at 3 so the block
+  // reads as a curated set, not a second index.
+  const currentTags = new Set(article.tags ?? []);
+  const relatedArticles = [...otherArticles]
+    .sort(
+      (a, b) =>
+        (b.tags ?? []).filter((t) => currentTags.has(t)).length -
+        (a.tags ?? []).filter((t) => currentTags.has(t)).length
+    )
+    .slice(0, 3);
+
   return (
     <div className="site-container page-y">
       {/* Reading-progress bar, tracking the article body below. */}
@@ -104,6 +122,19 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 bespoke, larger scale — this was the biggest h1 on the site. */}
             <h1 className={`${pageTitleClasses} mb-md`}>{article.title}</h1>
 
+            {/* Standfirst / dek — the editorial intro line between headline and
+                byline. Optional: only renders when the admin has written one.
+                Set at the lead size (text-lg) in secondary body colour so it
+                reads as a bridge into the article, distinct from both the h1
+                above and the metadata below. */}
+            {article.standfirst?.trim() && (
+              <CmsText
+                value={article.standfirst}
+                className="mb-md space-y-2xs"
+                paragraphClassName="text-lg leading-body-lg text-warm-gray-600"
+              />
+            )}
+
             <div className="flex items-center justify-between mt-md">
               {/* All three read as content, so they sit at warm-gray-600
                   (secondary body text). Only the dot separators stay muted at
@@ -116,7 +147,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 </time>
                 <span className="text-warm-gray-400">·</span>
                 <span className="flex items-center gap-3xs">
-                  <Clock className="w-3.5 h-3.5" aria-hidden="true" />
+                  <Clock className="w-4 h-4" aria-hidden="true" />
                   {article.readingTimeMinutes} min read
                 </span>
               </div>
@@ -170,12 +201,34 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             <div className="mt-md text-center">
               <Link
                 href="/news"
-                className="tap-target inline-flex items-center gap-2xs text-base font-medium text-ocean hover:text-ocean-dark transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded-sm"
+                className="tap-target inline-flex items-center gap-2xs text-base font-medium text-ocean hover:text-ocean-dark transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean rounded-sm"
               >
                 ← More articles
               </Link>
             </div>
           </div>
+
+          {/* Keep reading — related stories with cover thumbnails. The single
+              most effective on-page lever for keeping a reader in the section:
+              the foot of an article is where attention is highest and the
+              sidebar (desktop-only, title-only) has already scrolled away.
+              Cards reuse the shared ArticleCard, so this can never drift from
+              the /news index. Ranked by shared tags (see relatedArticles). */}
+          {relatedArticles.length > 0 && (
+            <section className="mt-block" aria-labelledby="keep-reading-heading">
+              <h2
+                id="keep-reading-heading"
+                className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack"
+              >
+                Keep reading
+              </h2>
+              <div className={articleGridClasses} role="list" aria-label="Related articles">
+                {relatedArticles.map((related) => (
+                  <ArticleCard key={related.id} article={related} />
+                ))}
+              </div>
+            </section>
+          )}
         </article>
       </div>
     </div>

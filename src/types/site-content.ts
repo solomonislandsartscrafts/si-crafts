@@ -11,8 +11,22 @@ export interface SiteContent {
   homepageHeading: string;
   homepageIntro: string;
   homepageCtaText: string;
+
+  /**
+   * The hero H1 — NOT the makers section heading, despite the name. The makers
+   * section takes its heading from the `homepage.makersHeading` site-text key.
+   * `homepageHeading` above is the hero eyebrow. Both names read backwards from
+   * where they render; the admin form labels them correctly, and fixing the
+   * names would need a Django migration.
+   */
   homepageMakersHeading: string;
-  homepageMakersIntro: string;
+
+  // NOTE: homepageMakersIntro is intentionally absent. The Django model still
+  // has the `homepage_makers_intro` column (dropping it would need a
+  // destructive migration), but the field had no admin input AND no render on
+  // the homepage — it was reachable from nothing. `mapSiteContent` only copies
+  // keys it finds on its own defaults object, so the backend can keep sending
+  // it and the frontend simply ignores it.
 
   // About page text
   aboutPageIntro: string;

@@ -79,7 +79,7 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
       {hasNativeShare && (
         <button
           onClick={handleNativeShare}
-          className="tap-target p-2xs rounded-full text-warm-gray-400 hover:text-ocean hover:bg-ocean/10 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+          className="tap-target p-2xs rounded-full text-warm-gray-400 hover:text-ocean hover:bg-ocean/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
           aria-label="Share article"
         >
           <Share2 className="w-4 h-4" />
@@ -89,7 +89,7 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
       {/* Facebook */}
       <button
         onClick={handleFacebook}
-        className="tap-target p-2xs rounded-full text-warm-gray-400 hover:text-[#1877F2] hover:bg-[#1877F2]/10 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+        className="tap-target p-2xs rounded-full text-warm-gray-400 hover:text-[#1877F2] hover:bg-[#1877F2]/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
         aria-label="Share on Facebook"
       >
         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -100,7 +100,7 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
       {/* Twitter/X */}
       <button
         onClick={handleTwitter}
-        className="tap-target p-2xs rounded-full text-warm-gray-400 hover:text-warm-gray-800 hover:bg-warm-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+        className="tap-target p-2xs rounded-full text-warm-gray-400 hover:text-warm-gray-800 hover:bg-warm-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
         aria-label="Share on X"
       >
         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -111,7 +111,7 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
       {/* Email */}
       <button
         onClick={handleEmail}
-        className="tap-target p-2xs rounded-full text-warm-gray-400 hover:text-ocean hover:bg-ocean/10 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+        className="tap-target p-2xs rounded-full text-warm-gray-400 hover:text-ocean hover:bg-ocean/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
         aria-label="Share via email"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
@@ -124,7 +124,7 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
       {clipboardAvailable && (
         <button
           onClick={handleCopyLink}
-          className="tap-target p-2xs rounded-full text-warm-gray-400 hover:text-ocean hover:bg-ocean/10 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+          className="tap-target p-2xs rounded-full text-warm-gray-400 hover:text-ocean hover:bg-ocean/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
           aria-label={copied ? 'Link copied' : copyFailed ? 'Copy failed' : 'Copy link'}
         >
           {copied ? <Check className="w-4 h-4 text-success" /> : <Link2 className="w-4 h-4" />}

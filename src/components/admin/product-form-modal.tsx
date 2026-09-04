@@ -229,7 +229,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
           <button
             onClick={handleDismiss}
             disabled={saving}
-            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-50"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean disabled:opacity-50"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -417,7 +417,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
                 type="checkbox"
                 checked={form.featured}
                 onChange={(e) => handleChange('featured', e.target.checked)}
-                className="w-5 h-5 rounded border-sand-dark text-ocean focus:ring-2 focus:ring-ocean accent-ocean"
+                className="w-5 h-5 rounded border-sand-dark text-ocean focus-visible:ring-2 focus-visible:ring-ocean accent-ocean"
               />
               <div>
                 <span className="text-base font-medium text-warm-gray-800">Featured on Homepage</span>

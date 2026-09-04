@@ -232,9 +232,11 @@ export function PageHeader({
   const centered = align === 'center';
 
   // A coloured band behind a centred login form or a narrow lookup page reads
-  // as a mistake, so the banner treatment is only ever applied to the standard
-  // left-aligned, full-width interior header.
-  const useBanner = Boolean(banner) && !centered && width === 'default';
+  // Coloured banners are currently disabled site-wide — the site uses plain
+  // white headers only. The banner prop is still accepted (so call sites don't
+  // break) but ignored. To re-enable coloured banners later, restore
+  // `useBanner = Boolean(banner) && !centered && width === 'default'`.
+  const useBanner = false;
 
   if (useBanner && banner) {
     const activeMotif = motif ?? BANNER_DEFAULT_MOTIF[banner];

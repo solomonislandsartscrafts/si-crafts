@@ -97,11 +97,11 @@ export default function AdminTeamPage() {
           <table className="w-full text-sm">
             <thead className="bg-sand-light border-b border-sand">
               <tr>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Order</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600">Name</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden sm:table-cell">Location</th>
-                <th className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden md:table-cell">Bio</th>
-                <th className="text-right px-sm py-xs font-medium text-warm-gray-600">Actions</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Order</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Name</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden sm:table-cell">Location</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden md:table-cell">Bio</th>
+                <th scope="col" className="text-right px-sm py-xs font-medium text-warm-gray-600">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-sand">
@@ -119,14 +119,14 @@ export default function AdminTeamPage() {
                     <div className="flex items-center justify-end gap-2xs">
                       <button
                         onClick={() => handleEdit(member)}
-                        className="tap-target p-2xs text-warm-gray-400 hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                        className="tap-target p-2xs text-warm-gray-400 hover:text-ocean transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                         aria-label={`Edit ${member.name}`}
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(member.id, member.name)}
-                        className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                        className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                         aria-label={`Delete ${member.name}`}
                       >
                         <Trash2 className="w-4 h-4" />

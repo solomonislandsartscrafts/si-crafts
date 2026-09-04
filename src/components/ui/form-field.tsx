@@ -70,15 +70,31 @@ export function FormField({
         </p>
       )}
 
-      {/* Input slot — inject accessibility attributes into child element */}
+      {/* Input slot — inject accessibility attributes into child element.
+          Merges with (rather than overwrites) any `aria-describedby`/
+          `aria-invalid` the caller already set on the child directly — a
+          field can be wired to an error that lives outside FormField's own
+          `error` prop (e.g. one shared banner covering several fields, as in
+          the login form), and that association must survive this clone. */}
       {isValidElement(children)
         ? cloneElement(children as ReactElement<Record<string, unknown>>, {
             id: htmlFor || (children as ReactElement<Record<string, unknown>>).props.id,
             'aria-describedby':
-              [error ? errorId : helperId ? helperId : '']
+              [
+                // Reference the error message when there is one; otherwise the
+                // helper text — but only when it is actually rendered, which is
+                // when `helperText` is set and there is no error. Pointing
+                // `aria-describedby` at an id that no element carries is itself
+                // a violation, so an empty `helperText` must not contribute one.
+                error ? errorId : helperText ? helperId : '',
+                (children as ReactElement<Record<string, unknown>>).props['aria-describedby'],
+              ]
                 .filter(Boolean)
                 .join(' ') || undefined,
             ...(required ? { required: true, 'aria-required': true } : {}),
+            // Only assert `aria-invalid` when FormField owns an error. When it
+            // does not, leave whatever the child set directly — including the
+            // string "false" — untouched, rather than flipping it to `true`.
             ...(error ? { 'aria-invalid': true } : {}),
           })
         : children}
@@ -113,6 +129,6 @@ export function FormField({
 export const inputClasses =
   'w-full px-sm py-xs rounded-md border border-sand-dark bg-white text-warm-gray-800 ' +
   'placeholder:text-warm-gray-400 ' +
-  'focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean focus-visible:border-transparent ' +
   'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-warm-gray-100 ' +
-  'data-[error=true]:border-error data-[error=true]:focus:ring-error';
+  'data-[error=true]:border-error data-[error=true]:focus-visible:ring-error';

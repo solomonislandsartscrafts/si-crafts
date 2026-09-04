@@ -31,7 +31,7 @@ export default function GettingStartedPage() {
               <li key={section.id}>
                 <a
                   href={`#${section.id}`}
-                  className="tap-target inline-flex items-center px-xs py-2xs text-sm font-medium text-ocean bg-white border border-sand rounded-md hover:bg-ocean hover:text-white hover:border-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                  className="tap-target inline-flex items-center px-xs py-2xs text-sm font-medium text-ocean bg-white border border-sand rounded-md hover:bg-ocean hover:text-white hover:border-ocean transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                 >
                   {section.label}
                 </a>

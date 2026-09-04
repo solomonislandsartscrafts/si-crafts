@@ -6,6 +6,7 @@ export const mockArticles: Article[] = [
     slug: 'first-shopping-trip-to-honiara',
     title: 'Our First Shopping Trip to Honiara',
     excerpt: 'In early 2026, we made our first trip to Solomon Islands to meet makers and purchase crafts directly. Here\'s what we learned about building relationships face to face.',
+    standfirst: 'A week of conversations, demonstrations and listening in Honiara — and the principle it left us with: makers lead, we follow.',
     content: `<p>In February 2026, Alison travelled to Honiara to meet the makers whose work we'd admired from afar. What followed was a week of conversations, demonstrations, and — most importantly — listening.</p>
 <h2>Meeting Julie in Atori</h2>
 <p>Julie Mone has been weaving pandanus bags since she was a teenager, learning from her mother on the veranda of their family home in Atori village, Guadalcanal Province. When we arrived, she had a collection of shoulder bags, clutch purses, and fans laid out on a woven mat.</p>
@@ -32,6 +33,7 @@ export const mockArticles: Article[] = [
     slug: 'how-shell-money-is-made',
     title: 'How Shell-Money Jewellery Is Made',
     excerpt: 'From reef to necklace — the painstaking process behind every shell-money piece, explained by Agnes Rini from Auki, Malaita Province.',
+    standfirst: '',
     content: `<p>Shell money (tafuliae) has been both currency and adornment in Solomon Islands for centuries. Today, makers like Agnes Rini in Auki continue this tradition, creating jewellery that honours the craft while being wearable every day.</p>
 <h2>Collecting the shells</h2>
 <p>Agnes collects shells from the reef near her village at low tide. Different species produce different colours — white from conus shells, black from a type of mussel, and the prized red-orange from shells that are baked in a fire to achieve their colour.</p>
@@ -57,6 +59,7 @@ export const mockArticles: Article[] = [
     slug: 'qagoma-partnership-announcement',
     title: 'QAGOMA Is Our First Stockist',
     excerpt: 'We\'re thrilled to announce that Queensland Art Gallery of Modern Art (QAGOMA) is stocking Solomon Islands handicrafts in their gallery shop.',
+    standfirst: 'From November 2026, pandanus bags, shell-money jewellery and wood carvings will be on the shelves at South Bank.',
     content: `<p>We're excited to share that QAGOMA — the Queensland Art Gallery of Modern Art in Brisbane — is our first retail stockist. From November 2026, you'll find Solomon Islands pandanus bags, shell-money jewellery, and wood carvings in their gallery shop at South Bank.</p>
 <h2>Why QAGOMA</h2>
 <p>Museum and gallery shops are the perfect home for these crafts. Visitors are already in a mindset of appreciating art, craftsmanship, and cultural stories. The staff understand provenance and can share the maker's story with customers.</p>
@@ -81,6 +84,7 @@ export const mockArticles: Article[] = [
     slug: 'caring-for-pandanus',
     title: 'How to Care for Your Pandanus Piece',
     excerpt: 'Simple tips to keep your pandanus bag, fan, or tray looking beautiful for years to come.',
+    standfirst: '',
     content: `<p>Pandanus weaving produces remarkably durable items — bags that last decades with proper care. Here's how to look after yours.</p>
 <h2>Keep it dry</h2>
 <p>Pandanus absorbs moisture readily and can develop mould if stored damp. If your bag gets caught in rain, shake off excess water and leave it in a well-ventilated area (not in direct sunlight) until completely dry.</p>

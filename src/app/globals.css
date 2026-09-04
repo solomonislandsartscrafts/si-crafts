@@ -30,11 +30,11 @@
         3xs   4px   hairline nudges, icon-to-baseline alignment
         2xs   8px   heading → its own subtitle; icon → its label
         xs   12px   button rows, chip rows, inline metadata
-        sm   16px   card padding, page gutter (mobile), tight stacks
-        md   24px   card padding (roomy), block internals, grid gutter (mobile)
-        lg   32px   grid gutter (desktop), section heading → content
-        xl   48px   section band padding (mobile), in-page block separation
-        2xl  64px   page gutter (desktop), in-page block separation (desktop)
+        sm   16px   card padding, page gutter (mobile), grid gutter (mobile)
+        md   24px   card padding (roomy), block internals, grid gutter (desktop)
+        lg   32px   section heading → content (desktop)
+        xl   48px   section band padding (mobile), page gutter (desktop)
+        2xl  64px   in-page block separation (desktop)
         3xl  96px   section band padding (desktop)
 
    2. THE SEMANTIC LAYER (--gutter, --section-y, --block-y, --stack-y,
@@ -43,17 +43,30 @@
       writes `pb-section` rather than `pb-10 lg:pb-20`: the responsive step is
       owned by the token, in one place, not repeated at every call site.
 
-   HIERARCHY (largest gap → smallest). Enforced by the semantic tokens:
+   HIERARCHY (largest gap → smallest). Enforced by the semantic tokens, and it
+   is a STRICT descent — no two rungs share a value:
 
         section  48 → 96   between major page sections
         block    32 → 64   between blocks inside one section
         stack    24 → 32   section heading/subtitle → the content below it
-        grid     24 → 32   card grid gutters
+        grid     16 → 24   card grid gutters
         2xs       8        heading → subtitle, and other same-group pairs
 
+   `grid` sitting a clear rung below `stack` is load-bearing, not incidental.
+   The two used to be equal (24 → 32 each), which meant the gap under a section
+   heading was exactly the gap between two cards: nothing marked where the
+   heading ended and the grid began, and the tiles read as separate objects
+   instead of one block of imagery. Roughly 1:2 between the grid gutter and the
+   heading gap is what makes a card grid cohere under its heading. If you widen
+   `grid`, you have to widen `stack` with it.
+
    INTERNAL ≤ EXTERNAL. Padding inside a card (sm 16 / md 24) is never larger
-   than the gap separating it from its neighbours (grid 24 → 32). Check this
-   whenever you add a card variant.
+   than the gap separating it from its neighbours (grid 16 → 24). Note this is
+   now EQUAL at both breakpoints for `sm` padding, not smaller — so `md` (24)
+   panel padding no longer clears the mobile gutter and must not be used on
+   anything sitting in a card grid. Poster cards have no panel padding at all
+   (their only internal spacing is the 12px frame → caption), so this only bites
+   if you add a padded panel variant. Check it when you do.
 
    MOBILE IS THE SAME LADDER, ONE RUNG DOWN. Every semantic token steps to a
    smaller rung of the SAME scale on small screens — it does not switch to a
@@ -107,8 +120,15 @@
     /* A section heading (+ its subtitle) down to the content it introduces. */
     --stack-y: var(--space-md);      /* 24px */
 
-    /* Card grid gutters — row and column, the same value in both directions. */
-    --grid-gap: var(--space-md);     /* 24px */
+    /* Card grid gutters — row and column, the same value in both directions.
+       Deliberately the SMALLEST gap in the hierarchy, and a clear rung below
+       --stack-y. It used to equal --stack-y (24 → 32 for both), which left the
+       hierarchy with a flat rung: the gap under a section heading was exactly
+       the gap between two cards, so nothing marked where the heading ended and
+       the grid began, and a row of tiles read as separate objects rather than
+       one block of imagery. A tight gutter under a wide heading gap is what
+       makes a card grid cohere. */
+    --grid-gap: var(--space-sm);     /* 16px */
 
     /* Component-internal button padding. Exposed as variables so the four
        .btn-* classes cannot drift apart. */
@@ -120,9 +140,15 @@
   /* 920px (tabtop) — the point at which the layout opens up horizontally. */
   @media (min-width: 920px) {
     :root {
-      --gutter: var(--space-2xl);    /* 64px */
+      /* 48px, not 64px. The gutter is pure margin: every px of it is taken off
+         the content column, and on an image-led wholesale catalogue that column
+         is the product photography. 64px on a 1440px canvas left the grid
+         noticeably narrower than it needed to be; 48px hands 32px per side back
+         to the images and is still three rungs above the 16px mobile gutter, so
+         the page never reads as edge-to-edge. */
+      --gutter: var(--space-xl);     /* 48px */
       --page-y: var(--space-lg);     /* 32px */
-      --grid-gap: var(--space-lg);   /* 32px */
+      --grid-gap: var(--space-md);   /* 24px */
     }
   }
 
@@ -212,7 +238,7 @@
      file. They exist so the four measurements that decide the whole page
      rhythm are each written once:
 
-       .site-px         padding-left/right  = --gutter    16 → 64 @920
+       .site-px         padding-left/right  = --gutter    16 → 48 @920
        .site-container  .site-px + max-width 1440px + centred
        .page-y          padding-top/bottom  = --page-y    24 → 32 @920
        .section-y       padding-top/bottom  = --section-y 48 → 96 @1024
@@ -698,20 +724,71 @@
   color: #3D362E;
 }
 
+/* Measure (line length). Prose is capped at ~68 characters — the readable
+   band every serious editorial site holds text to (NYT ≈ 600px, Medium ≈ 680px)
+   — while the article column itself stays 720px so figures can still use the
+   full width and read as a deliberate break from the text. Text stays
+   left-aligned at the column's left edge (not centred); only the right edge
+   pulls in, so the reader's eye returns to the same start point every line.
+   `ch` is the correct unit: it tracks the font's own average character width,
+   so the cap holds at ~68 characters whatever the reader's font size. */
+.article-content p,
+.article-content ul,
+.article-content ol,
+.article-content blockquote,
+.article-content h2,
+.article-content h3 {
+  max-width: 68ch;
+}
+
 .article-content p {
   margin-bottom: var(--space-md);
 }
 
 /* Lead paragraph — the article's entry point. The opening paragraph is set a
    step larger so the eye has somewhere to land before the body settles to its
-   reading size, the standard editorial "standfirst". Only the very first
-   paragraph, and only when it is the first child, so an article that opens with
-   an image or heading is not given a false lead. 1.25rem (20px) × 1.6 = 32px,
-   still on the 4px grid. */
-.article-content > p:first-child {
+   reading size, the standard editorial "standfirst". `first-of-type` rather
+   than `first-child` so the lead survives an article that opens with a cover
+   image or a heading before its first line of prose — the previous
+   `first-child` rule silently lost the lead in exactly that (common) case.
+   1.25rem (20px) × 1.6 = 32px, still on the 4px grid. */
+.article-content > p:first-of-type {
   font-size: 1.25rem;
   line-height: 1.6;
   color: #3D362E;
+}
+
+/* Drop cap — the classic long-read entry cue. The first letter of the opening
+   paragraph is enlarged and floated so the eye is drawn straight to the start
+   of the prose. Deep-blue (heading colour) and Poppins (the heading face) so it
+   reads as a deliberate typographic mark rather than an oversized body letter.
+   `initial-letter` sinks it 3 lines where supported (Safari, Chrome); the
+   float/font-size fallback covers Firefox with an approximation on the same
+   4px-ish rhythm. Applied only to the very first paragraph, so it never fires
+   mid-article. Reduced-motion is irrelevant here — this is static. */
+.article-content > p:first-of-type::first-letter {
+  font-family: var(--font-heading), 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #1B3A4B;
+  font-weight: 600;
+  -webkit-initial-letter: 3;
+  initial-letter: 3;
+  /* Fallback for engines without initial-letter (Firefox): float a large cap. */
+  float: left;
+  font-size: 3.25rem;
+  line-height: 1;
+  padding-right: var(--space-2xs);
+  padding-top: 0.25rem;
+}
+
+/* Where initial-letter IS supported, drop the float fallback so the two
+   mechanisms don't fight — initial-letter handles the sink and spacing. */
+@supports (initial-letter: 3) or (-webkit-initial-letter: 3) {
+  .article-content > p:first-of-type::first-letter {
+    float: none;
+    font-size: inherit;
+    line-height: inherit;
+    padding-top: 0;
+  }
 }
 
 .article-content h2 {
@@ -784,12 +861,27 @@
   color: #154A8C;
 }
 
+/* Pull quote / blockquote — a rest point for the eye and the strongest device
+   for pulling a scanner into the body. Set a step larger than body (1.25rem,
+   the lead size) with the brand-green accent rule, so a quote reads as a
+   deliberate lift rather than just indented prose. 20px × 1.6 = 32px keeps it
+   on the 4px grid. Italic is dropped in favour of size + colour: long italic
+   runs are harder to read, and the size already marks it as set apart. */
 .article-content blockquote {
   border-left: 3px solid #1E7A3D;
   padding-left: var(--space-md);
-  margin: var(--space-lg) 0;
-  font-style: italic;
-  color: #5C5648;
+  margin: var(--space-lg) auto;
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: #1B3A4B;
+}
+
+.article-content blockquote p {
+  margin-bottom: var(--space-2xs);
+}
+
+.article-content blockquote p:last-child {
+  margin-bottom: 0;
 }
 
 .article-content img {
@@ -822,41 +914,6 @@
 /* In the editor, clicking an image opens its alt text and caption fields. */
 [contenteditable] img {
   cursor: pointer;
-}
-
-/* Accessibility widget overrides */
-.a11y-high-contrast body,
-.a11y-high-contrast {
-  color: #000 !important;
-}
-
-.a11y-high-contrast p,
-.a11y-high-contrast li,
-.a11y-high-contrast span,
-.a11y-high-contrast td,
-.a11y-high-contrast dt,
-.a11y-high-contrast dd {
-  color: #000 !important;
-  background-color: transparent !important;
-}
-
-.a11y-high-contrast h1,
-.a11y-high-contrast h2,
-.a11y-high-contrast h3,
-.a11y-high-contrast h4,
-.a11y-high-contrast h5,
-.a11y-high-contrast h6 {
-  color: #000 !important;
-}
-
-.a11y-high-contrast a {
-  color: #0000EE !important;
-  text-decoration: underline !important;
-}
-
-.a11y-high-contrast button,
-.a11y-high-contrast [role="button"] {
-  border: 2px solid currentColor !important;
 }
 
 

@@ -61,7 +61,7 @@ export function ActivityFeed({ items }: ActivityFeedProps) {
               <li key={item.id}>
                 <Link
                   href={item.href}
-                  className="tap-target flex items-center gap-xs py-xs -mx-2xs px-2xs rounded-md hover:bg-sand-light focus:outline-none focus:ring-2 focus:ring-ocean"
+                  className="tap-target flex items-center gap-xs py-xs -mx-2xs px-2xs rounded-md hover:bg-sand-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                 >
                   <Icon className="w-4 h-4 flex-shrink-0 text-warm-gray-400" aria-hidden="true" />
                   <div className="flex-1 min-w-0">

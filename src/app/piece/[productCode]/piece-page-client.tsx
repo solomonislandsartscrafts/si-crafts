@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Check, ShoppingCart, Minus, Plus } from 'lucide-react';
+import { Check, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import { Button, ButtonLink } from '@/components/ui/button';
 import type { Product, Maker, Craft } from '@/types';
 import { ImageGallery } from '@/components/provenance/image-gallery';
 import { MakerSection } from '@/components/provenance/maker-section';
 import { CmsInline, CmsText } from '@/components/ui/cms-text';
+import { QuantityStepper } from '@/components/ui/quantity-stepper';
 import { ShieldCheck } from 'lucide-react';
 import { ShareButtons } from '@/components/shared/share-buttons';
 import { FlagDivider } from '@/components/layout/flag-divider';
@@ -153,25 +154,13 @@ export function PiecePageClient({
           {isStockist && (
             <div ref={ctaRef} className="mb-md">
               <div className="flex items-center gap-xs">
-                <div className="flex items-center border border-sand-dark rounded-md bg-white">
-                  <button
-                    onClick={() => setQty(Math.max(1, qty - 1))}
-                    className="tap-target flex items-center justify-center text-warm-gray-800 hover:bg-sand-light rounded-l-md focus:outline-none focus:ring-2 focus:ring-ocean"
-                    aria-label="Decrease quantity"
-                  >
-                    <Minus className="w-4 h-4" aria-hidden="true" />
-                  </button>
-                  <span className="px-xs text-base font-medium text-deep-blue border-x border-sand-dark min-w-[3rem] text-center">
-                    {qty}
-                  </span>
-                  <button
-                    onClick={() => setQty(Math.min(999, qty + 1))}
-                    className="tap-target flex items-center justify-center text-warm-gray-800 hover:bg-sand-light rounded-r-md focus:outline-none focus:ring-2 focus:ring-ocean"
-                    aria-label="Increase quantity"
-                  >
-                    <Plus className="w-4 h-4" aria-hidden="true" />
-                  </button>
-                </div>
+                <QuantityStepper
+                  value={qty}
+                  onChange={setQty}
+                  itemLabel={product.name}
+                  className="bg-white"
+                  valueClassName="px-xs text-base font-medium text-deep-blue border-x border-sand-dark min-w-[3rem] text-center"
+                />
                 <Button
                   onClick={handleAddToCart}
                   disabled={added}

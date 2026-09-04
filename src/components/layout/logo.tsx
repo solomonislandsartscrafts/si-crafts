@@ -12,37 +12,27 @@ import Image from 'next/image';
  * every breakpoint and the logo can never distort. Height (44/48px) is kept
  * under the 80px header (h-20) with room to breathe.
  *
- * Light-on-dark: the artwork is dark ink on transparency, so it disappears on
- * dark surfaces (footer, admin sidebar). Those surfaces render their own white
- * text. The homepage hero is the exception — it wants the real lockup on the
- * blue band — so `onDark` applies a `brightness-0 invert` filter that renders
- * the single-colour mark crisp white. This reuses the one PNG rather than
- * shipping a second reversed asset.
+ * Light-on-dark: the artwork is dark ink on transparency, so it disappears on a
+ * dark surface. `onDark` applies a `brightness-0 invert` filter that renders the
+ * single-colour mark crisp white, reusing the one PNG rather than shipping a
+ * second reversed asset. The footer uses it; the admin sidebar renders its own
+ * white text instead.
+ *
+ * There was also an `onDarkFromLg` prop, for the homepage header when it floated
+ * transparent over a coloured hero band on desktop only. Both that header
+ * treatment and the coloured hero are gone, so the prop went with them.
  */
 interface LogoProps {
   className?: string;
   /**
-   * Render the mark white, for placement on a dark background (footer, admin
-   * sidebar, hero band). Applies at every width.
+   * Render the mark white, for placement on a dark background. Applies at every
+   * width.
    */
   onDark?: boolean;
-  /**
-   * Render the mark white only from `lg` up, dark ink below. Used ONLY by the
-   * homepage header: it floats white over the blue hero on desktop, but below
-   * `lg` the header is solid white (transparent-over-hero is desktop-only — see
-   * Header), so the dark ink logo is correct on the white mobile bar. Kept
-   * separate from `onDark` so a genuinely dark surface (the footer) stays white
-   * at every width. Pass one or the other, not both.
-   */
-  onDarkFromLg?: boolean;
 }
 
-export function Logo({ className = '', onDark = false, onDarkFromLg = false }: LogoProps) {
-  const darkFilter = onDark
-    ? 'brightness-0 invert'
-    : onDarkFromLg
-      ? 'lg:brightness-0 lg:invert'
-      : '';
+export function Logo({ className = '', onDark = false }: LogoProps) {
+  const darkFilter = onDark ? 'brightness-0 invert' : '';
   return (
     <Image
       src="/images/sica logo.png"

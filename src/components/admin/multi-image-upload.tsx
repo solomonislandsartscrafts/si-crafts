@@ -154,23 +154,25 @@ export function MultiImageUpload({
               </span>
             )}
 
-            {/* Remove button */}
+            {/* Remove button. Visible on hover AND on keyboard focus — without
+                `focus:opacity-100` a keyboard user could tab onto this button
+                and see nothing there until the mouse also happened to hover it. */}
             <button
               type="button"
               onClick={() => handleRemove(index)}
-              className="absolute -top-2 -right-2 w-6 h-6 bg-error text-white rounded-full flex items-center justify-center hover:bg-error/80 focus:outline-none focus:ring-2 focus:ring-error opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute -top-2 -right-2 w-6 h-6 bg-error text-white rounded-full flex items-center justify-center hover:bg-error/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
               aria-label={`Remove image ${index + 1}`}
             >
               <X className="w-3 h-3" />
             </button>
 
-            {/* Reorder buttons */}
-            <div className="absolute bottom-1 inset-x-0 flex justify-center gap-3xs opacity-0 group-hover:opacity-100 transition-opacity">
+            {/* Reorder buttons — same hover/focus-visibility rule as above. */}
+            <div className="absolute bottom-1 inset-x-0 flex justify-center gap-3xs opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
               {index > 0 && (
                 <button
                   type="button"
                   onClick={() => handleMoveLeft(index)}
-                  className="w-5 h-5 bg-white/90 text-deep-blue rounded flex items-center justify-center shadow-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-ocean"
+                  className="w-5 h-5 bg-white/90 text-deep-blue rounded flex items-center justify-center shadow-sm hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean focus:opacity-100"
                   aria-label={`Move image ${index + 1} left`}
                 >
                   <ChevronLeft className="w-3 h-3" />
@@ -180,7 +182,7 @@ export function MultiImageUpload({
                 <button
                   type="button"
                   onClick={() => handleMoveRight(index)}
-                  className="w-5 h-5 bg-white/90 text-deep-blue rounded flex items-center justify-center shadow-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-ocean"
+                  className="w-5 h-5 bg-white/90 text-deep-blue rounded flex items-center justify-center shadow-sm hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean focus:opacity-100"
                   aria-label={`Move image ${index + 1} right`}
                 >
                   <ChevronRight className="w-3 h-3" />
@@ -196,7 +198,7 @@ export function MultiImageUpload({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            className="tap-target flex flex-col items-center justify-center w-24 h-24 rounded-lg border-2 border-dashed border-sand-dark hover:border-ocean bg-sand-light/50 hover:bg-sand-light transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-50"
+            className="tap-target flex flex-col items-center justify-center w-24 h-24 rounded-lg border-2 border-dashed border-sand-dark hover:border-ocean bg-sand-light/50 hover:bg-sand-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean disabled:opacity-50"
           >
             {uploading ? (
               <Loader2 className="w-5 h-5 text-ocean animate-spin" />
@@ -243,7 +245,7 @@ export function MultiImageUpload({
                   aria-invalid={isMissing}
                   aria-label={`Alt text for image ${index + 1}`}
                   placeholder={`Describe image ${index + 1}`}
-                  className={`flex-1 px-xs py-2xs text-sm rounded-md border bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent ${
+                  className={`flex-1 px-xs py-2xs text-sm rounded-md border bg-white text-warm-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean focus-visible:border-transparent ${
                     isMissing ? 'border-error' : 'border-sand-dark'
                   }`}
                 />

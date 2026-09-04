@@ -23,6 +23,10 @@ export function MakerFilter({ makers, selected, onChange }: MakerFilterProps) {
       options={selectOptions}
       placeholder="All makers"
       label="Filter by maker"
+      // Fills the filter rail so it lines up with the search box above it.
+      // Without this the trigger shrinks to "All makers" from `sm` up and the
+      // rail's controls sit at three different widths.
+      fullWidth
     />
   );
 }

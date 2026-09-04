@@ -35,6 +35,7 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
     title: article?.title ?? '',
     slug: article?.slug ?? '',
     excerpt: article?.excerpt ?? '',
+    standfirst: article?.standfirst ?? '',
     content: article?.content ?? '',
     coverImageUrl: article?.coverImageUrl ?? '',
     coverImageAlt: article?.coverImageAlt ?? '',
@@ -99,6 +100,7 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
         title: form.title,
         slug: form.slug,
         excerpt: form.excerpt,
+        standfirst: form.standfirst,
         content: form.content,
         coverImageUrl: form.coverImageUrl || null,
         coverImageAlt: form.coverImageAlt || '',
@@ -139,7 +141,7 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
           <button
             onClick={handleDismiss}
             disabled={saving}
-            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-50"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean disabled:opacity-50"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -168,10 +170,25 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
           {/* Excerpt */}
           <FormField label="Excerpt" htmlFor="article-excerpt">
             <textarea
+              id="article-excerpt"
               value={form.excerpt}
               onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
               rows={2}
               placeholder="Brief summary shown on cards (1-2 sentences)"
+              className={`${inputClasses} resize-y`}
+            />
+          </FormField>
+
+          {/* Standfirst — the dek shown between headline and byline on the
+              article page. Optional; falls back to nothing when blank. */}
+          <FormField label="Standfirst (optional)" htmlFor="article-standfirst">
+            <textarea
+              id="article-standfirst"
+              value={form.standfirst}
+              onChange={(e) => setForm({ ...form, standfirst: e.target.value })}
+              rows={2}
+              maxLength={500}
+              placeholder="A one- or two-sentence intro shown under the headline on the article page. Leave blank to omit."
               className={`${inputClasses} resize-y`}
             />
           </FormField>
@@ -184,6 +201,8 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
             onAltTextChange={(alt) => setForm({ ...form, coverImageAlt: alt })}
             label="Cover Image"
             aspectHint="16:9 landscape"
+            recommendedAspectRatio={16 / 9}
+            recommendedMinWidth={1200}
             maxWidth={1400}
             quality={0.85}
           />
@@ -243,7 +262,7 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
                 type="checkbox"
                 checked={form.published}
                 onChange={(e) => setForm({ ...form, published: e.target.checked })}
-                className="w-4 h-4 rounded border-sand-dark text-ocean focus:ring-ocean"
+                className="w-4 h-4 rounded border-sand-dark text-ocean focus-visible:ring-ocean"
               />
               <span className="text-base text-warm-gray-800">Published</span>
             </label>
@@ -252,7 +271,7 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
                 type="checkbox"
                 checked={form.featured}
                 onChange={(e) => setForm({ ...form, featured: e.target.checked })}
-                className="w-4 h-4 rounded border-sand-dark text-ocean focus:ring-ocean"
+                className="w-4 h-4 rounded border-sand-dark text-ocean focus-visible:ring-ocean"
               />
               <span className="text-base text-warm-gray-800">Featured (hero on news page)</span>
             </label>

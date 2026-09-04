@@ -35,7 +35,6 @@ export function MakersCarousel({ makers, craftNameMap }: MakersCarouselProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
-  const [hintVisible, setHintVisible] = useState(true);
 
   // Recompute which arrows are usable from the track's current scroll offset.
   // Runs on mount, on scroll, and on resize because the visible-card count (and
@@ -75,10 +74,6 @@ export function MakersCarousel({ makers, craftNameMap }: MakersCarouselProps) {
     el.scrollBy({ left: step * direction, behavior: 'smooth' });
   }, []);
 
-  function handleScrollHint() {
-    if (hintVisible) setHintVisible(false);
-  }
-
   if (makers.length === 0) return null;
 
   return (
@@ -98,7 +93,7 @@ export function MakersCarousel({ makers, craftNameMap }: MakersCarouselProps) {
         onClick={() => scrollByCard(-1)}
         disabled={!canScrollLeft}
         aria-label="Previous makers"
-        className="absolute left-0 top-[38%] z-10 hidden -translate-x-1/2 -translate-y-1/2 tap-target lg:flex items-center justify-center rounded-full border border-sand-dark bg-card-bg text-deep-blue shadow-card transition-colors hover:border-ocean hover:text-ocean disabled:cursor-not-allowed disabled:opacity-0 focus:outline-none focus:ring-2 focus:ring-ocean"
+        className="absolute left-0 top-[38%] z-10 hidden -translate-x-1/2 -translate-y-1/2 tap-target lg:flex items-center justify-center rounded-full border border-sand-dark bg-card-bg text-deep-blue shadow-card transition-colors hover:border-ocean hover:text-ocean disabled:cursor-not-allowed disabled:opacity-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
       >
         <ChevronLeft className="h-5 w-5" aria-hidden="true" />
       </button>
@@ -107,7 +102,7 @@ export function MakersCarousel({ makers, craftNameMap }: MakersCarouselProps) {
         onClick={() => scrollByCard(1)}
         disabled={!canScrollRight}
         aria-label="Next makers"
-        className="absolute right-0 top-[38%] z-10 hidden translate-x-1/2 -translate-y-1/2 tap-target lg:flex items-center justify-center rounded-full border border-sand-dark bg-card-bg text-deep-blue shadow-card transition-colors hover:border-ocean hover:text-ocean disabled:cursor-not-allowed disabled:opacity-0 focus:outline-none focus:ring-2 focus:ring-ocean"
+        className="absolute right-0 top-[38%] z-10 hidden translate-x-1/2 -translate-y-1/2 tap-target lg:flex items-center justify-center rounded-full border border-sand-dark bg-card-bg text-deep-blue shadow-card transition-colors hover:border-ocean hover:text-ocean disabled:cursor-not-allowed disabled:opacity-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
       >
         <ChevronRight className="h-5 w-5" aria-hidden="true" />
       </button>
@@ -122,12 +117,16 @@ export function MakersCarousel({ makers, craftNameMap }: MakersCarouselProps) {
           here wrapped a listitem inside a listitem — which axe flags, because the
           inner one's nearest list ancestor is a listitem, not a list. One
           container pattern site-wide is what keeps that from happening again. */}
+      {/* `scroll-pl-gutter` makes each snapped card come to rest at the gutter
+          rather than flush against the screen edge — without it a scroll-snap
+          container snaps `snap-start` cards to the padding box edge, so the
+          first card sat at 0 on a phone and the section had no left inset. It
+          mirrors `px-gutter` and is reset with the padding at `lg`. */}
       <div
         role="list"
         ref={trackRef}
-        onScroll={handleScrollHint}
         aria-label="Featured makers"
-        className="-mx-gutter flex snap-x snap-mandatory gap-grid overflow-x-auto scroll-smooth px-gutter pb-3xs scrollbar-hide lg:mx-0 lg:px-0"
+        className="-mx-gutter flex snap-x snap-mandatory gap-grid overflow-x-auto scroll-smooth scroll-pl-gutter px-gutter pb-3xs scrollbar-hide lg:mx-0 lg:scroll-pl-0 lg:px-0"
       >
         {makers.map((maker) => (
           <div
@@ -150,9 +149,12 @@ export function MakersCarousel({ makers, craftNameMap }: MakersCarouselProps) {
       </div>
 
       {/* Mobile swipe hint — the desktop arrows do this job on wide screens, so
-          this is lg:hidden. Fades out once the user starts scrolling so it is
-          not permanent chrome. Decorative icon; the text carries the meaning. */}
-      {hintVisible && makers.length > 1 && (
+          this is lg:hidden. Stays visible as long as there is more to the right
+          (`canScrollRight`) rather than fading on the first scroll, so the "there
+          is more" affordance is honest: it persists while it is true and clears
+          itself the moment the user reaches the last maker. Decorative icon; the
+          text carries the meaning. */}
+      {canScrollRight && makers.length > 1 && (
         <p
           aria-hidden="true"
           className="mt-sm flex items-center justify-center gap-2xs text-sm text-warm-gray-400 transition-opacity duration-300 lg:hidden"

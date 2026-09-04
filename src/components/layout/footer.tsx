@@ -74,7 +74,7 @@ export async function Footer() {
             <div className="col-span-2 md:col-span-1">
               <Link
                 href="/"
-                className="inline-flex rounded-sm focus:outline-none focus:ring-2 focus:ring-ocean-light"
+                className="inline-flex rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-light"
                 aria-label="Solomon Islands Arts & Crafts — home"
               >
                 <Logo onDark />
@@ -104,7 +104,7 @@ export async function Footer() {
                           inside that taller box. */}
                       <Link
                         href={link.href}
-                        className="tap-target inline-flex items-center justify-start text-base text-white/70 leading-body hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean-light rounded-sm"
+                        className="tap-target inline-flex items-center justify-start text-base text-white/70 leading-body hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-light rounded-sm"
                       >
                         {link.label}
                       </Link>

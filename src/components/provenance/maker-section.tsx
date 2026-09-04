@@ -107,7 +107,7 @@ export function MakerSection({
             href={`/maker/${maker.slug}`}
             aria-hidden="true"
             tabIndex={-1}
-            className="group rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+            className="group rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
           >
             <div className="relative h-28 w-28 overflow-hidden rounded-full bg-sand ring-4 ring-accent-gold/70 ring-offset-4 ring-offset-sand-light shadow-card sm:h-32 sm:w-32">
               <SafeImage
@@ -180,7 +180,7 @@ export function MakerSection({
             has an obvious next step. */}
         <Link
           href={`/maker/${maker.slug}`}
-          className="tap-target mt-md inline-flex items-center gap-2xs text-base font-semibold text-ocean transition-colors hover:text-ocean-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean rounded-sm"
+          className="tap-target mt-md inline-flex items-center gap-2xs text-base font-semibold text-ocean transition-colors hover:text-ocean-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean rounded-sm"
         >
           Read {maker.name}&apos;s full story
           <ArrowRight className="h-4 w-4" aria-hidden="true" />

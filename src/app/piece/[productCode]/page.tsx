@@ -5,6 +5,7 @@ import { getAllMakers } from '@/services/makers';
 import { getSiteTextSafe } from '@/services/site-text';
 import { PiecePageClient } from './piece-page-client';
 import { ProductCard } from '@/components/cards/product-card';
+import { posterGridClasses } from '@/components/cards/poster-card';
 import { DetailPageLayout } from '@/components/layout/detail-page-layout';
 import { PageHeader } from '@/components/layout/page-header';
 import { ButtonLink } from '@/components/ui/button';
@@ -205,7 +206,7 @@ export default async function PiecePage({ params }: PiecePageProps) {
           <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack">
             {text['provenance.relatedHeading']}
           </h2>
-          <div role="list" aria-label="Related pieces" className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-grid">
+          <div role="list" aria-label="Related pieces" className={posterGridClasses}>
             {relatedProducts.map((relatedProduct) => {
               const relatedMaker = allMakers.find((m) => m.id === relatedProduct.makerId);
               return (

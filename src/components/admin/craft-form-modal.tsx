@@ -135,7 +135,7 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
           <button
             onClick={handleDismiss}
             disabled={saving}
-            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-50"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean disabled:opacity-50"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -209,7 +209,7 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
               onChange={(e) =>
                 handleChange('culturalContextReviewFlag', e.target.checked ? 'reviewed' : 'unreviewed')
               }
-              className="w-4 h-4 rounded border-sand-dark text-ocean focus:ring-ocean"
+              className="w-4 h-4 rounded border-sand-dark text-ocean focus-visible:ring-ocean"
             />
             <label htmlFor="craft-cultural-review" className="text-base text-warm-gray-800">
               Cultural context reviewed by cultural partner

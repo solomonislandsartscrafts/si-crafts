@@ -36,7 +36,7 @@ export default async function ContactPage() {
         intro={siteContent.contactIntro}
       />
 
-      <div className="site-container pb-section grid grid-cols-1 md:grid-cols-2 gap-block">
+      <div className="site-container pb-section grid grid-cols-1 lg:grid-cols-2 gap-block">
         <ContactForm
           successHeading={text['contact.successHeading']}
           successBody={text['contact.successBody']}

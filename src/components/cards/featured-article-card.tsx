@@ -3,6 +3,7 @@ import { Clock } from 'lucide-react';
 import { formatArticleDate } from '@/lib/format-date';
 import type { Article } from '@/types';
 import { PosterFrame, ARTICLE_ASPECT, posterMetaClasses } from './poster-card';
+import { ArticleImageFallback } from './article-card';
 
 interface FeaturedArticleCardProps {
   article: Article;
@@ -17,9 +18,10 @@ interface FeaturedArticleCardProps {
  * read as news, then the remaining items sit in the normal grid below.
  *
  * Composes the shared `PosterFrame` (same white surface, `shadow-card`,
- * `rounded-lg`, hover shadow, `ARTICLE_ASPECT` cover) so the chrome cannot drift
- * from `ArticleCard`. The only difference is the layout: image and text sit
- * side by side from `md:` up, and stack on a phone. The whole card is one link.
+ * `rounded-lg`, hover shadow, `ARTICLE_ASPECT` 16:9 cover) so the chrome cannot
+ * drift from `ArticleCard`. The only difference is the layout: image and text
+ * sit side by side from `md:` up, and stack on a phone. The whole card is one
+ * link.
  */
 export function FeaturedArticleCard({ article }: FeaturedArticleCardProps) {
   const date = article.publishedAt || article.createdAt;
@@ -27,7 +29,7 @@ export function FeaturedArticleCard({ article }: FeaturedArticleCardProps) {
   return (
     <Link
       href={`/news/${article.slug}`}
-      className="group grid grid-cols-1 items-center gap-md rounded-lg focus:outline-none focus:ring-2 focus:ring-ocean md:grid-cols-2 md:gap-lg"
+      className="group grid grid-cols-1 items-center gap-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean md:grid-cols-2 md:gap-lg"
     >
       <PosterFrame
         src={article.coverImageUrl ?? null}
@@ -35,6 +37,7 @@ export function FeaturedArticleCard({ article }: FeaturedArticleCardProps) {
         fit="cover"
         aspect={ARTICLE_ASPECT}
         pill={article.tags?.[0]}
+        fallback={<ArticleImageFallback tag={article.tags?.[0]} />}
         sizes="(max-width: 768px) 100vw, 50vw"
         priority
       />

@@ -33,14 +33,10 @@ type AuthState = 'none' | 'stockist' | 'admin';
 
 /**
  * Shared class string for a desktop nav link, so the two groups stay identical.
- * `overHero` swaps to light text for the transparent-over-blue homepage state.
  */
-function navLinkClasses(active: boolean, overHero: boolean): string {
+function navLinkClasses(active: boolean): string {
   const base =
-    'tap-target px-2xs xl:px-xs py-2xs text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded-sm';
-  if (overHero) {
-    return `${base} ${active ? 'text-white' : 'text-white/75 hover:text-white'}`;
-  }
+    'tap-target px-2xs xl:px-xs py-2xs text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean rounded-sm';
   return `${base} ${
     active
       ? 'text-ocean'
@@ -48,24 +44,25 @@ function navLinkClasses(active: boolean, overHero: boolean): string {
   }`;
 }
 
-interface HeaderProps {
-  /**
-   * Homepage only. The header starts transparent over the green hero band
-   * with light content (white wordmark + nav), then flips to the solid
-   * `bg-cream` treatment once the user scrolls past the hero. Off everywhere
-   * else — every other page has a light background under the header.
-   */
-  transparentOverHero?: boolean;
-}
-
-export function Header({ transparentOverHero = false }: HeaderProps) {
+/**
+ * Site header — solid on every route, including the homepage.
+ *
+ * There used to be a `transparentOverHero` prop: on `/` the header started
+ * transparent with white nav content over the coloured hero band and flipped to
+ * the solid treatment once `window.scrollY` passed ~64px. It has been removed
+ * because the homepage hero is now white (see `src/app/page.tsx`), so there is no
+ * dark band to sit over and white nav content would have been invisible. Nothing
+ * had passed the prop for a while, which left roughly ten unreachable style
+ * branches and a scroll listener that could never fire.
+ *
+ * If a coloured hero is restored, recover this from git history rather than
+ * rebuilding it — it also needs the white `<Logo>` variant, a `max-lg:` pin (the
+ * treatment was desktop-only, because the flip was unreliable on mobile
+ * browsers), and the light nav/divider/auth-button variants.
+ */
+export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authState, setAuthState] = useState<AuthState>('none');
-  // `true` while the header sits over the hero (transparent, light content).
-  // Only ever true when transparentOverHero is set. Starts true so the first
-  // paint over the hero is already light — flipping from solid to transparent
-  // on mount would flash the wrong treatment.
-  const [overHero, setOverHero] = useState(transparentOverHero);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -80,24 +77,6 @@ export function Header({ transparentOverHero = false }: HeaderProps) {
     }
   }, [pathname]);
 
-  // Flip to the solid treatment once the hero band has scrolled up past the
-  // header. The threshold is intentionally short (most of the header height):
-  // it flips while the hero is still mostly in view, so the transparent state
-  // never lingers over white content below the fold. Passive listener, and it
-  // runs once on mount to catch a reload partway down the page.
-  useEffect(() => {
-    if (!transparentOverHero) {
-      setOverHero(false);
-      return;
-    }
-    function onScroll() {
-      setOverHero(window.scrollY < 64);
-    }
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [transparentOverHero]);
-
   function isActive(href: string) {
     if (href === '/') return pathname === '/';
     return pathname.startsWith(href);
@@ -105,19 +84,11 @@ export function Header({ transparentOverHero = false }: HeaderProps) {
 
   return (
     <>
-      <header
-        className={`sticky top-0 z-40 transition-colors duration-300 ${
-          overHero
-            ? // Transparent-over-hero is a DESKTOP-only treatment. Below `lg` the
-              // hero is text-only (the slideshow is `lg`+), the header sits on a
-              // shorter blue band, and the flip-on-scroll was unreliable on
-              // mobile browsers — so on mobile the header is solid white from the
-              // start, matching every other page. The transparent state only
-              // applies from `lg` up; `max-lg:` pins the solid treatment below it.
-              'bg-transparent border-b border-transparent max-lg:bg-cream/95 max-lg:backdrop-blur-sm max-lg:border-sand'
-            : 'bg-cream/95 backdrop-blur-sm border-b border-sand'
-        }`}
-      >
+      {/* The `border-b border-sand` is the separation between the header and the
+          page below it — interior pages open with a full coloured
+          `<PageHeader banner>` band flush against it, and the homepage opens on
+          white. There is deliberately no flag stripe under the header. */}
+      <header className="sticky top-0 z-40 border-b border-sand bg-cream/95 backdrop-blur-sm transition-colors duration-300">
         <div className="site-container">
           {/* Row height stepped up from h-16 (64px) to h-20 (80px) so the bar
               has vertical breathing room that matches the page's spacing
@@ -129,16 +100,12 @@ export function Header({ transparentOverHero = false }: HeaderProps) {
                 instead of its natural 128px at every width below 900px. */}
             <Link
               href="/"
-              className="tap-target inline-flex flex-shrink-0 items-center rounded-sm transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-ocean mr-md lg:mr-lg"
+              className="tap-target inline-flex flex-shrink-0 items-center rounded-sm transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean mr-md lg:mr-lg"
               aria-label="Solomon Islands Arts & Crafts — home"
             >
-              {/* Over the blue hero the logo is rendered white via a
-                  brightness-0/invert filter — but only from `lg` up
-                  (`onDarkFromLg`), because the transparent-over-hero header is
-                  desktop-only. Below `lg` the header is solid white and the dark
-                  ink logo is correct. Once scrolled (solid header, `overHero`
-                  false) the standard dark logo returns at every width. */}
-              <Logo onDarkFromLg={overHero} />
+              {/* Standard dark-ink logo at every width — the header bar is
+                  always light. */}
+              <Logo />
             </Link>
 
             {/* `lg:` (1024), not `md:` (768). Eight links plus the hairline and
@@ -153,7 +120,7 @@ export function Header({ transparentOverHero = false }: HeaderProps) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={navLinkClasses(isActive(link.href), overHero)}
+                  className={navLinkClasses(isActive(link.href))}
                   aria-current={isActive(link.href) ? 'page' : undefined}
                 >
                   {link.label}
@@ -162,16 +129,13 @@ export function Header({ transparentOverHero = false }: HeaderProps) {
 
               {/* Hairline separating the browse links from the utility links +
                   auth control, so the primary nav reads as one lean group. */}
-              <span
-                className={`mx-2xs h-5 w-px ${overHero ? 'bg-white/30' : 'bg-sand'}`}
-                aria-hidden="true"
-              />
+              <span className="mx-2xs h-5 w-px bg-sand" aria-hidden="true" />
 
               {UTILITY_NAV.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={navLinkClasses(isActive(link.href), overHero)}
+                  className={navLinkClasses(isActive(link.href))}
                   aria-current={isActive(link.href) ? 'page' : undefined}
                 >
                   {link.label}
@@ -185,7 +149,7 @@ export function Header({ transparentOverHero = false }: HeaderProps) {
                   href="/admin/dashboard"
                   variant="admin"
                   size="sm"
-                  className={`ml-2xs ${overHero ? '!bg-white/15 hover:!bg-white/25' : ''}`}
+                  className="ml-2xs"
                 >
                   <Shield className="w-4 h-4" aria-hidden="true" />
                   Admin
@@ -195,11 +159,7 @@ export function Header({ transparentOverHero = false }: HeaderProps) {
                 <>
                   <Link
                     href="/stockist/orders"
-                    className={`tap-target relative ml-2xs flex items-center justify-center rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ocean ${
-                      overHero
-                        ? 'text-white/80 hover:text-white hover:bg-white/10'
-                        : 'text-warm-gray-600 hover:text-deep-blue hover:bg-sand-light'
-                    }`}
+                    className="tap-target relative ml-2xs flex items-center justify-center rounded-md text-warm-gray-600 transition-colors hover:bg-sand-light hover:text-deep-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                     aria-label="View order"
                   >
                     <ShoppingCart className="w-5 h-5" aria-hidden="true" />
@@ -208,7 +168,7 @@ export function Header({ transparentOverHero = false }: HeaderProps) {
                   <ButtonLink
                     href="/stockist/account"
                     size="sm"
-                    className={`ml-3xs ${overHero ? '!bg-white/15 hover:!bg-white/25' : ''}`}
+                    className="ml-3xs"
                   >
                     My Account
                   </ButtonLink>
@@ -221,17 +181,12 @@ export function Header({ transparentOverHero = false }: HeaderProps) {
                 // the single main action on a page. A filled Login here would
                 // compete with those. The user icon is the only addition — it
                 // lets the control read as an account action at a glance rather
-                // than as one more text link in the row. Over the hero the
-                // ocean outline becomes a white outline so it reads on blue.
+                // than as one more text link in the row.
                 <ButtonLink
                   href="/login"
                   variant="secondary"
                   size="sm"
-                  className={`ml-2xs ${
-                    overHero
-                      ? '!text-white !border-white/70 hover:!bg-white/10 hover:!border-white hover:!text-white'
-                      : ''
-                  }`}
+                  className="ml-2xs"
                 >
                   <User className="w-4 h-4" aria-hidden="true" />
                   Login
@@ -242,13 +197,11 @@ export function Header({ transparentOverHero = false }: HeaderProps) {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              // The menu button only shows below `lg`, where the header is now
-              // solid white even on the homepage (transparent-over-hero is
-              // desktop-only). So it always takes the dark treatment — the
-              // `overHero` white variant would be invisible on the white bar.
-              className="lg:hidden tap-target relative flex items-center justify-center p-2xs rounded-md focus:outline-none focus:ring-2 focus:ring-ocean transition-colors text-warm-gray-800 hover:bg-sand-light"
+              // Only shows below `lg`. Dark treatment, on the light header bar.
+              className="lg:hidden tap-target relative flex items-center justify-center p-2xs rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean transition-colors text-warm-gray-800 hover:bg-sand-light"
               aria-label="Menu"
               aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-nav-panel"
             >
               <Menu className="h-6 w-6" />
               {authState !== 'none' && (
@@ -289,11 +242,24 @@ function CartBadge() {
     };
   }, []);
 
-  if (count === 0) return null;
-
   return (
-    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center bg-brand-green text-white text-[10px] font-bold rounded-full px-3xs">
-      {count}
-    </span>
+    <>
+      {count > 0 && (
+        <span
+          aria-hidden="true"
+          className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center bg-brand-green text-white text-[10px] font-bold rounded-full px-3xs"
+        >
+          {count}
+        </span>
+      )}
+      {/* The visible badge is aria-hidden (a small numeral chip is easy to
+          miss even sighted, and doubles up with the "View order" label on the
+          link it sits inside) — this live region is what actually announces a
+          cart-count change to screen-reader users when an item is added from
+          elsewhere on the site. */}
+      <span className="sr-only" role="status" aria-live="polite">
+        {count > 0 ? `${count} item${count === 1 ? '' : 's'} in your order` : ''}
+      </span>
+    </>
   );
 }

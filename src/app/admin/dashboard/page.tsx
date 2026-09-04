@@ -160,7 +160,7 @@ function StatCard({ icon: Icon, label, value, hint, href, urgent = false }: Stat
   return (
     <Link
       href={href}
-      className={`block rounded-lg p-sm shadow-card transition-shadow hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ocean ${
+      className={`block rounded-lg p-sm shadow-card transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean ${
         urgent ? 'bg-white border-l-4 border-accent-gold' : 'bg-card-bg'
       }`}
     >
@@ -190,7 +190,7 @@ function QuickActions() {
           <Link
             key={href}
             href={href}
-            className="tap-target flex items-center gap-xs px-sm py-xs rounded-md border border-sand hover:border-ocean hover:bg-sand-light transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+            className="tap-target flex items-center gap-xs px-sm py-xs rounded-md border border-sand hover:border-ocean hover:bg-sand-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
           >
             <Icon className="w-4 h-4 text-ocean flex-shrink-0" aria-hidden="true" />
             <span className="text-sm font-medium text-warm-gray-800">{label}</span>

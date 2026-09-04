@@ -125,8 +125,9 @@ function relativeOffset(index: number, active: number, count: number): number {
  *
  * The peek is doing a job, not decoration: it shows at a glance that the hero
  * holds more than one piece, and it gives a direct target for the slide either
- * side. The homepage hides the whole slideshow below `lg` (see `page.tsx`), so
- * it only ever renders where the two-column hero gives it room.
+ * side. The homepage hides the whole slideshow below `lg` (`hidden lg:block` on
+ * its wrapper in `page.tsx`) so the mobile sponsor row stays in the first
+ * viewport — so it only ever renders where the two-column hero gives it room.
  *
  * The centre slide's caption sits BELOW the frame on a solid background, not
  * overlaid on the image — the house `PosterCard` pattern. An overlaid caption
@@ -310,7 +311,7 @@ export function HeroSlideshow({ items, interval = 5000, tone = 'light' }: HeroSl
                 // `top-xs` matches the stage's `py-xs`: an absolutely positioned
                 // child is placed against the padding box, so `top-0` would sit
                 // above the height spacer rather than level with it.
-                'group absolute left-1/2 top-xs overflow-hidden rounded-lg bg-card-bg shadow-card',
+                'group absolute left-1/2 top-xs overflow-hidden bg-card-bg shadow-card',
                 frameWidth,
                 frameAspect,
                 motion,
@@ -384,7 +385,7 @@ export function HeroSlideshow({ items, interval = 5000, tone = 'light' }: HeroSl
               {isActive ? (
                 <Link
                   href={item.href}
-                  className="absolute inset-0 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ocean"
+                  className="absolute inset-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ocean"
                 >
                   <span className="sr-only">{item.title}</span>
                 </Link>
@@ -392,7 +393,7 @@ export function HeroSlideshow({ items, interval = 5000, tone = 'light' }: HeroSl
                 <button
                   type="button"
                   onClick={() => setCurrent(index)}
-                  className="absolute inset-0 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ocean"
+                  className="absolute inset-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ocean"
                   aria-label={`Show ${item.title}`}
                 />
               )}

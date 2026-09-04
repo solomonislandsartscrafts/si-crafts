@@ -142,7 +142,7 @@ export function AdminLayout({ children, requiredRole = null }: AdminLayoutProps)
         <div className="lg:hidden sticky top-0 z-30 flex items-center gap-xs px-md py-xs bg-deep-blue text-white">
           <button
             onClick={() => setNavOpen(true)}
-            className="tap-target flex items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-accent-gold"
+            className="tap-target flex items-center justify-center rounded-md hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold"
             aria-label="Open admin navigation"
             aria-expanded={navOpen}
           >

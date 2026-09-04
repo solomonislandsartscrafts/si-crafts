@@ -119,7 +119,7 @@ export function RetailStockistFormModal({
           </h2>
           <button
             onClick={handleDismiss}
-            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean rounded"
             aria-label="Close"
           >
             <X className="w-5 h-5" />

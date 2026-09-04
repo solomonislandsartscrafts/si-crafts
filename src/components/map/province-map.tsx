@@ -163,8 +163,25 @@ export function SolomonIslandsProvinceMap({
             return;
           }
 
+          // Pointer-only: hover/click convenience for a mouse user tracing the
+          // map shapes. Deliberately NOT wired for keyboard/AT (no role,
+          // tabindex, or keydown handler) — every available province already
+          // has a real, fully accessible control below in the label-pill
+          // overlay (a proper `<button>` with a Tailwind focus-visible ring
+          // and `aria-pressed`). Making the raw SVG `<path>` a second focusable
+          // control for the same action doubled the tab stops for the same
+          // nine choices, and — because the path is injected via `innerHTML`
+          // and styled by directly setting `el.style.fill`, not through
+          // Tailwind classes — it had no way to render a focus indicator
+          // distinct from its own hover state, so a keyboard user landing on
+          // it could not tell it was focused at all. Raw SVG paths are also an
+          // inconsistently-supported focus target across browsers/AT, which
+          // WAI-ARIA's SVG accessibility guidance flags as fragile. The pill
+          // is the one accessible entry point per province; the path is
+          // presentation.
           el.style.cursor = 'pointer';
           el.style.fill = FILL_BASE;
+          el.setAttribute('aria-hidden', 'true');
 
           el.addEventListener('mouseenter', () => {
             setHoveredProvince(province);
@@ -176,24 +193,6 @@ export function SolomonIslandsProvinceMap({
           });
           el.addEventListener('click', () => {
             onProvinceSelect(province === selectedProvince ? null : province);
-          });
-          el.addEventListener('focus', () => {
-            setHoveredProvince(province);
-            highlightProvinceByName(province, true);
-          });
-          el.addEventListener('blur', () => {
-            setHoveredProvince(null);
-            highlightProvinceByName(province, false);
-          });
-
-          el.setAttribute('role', 'button');
-          el.setAttribute('tabindex', '0');
-          el.setAttribute('aria-label', `Show makers in ${province}`);
-          el.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              onProvinceSelect(province === selectedProvince ? null : province);
-            }
           });
         });
 
@@ -245,7 +244,7 @@ export function SolomonIslandsProvinceMap({
                   onClick={() => onProvinceSelect(province === selectedProvince ? null : province)}
                   onMouseEnter={() => handleLabelEnter(province)}
                   onMouseLeave={() => handleLabelLeave(province)}
-                  className={`absolute inline-flex items-center rounded-full border px-2xs py-3xs text-[11px] font-semibold uppercase tracking-wide shadow-card transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-ocean ${
+                  className={`absolute inline-flex items-center rounded-full border px-2xs py-3xs text-[11px] font-semibold uppercase tracking-wide shadow-card transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean ${
                     isActive || isSelected
                       ? 'border-ocean bg-ocean text-white'
                       : 'border-sand bg-white text-deep-blue hover:border-ocean hover:text-ocean'

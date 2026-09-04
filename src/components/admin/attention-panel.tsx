@@ -48,7 +48,7 @@ export function AttentionPanel({ items }: AttentionPanelProps) {
             <li key={item.id}>
               <Link
                 href={item.href}
-                className="tap-target group flex items-start gap-xs py-xs -mx-2xs px-2xs rounded-md hover:bg-sand-light focus:outline-none focus:ring-2 focus:ring-ocean"
+                className="tap-target group flex items-start gap-xs py-xs -mx-2xs px-2xs rounded-md hover:bg-sand-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
               >
                 <Icon className={`w-5 h-5 flex-shrink-0 mt-3xs ${icon}`} aria-hidden="true" />
                 <div className="flex-1 min-w-0">

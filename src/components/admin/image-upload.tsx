@@ -87,7 +87,11 @@ export function ImageUpload({
           const actualRatio = dims.width / dims.height;
           const deviation = Math.abs(actualRatio - recommendedAspectRatio) / recommendedAspectRatio;
           if (deviation > 0.25) {
-            warnings.push(`Aspect ratio differs from recommended — image may be cropped in the slideshow.`);
+            warnings.push(
+              aspectHint
+                ? `Aspect ratio differs from the recommended ${aspectHint} — the image may be cropped where it is shown.`
+                : `Aspect ratio differs from recommended — the image may be cropped where it is shown.`
+            );
           }
         }
         if (warnings.length > 0) {
@@ -176,7 +180,7 @@ export function ImageUpload({
           <button
             type="button"
             onClick={handleRemove}
-            className="absolute -top-2 -right-2 w-6 h-6 bg-error text-white rounded-full flex items-center justify-center hover:bg-error/80 focus:outline-none focus:ring-2 focus:ring-error"
+            className="absolute -top-2 -right-2 w-6 h-6 bg-error text-white rounded-full flex items-center justify-center hover:bg-error/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error"
             aria-label="Remove image"
           >
             <X className="w-3 h-3" />
@@ -187,7 +191,7 @@ export function ImageUpload({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="tap-target flex flex-col items-center justify-center w-32 h-32 rounded-lg border-2 border-dashed border-sand-dark hover:border-ocean bg-sand-light/50 hover:bg-sand-light transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-50"
+          className="tap-target flex flex-col items-center justify-center w-32 h-32 rounded-lg border-2 border-dashed border-sand-dark hover:border-ocean bg-sand-light/50 hover:bg-sand-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean disabled:opacity-50"
         >
           {uploading ? (
             <Loader2 className="w-6 h-6 text-ocean animate-spin" />
@@ -231,7 +235,7 @@ export function ImageUpload({
             placeholder="Describe what this image shows"
             required
             aria-invalid={Boolean(value) && !altText.trim()}
-            className={`w-full px-xs py-2xs text-sm rounded-md border bg-white text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean focus:border-transparent ${
+            className={`w-full px-xs py-2xs text-sm rounded-md border bg-white text-warm-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean focus-visible:border-transparent ${
               value && !altText.trim() ? 'border-error' : 'border-sand-dark'
             }`}
           />

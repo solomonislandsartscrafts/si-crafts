@@ -196,7 +196,7 @@ function SponsorLogo({ supporter }: { supporter: Supporter }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`${supporter.name} (opens in a new tab)`}
-      className={`${box} tap-target rounded-sm opacity-80 transition-opacity duration-200 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean focus-visible:ring-offset-2`}
+      className={`${box} tap-target rounded-sm opacity-80 transition-opacity duration-200 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean focus-visible:ring-offset-2`}
     >
       {image}
     </a>

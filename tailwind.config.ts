@@ -231,12 +231,15 @@ const config: Config = {
         // complete responsive declaration and replaces `pb-10 lg:pb-20`. Do not
         // pair them with a breakpoint prefix — that defeats the point and
         // reintroduces the per-call-site drift they exist to prevent.
-        gutter: 'var(--gutter)',      // 16 → 64  page side gutters
+        gutter: 'var(--gutter)',      // 16 → 48  page side gutters
         page: 'var(--page-y)',        // 24 → 32  whole-page top/bottom padding
         section: 'var(--section-y)',  // 48 → 96  between major sections
         block: 'var(--block-y)',      // 32 → 64  between blocks in a section
         stack: 'var(--stack-y)',      // 24 → 32  section heading → its content
-        grid: 'var(--grid-gap)',      // 24 → 32  card grid gutters
+        grid: 'var(--grid-gap)',      // 16 → 24  card grid gutters — the
+                                      // smallest structural gap, deliberately a
+                                      // rung below `stack` so a grid reads as
+                                      // one block under its heading
       },
       boxShadow: {
         card: '0 2px 8px rgba(0, 0, 0, 0.06)',

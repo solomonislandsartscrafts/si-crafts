@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Check, Minus, Plus } from 'lucide-react';
+import { Check } from 'lucide-react';
 import type { Product } from '@/types';
 import { addToCart } from '@/lib/cart';
 import { formatPrice } from '@/lib/price';
 import { Button } from '@/components/ui/button';
 import { inputClasses } from '@/components/ui/form-field';
+import { QuantityStepper } from '@/components/ui/quantity-stepper';
 import { materialLabel } from '@/lib/labels';
 import {
   PosterFrame,
@@ -59,14 +60,14 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
           stockist logs in. */}
       <Link
         href={`/piece/${product.productCode}`}
-        className="group block rounded-lg focus:outline-none focus:ring-2 focus:ring-ocean"
+        className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
       >
         <PosterFrame
           src={product.imageUrls[0] ?? null}
           alt={`${product.name}${makerName ? ` by ${makerName}` : ''}`}
           fit="contain"
           pill={materialLabel(product.materialCategory)}
-          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
         />
       </Link>
 
@@ -80,7 +81,7 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
         <h3 className={`${posterTitleClasses} line-clamp-2`}>
           <Link
             href={`/piece/${product.productCode}`}
-            className="hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded-sm"
+            className="hover:text-ocean transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean rounded-sm"
           >
             {product.name}
           </Link>
@@ -128,25 +129,12 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
               "Add" (not "Add to Order") so it fits on one line next to the 48px
               stepper even at the narrow 4-column card width. */}
           <div className="flex items-center gap-2xs">
-            <div className="flex items-center self-start border border-sand-dark rounded-md flex-shrink-0">
-              <button
-                onClick={() => setQty(Math.max(1, qty - 1))}
-                className="tap-target flex items-center justify-center text-warm-gray-800 hover:bg-sand-light rounded-l-md focus:outline-none focus:ring-2 focus:ring-ocean"
-                aria-label={`Decrease quantity of ${product.name}`}
-              >
-                <Minus className="w-4 h-4" aria-hidden="true" />
-              </button>
-              <span className="px-2xs text-base font-medium text-warm-gray-800 min-w-[2.5rem] text-center">
-                {qty}
-              </span>
-              <button
-                onClick={() => setQty(Math.min(999, qty + 1))}
-                className="tap-target flex items-center justify-center text-warm-gray-800 hover:bg-sand-light rounded-r-md focus:outline-none focus:ring-2 focus:ring-ocean"
-                aria-label={`Increase quantity of ${product.name}`}
-              >
-                <Plus className="w-4 h-4" aria-hidden="true" />
-              </button>
-            </div>
+            <QuantityStepper
+              value={qty}
+              onChange={setQty}
+              itemLabel={product.name}
+              className="self-start flex-shrink-0"
+            />
             <Button
               onClick={handleAddToCart}
               disabled={added}

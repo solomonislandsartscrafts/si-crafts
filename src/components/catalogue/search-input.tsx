@@ -37,7 +37,7 @@ export function SearchInput({ value, onChange, fullWidth = false }: SearchInputP
         /* tap-target: this was a p-3xs hit area, well under 44px. */
         <button
           onClick={() => onChange('')}
-          className="tap-target absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-md text-warm-gray-400 hover:text-warm-gray-800 focus:outline-none focus:ring-2 focus:ring-ocean"
+          className="tap-target absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-md text-warm-gray-400 hover:text-warm-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
           aria-label="Clear search"
         >
           <X className="w-4 h-4" aria-hidden="true" />
