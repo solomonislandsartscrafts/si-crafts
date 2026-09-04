@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { PackageSearch, SlidersHorizontal } from 'lucide-react';
+import { PackageSearch } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import type { Product, Maker } from '@/types';
@@ -60,9 +60,6 @@ export function CatalogueClient({
   const [searchQuery, setSearchQuery] = useState('');
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [isStockist, setIsStockist] = useState(false);
-  // On mobile the filter rail is hidden behind a toggle so it doesn't push the
-  // grid down the page. On desktop (lg+) the sidebar is always visible.
-  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Confirm the session with the backend rather than trusting the presence of
   // a localStorage key, so an expired token stops showing wholesale pricing.
@@ -171,6 +168,14 @@ export function CatalogueClient({
     setSortKey(null);
   }
 
+  // Material options as a compact Select — used only in the mobile filter bar.
+  // The desktop rail keeps the CategoryFilter list; on a phone a single-line
+  // dropdown is far lighter than an expanding panel of stacked controls.
+  const materialSelectOptions = materialCategories.map((c) => ({
+    value: c.value,
+    label: c.label,
+  }));
+
   // The filter controls, shared between the desktop rail and the mobile stacked
   // layout — same markup, different container.
   //
@@ -217,29 +222,39 @@ export function CatalogueClient({
 
   return (
     <div className="site-container pb-section">
-      {/* Mobile-only toggle. The filter rail is hidden below lg so it doesn't
-          push the product grid down the page; this button reveals it. */}
-      <div className="mb-stack lg:hidden">
-        <Button
-          variant="secondary"
-          fullWidth
-          onClick={() => setFiltersOpen((open) => !open)}
-          aria-expanded={filtersOpen}
-          aria-controls="catalogue-filters"
-        >
-          <SlidersHorizontal className="w-4 h-4" />
-          {filtersOpen ? 'Hide filters' : 'Filters'}
-        </Button>
+      {/* Mobile filter bar — lightweight, inline, and always visible below lg.
+          Replaces the old "Filters" toggle that expanded the full stacked rail
+          (search + material list + maker select + clear) and pushed the grid
+          down the page. On a phone the two controls a visitor reaches for most —
+          search and material — sit in one compact row that reflows to two lines
+          on the narrowest screens. Maker filtering stays on the desktop rail;
+          on mobile, search covers a maker's name. */}
+      <div className="mb-stack flex flex-wrap items-center gap-sm lg:hidden">
+        <div className="flex-1 min-w-[12rem]">
+          <SearchInput value={searchQuery} onChange={setSearchQuery} fullWidth />
+        </div>
+        <Select
+          id="material-mobile"
+          value={selectedMaterial}
+          onChange={setSelectedMaterial}
+          options={materialSelectOptions}
+          placeholder="All materials"
+          label="Filter by material"
+        />
+        {hasActiveFilters && (
+          <Button variant="secondary" size="sm" onClick={clearFilters}>
+            Clear
+          </Button>
+        )}
       </div>
 
-      {/* Sidebar (desktop) + grid. On mobile this is one column, so the filter
-          panel stacks above the grid; from lg it becomes a fixed 260px rail on
-          the left with the products beside it, so the grid is visible at first
-          glance without scrolling past a control bar. */}
+      {/* Sidebar (desktop) + grid. On mobile this collapses to a single column
+          (the rail is hidden, replaced by the compact bar above); from lg it
+          becomes a fixed 260px rail on the left with the products beside it. */}
       <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-block items-start">
-        {/* Filter rail. Sticky on desktop so it stays in view as the grid
-            scrolls. Hidden on mobile unless toggled open, so it never pushes
-            the grid down the page.
+        {/* Filter rail — desktop only (`hidden lg:block`), sticky so it stays in
+            view as the grid scrolls. Mobile uses the compact bar above instead,
+            so the full stacked panel never pushes the grid down the page.
             No panel: this was a `bg-warm-gray-100` (#FAFAFA) box with a
             `border-sand` outline and `p-md`. On a white page a near-white fill
             adds weight without adding separation — the same conclusion the
@@ -249,7 +264,7 @@ export function CatalogueClient({
         <aside
           id="catalogue-filters"
           aria-label="Filter products"
-          className={`${filtersOpen ? 'block' : 'hidden'} lg:sticky lg:top-24 lg:block`}
+          className="hidden lg:sticky lg:top-24 lg:block"
         >
           {filtersPanel}
         </aside>
@@ -286,6 +301,7 @@ export function CatalogueClient({
               options={sortOptions}
               placeholder="Featured"
               label="Sort products"
+              align="right"
             />
           </div>
 
