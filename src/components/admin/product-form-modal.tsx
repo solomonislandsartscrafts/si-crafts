@@ -212,7 +212,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50" onClick={handleDismiss}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-sm bg-deep-blue/50" onClick={handleDismiss}>
       <div
         ref={modalRef}
         className="bg-white rounded-lg shadow-md w-full max-w-2xl max-h-[90vh] overflow-y-auto"
@@ -222,14 +222,14 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
         aria-labelledby="product-form-title"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-sand">
+        <div className="flex items-center justify-between px-md py-sm border-b border-sand">
           <h2 id="product-form-title" className="font-heading text-xl font-medium text-deep-blue">
             {product ? 'Edit Product' : 'Add Product'}
           </h2>
           <button
             onClick={handleDismiss}
             disabled={saving}
-            className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-50"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean disabled:opacity-50"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -237,18 +237,18 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
         </div>
 
         {/* Form */}
-        <form ref={formRef} onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="px-md py-sm space-y-sm">
           {/* Save error banner */}
           {saveError && (
-            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert" aria-live="assertive">
+            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-xs" role="alert" aria-live="assertive">
               {saveError}
             </div>
           )}
 
           {/* Material + Maker first (so code auto-generates) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
             <div>
-              <label htmlFor="product-material" className="block text-base font-medium text-warm-gray-800 mb-1">
+              <label htmlFor="product-material" className="block text-base font-medium text-warm-gray-800 mb-3xs">
                 Material Category *
               </label>
               <Select
@@ -262,7 +262,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
               />
             </div>
             <div>
-              <label htmlFor="product-maker" className="block text-base font-medium text-warm-gray-800 mb-1">
+              <label htmlFor="product-maker" className="block text-base font-medium text-warm-gray-800 mb-3xs">
                 Maker *
               </label>
               <Select
@@ -274,7 +274,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
                 label="Maker"
                 className="w-full"
               />
-              {errors.makerId && <p id="product-maker-error" className="text-base text-error mt-1" role="alert" aria-live="assertive">{errors.makerId}</p>}
+              {errors.makerId && <p id="product-maker-error" className="text-base text-error mt-3xs" role="alert" aria-live="assertive">{errors.makerId}</p>}
             </div>
           </div>
 
@@ -322,9 +322,9 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
           </FormField>
 
           {/* Type + Craft (row) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
             <div>
-              <label htmlFor="product-type" className="block text-base font-medium text-warm-gray-800 mb-1">
+              <label htmlFor="product-type" className="block text-base font-medium text-warm-gray-800 mb-3xs">
                 Product Type *
               </label>
               <Select
@@ -338,7 +338,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
               />
             </div>
             <div>
-              <label htmlFor="product-craft" className="block text-base font-medium text-warm-gray-800 mb-1">
+              <label htmlFor="product-craft" className="block text-base font-medium text-warm-gray-800 mb-3xs">
                 Craft *
               </label>
               <Select
@@ -350,7 +350,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
                 label="Craft"
                 className="w-full"
               />
-              {errors.craftId && <p id="product-craft-error" className="text-base text-error mt-1" role="alert" aria-live="assertive">{errors.craftId}</p>}
+              {errors.craftId && <p id="product-craft-error" className="text-base text-error mt-3xs" role="alert" aria-live="assertive">{errors.craftId}</p>}
             </div>
           </div>
 
@@ -388,7 +388,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
               minRows={5}
             />
             {errors.careNotes && (
-              <p className="text-base text-error mt-1" role="alert" aria-live="assertive">{errors.careNotes}</p>
+              <p className="text-base text-error mt-3xs" role="alert" aria-live="assertive">{errors.careNotes}</p>
             )}
           </div>
 
@@ -405,23 +405,23 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
               quality={0.8}
             />
             {errors.imageAlts && (
-              <p className="text-base text-error mt-1" role="alert" aria-live="assertive">{errors.imageAlts}</p>
+              <p className="text-base text-error mt-3xs" role="alert" aria-live="assertive">{errors.imageAlts}</p>
             )}
           </div>
 
           {/* Featured on Homepage toggle */}
-          <div className="flex items-center gap-3 py-3 px-4 bg-sand-light rounded-md">
-            <label htmlFor="product-featured" className="flex items-center gap-3 cursor-pointer flex-1">
+          <div className="flex items-center gap-xs py-xs px-sm bg-sand-light rounded-md">
+            <label htmlFor="product-featured" className="flex items-center gap-xs cursor-pointer flex-1">
               <input
                 id="product-featured"
                 type="checkbox"
                 checked={form.featured}
                 onChange={(e) => handleChange('featured', e.target.checked)}
-                className="w-5 h-5 rounded border-sand-dark text-ocean focus:ring-2 focus:ring-ocean accent-ocean"
+                className="w-5 h-5 rounded border-sand-dark text-ocean focus-visible:ring-2 focus-visible:ring-ocean accent-ocean"
               />
               <div>
                 <span className="text-base font-medium text-warm-gray-800">Featured on Homepage</span>
-                <p className="text-xs text-warm-gray-400 mt-0.5">
+                <p className="text-xs text-warm-gray-400 mt-3xs">
                   Show this product in the hero gallery slideshow (max 3 recommended).
                 </p>
               </div>
@@ -429,7 +429,7 @@ export function ProductFormModal({ product, onClose, onSave }: ProductFormModalP
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
+          <div className="flex items-center justify-end gap-xs pt-sm border-t border-sand">
             <Button variant="secondary" onClick={handleDismiss} disabled={saving}>
               Cancel
             </Button>

@@ -13,6 +13,7 @@ class SupporterSerializer(serializers.ModelSerializer):
             "logo_alt",
             "href",
             "sort_order",
+            "active",
             "created_at",
             "updated_at",
         ]

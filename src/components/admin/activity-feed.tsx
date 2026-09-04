@@ -40,8 +40,8 @@ function timeAgo(iso: string): string {
 /** Most recent changes and submissions across the site. */
 export function ActivityFeed({ items }: ActivityFeedProps) {
   return (
-    <section className="bg-card-bg rounded-lg shadow-card p-5">
-      <h2 className="font-heading text-lg font-semibold text-deep-blue mb-3">Recent activity</h2>
+    <section className="bg-card-bg rounded-lg shadow-card p-md">
+      <h2 className="font-heading text-lg font-semibold text-deep-blue mb-xs">Recent activity</h2>
 
       {items.length === 0 ? (
         <EmptyState
@@ -61,7 +61,7 @@ export function ActivityFeed({ items }: ActivityFeedProps) {
               <li key={item.id}>
                 <Link
                   href={item.href}
-                  className="tap-target flex items-center gap-3 py-3 -mx-2 px-2 rounded-md hover:bg-sand-light focus:outline-none focus:ring-2 focus:ring-ocean"
+                  className="tap-target flex items-center gap-xs py-xs -mx-2xs px-2xs rounded-md hover:bg-sand-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                 >
                   <Icon className="w-4 h-4 flex-shrink-0 text-warm-gray-400" aria-hidden="true" />
                   <div className="flex-1 min-w-0">

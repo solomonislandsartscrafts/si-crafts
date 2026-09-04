@@ -47,6 +47,7 @@ class ArticleWriteViewSet(viewsets.ViewSet):
             title=data.get("title", ""),
             slug=data.get("slug", ""),
             excerpt=data.get("excerpt", "") or "",
+            standfirst=data.get("standfirst", "") or "",
             body=data.get("body", "") or "",
             author_name=data.get("author_name", "") or "",
             author_role=data.get("author_role", "") or "",
@@ -84,6 +85,8 @@ class ArticleWriteViewSet(viewsets.ViewSet):
             article.slug = data["slug"]
         if "excerpt" in data:
             article.excerpt = data["excerpt"] or ""
+        if "standfirst" in data:
+            article.standfirst = data["standfirst"] or ""
         if "body" in data:
             article.body = data["body"] or ""
         if "author_name" in data:

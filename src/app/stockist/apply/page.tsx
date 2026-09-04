@@ -102,8 +102,8 @@ export default function StockistApplyPage() {
       intro="Tell us about your business and we'll get you set up with wholesale access."
       width="narrow"
     >
-      <div className="max-w-lg mt-8">
-        <form onSubmit={handleSubmit} noValidate className="space-y-5">
+      <div className="max-w-lg mt-lg">
+        <form onSubmit={handleSubmit} noValidate className="space-y-md">
           <FormField label="Business Name" htmlFor="businessName" error={errors.businessName}>
             <input id="businessName" type="text" value={form.businessName}
               onChange={(e) => setForm({ ...form, businessName: e.target.value })}
@@ -150,11 +150,11 @@ export default function StockistApplyPage() {
                 className={`${inputClasses} resize-y`}
                 data-error={!!errors.description || undefined} />
             </FormField>
-            <p className="text-xs text-warm-gray-400 mt-1">{form.description.length}/500</p>
+            <p className="text-xs text-warm-gray-400 mt-3xs">{form.description.length}/500</p>
           </div>
 
           {submitError && (
-            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert" aria-live="assertive">
+            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-xs" role="alert" aria-live="assertive">
               {submitError}
             </div>
           )}
@@ -164,7 +164,7 @@ export default function StockistApplyPage() {
           </Button>
         </form>
 
-        <p className="text-base text-warm-gray-600 mt-6 text-center">
+        <p className="text-base text-warm-gray-600 mt-md text-center">
           Already have an account?{' '}
           <Link href="/login" className="text-ocean hover:underline font-medium">Log in</Link>
         </p>

@@ -91,6 +91,28 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
         ],
       },
       {
+        title: 'Who we are',
+        description:
+          'The short statement directly under the hero. This is the first thing that tells a new visitor what Solomon Islands Arts & Crafts actually is, so keep it concrete.',
+        fields: [
+          {
+            key: 'homepage.missionStatement',
+            label: 'Statement',
+            defaultValue:
+              'A volunteer-run social enterprise bringing Solomon Islands craft to Australian museum and gallery shops.',
+            help: 'One sentence. Rendered large — it is the section heading as well as the statement, so there is no separate title above it.',
+          },
+          {
+            key: 'homepage.missionBody',
+            label: 'Supporting paragraph',
+            defaultValue:
+              'We import pandanus weaving, wood carving and shell-money jewellery directly from the makers, and we pay them fairly for it. Every piece carries the name of the person who made it and the village they made it in — [look up any product code](/piece) to meet them.',
+            type: 'multiline',
+            help: MARKDOWN_HELP,
+          },
+        ],
+      },
+      {
         title: 'Makers section',
         fields: [
           {
@@ -98,15 +120,17 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
             label: 'Heading',
             defaultValue: 'Meet the makers',
           },
-          {
-            key: 'homepage.makersIntro',
-            label: 'Intro line',
-            defaultValue: 'The weavers, carvers, and jewellers behind every piece.',
-          },
+          // No 'Intro line' field here. The homepage makers section deliberately
+          // has no intro paragraph — the hero directly above it already opens
+          // with the "meet the makers behind every piece" promise, so a second
+          // sentence restating it was cut. The field is gone rather than left in
+          // the form, because an editor typing into a box that changes nothing
+          // on the page is worse than not offering the box.
           {
             key: 'homepage.makersButton',
-            label: 'Button text',
-            defaultValue: 'Meet all makers',
+            label: 'Link text (beside the heading)',
+            defaultValue: 'View all',
+            help: 'The link to the full makers list, shown to the right of the section heading.',
           },
         ],
       },
@@ -117,11 +141,19 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
             key: 'homepage.productsHeading',
             label: 'Heading',
             defaultValue: 'Featured Crafts',
+            help: 'Rendered as a small uppercase label above the product grid, not a large heading — the pieces carry the section.',
           },
+          // No 'Intro line' field here either, for the same reason as the makers
+          // section: the products grid is deliberately introduced by a quiet
+          // label alone, so there is nowhere on the page for an intro sentence
+          // to appear.
           {
-            key: 'homepage.productsIntro',
-            label: 'Intro line',
-            defaultValue: 'Handmade pieces from across Solomon Islands.',
+            key: 'homepage.productsPricingNote',
+            label: 'Pricing note (below the grid)',
+            defaultValue:
+              'We sell wholesale only, so prices are not shown publicly. [Approved stockists](/wholesale) see pricing and can place order requests once signed in.',
+            type: 'multiline',
+            help: `Explains to a first-time visitor why no prices appear. Clear the field to hide the note. ${MARKDOWN_HELP}`,
           },
           {
             key: 'homepage.productsButton',
@@ -149,6 +181,26 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
             key: 'homepage.ctaButton',
             label: 'Button text',
             defaultValue: 'Learn about wholesale',
+          },
+        ],
+      },
+      {
+        title: 'Stocked by',
+        description:
+          'A quiet trust band listing the museum and gallery shops that stock Solomon Islands Arts & Crafts. Both fields are blank by default and the band stays hidden until you fill in the names — better to show nothing than to claim a stockist that has not agreed to be listed. List only shops that have confirmed they are happy to be named.',
+        fields: [
+          {
+            key: 'homepage.stockedByLabel',
+            label: 'Label (small line above the names)',
+            defaultValue: '',
+            help: 'For example "Stocked by" or "Our stockists". Leave the names field blank to hide the whole band.',
+          },
+          {
+            key: 'homepage.stockedByNames',
+            label: 'Stockist names (one per line)',
+            defaultValue: '',
+            type: 'multiline',
+            help: 'One shop or gallery name per line. Only list stockists who have confirmed they are happy to be named publicly. Clear the field to hide the band.',
           },
         ],
       },
@@ -988,6 +1040,18 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
               'Check back soon for stories and updates from Solomon Islands Arts & Crafts.',
             type: 'multiline',
           },
+          {
+            key: 'news.cta.title',
+            label: 'Closing banner heading',
+            defaultValue: 'Meet the makers behind the stories',
+          },
+          {
+            key: 'news.cta.description',
+            label: 'Closing banner description',
+            defaultValue:
+              'Every piece begins with a person. Get to know the weavers, carvers, and jewellers of Solomon Islands.',
+            type: 'multiline',
+          },
         ],
       },
     ],
@@ -1375,8 +1439,22 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
     label: 'Footer',
     sections: [
       {
+        title: 'Brand',
+        description: 'The short line beside the wordmark at the top of the footer.',
+        fields: [
+          {
+            key: 'footer.tagline',
+            label: 'Footer tagline',
+            defaultValue:
+              'Handmade in Solomon Islands. Brought to Australian museum and gallery shops with fair pay and maker consent.',
+            type: 'multiline',
+          },
+        ],
+      },
+      {
         title: 'Quick links',
-        description: 'The three cards at the top of the footer.',
+        description:
+          'Descriptions kept for the support links in the footer. (No longer shown as cards.)',
         fields: [
           {
             key: 'footer.promiseDescription',

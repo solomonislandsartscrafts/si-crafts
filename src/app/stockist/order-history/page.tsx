@@ -61,13 +61,13 @@ export default function OrderHistoryPage() {
       <PageHeader
         title="Order History"
         eyebrow={
-          <Link href="/stockist/catalogue" className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark transition-colors">
+          <Link href="/stockist/catalogue" className="inline-flex items-center gap-3xs text-sm text-ocean hover:text-ocean-dark transition-colors">
             <ArrowLeft className="w-4 h-4" /> Back to catalogue
           </Link>
         }
       />
 
-      <div className="site-container pb-16">
+      <div className="site-container pb-section">
         {orders.length === 0 ? (
           <EmptyState
             icon={Package}
@@ -79,10 +79,10 @@ export default function OrderHistoryPage() {
             }
           />
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-sm">
             {orders.map((order) => (
-              <div key={order.id} className="border border-sand rounded-lg p-4 sm:p-6">
-                <div className="flex items-start justify-between gap-4 mb-3">
+              <div key={order.id} className="border border-sand rounded-lg p-sm sm:p-md">
+                <div className="flex items-start justify-between gap-sm mb-xs">
                   <div>
                     <p className="font-medium text-deep-blue">{order.referenceNumber}</p>
                     <p className="text-xs text-warm-gray-400">

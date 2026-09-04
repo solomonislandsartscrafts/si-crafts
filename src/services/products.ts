@@ -100,6 +100,31 @@ function buildQueryString(filters?: ProductFilters): string {
 
 // --- Public ---
 
+/**
+ * Get all published products, optionally filtered.
+ * 
+ * Used by the /catalogue page. Only returns products with publishedFlag = true.
+ * Supports filtering by material category, product type, maker, and text search.
+ * 
+ * @param filters - Optional filters to narrow results
+ * @param filters.materialCategory - Filter by material (e.g. "pandanus", "shell-money")
+ * @param filters.productType - Filter by type (e.g. "basket", "necklace")
+ * @param filters.makerId - Show only products by a specific maker
+ * @param filters.search - Text search across product name and description
+ * @returns Promise<Product[]> - Array of published products matching filters
+ * 
+ * @example
+ * ```tsx
+ * // Get all published products
+ * const all = await getPublicProducts();
+ * 
+ * // Get only pandanus baskets
+ * const baskets = await getPublicProducts({ 
+ *   materialCategory: 'pandanus', 
+ *   productType: 'basket' 
+ * });
+ * ```
+ */
 export async function getPublicProducts(filters?: ProductFilters): Promise<Product[]> {
   const qs = buildQueryString(filters);
   const data = await apiGet<WagtailListResponse>(
@@ -108,6 +133,21 @@ export async function getPublicProducts(filters?: ProductFilters): Promise<Produ
   return data.items.map(mapProduct);
 }
 
+/**
+ * Get products marked as "featured" for homepage display.
+ * 
+ * Returns products where featured = true and publishedFlag = true. If the
+ * backend doesn't support the featured field yet, gracefully returns empty
+ * array so the homepage can fall back to auto-selecting recent products.
+ * 
+ * @returns Promise<Product[]> - Featured products, or empty array if not supported
+ * 
+ * @example
+ * ```tsx
+ * const featured = await getFeaturedProducts();
+ * const toShow = featured.length > 0 ? featured : recentProducts.slice(0, 4);
+ * ```
+ */
 export async function getFeaturedProducts(): Promise<Product[]> {
   try {
     const data = await apiGet<WagtailListResponse>(
@@ -121,6 +161,22 @@ export async function getFeaturedProducts(): Promise<Product[]> {
   }
 }
 
+/**
+ * Get a single published product by its product code.
+ * 
+ * Product codes follow the format: {material}-{maker}-{number} (e.g. "P-J-1").
+ * This endpoint gates on publishedFlag, so unpublished products return null.
+ * Used by the public /piece/[productCode] provenance page.
+ * 
+ * @param productCode - Product code (e.g. "P-J-1", case-sensitive)
+ * @returns Promise<Product | null> - The product if found and published, null otherwise
+ * 
+ * @example
+ * ```tsx
+ * const product = await getPublicProductByCode('P-J-1');
+ * if (!product) notFound();
+ * ```
+ */
 export async function getPublicProductByCode(productCode: string): Promise<Product | null> {
   const data = await apiGet<WagtailListResponse>(
     `/api/v2/products/?product_code=${productCode}&published_flag=true&fields=*`
@@ -129,6 +185,21 @@ export async function getPublicProductByCode(productCode: string): Promise<Produ
   return mapProduct(data.items[0]);
 }
 
+/**
+ * Get all published products by a specific maker.
+ * 
+ * Used by the /maker/[slug] page to show "Pieces by {maker}" section. Only
+ * returns published products. If the maker is unpublished, this still returns
+ * their published products (consent gating applies to maker profile, not products).
+ * 
+ * @param makerId - Maker ID (stringified number)
+ * @returns Promise<Product[]> - Published products by this maker
+ * 
+ * @example
+ * ```tsx
+ * const products = await getProductsByMaker(maker.id);
+ * ```
+ */
 export async function getProductsByMaker(makerId: string): Promise<Product[]> {
   const data = await apiGet<WagtailListResponse>(
     `/api/v2/products/?maker=${makerId}&published_flag=true&fields=*`
@@ -136,6 +207,20 @@ export async function getProductsByMaker(makerId: string): Promise<Product[]> {
   return data.items.map(mapProduct);
 }
 
+/**
+ * Search published products by text query.
+ * 
+ * Searches across product name and description. Backend uses full-text search
+ * with stemming and relevance ranking. Returns empty array for empty/whitespace queries.
+ * 
+ * @param query - Search text
+ * @returns Promise<Product[]> - Matching published products, ranked by relevance
+ * 
+ * @example
+ * ```tsx
+ * const results = await searchProducts('basket');
+ * ```
+ */
 export async function searchProducts(query: string): Promise<Product[]> {
   if (!query.trim()) return [];
   const data = await apiGet<WagtailListResponse>(
@@ -146,17 +231,45 @@ export async function searchProducts(query: string): Promise<Product[]> {
 
 // --- Stockist ---
 
+/**
+ * Get products for wholesale buyers (authenticated stockists).
+ * 
+ * Currently delegates to getPublicProducts (wholesale pricing is visible to all).
+ * Kept as separate function so wholesale-specific logic (min order qty, stock
+ * levels) can be added later without changing call sites.
+ * 
+ * @param filters - Optional product filters
+ * @returns Promise<Product[]> - Products available for wholesale order
+ */
 export async function getWholesaleProducts(filters?: ProductFilters): Promise<Product[]> {
   return getPublicProducts(filters);
 }
 
 // --- Admin ---
 
+/**
+ * Get ALL products, regardless of published status.
+ * 
+ * Admin-only. Used by the admin products page. Returns every product in the
+ * database so admins can see drafts and manage the full catalogue. DO NOT use
+ * this on public or stockist pages.
+ * 
+ * @returns Promise<Product[]> - All products in the system
+ */
 export async function getAllProducts(): Promise<Product[]> {
   const data = await apiGet<WagtailListResponse>('/api/v2/products/?fields=*&limit=100');
   return data.items.map(mapProduct);
 }
 
+/**
+ * Get a single product by ID, regardless of published status.
+ * 
+ * Admin-only. Returns null if the product doesn't exist. Used by admin forms
+ * and the product detail modal.
+ * 
+ * @param id - Product ID (stringified number)
+ * @returns Promise<Product | null> - The product if found, null otherwise
+ */
 export async function getProductById(id: string): Promise<Product | null> {
   try {
     const raw = await apiGet<WagtailProductResponse>(`/api/v2/products/${id}/?fields=*`);
@@ -166,6 +279,16 @@ export async function getProductById(id: string): Promise<Product | null> {
   }
 }
 
+/**
+ * Get a single product by product code, regardless of published status.
+ * 
+ * Admin-only. Unlike getPublicProductByCode, this does NOT gate on publishedFlag,
+ * so unpublished products are returned. Used by the /piece/[productCode] page
+ * to show QR previews of unpublished pieces (reachable by direct link, not indexed).
+ * 
+ * @param code - Product code (e.g. "P-J-1")
+ * @returns Promise<Product | null> - The product if found, null otherwise
+ */
 export async function getProductByCode(code: string): Promise<Product | null> {
   const data = await apiGet<WagtailListResponse>(
     `/api/v2/products/?product_code=${code}&fields=*`
@@ -174,6 +297,16 @@ export async function getProductByCode(code: string): Promise<Product | null> {
   return mapProduct(data.items[0]);
 }
 
+/**
+ * Create a new product in the admin.
+ * 
+ * Admin-only, requires auth token. The publishedFlag is NOT auto-set based on
+ * any field — admins control publish state explicitly via the toggle in the UI.
+ * 
+ * @param data - Product fields (excludes server-generated id/timestamps/publishedFlag)
+ * @returns Promise<Product> - The newly created product
+ * @throws {ApiError} - If creation fails (validation, network, auth)
+ */
 export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'publishedFlag'>): Promise<Product> {
   const token = getAdminToken();
   const raw = await apiPost<WagtailProductResponse>('/api/write/products/', {
@@ -195,6 +328,16 @@ export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'up
   return mapProduct(raw);
 }
 
+/**
+ * Update an existing product.
+ * 
+ * Admin-only, requires auth token. Only provided fields are updated (partial update).
+ * 
+ * @param id - Product ID
+ * @param data - Partial product fields to update
+ * @returns Promise<Product | null> - Updated product, or null if not found
+ * @throws {ApiError} - If update fails (validation, network, auth)
+ */
 export async function updateProduct(id: string, data: Partial<Product>): Promise<Product | null> {
   const token = getAdminToken();
   const body: Record<string, unknown> = {};
@@ -210,6 +353,7 @@ export async function updateProduct(id: string, data: Partial<Product>): Promise
   if (data.careNotes !== undefined) body.care_notes = data.careNotes;
   if (data.wholesalePrice !== undefined) body.wholesale_price = data.wholesalePrice;
   if (data.featured !== undefined) body.featured = data.featured;
+  if (data.publishedFlag !== undefined) body.published_flag = data.publishedFlag;
   if (data.imageUrls !== undefined) body.image_urls = data.imageUrls;
   if (data.imageAlts !== undefined) body.image_alts = data.imageAlts;
 
@@ -217,6 +361,15 @@ export async function updateProduct(id: string, data: Partial<Product>): Promise
   return mapProduct(raw);
 }
 
+/**
+ * Delete a product permanently.
+ * 
+ * Admin-only, requires auth token. This is destructive and cannot be undone.
+ * Orders referencing this product may have their line items orphaned.
+ * 
+ * @param id - Product ID to delete
+ * @returns Promise<boolean> - true if deleted, false if delete failed
+ */
 export async function deleteProduct(id: string): Promise<boolean> {
   const token = getAdminToken();
   try {

@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Plus, Edit, Trash2, Search, Package } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Package, Eye, EyeOff } from 'lucide-react';
 import type { Product } from '@/types';
 import { AdminLayout } from '@/components/admin';
 import { ProductFormModal, type ProductFormData } from '@/components/admin/product-form-modal';
 import type { MaterialCategoryOption, ProductTypeOption } from '@/services/categories';
 import { SafeImage } from '@/components/ui/safe-image';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { useToast } from '@/components/ui/toast';
 import { Select } from '@/components/ui/select';
 import { pageTitleClasses } from '@/components/layout/page-header';
@@ -21,10 +22,10 @@ function TableSkeleton() {
   return (
     <SkeletonRegion
       label="Loading products"
-      className="bg-white rounded-lg shadow-card p-4 space-y-4"
+      className="bg-white rounded-lg shadow-card p-sm space-y-sm"
     >
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4">
+        <div key={i} className="flex items-center gap-sm">
           <Skeleton className="w-10 h-10 flex-shrink-0" />
           <Skeleton className="h-4 w-20" />
           <Skeleton className="h-4 flex-1" />
@@ -117,6 +118,22 @@ export default function AdminProductsPage() {
     }
   }
 
+  // Publish / suspend without opening the form. An unpublished (suspended)
+  // product stays in the admin but disappears from the public catalogue and
+  // provenance pages. Flips only publishedFlag, then reloads.
+  async function handleTogglePublished(product: Product) {
+    const next = !product.publishedFlag;
+    try {
+      const { updateProduct } = await import('@/services/products');
+      const result = await updateProduct(product.id, { publishedFlag: next });
+      if (result === null) throw new Error('update failed');
+      toastSuccess(`"${product.name}" ${next ? 'published' : 'suspended'}.`);
+      loadProducts();
+    } catch {
+      toastError(`Failed to update "${product.name}". Please try again.`);
+    }
+  }
+
   function handleEdit(product: Product) {
     setEditingProduct(product);
     setShowForm(true);
@@ -129,6 +146,7 @@ export default function AdminProductsPage() {
 
   async function handleSave(data: ProductFormData) {
     try {
+      let action: 'updated' | 'created';
       if (editingProduct) {
         const { updateProduct } = await import('@/services/products');
         await updateProduct(editingProduct.id, {
@@ -136,7 +154,7 @@ export default function AdminProductsPage() {
           dimensions: data.dimensions || null,
           careNotes: data.careNotes || null,
         });
-        toastSuccess(`"${data.name}" updated.`);
+        action = 'updated';
       } else {
         const { createProduct } = await import('@/services/products');
         await createProduct({
@@ -144,11 +162,14 @@ export default function AdminProductsPage() {
           dimensions: data.dimensions || null,
           careNotes: data.careNotes || null,
         });
-        toastSuccess(`"${data.name}" created.`);
+        action = 'created';
       }
       setShowForm(false);
       setEditingProduct(null);
-      loadProducts();
+      // Await the reload so a failed refresh surfaces through this try/catch,
+      // and only confirm success once the refreshed list has actually loaded.
+      await loadProducts();
+      toastSuccess(`"${data.name}" ${action}.`);
     } catch (err) {
       throw err;
     }
@@ -156,7 +177,7 @@ export default function AdminProductsPage() {
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-md">
         <h1 className={pageTitleClasses}>Products</h1>
         <Button size="sm" onClick={handleAdd}>
           <Plus className="w-4 h-4" /> Add Product
@@ -164,7 +185,7 @@ export default function AdminProductsPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 mb-4">
+      <div className="flex flex-wrap items-center gap-xs mb-sm">
         {/* Search */}
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-warm-gray-400" />
@@ -174,7 +195,7 @@ export default function AdminProductsPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by name or code..."
             aria-label="Search products by name or code"
-            className={`${inputClasses} pl-9`}
+            className={`${inputClasses} pl-lg`}
           />
         </div>
 
@@ -234,20 +255,24 @@ export default function AdminProductsPage() {
           <table className="w-full text-sm">
             <thead className="bg-sand-light border-b border-sand">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600 w-14">Image</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600">Code</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600">Name</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600 hidden md:table-cell">Material</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600 hidden md:table-cell">Type</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600 hidden lg:table-cell">Price</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600 hidden lg:table-cell">Created</th>
-                <th className="text-right px-4 py-3 font-medium text-warm-gray-600">Actions</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 w-14">Image</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Code</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Name</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden md:table-cell">Material</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden md:table-cell">Type</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden lg:table-cell">Price</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Status</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden lg:table-cell">Created</th>
+                <th scope="col" className="text-right px-sm py-xs font-medium text-warm-gray-600">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-sand">
               {filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-sand-light/50">
-                    <td className="px-4 py-2">
+                  <tr
+                    key={product.id}
+                    className={`hover:bg-sand-light/50 ${product.publishedFlag ? '' : 'opacity-60'}`}
+                  >
+                    <td className="px-sm py-2xs">
                       <div className="w-10 h-10 relative rounded overflow-hidden bg-sand-light flex-shrink-0">
                         <SafeImage
                           src={product.imageUrls[0] || null}
@@ -258,27 +283,50 @@ export default function AdminProductsPage() {
                         />
                       </div>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-warm-gray-600">{product.productCode}</td>
-                    <td className="px-4 py-3 font-medium text-warm-gray-800">{product.name}</td>
-                    <td className="px-4 py-3 text-warm-gray-600 capitalize hidden md:table-cell">{product.materialCategory}</td>
-                    <td className="px-4 py-3 text-warm-gray-600 capitalize hidden md:table-cell">{product.productType}</td>
-                    <td className="px-4 py-3 text-warm-gray-600 hidden lg:table-cell">{formatPrice(product.wholesalePrice)}</td>
-                    <td className="px-4 py-3 text-warm-gray-400 text-xs hidden lg:table-cell">
+                    <td className="px-sm py-xs font-mono text-xs text-warm-gray-600">{product.productCode}</td>
+                    <td className="px-sm py-xs font-medium text-warm-gray-800">{product.name}</td>
+                    <td className="px-sm py-xs text-warm-gray-600 capitalize hidden md:table-cell">{product.materialCategory}</td>
+                    <td className="px-sm py-xs text-warm-gray-600 capitalize hidden md:table-cell">{product.productType}</td>
+                    <td className="px-sm py-xs text-warm-gray-600 hidden lg:table-cell">{formatPrice(product.wholesalePrice)}</td>
+                    <td className="px-sm py-xs">
+                      {product.publishedFlag ? (
+                        <StatusBadge status="success" size="compact">Published</StatusBadge>
+                      ) : (
+                        <StatusBadge status="neutral" size="compact">Suspended</StatusBadge>
+                      )}
+                    </td>
+                    <td className="px-sm py-xs text-warm-gray-400 text-xs hidden lg:table-cell">
                       {product.createdAt
                         ? new Date(product.createdAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })
                         : '—'}
                     </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="px-sm py-xs text-right">
+                      <div className="flex items-center justify-end gap-2xs">
+                        <button
+                          onClick={() => handleTogglePublished(product)}
+                          className="tap-target p-2xs text-warm-gray-400 hover:text-ocean transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+                          aria-label={
+                            product.publishedFlag
+                              ? `Suspend ${product.name} from the catalogue`
+                              : `Publish ${product.name} to the catalogue`
+                          }
+                          title={product.publishedFlag ? 'Suspend from catalogue' : 'Publish to catalogue'}
+                        >
+                          {product.publishedFlag ? (
+                            <EyeOff className="w-4 h-4" />
+                          ) : (
+                            <Eye className="w-4 h-4" />
+                          )}
+                        </button>
                         <button
                           onClick={() => handleEdit(product)}
-                          className="tap-target p-2 text-warm-gray-400 hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                          className="tap-target p-2xs text-warm-gray-400 hover:text-ocean transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                           aria-label={`Edit ${product.name}`}
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button onClick={() => handleDelete(product.id, product.name)}
-                          className="tap-target p-2 text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                          className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                           aria-label={`Delete ${product.name}`}>
                           <Trash2 className="w-4 h-4" />
                         </button>

@@ -19,15 +19,15 @@ export function SetupProgressCard({ progress }: SetupProgressCardProps) {
   const nextStep = steps.find((step) => !step.complete);
 
   return (
-    <section className="bg-card-bg rounded-lg shadow-card p-5">
-      <div className="flex items-baseline justify-between gap-3 mb-3">
+    <section className="bg-card-bg rounded-lg shadow-card p-md">
+      <div className="flex items-baseline justify-between gap-xs mb-xs">
         <h2 className="font-heading text-lg font-semibold text-deep-blue">Site setup</h2>
         <span className="text-xs text-warm-gray-400">
           {completedCount} of {steps.length}
         </span>
       </div>
 
-      <div className="h-2 bg-sand rounded-full overflow-hidden mb-3">
+      <div className="h-2 bg-sand rounded-full overflow-hidden mb-xs">
         <div
           className="h-full bg-ocean transition-all duration-500"
           style={{ width: `${(completedCount / steps.length) * 100}%` }}
@@ -41,9 +41,9 @@ export function SetupProgressCard({ progress }: SetupProgressCardProps) {
 
       {nextStep ? (
         <>
-          <p className="text-xs text-warm-gray-400 uppercase tracking-wide mb-1">Next step</p>
-          <p className="text-base font-medium text-warm-gray-800 mb-4">{nextStep.title}</p>
-          <div className="flex flex-wrap gap-2">
+          <p className="text-xs text-warm-gray-400 uppercase tracking-wide mb-3xs">Next step</p>
+          <p className="text-base font-medium text-warm-gray-800 mb-sm">{nextStep.title}</p>
+          <div className="flex flex-wrap gap-2xs">
             <ButtonLink href={nextStep.href} variant="admin" size="sm">
               Continue
               <ChevronRight className="w-4 h-4" aria-hidden="true" />
@@ -56,7 +56,7 @@ export function SetupProgressCard({ progress }: SetupProgressCardProps) {
         </>
       ) : (
         <>
-          <p className="text-base text-warm-gray-800 mb-4">
+          <p className="text-base text-warm-gray-800 mb-sm">
             Setup is complete. The guide covers day-to-day editing whenever you need it.
           </p>
           <ButtonLink href="/admin/getting-started" variant="secondary" size="sm">

@@ -28,10 +28,21 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
+/**
+ * Padding per size, from the spacing scale.
+ *
+ * These deliberately OVERRIDE the padding baked into `.btn-*` (utilities beat
+ * the components layer), so a button's box is owned in exactly one of the two
+ * places — here for <Button>/<ButtonLink>, and in globals.css for the rare bare
+ * `.btn-primary` on an element this component does not render.
+ *
+ * `tap-target` guarantees a 48px minimum hit area on all three, so the vertical
+ * padding only has to set the visual weight, not reach the accessible minimum.
+ */
 const SIZE_CLASSES: Record<ButtonSize, string> = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-5 py-2.5 text-sm sm:px-6 sm:py-3',
-  lg: 'px-6 py-3 text-base sm:px-8 sm:py-3.5',
+  sm: 'px-xs py-2xs text-sm',            // 12 / 8
+  md: 'px-sm py-xs text-sm sm:px-md',    // 16 → 24 / 12
+  lg: 'px-md py-sm text-base sm:px-lg',  // 24 → 32 / 16
 };
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {

@@ -74,7 +74,7 @@ export function AdminLayout({ children, requiredRole = null }: AdminLayoutProps)
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen px-4">
+      <div className="flex items-center justify-center min-h-screen px-sm">
         <div className="w-full max-w-sm">
           <SkeletonText lines={3} />
         </div>
@@ -84,10 +84,10 @@ export function AdminLayout({ children, requiredRole = null }: AdminLayoutProps)
 
   if (denied) {
     return (
-      <div className="flex items-center justify-center min-h-screen px-4">
+      <div className="flex items-center justify-center min-h-screen px-sm">
         <div className="text-center">
-          <h1 className={`${pageTitleClasses} mb-2`}>Insufficient permissions</h1>
-          <p className="text-base text-warm-gray-600 mb-6">
+          <h1 className={`${pageTitleClasses} mb-2xs`}>Insufficient permissions</h1>
+          <p className="text-base text-warm-gray-600 mb-md">
             You don&apos;t have access to this section.
           </p>
           <Button variant="secondary" onClick={() => router.push('/admin/dashboard')}>
@@ -139,10 +139,10 @@ export function AdminLayout({ children, requiredRole = null }: AdminLayoutProps)
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile top bar with the drawer trigger */}
-        <div className="lg:hidden sticky top-0 z-30 flex items-center gap-3 px-5 py-3 bg-deep-blue text-white">
+        <div className="lg:hidden sticky top-0 z-30 flex items-center gap-xs px-md py-xs bg-deep-blue text-white">
           <button
             onClick={() => setNavOpen(true)}
-            className="tap-target flex items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-accent-gold"
+            className="tap-target flex items-center justify-center rounded-md hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold"
             aria-label="Open admin navigation"
             aria-expanded={navOpen}
           >
@@ -153,10 +153,11 @@ export function AdminLayout({ children, requiredRole = null }: AdminLayoutProps)
           </span>
         </div>
 
-        {/* Admin uses the 20px/30px steps of the shared scale but deliberately
-            NOT the public site's 70px gutter — admin is dense tabular data, and
-            140px of side padding would cost real column width. */}
-        <div className="flex-1 p-5 tabtop:p-8 bg-warm-gray-100 overflow-x-hidden">
+        {/* Admin takes the md/lg rungs of the shared scale (24 → 32) but
+            deliberately NOT `.site-px`'s 64px desktop gutter — admin is dense
+            tabular data, and 128px of side padding would cost real column
+            width. Same scale as the public site, two rungs lower. */}
+        <div className="flex-1 p-md tabtop:p-lg bg-warm-gray-100 overflow-x-hidden">
           {children}
         </div>
       </div>

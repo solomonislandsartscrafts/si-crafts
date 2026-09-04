@@ -25,6 +25,13 @@ interface SponsorBannerProps {
    * logos in twice as far as the content around them.
    */
   contained?: boolean;
+  /**
+   * Set to false when the parent already owns the spacing around the band — the
+   * mobile hero drops it into a grid cell, where the grid's row gap IS the gap.
+   * Leaving the band's own padding on in that position stacked two spacings on
+   * top of each other and opened a visible void under the hero gallery.
+   */
+  padded?: boolean;
 }
 
 /**
@@ -45,7 +52,10 @@ interface SponsorBannerProps {
  * ink it has nothing to desaturate and only lifts solid black to a muddy grey,
  * making good artwork look degraded. Emphasis is controlled with size instead.
  */
-export async function SponsorBanner({ contained = true }: SponsorBannerProps = {}) {
+export async function SponsorBanner({
+  contained = true,
+  padded = true,
+}: SponsorBannerProps = {}) {
   const [supporters, text] = await Promise.all([getSupportersSafe(), getSiteTextSafe()]);
 
   // A supporter with no artwork would render an empty box.
@@ -54,6 +64,8 @@ export async function SponsorBanner({ contained = true }: SponsorBannerProps = {
 
   const label = text['homepage.supportersLabel'];
 
+  // Each confirmed supporter is shown once. Below the wall threshold the band
+  // uses the inline credit line; at or above it, the centred wall.
   const band =
     visible.length >= WALL_THRESHOLD ? (
       <SponsorWall supporters={visible} label={label} />
@@ -62,7 +74,12 @@ export async function SponsorBanner({ contained = true }: SponsorBannerProps = {
     );
 
   return (
-    <section className="py-5 sm:py-6 lg:py-8" aria-label="Our supporters">
+    <section
+      // Borders separate the supporters band from the content above it and from
+      // the "Meet the makers" section below it.
+      className={`border-y border-sand ${padded ? 'py-md lg:py-lg' : ''}`.trim()}
+      aria-label="Our supporters"
+    >
       {contained ? <div className="site-container">{band}</div> : band}
     </section>
   );
@@ -80,17 +97,24 @@ interface BandProps {
  */
 function SponsorCredit({ supporters, label }: BandProps) {
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-      <div className="flex items-center gap-3">
+    <div className="flex flex-wrap items-center gap-x-sm gap-y-2xs">
+      <div className="flex items-center gap-xs">
         <SponsorLabel label={label} />
         {/* Separates the eyebrow from the artwork so the two stop competing on
             one baseline. Quiet on purpose — an accent colour here would pull
             more attention than the credit deserves. */}
         <span className="h-px w-8 bg-sand-dark" aria-hidden="true" />
       </div>
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-        {supporters.map((supporter) => (
-          <SponsorLogo key={supporter.id} supporter={supporter} />
+      <div className="flex flex-wrap items-center gap-x-md gap-y-2xs">
+        {supporters.map((supporter, index) => (
+          <div key={supporter.id} className="flex items-center gap-x-md">
+            {/* Vertical divider between logos, so each supporter reads as its
+                own slot rather than the row running together. */}
+            {index > 0 && (
+              <span className="h-8 w-px bg-sand-dark" aria-hidden="true" />
+            )}
+            <SponsorLogo supporter={supporter} />
+          </div>
         ))}
       </div>
     </div>
@@ -104,12 +128,19 @@ function SponsorCredit({ supporters, label }: BandProps) {
 function SponsorWall({ supporters, label }: BandProps) {
   return (
     <>
-      <div className="text-center mb-3 sm:mb-4">
+      <div className="text-center mb-xs sm:mb-sm">
         <SponsorLabel label={label} />
       </div>
-      <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 lg:gap-x-12">
-        {supporters.map((supporter) => (
-          <SponsorLogo key={supporter.id} supporter={supporter} />
+      <div className="flex flex-wrap items-center justify-center gap-x-lg gap-y-sm lg:gap-x-xl">
+        {supporters.map((supporter, index) => (
+          <div key={supporter.id} className="flex items-center gap-x-lg lg:gap-x-xl">
+            {/* Vertical divider between logos, so each supporter reads as its
+                own slot rather than the wall running together. */}
+            {index > 0 && (
+              <span className="h-8 w-px bg-sand-dark" aria-hidden="true" />
+            )}
+            <SponsorLogo supporter={supporter} />
+          </div>
         ))}
       </div>
     </>
@@ -165,7 +196,7 @@ function SponsorLogo({ supporter }: { supporter: Supporter }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`${supporter.name} (opens in a new tab)`}
-      className={`${box} tap-target rounded-sm opacity-80 transition-opacity duration-200 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean focus-visible:ring-offset-2`}
+      className={`${box} tap-target rounded-sm opacity-80 transition-opacity duration-200 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean focus-visible:ring-offset-2`}
     >
       {image}
     </a>

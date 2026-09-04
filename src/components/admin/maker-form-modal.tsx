@@ -139,7 +139,7 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50" onClick={handleDismiss}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-sm bg-deep-blue/50" onClick={handleDismiss}>
       <div
         ref={modalRef}
         className="bg-white rounded-lg shadow-md w-full max-w-2xl max-h-[90vh] overflow-y-auto"
@@ -149,14 +149,14 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
         aria-labelledby="maker-form-title"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-sand">
+        <div className="flex items-center justify-between px-md py-sm border-b border-sand">
           <h2 id="maker-form-title" className="font-heading text-xl font-medium text-deep-blue">
             {maker ? 'Edit Maker' : 'Add Maker'}
           </h2>
           <button
             onClick={handleDismiss}
             disabled={saving}
-            className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-50"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean disabled:opacity-50"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -164,10 +164,10 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
         </div>
 
         {/* Form */}
-        <form ref={formRef} onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="px-md py-sm space-y-sm">
           {/* Save error banner */}
           {saveError && (
-            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert" aria-live="assertive">
+            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-xs" role="alert" aria-live="assertive">
               {saveError}
             </div>
           )}
@@ -184,7 +184,7 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
           </FormField>
 
           {/* Village + Province (row) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
             <FormField label="Village *" htmlFor="maker-village" error={errors.village}>
               <input
                 type="text"
@@ -218,7 +218,7 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
 
           {/* Craft */}
           <div>
-            <label htmlFor="maker-craft" className="block text-base font-medium text-warm-gray-800 mb-1">
+            <label htmlFor="maker-craft" className="block text-base font-medium text-warm-gray-800 mb-3xs">
               Craft *
             </label>
             <Select
@@ -230,11 +230,11 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
               label="Craft"
               className="w-full"
             />
-            {errors.craftId && <p id="maker-craft-error" className="text-base text-error mt-1" role="alert" aria-live="assertive">{errors.craftId}</p>}
+            {errors.craftId && <p id="maker-craft-error" className="text-base text-error mt-3xs" role="alert" aria-live="assertive">{errors.craftId}</p>}
           </div>
 
           {/* Age + Years Active (row) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
             <FormField label="Age" htmlFor="maker-age">
               <input
                 type="number"
@@ -272,7 +272,7 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
               quality={0.82}
             />
             {errors.portraitAlt && (
-              <p className="text-base text-error mt-1" role="alert" aria-live="assertive">{errors.portraitAlt}</p>
+              <p className="text-base text-error mt-3xs" role="alert" aria-live="assertive">{errors.portraitAlt}</p>
             )}
           </div>
 
@@ -288,7 +288,7 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
           </FormField>
 
           {/* Cultural Review Flag */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-xs">
             <input
               id="maker-cultural-review"
               type="checkbox"
@@ -296,7 +296,7 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
               onChange={(e) =>
                 handleChange('storyCulturalReviewFlag', e.target.checked ? 'reviewed' : 'unreviewed')
               }
-              className="w-4 h-4 rounded border-sand-dark text-ocean focus:ring-ocean"
+              className="w-4 h-4 rounded border-sand-dark text-ocean focus-visible:ring-ocean"
             />
             <label htmlFor="maker-cultural-review" className="text-base text-warm-gray-800">
               Story reviewed by cultural partner
@@ -304,8 +304,8 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
           </div>
 
           {/* Consent Status */}
-          <div className="bg-sand-light rounded-md p-4">
-            <label htmlFor="maker-consent" className="block text-base font-medium text-warm-gray-800 mb-2">
+          <div className="bg-sand-light rounded-md p-sm">
+            <label htmlFor="maker-consent" className="block text-base font-medium text-warm-gray-800 mb-2xs">
               Consent Status
             </label>
             <Select
@@ -320,13 +320,13 @@ export function MakerFormModal({ maker, onClose, onSave }: MakerFormModalProps) 
               label="Consent status"
               className="w-full"
             />
-            <p className="text-xs text-warm-gray-400 mt-2">
+            <p className="text-xs text-warm-gray-400 mt-2xs">
               Setting consent to &quot;Signed&quot; will publish this maker and their products to the public site.
             </p>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
+          <div className="flex items-center justify-end gap-xs pt-sm border-t border-sand">
             <Button variant="secondary" onClick={handleDismiss} disabled={saving}>
               Cancel
             </Button>

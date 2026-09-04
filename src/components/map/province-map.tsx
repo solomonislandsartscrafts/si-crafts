@@ -5,7 +5,24 @@ import { useState, useEffect, useRef } from 'react';
 interface ProvinceMapProps {
   selectedProvince: string | null;
   onProvinceSelect: (province: string | null) => void;
+  /**
+   * Provinces that actually have makers. Only these are interactive and
+   * labelled — filtering to a province with no makers is a dead end, and
+   * labelling all nine crowds the small map. Omit to make every province
+   * interactive (the previous behaviour).
+   */
+  availableProvinces?: string[];
 }
+
+/**
+ * Map colours, pulled from the locked palette rather than raw hex so the map
+ * stays on-brand. `deep-blue` is the resting land fill (the heading/footer
+ * colour), `ocean` the interactive highlight, and a muted grey for provinces
+ * with no makers so they read as present-but-inactive.
+ */
+const FILL_BASE = '#1B3A4B'; // deep-blue
+const FILL_ACTIVE = '#1E5AA8'; // ocean
+const FILL_INACTIVE = '#D4D4D4'; // sand-dark — province with no makers
 
 const ID_TO_PROVINCE: Record<string, string> = {
   SBCH: 'Choiseul Province',
@@ -64,12 +81,26 @@ const PROVINCE_TO_IDS: Record<string, string[]> = {
 export function SolomonIslandsProvinceMap({
   selectedProvince,
   onProvinceSelect,
+  availableProvinces,
 }: ProvinceMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoveredProvince, setHoveredProvince] = useState<string | null>(null);
   const [svgLoaded, setSvgLoaded] = useState(false);
 
   const activeProvince = hoveredProvince || selectedProvince;
+
+  // A province is interactive only if it has makers. When no list is passed,
+  // every province is available (the previous behaviour).
+  const availableSet = availableProvinces ? new Set(availableProvinces) : null;
+  function isAvailable(province: string) {
+    return availableSet === null || availableSet.has(province);
+  }
+
+  // Resting fill for a province: muted grey if it has no makers, else the
+  // deep-blue land colour.
+  function restFill(province: string) {
+    return isAvailable(province) ? FILL_BASE : FILL_INACTIVE;
+  }
 
   // Highlight/unhighlight SVG paths for a given province
   function highlightProvinceByName(province: string, active: boolean) {
@@ -81,12 +112,13 @@ export function SolomonIslandsProvinceMap({
     ids.forEach((pathId) => {
       const el = svg.querySelector(`#${pathId}`) as SVGPathElement | null;
       if (el) {
-        el.style.fill = active ? '#2E7D8C' : '#3d3d3d';
+        el.style.fill = active ? FILL_ACTIVE : restFill(province);
       }
     });
   }
 
   function handleLabelEnter(province: string) {
+    if (!isAvailable(province)) return;
     setHoveredProvince(province);
     highlightProvinceByName(province, true);
   }
@@ -112,7 +144,9 @@ export function SolomonIslandsProvinceMap({
         svg.style.height = 'auto';
         svg.style.display = 'block';
 
-        // Make all province paths interactive
+        // Wire up province paths. Only provinces that have makers are made
+        // interactive; the rest are painted in the muted inactive fill and left
+        // inert, so the map never filters to an empty result.
         const paths = svg.querySelectorAll('#features path');
         paths.forEach((path) => {
           const id = path.getAttribute('id') || '';
@@ -120,38 +154,45 @@ export function SolomonIslandsProvinceMap({
           if (!province) return;
 
           const el = path as SVGPathElement;
-          el.style.cursor = 'pointer';
           el.style.transition = 'fill 0.2s, opacity 0.2s';
-          el.style.fill = '#3d3d3d';
+
+          if (!isAvailable(province)) {
+            el.style.fill = FILL_INACTIVE;
+            el.style.cursor = 'default';
+            el.setAttribute('aria-hidden', 'true');
+            return;
+          }
+
+          // Pointer-only: hover/click convenience for a mouse user tracing the
+          // map shapes. Deliberately NOT wired for keyboard/AT (no role,
+          // tabindex, or keydown handler) — every available province already
+          // has a real, fully accessible control below in the label-pill
+          // overlay (a proper `<button>` with a Tailwind focus-visible ring
+          // and `aria-pressed`). Making the raw SVG `<path>` a second focusable
+          // control for the same action doubled the tab stops for the same
+          // nine choices, and — because the path is injected via `innerHTML`
+          // and styled by directly setting `el.style.fill`, not through
+          // Tailwind classes — it had no way to render a focus indicator
+          // distinct from its own hover state, so a keyboard user landing on
+          // it could not tell it was focused at all. Raw SVG paths are also an
+          // inconsistently-supported focus target across browsers/AT, which
+          // WAI-ARIA's SVG accessibility guidance flags as fragile. The pill
+          // is the one accessible entry point per province; the path is
+          // presentation.
+          el.style.cursor = 'pointer';
+          el.style.fill = FILL_BASE;
+          el.setAttribute('aria-hidden', 'true');
 
           el.addEventListener('mouseenter', () => {
             setHoveredProvince(province);
-            highlightProvince(svg, id, true);
+            highlightProvinceByName(province, true);
           });
           el.addEventListener('mouseleave', () => {
             setHoveredProvince(null);
-            highlightProvince(svg, id, false);
+            highlightProvinceByName(province, false);
           });
           el.addEventListener('click', () => {
             onProvinceSelect(province === selectedProvince ? null : province);
-          });
-          el.addEventListener('focus', () => {
-            setHoveredProvince(province);
-            highlightProvince(svg, id, true);
-          });
-          el.addEventListener('blur', () => {
-            setHoveredProvince(null);
-            highlightProvince(svg, id, false);
-          });
-
-          el.setAttribute('role', 'button');
-          el.setAttribute('tabindex', '0');
-          el.setAttribute('aria-label', `Show makers in ${province}`);
-          el.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              onProvinceSelect(province === selectedProvince ? null : province);
-            }
           });
         });
 
@@ -165,27 +206,34 @@ export function SolomonIslandsProvinceMap({
 
         // Set background — match page background so map blends seamlessly
         svg.style.backgroundColor = 'transparent';
-        svg.setAttribute('fill', '#3d3d3d');
+        svg.setAttribute('fill', FILL_BASE);
         svg.setAttribute('stroke', '#ffffff');
 
         setSvgLoaded(true);
       });
-  }, [onProvinceSelect, selectedProvince]);
+    // availableProvinces joined to a stable string: the array is a new
+    // reference each render, so depending on it directly would re-wire the SVG
+    // on every render. The joined value only changes when the set truly does.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onProvinceSelect, selectedProvince, (availableProvinces || []).join('|')]);
 
   return (
     <div className="w-full">
-      {/* Map wrapper — relative container for SVG + label overlay.
-          The scale-up sits HERE, not on the SVG alone: the labels are
-          positioned as a % of the same box, so scaling only the SVG slid every
-          province out from under its own label. */}
-      <div className="relative w-full min-h-[280px] transform scale-110 origin-center">
+      {/* Map wrapper — relative container for SVG + label overlay. Labels are
+          positioned as a % of this same box, so the SVG and the overlay must
+          share one transform (none here) to stay aligned. */}
+      <div className="relative w-full min-h-[300px]">
         {/* SVG map container */}
         <div ref={containerRef} className="w-full rounded-lg overflow-hidden" />
 
-        {/* Province text labels overlaid on the map */}
+        {/* Province labels overlaid on the map. Only provinces with makers are
+            labelled — labelling all nine crowded the small map and the text ran
+            together. Each label is a small white pill so it stays legible over
+            the land and never merges with a neighbouring label. */}
         {svgLoaded && (
           <div className="absolute inset-0">
             {Object.entries(LABEL_POSITIONS).map(([province, pos]) => {
+              if (!isAvailable(province)) return null;
               const isActive = activeProvince === province;
               const isSelected = selectedProvince === province;
               const label = PROVINCE_LABELS[province] || province;
@@ -196,12 +244,10 @@ export function SolomonIslandsProvinceMap({
                   onClick={() => onProvinceSelect(province === selectedProvince ? null : province)}
                   onMouseEnter={() => handleLabelEnter(province)}
                   onMouseLeave={() => handleLabelLeave(province)}
-                  className={`absolute text-[9px] sm:text-[11px] md:text-sm font-bold uppercase tracking-wide transition-colors cursor-pointer tap-target flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-ocean rounded ${
-                    isActive
-                      ? 'text-ocean'
-                      : isSelected
-                        ? 'text-ocean-dark'
-                        : 'text-warm-gray-600 hover:text-ocean'
+                  className={`absolute inline-flex items-center rounded-full border px-2xs py-3xs text-[11px] font-semibold uppercase tracking-wide shadow-card transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean ${
+                    isActive || isSelected
+                      ? 'border-ocean bg-ocean text-white'
+                      : 'border-sand bg-white text-deep-blue hover:border-ocean hover:text-ocean'
                   }`}
                   style={{
                     left: `${pos.x}%`,
@@ -220,23 +266,15 @@ export function SolomonIslandsProvinceMap({
       </div>
 
       {/* Instruction text below map */}
-      <p className="mt-4 text-center text-sm text-warm-gray-400">
+      <p className="mt-sm text-center text-sm text-warm-gray-400">
         {svgLoaded
           ? selectedProvince
             ? `Showing makers from ${PROVINCE_LABELS[selectedProvince] || selectedProvince}`
-            : 'Click a province or its label to filter makers'
+            : 'Select a highlighted province to filter makers'
           : 'Loading map...'}
       </p>
     </div>
   );
 }
 
-function highlightProvince(svg: SVGSVGElement, id: string, active: boolean) {
-  const ids = id === 'SBGU' ? ['SBGU', 'SBCT'] : id === 'SBCT' ? ['SBGU', 'SBCT'] : [id];
-  ids.forEach((pathId) => {
-    const el = svg.querySelector(`#${pathId}`) as SVGPathElement | null;
-    if (el) {
-      el.style.fill = active ? '#2E7D8C' : '#3d3d3d';
-    }
-  });
-}
+

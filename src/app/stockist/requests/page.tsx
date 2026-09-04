@@ -125,14 +125,14 @@ export default function StockistRequestsPage() {
         title="Requests"
         intro="Need replacement tags or want to discuss a custom/bulk order? Submit a request below."
         eyebrow={
-          <Link href="/stockist/catalogue" className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark transition-colors">
+          <Link href="/stockist/catalogue" className="inline-flex items-center gap-3xs text-sm text-ocean hover:text-ocean-dark transition-colors">
             <ArrowLeft className="w-4 h-4" /> Back to catalogue
           </Link>
         }
         width="narrow"
       />
 
-      <div className="max-w-2xl mx-auto site-px pb-16">
+      <div className="max-w-2xl mx-auto site-px pb-section">
         <div className="max-w-lg">
           {/* Type selector.
               Native radios in a fieldset rather than role="radio" buttons: the
@@ -141,7 +141,7 @@ export default function StockistRequestsPage() {
               one. Real inputs get focus, arrow keys and checked state from the
               browser, so there is no keyboard handling to maintain. The inputs
               are visually hidden and the label carries the segmented styling. */}
-          <fieldset className="mb-8">
+          <fieldset className="mb-lg">
             <legend className="sr-only">Request type</legend>
             <div className="flex border border-sand-dark rounded-md overflow-hidden">
               {([
@@ -150,7 +150,7 @@ export default function StockistRequestsPage() {
               ] as const).map(([value, label]) => (
                 <label
                   key={value}
-                  className={`tap-target flex-1 flex items-center justify-center px-4 py-3 text-sm font-medium text-center cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-ocean focus-within:ring-inset ${
+                  className={`tap-target flex-1 flex items-center justify-center px-sm py-xs text-sm font-medium text-center cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-ocean focus-within:ring-inset ${
                     kind === value
                       ? 'bg-ocean text-white'
                       : 'bg-white text-warm-gray-600 hover:bg-sand-light'
@@ -170,7 +170,7 @@ export default function StockistRequestsPage() {
             </div>
           </fieldset>
 
-          <form onSubmit={handleSubmit} noValidate className="space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="space-y-md">
             {kind === 'replacement-tag' ? (
               <>
                 <FormField label="Product code" htmlFor="tagCode" error={errors.tagCode}>
@@ -217,7 +217,7 @@ export default function StockistRequestsPage() {
 
             {errors.form && (
               <div
-                className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3"
+                className="bg-error/10 border border-error/20 text-error text-base rounded-md p-xs"
                 role="alert"
                 aria-live="assertive"
               >

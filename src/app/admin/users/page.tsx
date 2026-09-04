@@ -26,10 +26,10 @@ function TableSkeleton() {
   return (
     <SkeletonRegion
       label="Loading accounts"
-      className="bg-white rounded-lg shadow-card p-4 space-y-4"
+      className="bg-white rounded-lg shadow-card p-sm space-y-sm"
     >
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4">
+        <div key={i} className="flex items-center gap-sm">
           <Skeleton className="h-4 flex-1" />
           <Skeleton className="h-4 w-40 hidden md:block" />
           <Skeleton className="h-4 w-24" />
@@ -171,10 +171,10 @@ export default function AdminUsersPage() {
 
   return (
     <AdminLayout requiredRole="super_admin">
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-2">
+      <div className="flex flex-wrap items-start justify-between gap-sm mb-2xs">
         <div>
           <h1 className={pageTitleClasses}>Accounts</h1>
-          <p className="text-base text-warm-gray-600 mt-1">
+          <p className="text-base text-warm-gray-600 mt-3xs">
             Every login on the site. Change someone&apos;s role to make them a stockist,
             editor or super admin.
           </p>
@@ -186,7 +186,7 @@ export default function AdminUsersPage() {
 
       {notice && (
         <div
-          className="bg-success/10 border border-success/20 text-success text-base rounded-md p-3 mt-4"
+          className="bg-success/10 border border-success/20 text-success text-base rounded-md p-xs mt-sm"
           role="status"
           aria-live="polite"
         >
@@ -194,7 +194,7 @@ export default function AdminUsersPage() {
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-3 mt-6 mb-4">
+      <div className="flex flex-col sm:flex-row gap-xs mt-md mb-sm">
         <label htmlFor="user-search" className="sr-only">Search accounts</label>
         <input
           id="user-search"
@@ -216,7 +216,7 @@ export default function AdminUsersPage() {
       </div>
 
       {loadError && (
-        <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3 mb-4" role="alert">
+        <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-xs mb-sm" role="alert">
           {loadError}
         </div>
       )}
@@ -248,11 +248,11 @@ export default function AdminUsersPage() {
           <table className="w-full text-sm">
             <thead className="bg-sand-light border-b border-sand">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600">Name</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600 hidden md:table-cell">Email</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600">Role</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600 hidden sm:table-cell">Status</th>
-                <th className="text-right px-4 py-3 font-medium text-warm-gray-600">Actions</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Name</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden md:table-cell">Email</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Role</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden sm:table-cell">Status</th>
+                <th scope="col" className="text-right px-sm py-xs font-medium text-warm-gray-600">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-sand">
@@ -260,33 +260,33 @@ export default function AdminUsersPage() {
                 const RoleIcon = ROLE_ICONS[u.role];
                 return (
                   <tr key={u.id} className="hover:bg-sand-light/50">
-                    <td className="px-4 py-3">
+                    <td className="px-sm py-xs">
                       <p className="font-medium text-warm-gray-800">{u.name}</p>
                       <p className="text-xs text-warm-gray-400 md:hidden">{u.email}</p>
                       {u.stockist && (
                         <p className="text-xs text-warm-gray-400">{u.stockist.businessName}</p>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-warm-gray-600 hidden md:table-cell">{u.email}</td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={ROLE_BADGE[u.role]} className="gap-1">
+                    <td className="px-sm py-xs text-warm-gray-600 hidden md:table-cell">{u.email}</td>
+                    <td className="px-sm py-xs">
+                      <StatusBadge status={ROLE_BADGE[u.role]} className="gap-3xs">
                         <RoleIcon className="w-3 h-3" />
                         {ROLE_LABELS[u.role]}
                       </StatusBadge>
                     </td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
+                    <td className="px-sm py-xs hidden sm:table-cell">
                       <StatusBadge status={u.isActive ? 'success' : 'neutral'}>
                         {u.isActive ? 'Active' : 'Inactive'}
                       </StatusBadge>
                       {!u.hasPassword && (
-                        <span className="block text-xs text-warning-text mt-1">No password set</span>
+                        <span className="block text-xs text-warning-text mt-3xs">No password set</span>
                       )}
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-1">
+                    <td className="px-sm py-xs">
+                      <div className="flex items-center justify-end gap-3xs">
                         <button
                           onClick={() => { setNotice(''); setEditing(u); }}
-                          className="tap-target p-2 text-warm-gray-400 hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                          className="tap-target p-2xs text-warm-gray-400 hover:text-ocean transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                           aria-label={`Edit ${u.name}`}
                         >
                           <Pencil className="w-4 h-4" />
@@ -294,7 +294,7 @@ export default function AdminUsersPage() {
                         {u.stockist && (
                           <button
                             onClick={() => handleSendPasswordLink(u)}
-                            className="tap-target p-2 text-warm-gray-400 hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                            className="tap-target p-2xs text-warm-gray-400 hover:text-ocean transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                             aria-label={`Email ${u.name} a password link`}
                           >
                             <Mail className="w-4 h-4" />
@@ -303,7 +303,7 @@ export default function AdminUsersPage() {
                         {!u.isSuperuser && (
                           <button
                             onClick={() => handleDelete(u)}
-                            className="tap-target p-2 text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                            className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                             aria-label={`Delete ${u.name}`}
                           >
                             <Trash2 className="w-4 h-4" />

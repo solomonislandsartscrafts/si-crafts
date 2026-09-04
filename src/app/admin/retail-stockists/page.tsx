@@ -18,10 +18,10 @@ function TableSkeleton() {
   return (
     <SkeletonRegion
       label="Loading stockists"
-      className="bg-white rounded-lg shadow-card p-4 space-y-4"
+      className="bg-white rounded-lg shadow-card p-sm space-y-sm"
     >
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4">
+        <div key={i} className="flex items-center gap-sm">
           <Skeleton className="h-4 w-8" />
           <Skeleton className="h-4 flex-1" />
           <Skeleton className="h-4 w-24 hidden sm:block" />
@@ -89,13 +89,13 @@ export default function AdminRetailStockistsPage() {
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-2xs">
         <h1 className={pageTitleClasses}>Retail Stockists</h1>
         <Button size="sm" onClick={handleAdd}>
           <Plus className="w-4 h-4" /> Add Stockist
         </Button>
       </div>
-      <p className="text-base text-warm-gray-600 mb-6">
+      <p className="text-base text-warm-gray-600 mb-md">
         The museum and gallery shops listed publicly on the Stockists page. Separate from wholesale
         accounts, which are managed under Stockists.
       </p>
@@ -117,45 +117,45 @@ export default function AdminRetailStockistsPage() {
           <table className="w-full text-sm">
             <thead className="bg-sand-light border-b border-sand">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600">Order</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600">Shop</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600 hidden sm:table-cell">
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Order</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Shop</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden sm:table-cell">
                   City
                 </th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600 hidden md:table-cell">
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden md:table-cell">
                   Contact
                 </th>
-                <th className="text-right px-4 py-3 font-medium text-warm-gray-600">Actions</th>
+                <th scope="col" className="text-right px-sm py-xs font-medium text-warm-gray-600">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-sand">
               {stockists.map((stockist) => (
                 <tr key={stockist.id} className="hover:bg-sand-light/50">
-                  <td className="px-4 py-3 text-warm-gray-400 text-xs">{stockist.sortOrder}</td>
-                  <td className="px-4 py-3 font-medium text-warm-gray-800">{stockist.name}</td>
-                  <td className="px-4 py-3 text-warm-gray-600 hidden sm:table-cell">
+                  <td className="px-sm py-xs text-warm-gray-400 text-xs">{stockist.sortOrder}</td>
+                  <td className="px-sm py-xs font-medium text-warm-gray-800">{stockist.name}</td>
+                  <td className="px-sm py-xs text-warm-gray-600 hidden sm:table-cell">
                     {stockist.city || <span className="text-warm-gray-400 italic">—</span>}
                   </td>
-                  <td className="px-4 py-3 text-warm-gray-600 hidden md:table-cell max-w-xs truncate">
+                  <td className="px-sm py-xs text-warm-gray-600 hidden md:table-cell max-w-xs truncate">
                     {stockist.email || stockist.phone || (
                       <span className="text-warm-gray-400 italic">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                  <td className="px-sm py-xs text-right">
+                    <div className="flex items-center justify-end gap-2xs">
                       <button
                         onClick={() => {
                           setEditing(stockist);
                           setShowForm(true);
                         }}
-                        className="tap-target p-2 text-warm-gray-400 hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                        className="tap-target p-2xs text-warm-gray-400 hover:text-ocean transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                         aria-label={`Edit ${stockist.name}`}
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(stockist.id, stockist.name)}
-                        className="tap-target p-2 text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                        className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                         aria-label={`Remove ${stockist.name}`}
                       >
                         <Trash2 className="w-4 h-4" />

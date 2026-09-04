@@ -92,7 +92,7 @@ export function TeamFormModal({ member, onClose, onSave }: TeamFormModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50" onClick={handleDismiss}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-sm bg-deep-blue/50" onClick={handleDismiss}>
       <div
         ref={modalRef}
         className="bg-white rounded-lg shadow-md w-full max-w-lg max-h-[90vh] overflow-y-auto"
@@ -102,13 +102,13 @@ export function TeamFormModal({ member, onClose, onSave }: TeamFormModalProps) {
         aria-labelledby="team-form-title"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-sand">
+        <div className="flex items-center justify-between px-md py-sm border-b border-sand">
           <h2 id="team-form-title" className="font-heading text-lg font-semibold text-deep-blue">
             {member ? 'Edit Team Member' : 'Add Team Member'}
           </h2>
           <button
             onClick={handleDismiss}
-            className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean rounded"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -116,9 +116,9 @@ export function TeamFormModal({ member, onClose, onSave }: TeamFormModalProps) {
         </div>
 
         {/* Form */}
-        <form ref={formRef} onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="px-md py-sm space-y-sm">
           {saveError && (
-            <p className="text-base text-error bg-error/10 px-3 py-2 rounded" role="alert" aria-live="assertive">
+            <p className="text-base text-error bg-error/10 px-xs py-2xs rounded" role="alert" aria-live="assertive">
               {saveError}
             </p>
           )}
@@ -169,7 +169,7 @@ export function TeamFormModal({ member, onClose, onSave }: TeamFormModalProps) {
                 className={`${inputClasses} max-w-24`}
               />
             </FormField>
-            <p className="text-xs text-warm-gray-400 mt-1">Lower numbers appear first.</p>
+            <p className="text-xs text-warm-gray-400 mt-3xs">Lower numbers appear first.</p>
           </div>
 
           {/* Photo */}
@@ -182,7 +182,7 @@ export function TeamFormModal({ member, onClose, onSave }: TeamFormModalProps) {
             aspectHint="1:1 square"
           />
           {errors.photoAlt && (
-            <p className="text-base text-error mt-1" role="alert" aria-live="assertive">{errors.photoAlt}</p>
+            <p className="text-base text-error mt-3xs" role="alert" aria-live="assertive">{errors.photoAlt}</p>
           )}
 
           {/* Photo Position Adjuster — shown when an image is uploaded */}
@@ -195,7 +195,7 @@ export function TeamFormModal({ member, onClose, onSave }: TeamFormModalProps) {
           )}
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
+          <div className="flex items-center justify-end gap-xs pt-sm border-t border-sand">
             <Button variant="secondary" onClick={handleDismiss} disabled={saving}>
               Cancel
             </Button>
@@ -237,6 +237,42 @@ function PhotoPositionControl({ imageUrl, position, onChange }: PhotoPositionCon
     [onChange]
   );
 
+  // Keyboard equivalent of dragging: the control was mouse/touch-only, so a
+  // keyboard-only admin had no way to set a team member's photo focal point
+  // at all. Arrow keys nudge the focal point by 5% per press (Shift for a
+  // finer 1% step); Home/End jump to the left/top and right/bottom edges.
+  function handleKeyDown(e: React.KeyboardEvent) {
+    const step = e.shiftKey ? 1 : 5;
+    let nextX = posX;
+    let nextY = posY;
+    switch (e.key) {
+      case 'ArrowLeft':
+        nextX = Math.max(0, posX - step);
+        break;
+      case 'ArrowRight':
+        nextX = Math.min(100, posX + step);
+        break;
+      case 'ArrowUp':
+        nextY = Math.max(0, posY - step);
+        break;
+      case 'ArrowDown':
+        nextY = Math.min(100, posY + step);
+        break;
+      case 'Home':
+        nextX = 0;
+        nextY = 0;
+        break;
+      case 'End':
+        nextX = 100;
+        nextY = 100;
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+    onChange(`${Math.round(nextX)}% ${Math.round(nextY)}%`);
+  }
+
   function handleMouseDown(e: React.MouseEvent) {
     e.preventDefault();
     dragging.current = true;
@@ -272,23 +308,35 @@ function PhotoPositionControl({ imageUrl, position, onChange }: PhotoPositionCon
 
   return (
     <div>
-      <label className="block text-base font-medium text-warm-gray-800 mb-1">
-        <Move className="w-4 h-4 inline mr-1" />
+      <label className="block text-base font-medium text-warm-gray-800 mb-3xs">
+        <Move className="w-4 h-4 inline mr-3xs" />
         Adjust Photo Position
       </label>
-      <p className="text-xs text-warm-gray-400 mb-2">
-        Click or drag on the circle to position the focal point of the image.
+      <p className="text-xs text-warm-gray-400 mb-2xs">
+        Click or drag on the circle to position the focal point of the image, or
+        tab to it and use the arrow keys.
       </p>
 
-      <div className="flex items-center gap-4">
-        {/* Draggable circle preview */}
+      <div className="flex items-center gap-sm">
+        {/* Draggable circle preview. Also a keyboard control: arrow keys nudge
+            the focal point (Shift for a finer step), Home/End jump to the
+            corners — mouse/touch dragging alone left this unusable without a
+            pointer. */}
         <div
           ref={containerRef}
-          className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-ocean cursor-crosshair select-none flex-shrink-0"
+          role="slider"
+          tabIndex={0}
+          aria-label="Photo focal point"
+          aria-valuetext={`${posX}% from left, ${posY}% from top`}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={posX}
+          className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-ocean cursor-crosshair select-none flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean focus-visible:ring-offset-2"
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onKeyDown={handleKeyDown}
         >
           <Image
             src={resolveImageUrl(imageUrl)}
@@ -316,7 +364,7 @@ function PhotoPositionControl({ imageUrl, position, onChange }: PhotoPositionCon
           <button
             type="button"
             onClick={() => onChange('50% 50%')}
-            className="text-ocean hover:text-ocean-dark text-xs mt-1 transition-colors"
+            className="text-ocean hover:text-ocean-dark text-xs mt-3xs transition-colors"
           >
             Reset to center
           </button>

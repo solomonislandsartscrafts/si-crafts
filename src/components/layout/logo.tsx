@@ -9,20 +9,30 @@ import Image from 'next/image';
  * to it.
  *
  * Sized by height with `w-auto`, so the intrinsic 404x151 ratio is preserved at
- * every breakpoint and the logo can never distort. Height is kept under the
- * 64px header (h-16) with room to breathe.
+ * every breakpoint and the logo can never distort. Height (44/48px) is kept
+ * under the 80px header (h-20) with room to breathe.
  *
- * Light-on-dark: there is deliberately no `light` variant. The artwork is dark
- * ink on transparency, so it disappears on the footer and admin sidebar. Those
- * surfaces render their own white text instead. Dropping the prop means a
- * future `<Logo variant="light" />` is a compile error rather than an
- * invisible logo.
+ * Light-on-dark: the artwork is dark ink on transparency, so it disappears on a
+ * dark surface. `onDark` applies a `brightness-0 invert` filter that renders the
+ * single-colour mark crisp white, reusing the one PNG rather than shipping a
+ * second reversed asset. The footer uses it; the admin sidebar renders its own
+ * white text instead.
+ *
+ * There was also an `onDarkFromLg` prop, for the homepage header when it floated
+ * transparent over a coloured hero band on desktop only. Both that header
+ * treatment and the coloured hero are gone, so the prop went with them.
  */
 interface LogoProps {
   className?: string;
+  /**
+   * Render the mark white, for placement on a dark background. Applies at every
+   * width.
+   */
+  onDark?: boolean;
 }
 
-export function Logo({ className = '' }: LogoProps) {
+export function Logo({ className = '', onDark = false }: LogoProps) {
+  const darkFilter = onDark ? 'brightness-0 invert' : '';
   return (
     <Image
       src="/images/sica logo.png"
@@ -41,8 +51,8 @@ export function Logo({ className = '' }: LogoProps) {
       priority
       /* Tells the browser the real rendered width, so it picks the small
          variant instead of downloading artwork sized for a 404px slot. */
-      sizes="(min-width: 640px) 118px, 107px"
-      className={`h-10 w-auto sm:h-11 ${className}`.trim()}
+      sizes="(min-width: 640px) 128px, 118px"
+      className={`h-11 w-auto sm:h-12 ${darkFilter} ${className}`.trim()}
     />
   );
 }

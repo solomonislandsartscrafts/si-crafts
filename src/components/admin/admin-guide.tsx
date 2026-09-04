@@ -34,10 +34,10 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="bg-card-bg rounded-lg shadow-card p-5 sm:p-6 scroll-mt-6">
+    <section id={id} className="bg-card-bg rounded-lg shadow-card p-md sm:p-md scroll-mt-6">
       <h2 className="font-heading text-xl md:text-2xl font-medium text-deep-blue">{title}</h2>
-      {intro && <p className="text-base text-warm-gray-600 mt-2 leading-body">{intro}</p>}
-      <div className="mt-5">{children}</div>
+      {intro && <p className="text-base text-warm-gray-600 mt-2xs leading-body">{intro}</p>}
+      <div className="mt-md">{children}</div>
     </section>
   );
 }
@@ -182,10 +182,10 @@ export function AdminGuide() {
         title="Six rules to know"
         intro="These apply to everything you do in this admin. Read them once, and they’ll make sense every time."
       >
-        <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <ul className="grid grid-cols-1 md:grid-cols-2 gap-sm">
           {ESSENTIALS.map(({ icon: Icon, title, body }) => (
-            <li key={title} className="rounded-lg border border-sand p-4">
-              <div className="flex items-center gap-2 mb-2">
+            <li key={title} className="rounded-lg border border-sand p-sm">
+              <div className="flex items-center gap-2xs mb-2xs">
                 <Icon className="w-5 h-5 text-ocean flex-shrink-0" aria-hidden="true" />
                 <h3 className="font-heading text-base font-semibold text-deep-blue">{title}</h3>
               </div>
@@ -200,14 +200,14 @@ export function AdminGuide() {
         title="How to do things"
         intro="Step-by-step for the most common jobs. Follow each step in order."
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
           {TASKS.map(({ title, steps }) => (
-            <div key={title} className="rounded-lg bg-sand-light p-4">
-              <h3 className="font-heading text-base font-semibold text-deep-blue mb-3">{title}</h3>
-              <ol className="space-y-2">
+            <div key={title} className="rounded-lg bg-sand-light p-sm">
+              <h3 className="font-heading text-base font-semibold text-deep-blue mb-xs">{title}</h3>
+              <ol className="space-y-2xs">
                 {steps.map((step, index) => (
-                  <li key={step} className="flex gap-2 text-base text-warm-gray-800 leading-body">
-                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-ocean/10 text-ocean text-xs font-bold flex items-center justify-center mt-0.5">
+                  <li key={step} className="flex gap-2xs text-base text-warm-gray-800 leading-body">
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-ocean/10 text-ocean text-xs font-bold flex items-center justify-center mt-3xs">
                       {index + 1}
                     </span>
                     <span>{step}</span>
@@ -224,10 +224,10 @@ export function AdminGuide() {
         title="Photos"
         intro="Good photos sell the crafts. Here’s what to aim for."
       >
-        <div className="space-y-6">
+        <div className="space-y-md">
           <div>
-            <h3 className="font-heading text-base font-semibold text-deep-blue mb-2">Choosing photos</h3>
-            <ul className="space-y-1.5 text-base text-warm-gray-800 leading-body list-disc pl-5">
+            <h3 className="font-heading text-base font-semibold text-deep-blue mb-2xs">Choosing photos</h3>
+            <ul className="space-y-2xs text-base text-warm-gray-800 leading-body list-disc pl-md">
               <li>Square photos for products. Upright/portrait photos for makers.</li>
               <li>Natural daylight. Plain background. The whole piece in frame.</li>
               <li>Include one close-up showing the weave, grain, or shell work.</li>
@@ -238,24 +238,24 @@ export function AdminGuide() {
           </div>
 
           <div>
-            <h3 className="font-heading text-base font-semibold text-deep-blue mb-2">Writing alt text</h3>
-            <p className="text-base text-warm-gray-800 leading-body mb-3">
+            <h3 className="font-heading text-base font-semibold text-deep-blue mb-2xs">Writing alt text</h3>
+            <p className="text-base text-warm-gray-800 leading-body mb-xs">
               One sentence, about 125 characters. Say who is in the photo, where they are, and what
               they&rsquo;re doing. Don&rsquo;t start with &ldquo;image of&rdquo; or &ldquo;photo of&rdquo; &mdash; screen
               readers already say that.
             </p>
-            <ul className="space-y-3">
+            <ul className="space-y-xs">
               {ALT_EXAMPLES.map(({ good, bad }) => (
-                <li key={good} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="flex gap-2 rounded-md bg-success/5 p-3">
-                    <Check className="w-4 h-4 mt-0.5 flex-shrink-0 text-success" aria-hidden="true" />
+                <li key={good} className="grid grid-cols-1 sm:grid-cols-2 gap-xs">
+                  <div className="flex gap-2xs rounded-md bg-success/5 p-xs">
+                    <Check className="w-4 h-4 mt-3xs flex-shrink-0 text-success" aria-hidden="true" />
                     <span className="text-base text-warm-gray-800 leading-body">
                       <span className="sr-only">Good example: </span>
                       {good}
                     </span>
                   </div>
-                  <div className="flex gap-2 rounded-md bg-error/5 p-3">
-                    <X className="w-4 h-4 mt-0.5 flex-shrink-0 text-error" aria-hidden="true" />
+                  <div className="flex gap-2xs rounded-md bg-error/5 p-xs">
+                    <X className="w-4 h-4 mt-3xs flex-shrink-0 text-error" aria-hidden="true" />
                     <span className="text-base text-warm-gray-600 leading-body">
                       <span className="sr-only">Weak example: </span>
                       {bad}
@@ -273,10 +273,10 @@ export function AdminGuide() {
         title="Writing tips"
         intro="The crafts belong to Solomon Islands communities. Our words should reflect that."
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
           <div>
-            <h3 className="font-heading text-base font-semibold text-deep-blue mb-2">Do this</h3>
-            <ul className="space-y-1.5 text-base text-warm-gray-800 leading-body list-disc pl-5">
+            <h3 className="font-heading text-base font-semibold text-deep-blue mb-2xs">Do this</h3>
+            <ul className="space-y-2xs text-base text-warm-gray-800 leading-body list-disc pl-md">
               <li>Name the maker, their village, and their province every time.</li>
               <li>Write maker stories in first person (their words, not yours).</li>
               <li>Write &ldquo;Solomon Islands&rdquo; in full.</li>
@@ -285,8 +285,8 @@ export function AdminGuide() {
             </ul>
           </div>
           <div>
-            <h3 className="font-heading text-base font-semibold text-deep-blue mb-2">Don&apos;t do this</h3>
-            <ul className="space-y-1.5 text-base text-warm-gray-800 leading-body list-disc pl-5">
+            <h3 className="font-heading text-base font-semibold text-deep-blue mb-2xs">Don&apos;t do this</h3>
+            <ul className="space-y-2xs text-base text-warm-gray-800 leading-body list-disc pl-md">
               <li>Filler like &ldquo;skilled artisan&rdquo; or &ldquo;local craftsperson&rdquo;.</li>
               <li>&ldquo;The Solomons&rdquo;, &ldquo;tribal&rdquo;, &ldquo;primitive&rdquo;, &ldquo;exotic&rdquo;.</li>
               <li>Making up spiritual meaning or origin stories.</li>
@@ -301,7 +301,7 @@ export function AdminGuide() {
         title="Before you publish"
         intro="Run through this checklist before ticking “Published” on anything."
       >
-        <ul className="space-y-2">
+        <ul className="space-y-2xs">
           {[
             'Every image has alt text that describes the photo.',
             'Maker consent status is \u201cSigned\u201d.',
@@ -312,14 +312,14 @@ export function AdminGuide() {
             'Names, villages, and provinces are spelled correctly.',
             'You\u2019ve opened the public page on your phone and read it.',
           ].map((item) => (
-            <li key={item} className="flex gap-2 text-base text-warm-gray-800 leading-body">
-              <Check className="w-4 h-4 mt-1 flex-shrink-0 text-success" aria-hidden="true" />
+            <li key={item} className="flex gap-2xs text-base text-warm-gray-800 leading-body">
+              <Check className="w-4 h-4 mt-3xs flex-shrink-0 text-success" aria-hidden="true" />
               <span>{item}</span>
             </li>
           ))}
         </ul>
 
-        <p className="text-base text-warm-gray-600 mt-5 leading-body">
+        <p className="text-base text-warm-gray-600 mt-md leading-body">
           Not sure if something is ready? The{' '}
           <Link href="/admin/dashboard" className="text-ocean hover:text-ocean-dark font-medium transition-colors">
             dashboard

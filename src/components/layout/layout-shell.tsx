@@ -3,6 +3,7 @@
 import { Suspense } from 'react';
 import { usePathname } from 'next/navigation';
 import { Header } from './header';
+import { FlagDivider } from './flag-divider';
 import { RouteProgressBar } from '@/components/shared/route-progress-bar';
 
 /**
@@ -38,12 +39,12 @@ export function LayoutShell({
         <RouteProgressBar />
       </Suspense>
       <Header />
-      {/* Flag stripe — sits below the header, scrolls with page content */}
-      <div className="flag-divider" aria-hidden="true" />
-      {/* Small offset only — enough to lift shadowed content clear of the flag
-          divider. The real top spacing belongs to .page-y on each page, so
-          keeping this large would double up on every route. */}
-      <main id="main-content" className="flex-1 pt-2.5 tabtop:pt-4">
+
+      {/* Flag stripe sits below the header, NOT inside it — so it does not
+          scroll with the sticky header. Shown on every public page. */}
+      <FlagDivider />
+
+      <main id="main-content" className="flex-1">
         {children}
       </main>
       {footer}

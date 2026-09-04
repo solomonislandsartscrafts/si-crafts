@@ -52,7 +52,6 @@ const EMPTY: SiteContent = {
   homepageIntro: '',
   homepageCtaText: '',
   homepageMakersHeading: '',
-  homepageMakersIntro: '',
   aboutPageIntro: '',
   aboutSolomonIslandsHeading: '',
   aboutSolomonIslandsText: '',
@@ -203,7 +202,7 @@ export default function AdminSiteContentPage() {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="max-w-3xl py-8">
+        <div className="max-w-3xl py-lg">
           <SkeletonText lines={8} />
         </div>
       </AdminLayout>
@@ -214,15 +213,15 @@ export default function AdminSiteContentPage() {
     <AdminLayout>
       <div className="max-w-3xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-md">
           <div>
             <h1 className={pageTitleClasses}>Site Content</h1>
-            <p className="text-base text-warm-gray-600 mt-1">
+            <p className="text-base text-warm-gray-600 mt-3xs">
               Edit text and images across all pages. Changes can take a few minutes to appear on
               the live site.
             </p>
             {changedTextKeys.length > 0 && (
-              <p className="text-sm text-warning-text mt-1" role="status">
+              <p className="text-sm text-warning-text mt-3xs" role="status">
                 {changedTextKeys.length} unsaved{' '}
                 {changedTextKeys.length === 1 ? 'change' : 'changes'}
               </p>
@@ -240,12 +239,12 @@ export default function AdminSiteContentPage() {
         </div>
 
         {/* Tab navigation */}
-        <div className="flex gap-1 border-b border-sand mb-6 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-3xs border-b border-sand mb-md overflow-x-auto scrollbar-hide">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`tap-target whitespace-nowrap px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+              className={`tap-target whitespace-nowrap px-sm py-xs text-sm font-medium border-b-2 transition-colors ${
                 activeTab === tab.id
                   ? 'border-ocean text-ocean'
                   : 'border-transparent text-warm-gray-600 hover:text-deep-blue hover:border-sand-dark'
@@ -258,7 +257,7 @@ export default function AdminSiteContentPage() {
 
         {/* Tab content — the hand-written SiteContent editor for this page (if
             any), then the sections generated from the manifest. */}
-        <div className="space-y-6">
+        <div className="space-y-md">
           {(() => {
             const SiteContentEditor = SITE_CONTENT_EDITORS[activeTab];
             return SiteContentEditor ? (
@@ -285,16 +284,16 @@ export default function AdminSiteContentPage() {
 
       {/* Confirmation Dialog */}
       {showConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50" onClick={() => setShowConfirm(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-sm bg-deep-blue/50" onClick={() => setShowConfirm(false)}>
           <div
-            className="bg-white rounded-lg shadow-md w-full max-w-md p-6"
+            className="bg-white rounded-lg shadow-md w-full max-w-md p-md"
             onClick={(e) => e.stopPropagation()}
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="confirm-title"
             aria-describedby="confirm-desc"
           >
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-xs mb-sm">
               <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center flex-shrink-0">
                 <AlertTriangle className="w-5 h-5 text-warning" />
               </div>
@@ -306,11 +305,11 @@ export default function AdminSiteContentPage() {
                 "immediately" here and "a few minutes" there sent admins
                 refreshing the live site looking for a change that had not
                 rebuilt yet. */}
-            <p id="confirm-desc" className="text-base text-warm-gray-600 mb-6">
+            <p id="confirm-desc" className="text-base text-warm-gray-600 mb-md">
               This will publish to the live website. Changes can take a few minutes to appear for
               visitors. Are you sure you want to publish these changes?
             </p>
-            <div className="flex items-center justify-end gap-3">
+            <div className="flex items-center justify-end gap-xs">
               <Button variant="secondary" size="sm" onClick={() => setShowConfirm(false)}>
                 Cancel
               </Button>
@@ -373,7 +372,7 @@ function HomepageTab({ content, update }: TabProps) {
   return (
     <>
       <Section title="Hero Section" description="The main heading and intro text visitors see first.">
-        <Field label="Eyebrow text (small blue line above the heading)" value={content.homepageHeading} onChange={(v) => update('homepageHeading', v)} placeholder="Meet the Makers Behind Every Piece" />
+        <Field label="Eyebrow text (small blue line above the heading)" value={content.homepageHeading} onChange={(v) => update('homepageHeading', v)} placeholder="Wholesale Solomon Islands handicrafts" />
         <Field label="Heading" value={content.homepageMakersHeading} onChange={(v) => update('homepageMakersHeading', v)} placeholder="Handmade in Solomon Islands" />
         <TextArea label="Intro paragraph" value={content.homepageIntro} onChange={(v) => update('homepageIntro', v)} placeholder="Every product is handmade. When you buy from us..." rows={3} />
         <Field label="Primary CTA button text" value={content.homepageCtaText} onChange={(v) => update('homepageCtaText', v)} placeholder="Browse Catalogue" />
@@ -459,10 +458,10 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="border border-sand rounded-lg p-6">
-      <h2 className="font-heading text-lg font-semibold text-deep-blue mb-1">{title}</h2>
-      {description && <p className="text-base text-warm-gray-400 mb-4">{description}</p>}
-      <div className="space-y-4">{children}</div>
+    <div className="border border-sand rounded-lg p-md">
+      <h2 className="font-heading text-lg font-semibold text-deep-blue mb-3xs">{title}</h2>
+      {description && <p className="text-base text-warm-gray-400 mb-sm">{description}</p>}
+      <div className="space-y-sm">{children}</div>
     </div>
   );
 }
@@ -506,7 +505,7 @@ function SiteTextInput({
           />
         )}
       </FormField>
-      {field.help && <p className="text-xs text-warm-gray-400 mt-1">{field.help}</p>}
+      {field.help && <p className="text-xs text-warm-gray-400 mt-3xs">{field.help}</p>}
     </div>
   );
 }

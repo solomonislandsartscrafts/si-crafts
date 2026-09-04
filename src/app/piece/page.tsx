@@ -19,11 +19,11 @@ export default async function PieceLookupPage() {
       width="narrow"
       intro={text['provenance.lookupIntro']}
     >
-      <div className="max-w-xs mx-auto mt-8">
+      <div className="max-w-xs mx-auto mt-lg">
         <PieceLookup />
       </div>
       {text['provenance.lookupHint'] && (
-        <p className="text-sm text-warm-gray-600 mt-4">{text['provenance.lookupHint']}</p>
+        <p className="text-sm text-warm-gray-600 mt-sm">{text['provenance.lookupHint']}</p>
       )}
     </PageHeader>
   );

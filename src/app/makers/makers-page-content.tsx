@@ -44,28 +44,28 @@ export function MakersPageContent({
 
   return (
     <div>
-      <PageHeader title={title} intro={intro}>
-        <div className="mt-4 flex flex-wrap gap-4 text-sm text-warm-gray-600">
-          <span className="flex items-center gap-1.5">
+      <PageHeader banner="blue" eyebrow="The people behind the work" title={title} intro={intro} motif="waves">
+        <div className="mt-sm flex flex-wrap gap-sm text-sm">
+          <span className="flex items-center gap-2xs">
             <Users className="w-4 h-4" aria-hidden="true" />
             {makers.length} makers
           </span>
-          <span className="flex items-center gap-1.5">
+          <span className="flex items-center gap-2xs">
             <MapPin className="w-4 h-4" aria-hidden="true" />
             {provinces.length} provinces
           </span>
         </div>
       </PageHeader>
 
-      <div className="site-container pb-10 lg:pb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-10 items-start">
+      <div className="site-container pb-section">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-block items-start">
           {/* Left: maker grid */}
           <div>
             {/* Filter bar. The province select stays mounted whether or not a
                 province is selected — previously selecting one replaced the
                 dropdown with a clear button, so you could not switch province
                 without clearing first. */}
-            <div className="flex flex-wrap items-end gap-4 mb-6">
+            <div className="flex flex-wrap items-end gap-sm mb-stack">
               <div className="lg:hidden">
                 <Select
                   id="province-filter"
@@ -116,7 +116,7 @@ export function MakersPageContent({
             ) : (
               /* Shared MakerCard, so a maker looks the same here as on the
                  homepage and craft pages. */
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div role="list" aria-label="Makers" className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-grid">
                 {filteredMakers.map((maker) => (
                   <MakerCard
                     key={maker.id}
@@ -128,29 +128,34 @@ export function MakersPageContent({
             )}
           </div>
 
-          {/* Right: province map — desktop filter */}
+          {/* Right: province map — desktop filter. Framed in a sand-light
+              panel so it reads as a deliberate filter tool rather than a map
+              floating on the page. */}
           <div className="hidden lg:block lg:sticky lg:top-24 lg:self-start">
-            <div className="pb-3">
-              <h2 className="font-heading text-lg font-semibold text-deep-blue">
-                {filterHeading}
-              </h2>
-              <p className="text-sm text-warm-gray-600 mt-0.5">{filterHint}</p>
-            </div>
-            <SolomonIslandsProvinceMap
-              selectedProvince={selectedProvince}
-              onProvinceSelect={setSelectedProvince}
-            />
-            {selectedProvince && (
-              <div className="pt-4 flex justify-center">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setSelectedProvince(null)}
-                >
-                  Show all provinces
-                </Button>
+            <div className="rounded-lg bg-sand-light p-md">
+              <div className="pb-xs">
+                <h2 className="font-heading text-lg font-semibold text-deep-blue">
+                  {filterHeading}
+                </h2>
+                <p className="text-sm text-warm-gray-600 mt-3xs">{filterHint}</p>
               </div>
-            )}
+              <SolomonIslandsProvinceMap
+                selectedProvince={selectedProvince}
+                onProvinceSelect={setSelectedProvince}
+                availableProvinces={provinces}
+              />
+              {selectedProvince && (
+                <div className="pt-sm flex justify-center">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setSelectedProvince(null)}
+                  >
+                    Show all provinces
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

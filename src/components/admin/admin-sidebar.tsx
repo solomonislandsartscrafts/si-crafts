@@ -93,15 +93,15 @@ export function AdminSidebar({
   return (
     <aside className="w-64 lg:w-56 flex-shrink-0 bg-deep-blue text-white min-h-screen flex flex-col">
       {/* Logo */}
-      <div className="px-4 py-5 border-b border-white/10">
+      <div className="px-sm py-md border-b border-white/10">
         <Link href="/" className="font-heading text-lg font-semibold text-white hover:text-white/80 transition-colors">
           SIAC
         </Link>
-        <p className="text-xs text-white/40 mt-0.5">Admin Panel</p>
+        <p className="text-xs text-white/40 mt-3xs">Admin Panel</p>
       </div>
 
       {/* Navigation — grouped with section headers */}
-      <nav className="flex-1 py-3 overflow-y-auto" aria-label="Admin navigation">
+      <nav className="flex-1 py-xs overflow-y-auto" aria-label="Admin navigation">
         {NAV_GROUPS.map((group) => {
           // Skip entire group if the current role isn't in group.roles
           if (!group.roles.includes(role)) return null;
@@ -110,14 +110,14 @@ export function AdminSidebar({
           if (visibleItems.length === 0) return null;
 
           return (
-            <div key={group.title} className="mt-4 first:mt-0">
+            <div key={group.title} className="mt-sm first:mt-0">
               {/* Section header */}
-              <h3 className="px-4 mb-1 text-[10px] font-semibold uppercase tracking-wider text-white/40">
+              <h3 className="px-sm mb-3xs text-[10px] font-semibold uppercase tracking-wider text-white/40">
                 {group.title}
               </h3>
 
               {/* Section items */}
-              <ul className="space-y-0.5">
+              <ul className="space-y-3xs">
                 {visibleItems.map((item) => {
                   const active = pathname === item.href || pathname.startsWith(item.href + '/');
                   const Icon = item.icon;
@@ -126,7 +126,7 @@ export function AdminSidebar({
                       <Link
                         href={item.href}
                         onClick={onNavigate}
-                        className={`tap-target flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${
+                        className={`tap-target flex items-center gap-xs px-sm py-xs text-sm font-medium transition-colors ${
                           active
                             ? 'bg-white/10 text-white border-l-[3px] border-accent-gold'
                             : 'text-white/60 hover:bg-white/5 hover:text-white border-l-[3px] border-transparent'
@@ -146,11 +146,11 @@ export function AdminSidebar({
       </nav>
 
       {/* Return to Site + User + Logout at bottom */}
-      <div className="border-t border-white/10 px-4 py-4 space-y-3">
+      <div className="border-t border-white/10 px-sm py-sm space-y-xs">
         <Link
           href="/"
           onClick={onNavigate}
-          className="tap-target flex items-center gap-2 px-3 py-2 text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors"
+          className="tap-target flex items-center gap-2xs px-xs py-2xs text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors"
         >
           <ExternalLink className="w-4 h-4" />
           View Site
@@ -161,7 +161,7 @@ export function AdminSidebar({
         {onLogout && (
           <button
             onClick={onLogout}
-            className="tap-target w-full flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+            className="tap-target w-full flex items-center gap-2xs px-xs py-2xs text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
           >
             <LogOut className="w-4 h-4" />
             Logout

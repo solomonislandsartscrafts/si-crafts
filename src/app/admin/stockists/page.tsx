@@ -11,6 +11,7 @@ import { FormField, inputClasses } from '@/components/ui/form-field';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Skeleton, SkeletonRegion } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast';
+import { useModalA11y } from '@/lib/use-modal-a11y';
 
 const STATUS_BADGE: Record<string, 'success' | 'warning' | 'error' | 'neutral'> = {
   approved: 'success',
@@ -22,13 +23,13 @@ const STATUS_BADGE: Record<string, 'success' | 'warning' | 'error' | 'neutral'> 
 /** Card-shaped placeholder while the stockist list loads. */
 function StockistListSkeleton() {
   return (
-    <SkeletonRegion label="Loading stockists" className="space-y-3">
+    <SkeletonRegion label="Loading stockists" className="space-y-xs">
       {Array.from({ length: 4 }).map((_, i) => (
         <div
           key={i}
-          className="bg-white rounded-lg shadow-card border border-sand flex items-center justify-between px-5 py-4 gap-4"
+          className="bg-white rounded-lg shadow-card border border-sand flex items-center justify-between px-md py-sm gap-sm"
         >
-          <div className="flex-1 space-y-2">
+          <div className="flex-1 space-y-2xs">
             <Skeleton className="h-4 w-1/3" />
             <Skeleton className="h-3 w-1/2" />
           </div>
@@ -162,11 +163,11 @@ export default function AdminStockistsPage() {
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-md">
         <div>
           <h1 className={pageTitleClasses}>Stockists</h1>
           {pendingCount > 0 && (
-            <p className="text-base text-warning-text mt-1">{pendingCount} application{pendingCount > 1 ? 's' : ''} awaiting review</p>
+            <p className="text-base text-warning-text mt-3xs">{pendingCount} application{pendingCount > 1 ? 's' : ''} awaiting review</p>
           )}
         </div>
         <Button ref={addButtonRef} size="sm" onClick={() => setShowAddModal(true)}>
@@ -185,7 +186,7 @@ export default function AdminStockistsPage() {
           }
         />
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-xs">
           {sortedStockists.map((s) => {
             const isExpanded = expandedId === s.id;
             const isPending = s.status === 'pending';
@@ -200,16 +201,16 @@ export default function AdminStockistsPage() {
                 {/* Summary row */}
                 <button
                   onClick={() => toggleExpand(s.id)}
-                  className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-sand-light/50 transition-colors"
+                  className="w-full flex items-center justify-between px-md py-sm text-left hover:bg-sand-light/50 transition-colors"
                   aria-expanded={isExpanded}
                 >
-                  <div className="flex items-center gap-4 min-w-0">
+                  <div className="flex items-center gap-sm min-w-0">
                     <div className="min-w-0">
                       <p className="font-medium text-warm-gray-800 truncate">{s.businessName}</p>
                       <p className="text-xs text-warm-gray-400">{s.contactName} · {s.email}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex items-center gap-xs shrink-0">
                     <StatusBadge status={STATUS_BADGE[s.status] ?? 'neutral'} className="capitalize">
                       {s.status}
                     </StatusBadge>
@@ -219,36 +220,36 @@ export default function AdminStockistsPage() {
 
                 {/* Expanded review panel */}
                 {isExpanded && (
-                  <div className="border-t border-sand px-5 py-5 bg-sand-light/30">
-                    <h3 className="text-sm font-semibold text-deep-blue mb-4">Application Details</h3>
+                  <div className="border-t border-sand px-md py-md bg-sand-light/30">
+                    <h3 className="text-sm font-semibold text-deep-blue mb-sm">Application Details</h3>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                      <div className="flex items-start gap-2">
-                        <Building2 className="w-4 h-4 text-warm-gray-400 mt-0.5 shrink-0" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm mb-sm">
+                      <div className="flex items-start gap-2xs">
+                        <Building2 className="w-4 h-4 text-warm-gray-400 mt-3xs shrink-0" />
                         <div>
                           <p className="text-xs text-warm-gray-400">Business Name</p>
                           <p className="text-sm text-warm-gray-800">{s.businessName}</p>
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-2">
-                        <FileText className="w-4 h-4 text-warm-gray-400 mt-0.5 shrink-0" />
+                      <div className="flex items-start gap-2xs">
+                        <FileText className="w-4 h-4 text-warm-gray-400 mt-3xs shrink-0" />
                         <div>
                           <p className="text-xs text-warm-gray-400">ABN</p>
                           <p className="text-sm text-warm-gray-800">{s.abn || '(not provided)'}</p>
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-2">
-                        <Mail className="w-4 h-4 text-warm-gray-400 mt-0.5 shrink-0" />
+                      <div className="flex items-start gap-2xs">
+                        <Mail className="w-4 h-4 text-warm-gray-400 mt-3xs shrink-0" />
                         <div>
                           <p className="text-xs text-warm-gray-400">Email</p>
                           <p className="text-sm text-warm-gray-800">{s.email}</p>
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-2">
-                        <Phone className="w-4 h-4 text-warm-gray-400 mt-0.5 shrink-0" />
+                      <div className="flex items-start gap-2xs">
+                        <Phone className="w-4 h-4 text-warm-gray-400 mt-3xs shrink-0" />
                         <div>
                           <p className="text-xs text-warm-gray-400">Phone</p>
                           <p className="text-sm text-warm-gray-800">{s.phone || '(not provided)'}</p>
@@ -258,9 +259,9 @@ export default function AdminStockistsPage() {
 
                     {/* Description / reason for applying */}
                     {s.description && (
-                      <div className="mb-4">
-                        <p className="text-xs text-warm-gray-400 mb-1">Why they want to stock our products</p>
-                        <p className="text-base text-warm-gray-800 bg-white rounded-md p-3 border border-sand">
+                      <div className="mb-sm">
+                        <p className="text-xs text-warm-gray-400 mb-3xs">Why they want to stock our products</p>
+                        <p className="text-base text-warm-gray-800 bg-white rounded-md p-xs border border-sand">
                           {s.description}
                         </p>
                       </div>
@@ -268,14 +269,14 @@ export default function AdminStockistsPage() {
 
                     {/* Applied date */}
                     {s.createdAt && (
-                      <p className="text-xs text-warm-gray-400 mb-4">
+                      <p className="text-xs text-warm-gray-400 mb-sm">
                         Applied: {new Date(s.createdAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}
                       </p>
                     )}
 
                     {/* Action buttons */}
                     {isPending && (
-                      <div className="flex items-center gap-3 pt-3 border-t border-sand">
+                      <div className="flex items-center gap-xs pt-xs border-t border-sand">
                         <Button size="sm" onClick={() => handleApprove(s.id, s.businessName)}>
                           <CheckCircle className="w-4 h-4" />
                           Approve
@@ -288,7 +289,7 @@ export default function AdminStockistsPage() {
                     )}
 
                     {s.status === 'approved' && (
-                      <div className="flex items-center gap-3 pt-3 border-t border-sand">
+                      <div className="flex items-center gap-xs pt-xs border-t border-sand">
                         <Button variant="secondary" size="sm" onClick={() => handleSuspend(s.id, s.businessName)}>
                           <Pause className="w-4 h-4" />
                           Suspend Access
@@ -302,7 +303,7 @@ export default function AdminStockistsPage() {
                     )}
 
                     {s.status === 'suspended' && (
-                      <div className="flex items-center gap-3 pt-3 border-t border-sand">
+                      <div className="flex items-center gap-xs pt-xs border-t border-sand">
                         <Button size="sm" onClick={() => handleEnable(s.id, s.businessName)}>
                           <Play className="w-4 h-4" />
                           Re-enable Access
@@ -316,7 +317,7 @@ export default function AdminStockistsPage() {
                     )}
 
                     {s.status === 'rejected' && (
-                      <div className="flex items-center gap-3 pt-3 border-t border-sand">
+                      <div className="flex items-center gap-xs pt-xs border-t border-sand">
                         <Button variant="danger" size="sm" onClick={() => handleDelete(s.id, s.businessName)}>
                           <Trash2 className="w-4 h-4" />
                           Delete
@@ -363,38 +364,10 @@ function AddStockistModal({
   const [password, setPassword] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const dialogRef = useRef<HTMLDivElement>(null);
 
-  // Focus the dialog on mount and trap focus within it
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    dialog.focus();
-
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        if (!saving) onClose();
-        return;
-      }
-      if (e.key !== 'Tab') return;
-      const focusable = dialog!.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [saving, onClose]);
+  // Shared modal a11y: focus trap, Escape to close, body-scroll lock, and
+  // focus restored to the trigger element on close.
+  const dialogRef = useModalA11y(true, () => { if (!saving) onClose(); });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -443,35 +416,35 @@ function AddStockistModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-sm bg-deep-blue/50 overflow-y-auto"
       onClick={() => { if (!saving) onClose(); }}
     >
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className="bg-white rounded-lg shadow-md w-full max-w-md my-8 outline-none"
+        className="bg-white rounded-lg shadow-md w-full max-w-md my-lg outline-none"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="add-stockist-title"
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-sand">
+        <div className="flex items-center justify-between px-md py-sm border-b border-sand">
           <h2 id="add-stockist-title" className="font-heading text-xl font-medium text-deep-blue">
             Add Stockist
           </h2>
           <button
             onClick={() => { if (!saving) onClose(); }}
             disabled={saving}
-            className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-50"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean disabled:opacity-50"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+        <form onSubmit={handleSubmit} className="px-md py-sm space-y-sm">
           {error && (
-            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert" aria-live="assertive">
+            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-xs" role="alert" aria-live="assertive">
               {error}
             </div>
           )}
@@ -508,10 +481,10 @@ function AddStockistModal({
                 className={inputClasses}
               />
             </FormField>
-            <p className="text-xs text-warm-gray-400 mt-1">This is the address they log in with.</p>
+            <p className="text-xs text-warm-gray-400 mt-3xs">This is the address they log in with.</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
             <FormField label="Phone" htmlFor="stockist-phone">
               <input
                 type="tel"
@@ -553,13 +526,13 @@ function AddStockistModal({
                 className={inputClasses}
               />
             </FormField>
-            <p className="text-xs text-warm-gray-400 mt-1">
+            <p className="text-xs text-warm-gray-400 mt-3xs">
               Leave blank and we&apos;ll email them a one-time link to choose their own
               password. Set one here only if you need to give it to them directly.
             </p>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
+          <div className="flex items-center justify-end gap-xs pt-sm border-t border-sand">
             <Button variant="secondary" onClick={onClose} disabled={saving}>
               Cancel
             </Button>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Trash2, Minus, Plus, AlertTriangle, ArrowLeft, Send, X, MessageSquare, ShoppingCart } from 'lucide-react';
+import { Trash2, AlertTriangle, ArrowLeft, Send, X, MessageSquare, ShoppingCart } from 'lucide-react';
 import type { CartItem } from '@/types';
 import { getCart, updateQuantity, updateNote, removeFromCart, clearCart, getCartTotal, GST_THRESHOLD } from '@/lib/cart';
 import { validateStockistSession } from '@/lib/auth-client';
@@ -13,8 +13,10 @@ import { PageHeader } from '@/components/layout/page-header';
 import { Button, ButtonLink } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { inputClasses } from '@/components/ui/form-field';
+import { QuantityStepper } from '@/components/ui/quantity-stepper';
 import { SkeletonText } from '@/components/ui/skeleton';
 import { SuccessPanel } from '@/components/ui/success-panel';
+import { useModalA11y } from '@/lib/use-modal-a11y';
 
 export default function StockistOrdersPage() {
   const router = useRouter();
@@ -40,6 +42,10 @@ export default function StockistOrdersPage() {
 
   const [noteModalItem, setNoteModalItem] = useState<string | null>(null);
   const [noteText, setNoteText] = useState('');
+
+  // Focus trap + Escape + focus restore for the note modal, via the shared
+  // hook. modalRef attaches to the modal panel below.
+  const noteModalRef = useModalA11y(noteModalItem !== null, () => setNoteModalItem(null));
 
   function openNoteModal(productId: string) {
     const item = cart.find((i) => i.productId === productId);
@@ -121,14 +127,14 @@ export default function StockistOrdersPage() {
         }
       >
         <div className="text-center">
-          <p className="text-base text-warm-gray-600 mb-2">Reference: <strong>{submitted.ref}</strong></p>
-          <p className="text-sm text-warm-gray-400 mb-6">{new Date(submitted.time).toLocaleString()}</p>
+          <p className="text-base text-warm-gray-600 mb-2xs">Reference: <strong>{submitted.ref}</strong></p>
+          <p className="text-sm text-warm-gray-400 mb-md">{new Date(submitted.time).toLocaleString()}</p>
         </div>
-        <div className="bg-sand-light rounded-md p-4 text-base text-warm-gray-600">
+        <div className="bg-sand-light rounded-md p-sm text-base text-warm-gray-600">
           This is an expression of interest. We&apos;ll confirm availability and send bank transfer details by email.
         </div>
         {showGstWarning && (
-          <div className="bg-warning/10 border border-warning/20 text-warning-text text-base rounded-md p-3 mt-6 flex items-center gap-2">
+          <div className="bg-warning/10 border border-warning/20 text-warning-text text-base rounded-md p-xs mt-md flex items-center gap-2xs">
             <AlertTriangle className="w-4 h-4 flex-shrink-0" />
             <span>This order exceeds A$1,000. GST registration obligations may apply.</span>
           </div>
@@ -143,13 +149,13 @@ export default function StockistOrdersPage() {
         title="Your Order"
         intro="Review your order request. Orders are expressions of interest paid by bank transfer, not confirmed purchases."
         eyebrow={
-          <Link href="/stockist/catalogue" className="inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark transition-colors">
+          <Link href="/stockist/catalogue" className="inline-flex items-center gap-3xs text-sm text-ocean hover:text-ocean-dark transition-colors">
             <ArrowLeft className="w-4 h-4" /> Back to catalogue
           </Link>
         }
       />
 
-      <div className="site-container pb-16">
+      <div className="site-container pb-section">
         {cart.length === 0 ? (
           <EmptyState
             icon={ShoppingCart}
@@ -163,14 +169,14 @@ export default function StockistOrdersPage() {
         ) : (
           <>
             {/* Cart items */}
-            <div className="divide-y divide-sand mb-8">
+            <div className="divide-y divide-sand mb-lg">
               {cart.map((item) => (
-                <div key={item.productId} className="flex items-center gap-4 py-4">
+                <div key={item.productId} className="flex items-center gap-sm py-sm">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-warm-gray-800 truncate">{item.productName}</p>
                     <p className="text-sm text-warm-gray-600">{item.productCode} · {formatPrice(item.unitPrice)} each</p>
                     {/* Note button */}
-                    <div className="mt-1">
+                    <div className="mt-3xs">
                       <Button variant="secondary" size="sm" onClick={() => openNoteModal(item.productId)}>
                         {item.note ? (
                           <>
@@ -182,26 +188,18 @@ export default function StockistOrdersPage() {
                       </Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
-                      disabled={item.quantity <= 1}
-                      className="tap-target p-2 rounded-md border border-sand-dark hover:bg-sand-light disabled:opacity-30 focus:outline-none focus:ring-2 focus:ring-ocean"
-                      aria-label={`Decrease quantity of ${item.productName}`}>
-                      <Minus className="w-3 h-3" />
-                    </button>
-                    <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
-                    <button onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}
-                      disabled={item.quantity >= 999}
-                      className="tap-target p-2 rounded-md border border-sand-dark hover:bg-sand-light disabled:opacity-30 focus:outline-none focus:ring-2 focus:ring-ocean"
-                      aria-label={`Increase quantity of ${item.productName}`}>
-                      <Plus className="w-3 h-3" />
-                    </button>
-                  </div>
-                  <p className="w-20 text-right font-medium text-warm-gray-800">
+                  <QuantityStepper
+                    value={item.quantity}
+                    onChange={(next) => handleQuantityChange(item.productId, next)}
+                    itemLabel={item.productName}
+                    buttonClassName="tap-target flex items-center justify-center text-warm-gray-800 hover:bg-sand-light disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+                    valueClassName="w-8 text-center text-sm font-medium"
+                  />
+                  <p className="w-20 text-right font-medium text-warm-gray-800" role="status" aria-live="polite">
                     {formatPrice(item.quantity * item.unitPrice)}
                   </p>
                   <button onClick={() => handleRemove(item.productId)}
-                    className="tap-target p-2 text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                    className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                     aria-label={`Remove ${item.productName} from order`}>
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -210,27 +208,27 @@ export default function StockistOrdersPage() {
             </div>
 
             {/* Total */}
-            <div className="flex justify-between items-center py-4 border-t-2 border-deep-blue mb-4">
+            <div className="flex justify-between items-center py-sm border-t-2 border-deep-blue mb-sm">
               <span className="font-heading font-semibold text-deep-blue text-lg">Total (ex. GST)</span>
               <span className="font-heading font-semibold text-deep-blue text-lg">{formatPrice(total)}</span>
             </div>
 
             {/* GST Warning */}
             {showGstWarning && (
-              <div className="bg-warning/10 border border-warning/20 text-warning-text text-base rounded-md p-3 mb-6 flex items-center gap-2">
+              <div className="bg-warning/10 border border-warning/20 text-warning-text text-base rounded-md p-xs mb-md flex items-center gap-2xs">
                 <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                 <span>This order exceeds A$1,000. GST registration obligations may apply.</span>
               </div>
             )}
 
             {/* Bank transfer notice */}
-            <div className="bg-sand-light rounded-md p-4 text-base text-warm-gray-600 mb-6">
+            <div className="bg-sand-light rounded-md p-sm text-base text-warm-gray-600 mb-md">
               Orders are expressions of interest paid by bank transfer. This is not a confirmed purchase.
             </div>
 
             {submitError && (
               <div
-                className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3 mb-4"
+                className="bg-error/10 border border-error/20 text-error text-base rounded-md p-xs mb-sm"
                 role="alert"
                 aria-live="assertive"
               >
@@ -251,30 +249,35 @@ export default function StockistOrdersPage() {
 
       {/* Note modal */}
       {noteModalItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50" onClick={() => setNoteModalItem(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-sm bg-deep-blue/50" onClick={() => setNoteModalItem(null)}>
           <div
+            ref={noteModalRef}
             className="bg-white rounded-lg shadow-md w-full max-w-sm"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
+            aria-label="Add note"
           >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-sand">
+            <div className="flex items-center justify-between px-md py-sm border-b border-sand">
               <h3 className="font-heading text-lg font-medium text-deep-blue">Add Note</h3>
-              <button onClick={() => setNoteModalItem(null)} className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800" aria-label="Close">
+              <button onClick={() => setNoteModalItem(null)} className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800" aria-label="Close">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="px-5 py-4">
+            <div className="px-md py-sm">
+              <label htmlFor="order-note-textarea" className="sr-only">
+                Note for this item
+              </label>
               <textarea
+                id="order-note-textarea"
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
                 placeholder="e.g. preferred colour, custom engraving, quantity notes..."
                 rows={3}
                 className={`${inputClasses} resize-none`}
-                autoFocus
               />
             </div>
-            <div className="flex justify-end gap-3 px-5 py-4 border-t border-sand">
+            <div className="flex justify-end gap-xs px-md py-sm border-t border-sand">
               <Button variant="secondary" size="sm" onClick={() => setNoteModalItem(null)}>
                 Cancel
               </Button>

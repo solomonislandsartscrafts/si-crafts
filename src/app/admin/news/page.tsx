@@ -17,10 +17,10 @@ function TableSkeleton() {
   return (
     <SkeletonRegion
       label="Loading articles"
-      className="bg-white rounded-lg shadow-card p-4 space-y-4"
+      className="bg-white rounded-lg shadow-card p-sm space-y-sm"
     >
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4">
+        <div key={i} className="flex items-center gap-sm">
           <Skeleton className="h-4 flex-1" />
           <Skeleton className="h-4 w-28 hidden sm:block" />
           <Skeleton className="h-4 w-24 hidden md:block" />
@@ -100,7 +100,7 @@ export default function AdminNewsPage() {
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-md">
         <h1 className={pageTitleClasses}>News & Articles</h1>
         <Button size="sm" onClick={handleAdd}>
           <Plus className="w-4 h-4" /> New Article
@@ -122,55 +122,55 @@ export default function AdminNewsPage() {
           <table className="w-full text-sm">
             <thead className="bg-sand-light border-b border-sand">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600">Title</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600 hidden sm:table-cell">Author</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600 hidden md:table-cell">Date</th>
-                <th className="text-left px-4 py-3 font-medium text-warm-gray-600">Status</th>
-                <th className="text-right px-4 py-3 font-medium text-warm-gray-600">Actions</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Title</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden sm:table-cell">Author</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600 hidden md:table-cell">Date</th>
+                <th scope="col" className="text-left px-sm py-xs font-medium text-warm-gray-600">Status</th>
+                <th scope="col" className="text-right px-sm py-xs font-medium text-warm-gray-600">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-sand">
               {articles.map((article) => (
                 <tr key={article.id} className="hover:bg-sand-light/50">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
+                  <td className="px-sm py-xs">
+                    <div className="flex items-center gap-2xs">
                       {article.featured && <Star className="w-3.5 h-3.5 text-warning fill-warning" />}
                       <span className="font-medium text-warm-gray-800 line-clamp-1">{article.title}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-warm-gray-600 hidden sm:table-cell">{article.authorName}</td>
-                  <td className="px-4 py-3 text-warm-gray-400 text-xs hidden md:table-cell">
+                  <td className="px-sm py-xs text-warm-gray-600 hidden sm:table-cell">{article.authorName}</td>
+                  <td className="px-sm py-xs text-warm-gray-400 text-xs hidden md:table-cell">
                     {new Date(article.publishedAt || article.createdAt).toLocaleDateString('en-AU', {
                       day: 'numeric', month: 'short', year: 'numeric',
                     })}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-sm py-xs">
                     <button
                       onClick={() => handleTogglePublish(article.id, article.published)}
-                      className="focus:outline-none focus:ring-2 focus:ring-ocean rounded-sm"
+                      className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean rounded-sm"
                       aria-label={`${article.published ? 'Unpublish' : 'Publish'} ${article.title}`}
                     >
                       <StatusBadge
                         status={article.published ? 'success' : 'neutral'}
-                        className="gap-1"
+                        className="gap-3xs"
                       >
                         {article.published ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
                         {article.published ? 'Published' : 'Draft'}
                       </StatusBadge>
                     </button>
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                  <td className="px-sm py-xs text-right">
+                    <div className="flex items-center justify-end gap-2xs">
                       <button
                         onClick={() => handleEdit(article)}
-                        className="tap-target p-2 text-warm-gray-400 hover:text-ocean transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                        className="tap-target p-2xs text-warm-gray-400 hover:text-ocean transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                         aria-label={`Edit ${article.title}`}
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(article.id, article.title)}
-                        className="tap-target p-2 text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-ocean"
+                        className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
                         aria-label={`Delete ${article.title}`}
                       >
                         <Trash2 className="w-4 h-4" />

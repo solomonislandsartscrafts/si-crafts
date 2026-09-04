@@ -33,11 +33,11 @@ export function TeamList({
   if (loading) {
     return (
       <SkeletonRegion label="Loading team">
-        <div className="space-y-10">
+        <div className="space-y-block">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="flex gap-6 items-start">
+            <div key={i} className="flex gap-md items-start">
               <Skeleton className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex-shrink-0" />
-              <div className="flex-1 space-y-2 pt-2">
+              <div className="flex-1 space-y-2xs pt-2xs">
                 <Skeleton className="h-5 w-32" />
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-4 w-full max-w-md" />
@@ -56,9 +56,9 @@ export function TeamList({
   }
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-block">
       {members.map((member) => (
-        <div key={member.id} className="flex gap-6 items-start">
+        <div key={member.id} className="flex gap-md items-start">
           {/* Photo */}
           <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-sand-light flex-shrink-0 relative overflow-hidden">
             <SafeImage
@@ -78,7 +78,7 @@ export function TeamList({
               {member.name}
             </h3>
             {member.location && (
-              <p className="text-sm text-warm-gray-400 mb-2">{member.location}</p>
+              <p className="text-sm text-warm-gray-400 mb-2xs">{member.location}</p>
             )}
             {member.bio ? (
               <p className="text-base text-warm-gray-600 leading-relaxed">

@@ -13,6 +13,10 @@ class Supporter(models.Model):
     logo_alt = models.CharField(max_length=300, blank=True, default="")
     href = models.CharField(max_length=500, blank=True, default="")
     sort_order = models.PositiveIntegerField(default=0)
+    # Suspended supporters stay in the table (and the admin list) but are hidden
+    # from the public homepage banner. Lets an admin take a logo down without
+    # losing the record — the alternative was deleting and re-adding it.
+    active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

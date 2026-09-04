@@ -8,6 +8,7 @@ interface ApiSupporter {
   logo_alt: string;
   href: string;
   sort_order: number;
+  active?: boolean;
 }
 
 function mapSupporter(raw: ApiSupporter): Supporter {
@@ -18,6 +19,9 @@ function mapSupporter(raw: ApiSupporter): Supporter {
     logoAlt: raw.logo_alt || '',
     href: raw.href || '',
     sortOrder: raw.sort_order,
+    // Older backends predate the `active` field; treat a missing value as
+    // active so existing supporters keep showing.
+    active: raw.active ?? true,
   };
 }
 
@@ -33,6 +37,7 @@ function toBody(data: Partial<Omit<Supporter, 'id'>>): Record<string, unknown> {
   if (data.logoAlt !== undefined) body.logo_alt = data.logoAlt;
   if (data.href !== undefined) body.href = data.href;
   if (data.sortOrder !== undefined) body.sort_order = data.sortOrder;
+  if (data.active !== undefined) body.active = data.active;
   return body;
 }
 
@@ -67,6 +72,7 @@ const BUNDLED_SUPPORTERS: Supporter[] = [
     logoAlt: '',
     href: '',
     sortOrder: 0,
+    active: true,
   },
 ];
 
@@ -77,7 +83,10 @@ const BUNDLED_SUPPORTERS: Supporter[] = [
 export async function getSupportersSafe(): Promise<Supporter[]> {
   try {
     const supporters = await getSupporters();
-    return supporters.length > 0 ? supporters : BUNDLED_SUPPORTERS;
+    // Suspended supporters are hidden from the public banner but kept in the
+    // admin list. Filter here so every public consumer is covered in one place.
+    const active = supporters.filter((s) => s.active);
+    return active.length > 0 ? active : BUNDLED_SUPPORTERS;
   } catch {
     return BUNDLED_SUPPORTERS;
   }

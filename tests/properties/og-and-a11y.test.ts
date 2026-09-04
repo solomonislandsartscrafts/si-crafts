@@ -8,7 +8,7 @@
 
 import { describe, it, expect, afterEach } from 'vitest';
 import * as fc from 'fast-check';
-import { generatePageMetadata } from '@/lib/metadata';
+import { generatePageMetadata, SITE_HOST } from '@/lib/metadata';
 import { getTransition, fadeIn, slideUp } from '@/lib/motion';
 
 // --- Property 1: Open Graph Tags Valid on All Public Pages ---
@@ -48,7 +48,13 @@ describe('Property 1: Open Graph tags valid on all public pages', () => {
     );
   });
 
-  it('og:url includes the site domain', () => {
+  it('og:url includes the configured site host', () => {
+    // Asserts against SITE_HOST (derived from NEXT_PUBLIC_SITE_URL) rather than
+    // a hardcoded domain. The public host is env-driven and deliberately still
+    // the workers.dev fallback until solomonislandsartsandcrafts.com.au is
+    // registered — see metadata.ts. Checking the configured host keeps this
+    // test correct now AND after the domain switch, and still catches a genuine
+    // regression where og:url loses its origin entirely.
     fc.assert(
       fc.property(
         fc.constantFrom('/', '/about', '/catalogue', '/makers', '/wholesale', '/craft/pandanus-weaving'),
@@ -61,7 +67,7 @@ describe('Property 1: Open Graph tags valid on all public pages', () => {
           const ogUrl = meta.openGraph && 'url' in meta.openGraph
             ? (meta.openGraph.url as string)
             : '';
-          return ogUrl.includes('solomonislandsartsandcrafts.com.au');
+          return ogUrl.includes(SITE_HOST);
         }
       )
     );

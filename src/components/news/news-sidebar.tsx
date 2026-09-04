@@ -25,18 +25,18 @@ function timeAgo(dateStr: string): string {
 export function NewsSidebar({ tags, otherArticles }: NewsSidebarProps) {
   return (
     <aside className="hidden lg:block">
-      <div className="sticky top-24 space-y-8">
+      <div className="sticky top-24 space-y-lg">
         {/* Recommended tags */}
         {tags.length > 0 && (
           <div>
-            <h2 className="font-heading text-sm font-medium text-deep-blue uppercase tracking-wide mb-3">
+            <h2 className="font-heading text-sm font-medium text-deep-blue uppercase tracking-wide mb-xs">
               Topics
             </h2>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2xs">
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-xs font-medium text-warm-gray-800 bg-sand-light px-3 py-1.5 rounded-full border border-sand"
+                  className="text-xs font-medium text-warm-gray-800 bg-sand-light px-xs py-2xs rounded-full border border-sand"
                 >
                   {tag}
                 </span>
@@ -47,11 +47,11 @@ export function NewsSidebar({ tags, otherArticles }: NewsSidebarProps) {
 
         {/* Other articles to read — title-only links */}
         {otherArticles.length > 0 && (
-          <div className="border-t border-sand pt-6">
-            <h2 className="font-heading text-sm font-medium text-deep-blue uppercase tracking-wide mb-4">
+          <div className="border-t border-sand pt-md">
+            <h2 className="font-heading text-sm font-medium text-deep-blue uppercase tracking-wide mb-sm">
               More to read
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-sm">
               {otherArticles.slice(0, 5).map((article) => {
                 const date = article.publishedAt || article.createdAt;
                 const tag = article.tags[0];
@@ -62,7 +62,7 @@ export function NewsSidebar({ tags, otherArticles }: NewsSidebarProps) {
                     href={`/news/${article.slug}`}
                     className="group block"
                   >
-                    <h3 className="font-heading text-sm font-semibold text-deep-blue group-hover:text-ocean transition-colors leading-snug mb-0.5">
+                    <h3 className="font-heading text-sm font-semibold text-deep-blue group-hover:text-ocean transition-colors leading-heading mb-3xs">
                       {article.title}
                     </h3>
                     <p className="text-xs text-warm-gray-400">

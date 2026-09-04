@@ -7,6 +7,7 @@ interface WagtailArticleResponse {
   slug?: string;
   title: string;
   excerpt: string;
+  standfirst?: string;
   body: string;
   cover_image_url?: string;
   cover_image_alt?: string;
@@ -31,6 +32,7 @@ function mapArticle(raw: WagtailArticleResponse): Article {
     slug: raw.meta?.slug ?? raw.slug ?? '',
     title: raw.title ?? '',
     excerpt: raw.excerpt ?? '',
+    standfirst: raw.standfirst ?? '',
     content: raw.body ?? '',
     coverImageUrl: raw.cover_image_url || null,
     coverImageAlt: raw.cover_image_alt || `Cover image for ${raw.title ?? ''}`,
@@ -92,6 +94,7 @@ export async function createArticle(data: Omit<Article, 'id' | 'createdAt' | 'up
     title: data.title,
     slug: data.slug,
     excerpt: data.excerpt,
+    standfirst: data.standfirst,
     body: data.content,
     cover_image_url: data.coverImageUrl,
     cover_image_alt: data.coverImageAlt,
@@ -112,6 +115,7 @@ export async function updateArticle(id: string, data: Partial<Article>): Promise
   if (data.title !== undefined) body.title = data.title;
   if (data.slug !== undefined) body.slug = data.slug;
   if (data.excerpt !== undefined) body.excerpt = data.excerpt;
+  if (data.standfirst !== undefined) body.standfirst = data.standfirst;
   if (data.content !== undefined) body.body = data.content;
   if (data.coverImageUrl !== undefined) body.cover_image_url = data.coverImageUrl;
   if (data.coverImageAlt !== undefined) body.cover_image_alt = data.coverImageAlt;

@@ -3,6 +3,7 @@ export interface Article {
   slug: string;
   title: string;
   excerpt: string; // Short summary for cards (max ~200 chars)
+  standfirst: string; // Editorial dek shown between headline and byline on the article page. Optional; '' when unset.
   content: string; // HTML content (rich text)
   coverImageUrl: string | null;
   coverImageAlt: string;

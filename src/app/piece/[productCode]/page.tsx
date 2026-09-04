@@ -5,13 +5,19 @@ import { getAllMakers } from '@/services/makers';
 import { getSiteTextSafe } from '@/services/site-text';
 import { PiecePageClient } from './piece-page-client';
 import { ProductCard } from '@/components/cards/product-card';
+import { posterGridClasses } from '@/components/cards/poster-card';
+import { DetailPageLayout } from '@/components/layout/detail-page-layout';
 import { PageHeader } from '@/components/layout/page-header';
 import { ButtonLink } from '@/components/ui/button';
-import { Breadcrumb } from '@/components/ui/breadcrumb';
-import { BackLink } from '@/components/shared/back-link';
 import { resolveImageUrl } from '@/lib/api-client';
 import { materialLabel, productTypeLabel } from '@/lib/labels';
-import { SITE_URL } from '@/lib/metadata';
+import {
+  SITE_URL,
+  generatePageMetadata,
+  toPlainDescription,
+} from '@/lib/metadata';
+import { JsonLd } from '@/lib/json-ld';
+import type { Metadata } from 'next';
 
 export async function generateStaticParams() {
   const products = await getAllProducts();
@@ -20,6 +26,41 @@ export async function generateStaticParams() {
 
 interface PiecePageProps {
   params: Promise<{ productCode: string }>;
+}
+
+/**
+ * Per-piece metadata for the provenance page.
+ *
+ * `robots: noindex` on unpublished pieces is the important part. This page reads
+ * through the ungated getProductByCode (and generateStaticParams uses
+ * getAllProducts), so an unpublished piece is still reachable by direct link —
+ * which is what makes the QR code work for a piece being previewed before
+ * release. Reachable is fine; indexed is not. This keeps the preview behaviour
+ * while making sure nothing unpublished can turn up in a search result.
+ */
+export async function generateMetadata({ params }: PiecePageProps): Promise<Metadata> {
+  const { productCode } = await params;
+  const product = await getProductByCode(productCode);
+
+  if (!product) return { title: 'Piece not found', robots: { index: false, follow: false } };
+
+  const maker = product.makerId ? await getMakerById(product.makerId) : null;
+  const publishedMaker = maker?.publishedFlag ? maker : null;
+
+  const base = generatePageMetadata({
+    // The product code is the thing a buyer holding the piece has in hand, so
+    // it belongs in the title alongside the name.
+    title: `${product.name} (${product.productCode})`,
+    // No price. Wholesale pricing is stockist-only and a meta description is
+    // about as public as a string can get.
+    description:
+      toPlainDescription(product.description) ||
+      `${product.name}, handmade in Solomon Islands${publishedMaker ? ` by ${publishedMaker.name}` : ''}. Provenance and maker story.`,
+    path: `/piece/${product.productCode}`,
+    imageUrl: resolveImageUrl(product.imageUrls[0]) || undefined,
+  });
+
+  return product.publishedFlag ? base : { ...base, robots: { index: false, follow: false } };
 }
 
 /**
@@ -52,7 +93,7 @@ export default async function PiecePage({ params }: PiecePageProps) {
         width="narrow"
         intro={`We couldn't find a piece with the code "${productCode}". It may have been removed, or the code might be incorrect.`}
       >
-        <div className="mt-8 flex justify-center">
+        <div className="mt-lg flex justify-center">
           <ButtonLink href="/catalogue">Browse the catalogue</ButtonLink>
         </div>
       </PageHeader>
@@ -130,27 +171,15 @@ export default async function PiecePage({ params }: PiecePageProps) {
     .slice(0, 4);
 
   return (
-    <div className="site-container page-y pb-10 lg:pb-20">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(jsonLd)
-            .replace(/</g, '\\u003c')
-            .replace(/>/g, '\\u003e')
-            .replace(/&/g, '\\u0026')
-            .replace(/\//g, '\\u002f'),
-        }}
-      />
-
-      {/* Breadcrumb */}
-      <Breadcrumb
-        items={[
-          { name: 'Home', url: '/' },
-          { name: 'Catalogue', url: '/catalogue' },
-          { name: product.name },
-        ]}
-        className="mb-6"
-      />
+    <DetailPageLayout
+      breadcrumbs={[
+        { name: 'Home', url: '/' },
+        { name: 'Catalogue', url: '/catalogue' },
+        { name: product.name },
+      ]}
+      backLink={{ label: 'Browse all pieces', href: '/catalogue' }}
+    >
+      <JsonLd data={jsonLd} />
 
       {/* Top section: Gallery + Product Info + Maker */}
       <PiecePageClient
@@ -173,11 +202,11 @@ export default async function PiecePage({ params }: PiecePageProps) {
       {/* Related Products. Needs at least two to read as a set — a single card
           in a four-column grid looks like a rendering fault. */}
       {relatedProducts.length > 1 && (
-        <section className="mt-12 pt-10 border-t border-sand">
-          <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-6">
+        <section className="mt-xl pt-block border-t border-sand">
+          <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack">
             {text['provenance.relatedHeading']}
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 tabtop:gap-x-8">
+          <div role="list" aria-label="Related pieces" className={posterGridClasses}>
             {relatedProducts.map((relatedProduct) => {
               const relatedMaker = allMakers.find((m) => m.id === relatedProduct.makerId);
               return (
@@ -191,11 +220,6 @@ export default async function PiecePage({ params }: PiecePageProps) {
           </div>
         </section>
       )}
-
-      {/* Bottom back link — useful for QR-scan users with no browsing history */}
-      <div className="mt-12 pt-8 border-t border-sand text-center">
-        <BackLink href="/catalogue" label="Browse all pieces" />
-      </div>
-    </div>
+    </DetailPageLayout>
   );
 }

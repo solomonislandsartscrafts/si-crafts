@@ -72,16 +72,31 @@ const config: Config = {
         'crest-red': '#C0392B',
 
         // Backgrounds & surfaces
-        // NOTE: cream and page-bg are intentionally set to pure white (#FFFFFF).
-        // The warm "cream" name is retained for semantic clarity in templates
-        // (distinguishes page chrome from card surfaces). Card boundaries are
-        // established via shadow-card and border tokens, not background contrast.
+        // cream / page-bg / card-bg are all pure white (#FFFFFF): the page
+        // canvas and cards share one white base. Card boundaries are carried by
+        // shadow-card and border tokens, and by the bg-sand-light section
+        // bands, not by a page/card colour difference. The warm accent in the
+        // palette comes from the coloured page banners (incl. terracotta), not
+        // from tinting the whole canvas.
         cream: '#FFFFFF',
         'page-bg': '#FFFFFF',
         'card-bg': '#FFFFFF',
-        // Footer — dark background. MUST pair with explicit light text.
-        // Never rely on inherited body color (warm-gray-800) on this background.
-        'footer-bg': '#1B3A4B',
+        // Subtle warm section band — the alternating body-section background.
+        // A barely-there warm off-white (NOT cool grey): it reads as a gentle
+        // change of surface so successive content sections are visually
+        // distinct, without the wireframe/disabled feel that bg-sand-light
+        // (#F0F0F0, a cool grey) gave and without fighting the warm craft
+        // palette. Dark body text on it is effectively unchanged for contrast
+        // (11.7:1 for warm-gray-800). Use via `.section-band` on a `.section-y`
+        // section, alternated with plain white sections — see globals.css.
+        'section-warm': '#FBF7F2',
+        // Footer — the darkest surface on the site, on purpose. It is the same
+        // flag-blue hue as deep-blue (#1B3A4B) taken down in lightness, so it
+        // stays on-brand while reading as a distinct, heavier anchor than the
+        // deep-blue page banners / hero / closing CTA that sit above it. White
+        // text is 14.8:1 — AAA. MUST pair with explicit light text; never rely
+        // on inherited body color (warm-gray-800) on this background.
+        'footer-bg': '#0E2129',
         // Explicit footer text color for use on footer-bg
         'footer-text': '#FFFFFF',
         'footer-muted': '#CBD5DC',  // Lighter secondary text on dark footer
@@ -106,10 +121,26 @@ const config: Config = {
           800: '#3D362E',  // 11.9:1 on white — AAA ✅ (primary body text)
         },
 
-        // NOTE: the legacy aliases `terracotta`, `teal` and `motto-gold` were
-        // removed. They pointed at brand-green / ocean / accent-gold, so class
-        // names like `bg-terracotta` rendered green — the names lied about the
-        // colour. Use the real token names above.
+        // NOTE: the legacy aliases `teal` and `motto-gold` were removed. They
+        // pointed at ocean / accent-gold, so class names like `bg-teal`
+        // rendered blue — the names lied about the colour. Use the real token
+        // names above.
+
+        // =====================================================================
+        // TERRACOTTA — warm earth accent. The third page-banner colour
+        // (alongside deep-blue and brand-green) and the warm counterpart to the
+        // cool ocean/green palette. Reserved for banner bands and warm accents;
+        // it is NOT a general-purpose fill. White heading text only on DEFAULT
+        // or dark — the light shade fails AA for white text.
+        //   terracotta DEFAULT: white text 4.9:1 — AA ✅ (safe for headings)
+        //   terracotta dark:    white text 6.0:1 — hover/active
+        //   terracotta light:   3.2:1 white — decorative / dark-text only
+        // =====================================================================
+        terracotta: {
+          light: '#C97B57',
+          DEFAULT: '#A9522F',  // white text 4.9:1 — AA ✅
+          dark: '#8C4426',     // white text 6.0:1
+        },
 
         // Semantic states
         success: '#1E7A3D',
@@ -143,9 +174,27 @@ const config: Config = {
         '5xl': '3rem',     // 48px — H1 hero / landing pages
       },
       lineHeight: {
-        body: '1.6',   // minimum for body copy — aids readability at 16px
-        heading: '1.2',
-        relaxed: '1.7',
+        // =====================================================================
+        // Line boxes land on the 4px base unit, so a run of text stacks in step
+        // with the spacing scale instead of drifting a fraction of a pixel per
+        // line. Kept unitless (not rem) so a nested larger or smaller element
+        // still scales its own line box.
+        //
+        // Ratios are chosen per the size each token pairs with:
+        //   body     1.75   × 16px (text-base) = 28px  — 7 × base ✅
+        //   body-lg  1.7778 × 18px (text-lg)   = 32px  — 8 × base ✅
+        //   heading  1.3333 × any multiple of 3px:
+        //                     18 → 24, 24 → 32, 30 → 40, 36 → 48, 48 → 64 ✅
+        //   title-sm 1.5    × 16px (small card headings) = 24px — 6 × base ✅
+        //
+        // `relaxed` is a deliberate alias of `body`: two near-identical body
+        // leadings is how a page ends up with two competing rhythms.
+        // =====================================================================
+        body: '1.75',
+        'body-lg': '1.7778',
+        relaxed: '1.75',
+        heading: '1.3333',
+        'title-sm': '1.5',
       },
       maxWidth: {
         // The single page-content width. 1440px, wider than Tailwind's
@@ -155,12 +204,42 @@ const config: Config = {
         site: '1440px',
       },
       spacing: {
-        // Page gutters. These exist as tokens so a child can break out of the
-        // container with a matching negative margin (e.g. full-bleed carousels:
-        // `-mx-page-x tabtop:-mx-page-x-lg`). The container itself uses the
-        // .site-px utility in globals.css rather than these classes.
-        'page-x': '20px',
-        'page-x-lg': '70px',
+        // =====================================================================
+        // SPACING SCALE — base unit 4px. Declared as CSS variables in
+        // src/app/globals.css (see the SPACING TOKENS block at the top of that
+        // file for the full rationale); this block only surfaces them as
+        // Tailwind utilities so you can write `p-md`, `gap-lg`, `mb-2xs`.
+        //
+        // Nothing here is a raw length. Change a value in globals.css and every
+        // call site follows.
+        // =====================================================================
+
+        // --- Raw scale ------------------------------------------------------
+        '3xs': 'var(--space-3xs)',  //  4px
+        '2xs': 'var(--space-2xs)',  //  8px
+        xs: 'var(--space-xs)',      // 12px
+        sm: 'var(--space-sm)',      // 16px
+        md: 'var(--space-md)',      // 24px
+        lg: 'var(--space-lg)',      // 32px
+        xl: 'var(--space-xl)',      // 48px
+        '2xl': 'var(--space-2xl)',  // 64px
+        '3xl': 'var(--space-3xl)',  // 96px
+
+        // --- Semantic layer -------------------------------------------------
+        // These are RESPONSIVE ON THEIR OWN: the variable re-points at a
+        // different rung of the scale at 920px / 1024px. So `pb-section` is a
+        // complete responsive declaration and replaces `pb-10 lg:pb-20`. Do not
+        // pair them with a breakpoint prefix — that defeats the point and
+        // reintroduces the per-call-site drift they exist to prevent.
+        gutter: 'var(--gutter)',      // 16 → 48  page side gutters
+        page: 'var(--page-y)',        // 24 → 32  whole-page top/bottom padding
+        section: 'var(--section-y)',  // 48 → 96  between major sections
+        block: 'var(--block-y)',      // 32 → 64  between blocks in a section
+        stack: 'var(--stack-y)',      // 24 → 32  section heading → its content
+        grid: 'var(--grid-gap)',      // 16 → 24  card grid gutters — the
+                                      // smallest structural gap, deliberately a
+                                      // rung below `stack` so a grid reads as
+                                      // one block under its heading
       },
       boxShadow: {
         card: '0 2px 8px rgba(0, 0, 0, 0.06)',
@@ -197,9 +276,20 @@ const config: Config = {
           '0%': { opacity: '0', transform: 'translateY(8px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        // Mobile nav drawer enter slide. A keyframe animation, not a CSS
+        // transition: an animation runs off the element's first paint, so the
+        // drawer can mount already in its OPEN position and still animate. A
+        // transition would need a second render to flip the class, and that
+        // second frame being dropped or coalesced on a phone is exactly how
+        // this drawer used to end up stranded off-screen.
+        'slide-in-right': {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
       },
       animation: {
         'slide-up': 'slide-up 0.25s ease-out',
+        'slide-in-right': 'slide-in-right 0.3s ease-out',
         marquee: 'marquee 20s linear infinite',
         'ken-burns': 'ken-burns 6s ease-out forwards',
         'progress-fill': 'progress-fill 5s linear forwards',

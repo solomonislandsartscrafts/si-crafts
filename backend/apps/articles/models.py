@@ -18,6 +18,11 @@ class ArticlePage(Page):
     """A news/blog article."""
 
     excerpt = models.TextField(max_length=500, blank=True)
+    standfirst = models.TextField(
+        max_length=500,
+        blank=True,
+        help_text="Editorial dek shown between the headline and byline on the article page.",
+    )
     body = RichTextField()
     cover_image = models.ForeignKey(
         "wagtailimages.Image",
@@ -39,6 +44,7 @@ class ArticlePage(Page):
 
     content_panels = Page.content_panels + [
         FieldPanel("excerpt"),
+        FieldPanel("standfirst"),
         FieldPanel("body"),
         FieldPanel("cover_image"),
         FieldPanel("author_name"),
@@ -54,6 +60,7 @@ class ArticlePage(Page):
 
     api_fields = [
         APIField("excerpt"),
+        APIField("standfirst"),
         APIField("body"),
         APIField("author_name"),
         APIField("author_role"),

@@ -90,7 +90,7 @@ export default function AdminCategoriesPage() {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="max-w-3xl py-8">
+        <div className="max-w-3xl py-lg">
           <SkeletonText lines={6} />
         </div>
       </AdminLayout>
@@ -100,27 +100,27 @@ export default function AdminCategoriesPage() {
   return (
     <AdminLayout>
       <div className="max-w-3xl">
-        <h1 className={`${pageTitleClasses} mb-2`}>
+        <h1 className={`${pageTitleClasses} mb-2xs`}>
           Categories & Types
         </h1>
-        <p className="text-base text-warm-gray-600 mb-8">
+        <p className="text-base text-warm-gray-600 mb-lg">
           Manage material categories and product types. These appear in dropdown menus across the admin panel and catalogue filters.
         </p>
 
         {/* Material Categories */}
-        <section className="mb-12">
-          <h2 className="font-heading text-lg font-semibold text-deep-blue mb-4">
+        <section className="mb-block">
+          <h2 className="font-heading text-lg font-semibold text-deep-blue mb-sm">
             Material Categories
           </h2>
-          <p className="text-base text-warm-gray-600 mb-4">
+          <p className="text-base text-warm-gray-600 mb-sm">
             Each category has a code initial used in product codes (e.g. P for Pandanus → P-J-1).
           </p>
 
           {/* Existing categories */}
-          <div className="space-y-2 mb-4">
+          <div className="space-y-2xs mb-sm">
             {materialCategories.map((cat) => (
-              <div key={cat.value} className="flex items-center justify-between px-4 py-3 bg-white border border-sand rounded-lg">
-                <div className="flex items-center gap-3">
+              <div key={cat.value} className="flex items-center justify-between px-sm py-xs bg-white border border-sand rounded-lg">
+                <div className="flex items-center gap-xs">
                   <span className="w-8 h-8 flex items-center justify-center bg-ocean/10 text-ocean font-mono font-bold text-sm rounded">
                     {cat.codeInitial}
                   </span>
@@ -131,7 +131,7 @@ export default function AdminCategoriesPage() {
                 </div>
                 <button
                   onClick={() => handleDeleteCategory(cat.value, cat.label)}
-                  className="tap-target p-2 text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-error rounded"
+                  className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error rounded"
                   aria-label={`Delete ${cat.label}`}
                 >
                   <Trash2 className="w-4 h-4" />
@@ -141,7 +141,7 @@ export default function AdminCategoriesPage() {
           </div>
 
           {/* Add new category */}
-          <div className="flex flex-wrap items-end gap-3 p-4 bg-sand-light rounded-lg">
+          <div className="flex flex-wrap items-end gap-xs p-sm bg-sand-light rounded-lg">
             <FormField label="Category Name" htmlFor="new-cat-label" className="flex-1 min-w-[140px]">
               <input
                 type="text"
@@ -166,29 +166,29 @@ export default function AdminCategoriesPage() {
               Add
             </Button>
           </div>
-          {catError && <p className="text-sm text-error mt-2">{catError}</p>}
+          {catError && <p className="text-sm text-error mt-2xs">{catError}</p>}
         </section>
 
         {/* Product Types */}
         <section>
-          <h2 className="font-heading text-lg font-semibold text-deep-blue mb-4">
+          <h2 className="font-heading text-lg font-semibold text-deep-blue mb-sm">
             Product Types
           </h2>
-          <p className="text-base text-warm-gray-600 mb-4">
+          <p className="text-base text-warm-gray-600 mb-sm">
             Types of products that can be assigned in the product form.
           </p>
 
           {/* Existing types */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2xs mb-sm">
             {productTypes.map((type) => (
-              <div key={type.value} className="flex items-center justify-between px-4 py-2.5 bg-white border border-sand rounded-lg">
+              <div key={type.value} className="flex items-center justify-between px-sm py-xs bg-white border border-sand rounded-lg">
                 <div>
                   <p className="text-sm font-medium text-warm-gray-800">{type.label}</p>
                   <p className="text-xs text-warm-gray-400">{type.value}</p>
                 </div>
                 <button
                   onClick={() => handleDeleteType(type.value, type.label)}
-                  className="tap-target p-2 text-warm-gray-400 hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-error rounded"
+                  className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error rounded"
                   aria-label={`Delete ${type.label}`}
                 >
                   <Trash2 className="w-4 h-4" />
@@ -198,7 +198,7 @@ export default function AdminCategoriesPage() {
           </div>
 
           {/* Add new type */}
-          <div className="flex items-end gap-3 p-4 bg-sand-light rounded-lg">
+          <div className="flex items-end gap-xs p-sm bg-sand-light rounded-lg">
             <FormField label="Type Name" htmlFor="new-type-label" className="flex-1">
               <input
                 type="text"
@@ -213,7 +213,7 @@ export default function AdminCategoriesPage() {
               Add
             </Button>
           </div>
-          {typeError && <p className="text-sm text-error mt-2">{typeError}</p>}
+          {typeError && <p className="text-sm text-error mt-2xs">{typeError}</p>}
         </section>
       </div>
     </AdminLayout>

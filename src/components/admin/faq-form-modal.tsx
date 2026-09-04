@@ -77,7 +77,7 @@ export function FaqFormModal({ faq, onClose, onSave }: FaqFormModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-blue/50" onClick={handleDismiss}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-sm bg-deep-blue/50" onClick={handleDismiss}>
       <div
         ref={modalRef}
         className="bg-white rounded-lg shadow-md w-full max-w-lg max-h-[90vh] overflow-y-auto"
@@ -87,13 +87,13 @@ export function FaqFormModal({ faq, onClose, onSave }: FaqFormModalProps) {
         aria-labelledby="faq-form-title"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-sand">
+        <div className="flex items-center justify-between px-md py-sm border-b border-sand">
           <h2 id="faq-form-title" className="font-heading text-lg font-semibold text-deep-blue">
             {faq ? 'Edit FAQ' : 'Add FAQ'}
           </h2>
           <button
             onClick={handleDismiss}
-            className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean rounded"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean rounded"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -101,9 +101,9 @@ export function FaqFormModal({ faq, onClose, onSave }: FaqFormModalProps) {
         </div>
 
         {/* Form */}
-        <form ref={formRef} onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="px-md py-sm space-y-sm">
           {saveError && (
-            <p className="text-base text-error bg-error/10 px-3 py-2 rounded" role="alert" aria-live="assertive">
+            <p className="text-base text-error bg-error/10 px-xs py-2xs rounded" role="alert" aria-live="assertive">
               {saveError}
             </p>
           )}
@@ -135,7 +135,7 @@ export function FaqFormModal({ faq, onClose, onSave }: FaqFormModalProps) {
                 placeholder="Write the answer in plain language..."
               />
             </FormField>
-            <p className="text-xs text-warm-gray-400 mt-1">
+            <p className="text-xs text-warm-gray-400 mt-3xs">
               Plain text. Start a new line to create a new paragraph.
             </p>
           </div>
@@ -151,11 +151,11 @@ export function FaqFormModal({ faq, onClose, onSave }: FaqFormModalProps) {
                 className={`${inputClasses} max-w-24`}
               />
             </FormField>
-            <p className="text-xs text-warm-gray-400 mt-1">Lower numbers appear first on the page.</p>
+            <p className="text-xs text-warm-gray-400 mt-3xs">Lower numbers appear first on the page.</p>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
+          <div className="flex items-center justify-end gap-xs pt-sm border-t border-sand">
             <Button variant="secondary" onClick={handleDismiss} disabled={saving}>
               Cancel
             </Button>

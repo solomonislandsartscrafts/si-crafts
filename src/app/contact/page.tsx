@@ -29,51 +29,56 @@ export default async function ContactPage() {
 
   return (
     <div>
-      <PageHeader title={text['contact.title']} intro={siteContent.contactIntro} />
+      <PageHeader
+        banner="blue"
+        eyebrow="Get in touch"
+        title={text['contact.title']}
+        intro={siteContent.contactIntro}
+      />
 
-      <div className="site-container pb-10 lg:pb-20 grid grid-cols-1 md:grid-cols-2 gap-10">
+      <div className="site-container pb-section grid grid-cols-1 lg:grid-cols-2 gap-block">
         <ContactForm
           successHeading={text['contact.successHeading']}
           successBody={text['contact.successBody']}
         />
 
         {/* Contact info */}
-        <div className="space-y-8">
+        <div className="space-y-lg">
           <div>
-            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-3">
+            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-2xs">
               {text['contact.emailHeading']}
             </h2>
             {email && (
               <a
                 href={`mailto:${email}`}
-                className="inline-flex items-center gap-2 text-ocean hover:text-ocean-dark transition-colors"
+                className="inline-flex items-center gap-2xs text-ocean hover:text-ocean-dark transition-colors"
               >
                 <Mail className="w-5 h-5" aria-hidden="true" />
                 {email}
               </a>
             )}
             {text['contact.abn'] && (
-              <p className="text-sm text-warm-gray-400 mt-2">{text['contact.abn']}</p>
+              <p className="text-sm text-warm-gray-400 mt-2xs">{text['contact.abn']}</p>
             )}
           </div>
 
           {blocks.map((block) => (
             <div key={block.n}>
               {block.heading && (
-                <h3 className="font-heading text-lg font-semibold text-deep-blue mb-2">
+                <h3 className="font-heading text-lg font-semibold text-deep-blue mb-2xs">
                   {block.heading}
                 </h3>
               )}
               <CmsText
                 value={block.body}
-                className="space-y-3"
+                className="space-y-xs"
                 paragraphClassName="text-base text-warm-gray-600"
               />
             </div>
           ))}
 
           {siteContent.contactResponseTime && (
-            <div className="bg-sand-light rounded-lg p-6">
+            <div className="bg-sand-light rounded-lg p-md">
               <p className="text-base text-warm-gray-600">{siteContent.contactResponseTime}</p>
             </div>
           )}

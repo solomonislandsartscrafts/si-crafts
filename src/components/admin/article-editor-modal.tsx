@@ -35,6 +35,7 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
     title: article?.title ?? '',
     slug: article?.slug ?? '',
     excerpt: article?.excerpt ?? '',
+    standfirst: article?.standfirst ?? '',
     content: article?.content ?? '',
     coverImageUrl: article?.coverImageUrl ?? '',
     coverImageAlt: article?.coverImageAlt ?? '',
@@ -99,6 +100,7 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
         title: form.title,
         slug: form.slug,
         excerpt: form.excerpt,
+        standfirst: form.standfirst,
         content: form.content,
         coverImageUrl: form.coverImageUrl || null,
         coverImageAlt: form.coverImageAlt || '',
@@ -122,24 +124,24 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-deep-blue/50 overflow-y-auto" onClick={handleDismiss}>
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-sm bg-deep-blue/50 overflow-y-auto" onClick={handleDismiss}>
       <div
         ref={modalRef}
-        className="bg-white rounded-lg shadow-md w-full max-w-4xl my-8"
+        className="bg-white rounded-lg shadow-md w-full max-w-4xl my-lg"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="article-editor-title"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-sand">
+        <div className="flex items-center justify-between px-md py-sm border-b border-sand">
           <h2 id="article-editor-title" className="font-heading text-xl font-medium text-deep-blue">
             {article ? 'Edit Article' : 'New Article'}
           </h2>
           <button
             onClick={handleDismiss}
             disabled={saving}
-            className="tap-target p-2 text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ocean disabled:opacity-50"
+            className="tap-target p-2xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean disabled:opacity-50"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -147,9 +149,9 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
         </div>
 
         {/* Form */}
-        <form ref={formRef} onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
+        <form ref={formRef} onSubmit={handleSubmit} className="px-md py-md space-y-md">
           {saveError && (
-            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert">
+            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-xs" role="alert">
               {saveError}
             </div>
           )}
@@ -168,10 +170,25 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
           {/* Excerpt */}
           <FormField label="Excerpt" htmlFor="article-excerpt">
             <textarea
+              id="article-excerpt"
               value={form.excerpt}
               onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
               rows={2}
               placeholder="Brief summary shown on cards (1-2 sentences)"
+              className={`${inputClasses} resize-y`}
+            />
+          </FormField>
+
+          {/* Standfirst — the dek shown between headline and byline on the
+              article page. Optional; falls back to nothing when blank. */}
+          <FormField label="Standfirst (optional)" htmlFor="article-standfirst">
+            <textarea
+              id="article-standfirst"
+              value={form.standfirst}
+              onChange={(e) => setForm({ ...form, standfirst: e.target.value })}
+              rows={2}
+              maxLength={500}
+              placeholder="A one- or two-sentence intro shown under the headline on the article page. Leave blank to omit."
               className={`${inputClasses} resize-y`}
             />
           </FormField>
@@ -184,6 +201,8 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
             onAltTextChange={(alt) => setForm({ ...form, coverImageAlt: alt })}
             label="Cover Image"
             aspectHint="16:9 landscape"
+            recommendedAspectRatio={16 / 9}
+            recommendedMinWidth={1200}
             maxWidth={1400}
             quality={0.85}
           />
@@ -198,7 +217,7 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
           />
 
           {/* Meta row */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-sm">
             <FormField label="Author" htmlFor="article-author">
               <input
                 type="text"
@@ -237,29 +256,29 @@ export function ArticleEditorModal({ article, onClose, onSave }: ArticleEditorMo
           </div>
 
           {/* Toggles */}
-          <div className="flex items-center gap-6">
-            <label className="flex items-center gap-2 cursor-pointer">
+          <div className="flex items-center gap-md">
+            <label className="flex items-center gap-2xs cursor-pointer">
               <input
                 type="checkbox"
                 checked={form.published}
                 onChange={(e) => setForm({ ...form, published: e.target.checked })}
-                className="w-4 h-4 rounded border-sand-dark text-ocean focus:ring-ocean"
+                className="w-4 h-4 rounded border-sand-dark text-ocean focus-visible:ring-ocean"
               />
               <span className="text-base text-warm-gray-800">Published</span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex items-center gap-2xs cursor-pointer">
               <input
                 type="checkbox"
                 checked={form.featured}
                 onChange={(e) => setForm({ ...form, featured: e.target.checked })}
-                className="w-4 h-4 rounded border-sand-dark text-ocean focus:ring-ocean"
+                className="w-4 h-4 rounded border-sand-dark text-ocean focus-visible:ring-ocean"
               />
               <span className="text-base text-warm-gray-800">Featured (hero on news page)</span>
             </label>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand">
+          <div className="flex items-center justify-end gap-xs pt-sm border-t border-sand">
             <Button variant="secondary" onClick={handleDismiss} disabled={saving}>
               Cancel
             </Button>

@@ -40,7 +40,7 @@ export function BackButton({
     <button
       type="button"
       onClick={handleClick}
-      className={`inline-flex items-center gap-1 text-sm text-ocean hover:text-ocean-dark transition-colors ${className}`.trim()}
+      className={`inline-flex items-center gap-3xs text-sm text-ocean hover:text-ocean-dark transition-colors ${className}`.trim()}
     >
       <ArrowLeft className="w-4 h-4" />
       {label}

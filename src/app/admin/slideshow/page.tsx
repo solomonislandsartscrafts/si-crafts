@@ -140,7 +140,7 @@ export default function AdminSlideshowPage() {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="max-w-4xl py-8">
+        <div className="max-w-4xl py-lg">
           <SkeletonText lines={8} />
         </div>
       </AdminLayout>
@@ -151,10 +151,10 @@ export default function AdminSlideshowPage() {
     <AdminLayout>
       <div className="max-w-4xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-md">
           <div>
             <h1 className={pageTitleClasses}>Homepage Slideshow</h1>
-            <p className="text-base text-warm-gray-600 mt-1">
+            <p className="text-base text-warm-gray-600 mt-3xs">
               Control which categories and items appear in the homepage hero slideshow.
             </p>
           </div>
@@ -165,12 +165,12 @@ export default function AdminSlideshowPage() {
         </div>
 
         {/* Category toggles */}
-        <section className="border border-sand rounded-lg p-6 mb-6">
-          <h2 className="font-heading text-lg font-semibold text-deep-blue mb-1">Category Toggles</h2>
-          <p className="text-base text-warm-gray-400 mb-4">
+        <section className="border border-sand rounded-lg p-md mb-md">
+          <h2 className="font-heading text-lg font-semibold text-deep-blue mb-3xs">Category Toggles</h2>
+          <p className="text-base text-warm-gray-400 mb-sm">
             Enable or disable entire categories. Disabled categories won&apos;t appear in the slideshow at all.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-sm">
             {(Object.keys(CATEGORY_META) as SlideCategory[]).map((cat) => {
               const meta = CATEGORY_META[cat];
               const Icon = meta.icon;
@@ -180,7 +180,7 @@ export default function AdminSlideshowPage() {
                   key={cat}
                   onClick={() => toggleCategory(cat)}
                   aria-pressed={enabled}
-                  className={`tap-target flex items-center gap-3 p-4 rounded-lg border-2 transition-colors ${
+                  className={`tap-target flex items-center gap-xs p-sm rounded-lg border-2 transition-colors ${
                     enabled
                       ? 'border-ocean bg-ocean/5'
                       : 'border-sand-dark bg-warm-gray-100 opacity-60'
@@ -288,25 +288,25 @@ interface ItemSectionProps {
 function ItemSection({ title, description, items, isItemEnabled, toggleItem, setItemPosition, getItemPosition }: ItemSectionProps) {
   if (items.length === 0) {
     return (
-      <section className="border border-sand rounded-lg p-6 mb-6">
-        <h2 className="font-heading text-lg font-semibold text-deep-blue mb-1">{title}</h2>
+      <section className="border border-sand rounded-lg p-md mb-md">
+        <h2 className="font-heading text-lg font-semibold text-deep-blue mb-3xs">{title}</h2>
         <p className="text-base text-warm-gray-400">No {title.toLowerCase()} with images available.</p>
       </section>
     );
   }
 
   return (
-    <section className="border border-sand rounded-lg p-6 mb-6">
-      <h2 className="font-heading text-lg font-semibold text-deep-blue mb-1">{title}</h2>
-      <p className="text-base text-warm-gray-400 mb-4">{description}</p>
-      <div className="space-y-2">
+    <section className="border border-sand rounded-lg p-md mb-md">
+      <h2 className="font-heading text-lg font-semibold text-deep-blue mb-3xs">{title}</h2>
+      <p className="text-base text-warm-gray-400 mb-sm">{description}</p>
+      <div className="space-y-2xs">
         {items.map((item) => {
           const enabled = isItemEnabled(item.id, item.kind);
           const position = getItemPosition(item.id, item.kind);
           return (
             <div
               key={item.id}
-              className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
+              className={`flex items-center gap-xs p-xs rounded-lg border transition-colors ${
                 enabled
                   ? 'border-sand bg-white'
                   : 'border-sand-dark bg-warm-gray-100 opacity-50'
@@ -316,7 +316,7 @@ function ItemSection({ title, description, items, isItemEnabled, toggleItem, set
               <button
                 onClick={() => toggleItem(item.id, item.kind)}
                 aria-pressed={enabled}
-                className="tap-target flex items-center gap-3 flex-1 min-w-0 text-left"
+                className="tap-target flex items-center gap-xs flex-1 min-w-0 text-left"
               >
                 {/* Thumbnail */}
                 <div className="w-10 h-10 rounded overflow-hidden bg-sand-light flex-shrink-0 relative">

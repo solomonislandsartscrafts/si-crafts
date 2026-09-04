@@ -227,8 +227,8 @@ export default function StockistAccountPage() {
   return (
     <div className="site-container page-y">
       {/* Welcome + Logout */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-10">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-sm mb-block">
+        <div className="flex items-center gap-sm">
           {/* Profile image */}
           <div className="relative w-16 h-16 rounded-full overflow-hidden bg-sand-light border border-sand shrink-0">
             {profile.profileImageUrl ? (
@@ -243,7 +243,7 @@ export default function StockistAccountPage() {
             <h1 className={pageTitleClasses}>
               Welcome back, {profile.contactName.split(' ')[0]}
             </h1>
-            <p className="text-warm-gray-600 mt-1">{profile.businessName}</p>
+            <p className="text-warm-gray-600 mt-3xs">{profile.businessName}</p>
           </div>
         </div>
         <Button variant="secondary" size="sm" onClick={handleLogout}>
@@ -253,59 +253,59 @@ export default function StockistAccountPage() {
       </div>
 
       {/* Quick actions grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-        <Link href="/stockist/catalogue" className="group block p-6 bg-white rounded-lg shadow-card hover:shadow-md transition-shadow">
-          <Package className="w-6 h-6 text-ocean mb-3" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-sm mb-block">
+        <Link href="/stockist/catalogue" className="group block p-md bg-white rounded-lg shadow-card hover:shadow-md transition-shadow">
+          <Package className="w-6 h-6 text-ocean mb-xs" />
           <h3 className="font-heading font-semibold text-deep-blue group-hover:text-ocean transition-colors">Browse Catalogue</h3>
-          <p className="text-base text-warm-gray-600 mt-1">View products and pricing</p>
+          <p className="text-base text-warm-gray-600 mt-3xs">View products and pricing</p>
         </Link>
 
-        <Link href="/stockist/orders" className="group block p-6 bg-white rounded-lg shadow-card hover:shadow-md transition-shadow relative">
-          <ShoppingCart className="w-6 h-6 text-ocean mb-3" />
+        <Link href="/stockist/orders" className="group block p-md bg-white rounded-lg shadow-card hover:shadow-md transition-shadow relative">
+          <ShoppingCart className="w-6 h-6 text-ocean mb-xs" />
           <h3 className="font-heading font-semibold text-deep-blue group-hover:text-ocean transition-colors">Current Order</h3>
-          <p className="text-base text-warm-gray-600 mt-1">
+          <p className="text-base text-warm-gray-600 mt-3xs">
             {cartCount > 0 ? `${cartCount} item${cartCount > 1 ? 's' : ''} in order` : 'Start an order'}
           </p>
           {cartCount > 0 && (
-            <span className="absolute top-4 right-4 min-w-[20px] h-[20px] flex items-center justify-center bg-brand-green text-white text-xs font-bold rounded-full px-1">
+            <span className="absolute top-4 right-4 min-w-[20px] h-[20px] flex items-center justify-center bg-brand-green text-white text-xs font-bold rounded-full px-3xs">
               {cartCount}
             </span>
           )}
         </Link>
 
-        <Link href="/stockist/order-history" className="group block p-6 bg-white rounded-lg shadow-card hover:shadow-md transition-shadow">
-          <ClipboardList className="w-6 h-6 text-ocean mb-3" />
+        <Link href="/stockist/order-history" className="group block p-md bg-white rounded-lg shadow-card hover:shadow-md transition-shadow">
+          <ClipboardList className="w-6 h-6 text-ocean mb-xs" />
           <h3 className="font-heading font-semibold text-deep-blue group-hover:text-ocean transition-colors">Order History</h3>
-          <p className="text-base text-warm-gray-600 mt-1">View past orders and status</p>
+          <p className="text-base text-warm-gray-600 mt-3xs">View past orders and status</p>
         </Link>
 
-        <Link href="/stockist/requests" className="group block p-6 bg-white rounded-lg shadow-card hover:shadow-md transition-shadow">
-          <MessageSquare className="w-6 h-6 text-ocean mb-3" />
+        <Link href="/stockist/requests" className="group block p-md bg-white rounded-lg shadow-card hover:shadow-md transition-shadow">
+          <MessageSquare className="w-6 h-6 text-ocean mb-xs" />
           <h3 className="font-heading font-semibold text-deep-blue group-hover:text-ocean transition-colors">Requests</h3>
-          <p className="text-base text-warm-gray-600 mt-1">Custom orders and tags</p>
+          <p className="text-base text-warm-gray-600 mt-3xs">Custom orders and tags</p>
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-grid">
         {/* Profile Details (2 cols) */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-lg">
           {/* Edit Profile Form */}
-          <div className="bg-white rounded-lg shadow-card p-6">
-            <h2 className="font-heading text-lg font-medium text-deep-blue mb-4">Profile Details</h2>
+          <div className="bg-white rounded-lg shadow-card p-md">
+            <h2 className="font-heading text-lg font-medium text-deep-blue mb-sm">Profile Details</h2>
 
             {saveSuccess && (
-              <div className="mb-4 bg-success/10 border border-success/20 text-success text-base rounded-md p-3" role="status">
+              <div className="mb-sm bg-success/10 border border-success/20 text-success text-base rounded-md p-xs" role="status">
                 Profile updated successfully.
               </div>
             )}
             {saveError && (
-              <div className="mb-4 bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert">
+              <div className="mb-sm bg-error/10 border border-error/20 text-error text-base rounded-md p-xs" role="alert">
                 {saveError}
               </div>
             )}
 
-            <form onSubmit={handleSaveProfile} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={handleSaveProfile} className="space-y-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
                 <FormField label="Contact Name" htmlFor="contactName">
                   <input
                     id="contactName"
@@ -326,7 +326,7 @@ export default function StockistAccountPage() {
                 </FormField>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
                 <FormField label="Phone" htmlFor="phone">
                   <input
                     id="phone"
@@ -357,7 +357,7 @@ export default function StockistAccountPage() {
                     className={inputClasses}
                   />
                 </FormField>
-                <p className="text-xs text-warm-gray-400 mt-1">Email cannot be changed. Contact us if needed.</p>
+                <p className="text-xs text-warm-gray-400 mt-3xs">Email cannot be changed. Contact us if needed.</p>
               </div>
 
               <Button type="submit" size="sm" loading={saving} loadingText="Saving...">
@@ -368,24 +368,24 @@ export default function StockistAccountPage() {
           </div>
 
           {/* Change Password */}
-          <div className="bg-white rounded-lg shadow-card p-6">
-            <h2 className="font-heading text-lg font-medium text-deep-blue mb-4 flex items-center gap-2">
+          <div className="bg-white rounded-lg shadow-card p-md">
+            <h2 className="font-heading text-lg font-medium text-deep-blue mb-sm flex items-center gap-2xs">
               <Lock className="w-5 h-5 text-ocean" />
               Change Password
             </h2>
 
             {passwordSuccess && (
-              <div className="mb-4 bg-success/10 border border-success/20 text-success text-base rounded-md p-3" role="status">
+              <div className="mb-sm bg-success/10 border border-success/20 text-success text-base rounded-md p-xs" role="status">
                 Password changed successfully.
               </div>
             )}
             {passwordError && (
-              <div className="mb-4 bg-error/10 border border-error/20 text-error text-base rounded-md p-3" role="alert">
+              <div className="mb-sm bg-error/10 border border-error/20 text-error text-base rounded-md p-xs" role="alert">
                 {passwordError}
               </div>
             )}
 
-            <form onSubmit={handleChangePassword} className="space-y-4">
+            <form onSubmit={handleChangePassword} className="space-y-sm">
               <FormField label="Current Password" htmlFor="currentPassword">
                 <input
                   id="currentPassword"
@@ -395,7 +395,7 @@ export default function StockistAccountPage() {
                   className={inputClasses}
                 />
               </FormField>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
                 <FormField label="New Password" htmlFor="newPassword">
                   <input
                     id="newPassword"
@@ -433,11 +433,11 @@ export default function StockistAccountPage() {
 
         {/* Profile Image (1 col) */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-card p-6">
-            <h2 className="font-heading text-lg font-medium text-deep-blue mb-4">Profile Photo</h2>
+          <div className="bg-white rounded-lg shadow-card p-md">
+            <h2 className="font-heading text-lg font-medium text-deep-blue mb-sm">Profile Photo</h2>
 
             <div className="flex flex-col items-center">
-              <div className="relative w-32 h-32 rounded-full overflow-hidden bg-sand-light border-2 border-sand mb-4">
+              <div className="relative w-32 h-32 rounded-full overflow-hidden bg-sand-light border-2 border-sand mb-sm">
                 {profile.profileImageUrl ? (
                   <Image src={profile.profileImageUrl} alt={profile.contactName} fill className="object-cover" sizes="128px" />
                 ) : (
@@ -467,7 +467,7 @@ export default function StockistAccountPage() {
                 aria-label="Upload profile photo"
               />
 
-              <p className="text-xs text-warm-gray-400 mt-3 text-center">
+              <p className="text-xs text-warm-gray-400 mt-xs text-center">
                 Square photo recommended. Max 10 MB.
               </p>
             </div>
