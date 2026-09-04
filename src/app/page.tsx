@@ -311,6 +311,12 @@ export default async function HomePage() {
 
       </div>
 
+      {/* Supporters — sits directly below the cover (the hero opening block),
+          so a first-time visitor sees who backs SIAC right after the hero.
+          Renders `null` when there are no supporters, in which case the page
+          moves straight to the featured products. */}
+      <SponsorBanner />
+
       {/* Featured Products — the warm band, so the first move below the white
           hero is a change of surface. Sits above Meet the makers now, so the
           page alternates hero (white) → Products (warm) → Makers (white) →
@@ -466,12 +472,6 @@ export default async function HomePage() {
           </div>
         </section>
       )}
-
-      {/* Supporters — sits at the bottom of the page, directly above the footer,
-          where a credit belongs alongside the footer's other institutional
-          detail. Renders `null` when there are no supporters, in which case the
-          page simply ends on the news section. */}
-      <SponsorBanner />
 
     </div>
   );
