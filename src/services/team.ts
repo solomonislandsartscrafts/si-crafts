@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch, apiDelete, getAdminToken, ApiError } from '@/lib/api-client';
+import { apiGet, apiPost, apiPatch, apiDelete, getAdminToken } from '@/lib/api-client';
 import type { TeamMember } from '@/types';
 
 interface ApiTeamMember {
@@ -29,8 +29,15 @@ function mapTeamMember(raw: ApiTeamMember): TeamMember {
   };
 }
 
-// --- Default seed data ---
-
+/**
+ * Render-only fallback for the public "Our Team" section.
+ *
+ * The backend (seeded via a data migration) is the source of truth. These
+ * defaults are shown ONLY when the backend cannot be reached, so the About page
+ * still renders something instead of an empty state. They are never persisted
+ * and never overwrite backend data — editing the team is done in the admin,
+ * which writes straight to the backend.
+ */
 const DEFAULT_TEAM: TeamMember[] = [
   {
     id: '1',
@@ -70,184 +77,82 @@ const DEFAULT_TEAM: TeamMember[] = [
   },
 ];
 
-// --- Local storage helpers (client-side persistence until backend is connected) ---
+// --- Public reads ---
 
-/** Returns true for errors that should trigger local storage fallback.
- * During mock-data phase, all backend errors fall back locally since
- * the team data is managed via localStorage until the backend auth is aligned.
+/**
+ * All team members, ordered by sortOrder.
+ *
+ * The backend is the source of truth. If it is unreachable, this falls back to
+ * DEFAULT_TEAM purely so the public page can still render — that fallback is
+ * never written anywhere. There is deliberately NO localStorage cache: it was
+ * the cause of admin edits appearing to save on one machine and reverting
+ * everywhere else, because writes that failed silently landed in one browser
+ * only.
  */
-function shouldFallbackLocally(err: unknown): boolean {
-  if (err instanceof ApiError) {
-    // Any backend error: auth mismatch, 404, 500 — use local data
-    return true;
-  }
-  return true; // Non-ApiError (e.g. TypeError from fetch) = network issue
-}
-
-const STORAGE_KEY = 'siac_team_members';
-
-function getLocalTeam(): TeamMember[] | null {
-  if (typeof window === 'undefined') return null;
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) return null;
-  try {
-    const parsed = JSON.parse(stored);
-    if (!Array.isArray(parsed)) {
-      localStorage.removeItem(STORAGE_KEY);
-      return null;
-    }
-    // Validate each entry has required TeamMember fields
-    const valid = parsed.every(
-      (item: unknown) =>
-        typeof item === 'object' &&
-        item !== null &&
-        typeof (item as Record<string, unknown>).id === 'string' &&
-        typeof (item as Record<string, unknown>).name === 'string' &&
-        typeof (item as Record<string, unknown>).sortOrder === 'number'
-    );
-    if (!valid) {
-      localStorage.removeItem(STORAGE_KEY);
-      return null;
-    }
-    return parsed as TeamMember[];
-  } catch {
-    localStorage.removeItem(STORAGE_KEY);
-    return null;
-  }
-}
-
-function saveLocalTeam(members: TeamMember[]): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(members));
-}
-
-function nextId(members: TeamMember[]): string {
-  const maxId = members.reduce((max, m) => Math.max(max, parseInt(m.id, 10) || 0), 0);
-  return String(maxId + 1);
-}
-
-// --- Public ---
-
 export async function getTeamMembers(): Promise<TeamMember[]> {
-  // Try real API first
   try {
     const data = await apiGet<ApiTeamMember[] | { results: ApiTeamMember[] }>('/api/team/');
     const list = Array.isArray(data) ? data : (data?.results ?? []);
-    if (list.length > 0) return list.map(mapTeamMember);
-  } catch (err) {
-    if (!shouldFallbackLocally(err)) throw err;
-    // API unavailable — use local data
+    return list.map(mapTeamMember).sort((a, b) => a.sortOrder - b.sortOrder);
+  } catch {
+    // Backend unreachable — render the defaults so the page isn't empty.
+    return DEFAULT_TEAM;
   }
-
-  // Use locally persisted data (admin edits) or default seed
-  const local = getLocalTeam();
-  if (local) return local.sort((a, b) => a.sortOrder - b.sortOrder);
-
-  return DEFAULT_TEAM;
 }
 
 export async function getTeamMemberById(id: string): Promise<TeamMember | null> {
   try {
     const raw = await apiGet<ApiTeamMember>(`/api/team/${id}/`);
     return mapTeamMember(raw);
-  } catch (err) {
-    if (!shouldFallbackLocally(err)) throw err;
-    // Fall back to local
-    const members = getLocalTeam() ?? DEFAULT_TEAM;
-    return members.find((m) => m.id === id) ?? null;
+  } catch {
+    return DEFAULT_TEAM.find((m) => m.id === id) ?? null;
   }
 }
 
 // --- Admin CRUD ---
+//
+// These write straight to the backend and throw on failure. They must NOT fall
+// back to localStorage: a silent local save is exactly the bug this service had
+// — the admin saw "saved", but the change never reached the database, so it was
+// invisible on every other machine and reverted on the next load. Throwing lets
+// useAdminCrud surface a real error to the admin instead.
 
 export async function createTeamMember(
   data: Omit<TeamMember, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<TeamMember> {
-  // Try API first
-  try {
-    const token = getAdminToken();
-    const raw = await apiPost<ApiTeamMember>('/api/team/', {
-      name: data.name,
-      location: data.location ?? '',
-      bio: data.bio ?? '',
-      photo_url: data.photoUrl ?? '',
-      photo_alt: data.photoAlt ?? '',
-      photo_position: data.photoPosition ?? '',
-      sort_order: data.sortOrder,
-    }, token);
-    return mapTeamMember(raw);
-  } catch (err) {
-    if (!shouldFallbackLocally(err)) throw err;
-    // Backend unavailable — persist locally
-    const members = getLocalTeam() ?? [...DEFAULT_TEAM];
-    const now = new Date().toISOString();
-    const newMember: TeamMember = {
-      id: nextId(members),
-      name: data.name,
-      location: data.location,
-      bio: data.bio,
-      photoUrl: data.photoUrl,
-      photoAlt: data.photoAlt,
-      photoPosition: data.photoPosition,
-      sortOrder: data.sortOrder,
-      createdAt: now,
-      updatedAt: now,
-    };
-    members.push(newMember);
-    saveLocalTeam(members);
-    return newMember;
-  }
+  const token = getAdminToken();
+  const raw = await apiPost<ApiTeamMember>('/api/team/', {
+    name: data.name,
+    location: data.location ?? '',
+    bio: data.bio ?? '',
+    photo_url: data.photoUrl ?? '',
+    photo_alt: data.photoAlt ?? '',
+    photo_position: data.photoPosition ?? '',
+    sort_order: data.sortOrder,
+  }, token);
+  return mapTeamMember(raw);
 }
 
 export async function updateTeamMember(
   id: string,
   data: Partial<Omit<TeamMember, 'id' | 'createdAt' | 'updatedAt'>>
 ): Promise<TeamMember> {
-  // Try API first
-  try {
-    const token = getAdminToken();
-    const body: Record<string, unknown> = {};
-    if (data.name !== undefined) body.name = data.name;
-    if (data.location !== undefined) body.location = data.location ?? '';
-    if (data.bio !== undefined) body.bio = data.bio ?? '';
-    if (data.photoUrl !== undefined) body.photo_url = data.photoUrl ?? '';
-    if (data.photoAlt !== undefined) body.photo_alt = data.photoAlt ?? '';
-    if (data.photoPosition !== undefined) body.photo_position = data.photoPosition ?? '';
-    if (data.sortOrder !== undefined) body.sort_order = data.sortOrder;
+  const token = getAdminToken();
+  const body: Record<string, unknown> = {};
+  if (data.name !== undefined) body.name = data.name;
+  if (data.location !== undefined) body.location = data.location ?? '';
+  if (data.bio !== undefined) body.bio = data.bio ?? '';
+  if (data.photoUrl !== undefined) body.photo_url = data.photoUrl ?? '';
+  if (data.photoAlt !== undefined) body.photo_alt = data.photoAlt ?? '';
+  if (data.photoPosition !== undefined) body.photo_position = data.photoPosition ?? '';
+  if (data.sortOrder !== undefined) body.sort_order = data.sortOrder;
 
-    const raw = await apiPatch<ApiTeamMember>(`/api/team/${id}/`, body, token);
-    return mapTeamMember(raw);
-  } catch (err) {
-    if (!shouldFallbackLocally(err)) throw err;
-    // Backend unavailable — persist locally
-    const members = getLocalTeam() ?? [...DEFAULT_TEAM];
-    const index = members.findIndex((m) => m.id === id);
-    if (index === -1) throw new Error('Team member not found');
-
-    const updated: TeamMember = {
-      ...members[index],
-      ...data,
-      updatedAt: new Date().toISOString(),
-    };
-    members[index] = updated;
-    saveLocalTeam(members);
-    return updated;
-  }
+  const raw = await apiPatch<ApiTeamMember>(`/api/team/${id}/`, body, token);
+  return mapTeamMember(raw);
 }
 
 export async function deleteTeamMember(id: string): Promise<boolean> {
-  // Try API first
-  try {
-    const token = getAdminToken();
-    await apiDelete(`/api/team/${id}/`, token);
-    return true;
-  } catch (err) {
-    if (!shouldFallbackLocally(err)) throw err;
-    // Backend unavailable — persist locally
-    const members = getLocalTeam() ?? [...DEFAULT_TEAM];
-    const filtered = members.filter((m) => m.id !== id);
-    if (filtered.length === members.length) return false;
-    saveLocalTeam(filtered);
-    return true;
-  }
+  const token = getAdminToken();
+  await apiDelete(`/api/team/${id}/`, token);
+  return true;
 }
