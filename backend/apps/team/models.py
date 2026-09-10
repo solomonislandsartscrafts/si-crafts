@@ -9,6 +9,7 @@ class TeamMember(models.Model):
     bio = models.TextField(blank=True, default="")
     photo_url = models.CharField(max_length=500, blank=True, default="")
     photo_alt = models.CharField(max_length=300, blank=True, default="")
+    photo_position = models.CharField(max_length=100, blank=True, default="")
     sort_order = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -12,6 +12,7 @@ class TeamMemberSerializer(serializers.ModelSerializer):
             "bio",
             "photo_url",
             "photo_alt",
+            "photo_position",
             "sort_order",
             "created_at",
             "updated_at",
