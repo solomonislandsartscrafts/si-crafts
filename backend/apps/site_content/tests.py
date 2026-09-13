@@ -3,6 +3,8 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from django.contrib.auth import get_user_model
 
+from apps.accounts.models import AdminProfile
+
 from .models import SiteContent
 
 User = get_user_model()
@@ -18,6 +20,10 @@ class SiteContentMaxLengthValidationTest(TestCase):
             password="testpass123",
             is_staff=True,
         )
+        # SiteContentView uses IsAdminOrReadOnly, which requires an active
+        # AdminProfile for writes — is_staff alone is rejected with 403, so
+        # without this the request never reaches serializer validation.
+        AdminProfile.objects.create(user=self.user, role="super_admin", is_active=True)
         self.client.force_authenticate(user=self.user)
         # Ensure the singleton exists
         SiteContent.load()

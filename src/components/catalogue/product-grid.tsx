@@ -21,6 +21,7 @@ export function ProductGrid({ products, makers, showPrice = false }: ProductGrid
             key={product.id}
             product={product}
             makerName={maker?.name}
+            makerLocation={maker?.province}
             showPrice={showPrice}
           />
         );

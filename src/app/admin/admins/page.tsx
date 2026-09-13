@@ -12,6 +12,7 @@ import { FormField, inputClasses } from '@/components/ui/form-field';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Skeleton, SkeletonRegion } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast';
+import { useModalA11y } from '@/lib/use-modal-a11y';
 
 /** Row-shaped placeholder while the admin table loads. */
 function TableSkeleton() {
@@ -175,6 +176,12 @@ function AddAdminModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
+  // Shared modal a11y: focus trap, Escape to close, body-scroll lock, and
+  // focus restored to the trigger on close. Matches every other admin modal.
+  // Escape is ignored while a create request is in flight, so a mis-tap does
+  // not discard an in-progress submission.
+  const modalRef = useModalA11y(true, () => { if (!saving) onClose(); });
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !password.trim()) {
@@ -216,6 +223,7 @@ function AddAdminModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-sm bg-deep-blue/50" onClick={onClose}>
       <div
+        ref={modalRef}
         className="bg-white rounded-lg shadow-md w-full max-w-md"
         onClick={(e) => e.stopPropagation()}
         role="dialog"

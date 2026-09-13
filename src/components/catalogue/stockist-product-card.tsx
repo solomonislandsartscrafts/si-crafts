@@ -54,13 +54,16 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
   const noteFieldId = `note-${product.id}`;
 
   return (
-    <div role="listitem" className="flex h-full flex-col">
-      {/* Shared poster frame — links to the piece page. Same frame, fit, and
-          hover as ProductCard, so the catalogue does not change shape when a
-          stockist logs in. */}
+    // One panel holding image + caption, matching the public PosterCard so the
+    // catalogue does not change shape when a stockist logs in. The panel is a
+    // `div`, not a link, because the caption holds buttons (a button cannot nest
+    // in a link); the image and title are each their own link inside it.
+    <div role="listitem" className="group flex h-full flex-col overflow-hidden rounded-lg bg-card-bg shadow-card transition-all duration-200 hover:-translate-y-1 hover:bg-section-warm hover:shadow-card-hover">
+      {/* Shared poster frame — links to the piece page. `bare` so the panel owns
+          the surface; same frame, fit, and hover as ProductCard. */}
       <Link
         href={`/piece/${product.productCode}`}
-        className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+        className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ocean"
       >
         <PosterFrame
           src={product.imageUrls[0] ?? null}
@@ -68,12 +71,13 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
           fit="contain"
           pill={materialLabel(product.materialCategory)}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+          bare
         />
       </Link>
 
-      {/* Caption below the frame. Kept outside the link above because it holds
-          buttons, and a button cannot be nested inside a link. */}
-      <div className="flex flex-1 flex-col pt-xs">
+      {/* Caption inside the panel. Kept outside the frame link above because it
+          holds buttons, and a button cannot be nested inside a link. */}
+      <div className="flex flex-1 flex-col p-sm">
         {/* The title carries its OWN hover, not the `group-hover:text-ocean`
             baked into `posterTitleClasses`: this caption sits outside the frame's
             link, so it is outside that link's `group`. Same end result — the
@@ -105,7 +109,7 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
             <button
               type="button"
               onClick={() => setShowNotes(true)}
-              className="text-sm text-ocean hover:text-ocean-dark transition-colors duration-200 font-body cursor-pointer"
+              className="focus-ring press-sink rounded-sm text-sm text-ocean hover:text-ocean-dark transition-colors duration-200 font-body cursor-pointer"
             >
               Add a note
             </button>

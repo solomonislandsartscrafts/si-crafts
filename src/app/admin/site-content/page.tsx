@@ -12,6 +12,7 @@ import { FormField, inputClasses } from '@/components/ui/form-field';
 import { SkeletonText } from '@/components/ui/skeleton';
 import { SITE_TEXT_GROUPS, type SiteTextField } from '@/lib/site-text-manifest';
 import type { SiteTextMap } from '@/services/site-text';
+import { useModalA11y } from '@/lib/use-modal-a11y';
 
 /**
  * This screen edits two stores that an admin has no reason to distinguish
@@ -27,6 +28,7 @@ import type { SiteTextMap } from '@/services/site-text';
  * the tab it belongs to. One Save button writes both.
  */
 const IMAGES_TAB = 'images';
+const BRANDING_TAB = 'branding';
 
 const SITE_CONTENT_EDITORS: Record<string, React.ComponentType<TabProps>> = {
   homepage: HomepageTab,
@@ -37,11 +39,14 @@ const SITE_CONTENT_EDITORS: Record<string, React.ComponentType<TabProps>> = {
 };
 
 const TABS: { id: string; label: string }[] = [
+  { id: BRANDING_TAB, label: 'Branding' },
   ...SITE_TEXT_GROUPS.map((group) => ({ id: group.id, label: group.label })),
   { id: IMAGES_TAB, label: 'Images' },
 ];
 
 const EMPTY: SiteContent = {
+  siteLogo: '',
+  siteLogoAlt: '',
   aboutSolomonIslandsImage: '',
   aboutSolomonIslandsImageAlt: '',
   aboutTeamImage: '',
@@ -118,6 +123,12 @@ export default function AdminSiteContentPage() {
   }, []);
 
   const [showConfirm, setShowConfirm] = useState(false);
+
+  // Shared modal a11y for the publish-confirm alertdialog: focus trap, Escape
+  // to close, body-scroll lock, and focus restored to the trigger on close.
+  // Keyed on `showConfirm` so it engages only while the dialog is open. Same
+  // hook every other modal on the site uses.
+  const confirmRef = useModalA11y(showConfirm, () => setShowConfirm(false));
 
   /**
    * True once updateSiteContent has landed for the copy currently on screen.
@@ -244,7 +255,7 @@ export default function AdminSiteContentPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`tap-target whitespace-nowrap px-sm py-xs text-sm font-medium border-b-2 transition-colors ${
+              className={`focus-ring tap-target whitespace-nowrap px-sm py-xs text-sm font-medium border-b-2 transition-colors ${
                 activeTab === tab.id
                   ? 'border-ocean text-ocean'
                   : 'border-transparent text-warm-gray-600 hover:text-deep-blue hover:border-sand-dark'
@@ -264,6 +275,8 @@ export default function AdminSiteContentPage() {
               <SiteContentEditor content={content} update={update} />
             ) : null;
           })()}
+
+          {activeTab === BRANDING_TAB && <BrandingTab content={content} update={update} />}
 
           {activeTab === IMAGES_TAB && <ImagesTab content={content} update={update} />}
 
@@ -286,6 +299,7 @@ export default function AdminSiteContentPage() {
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-sm bg-deep-blue/50" onClick={() => setShowConfirm(false)}>
           <div
+            ref={confirmRef}
             className="bg-white rounded-lg shadow-md w-full max-w-md p-md"
             onClick={(e) => e.stopPropagation()}
             role="alertdialog"
@@ -329,6 +343,31 @@ export default function AdminSiteContentPage() {
 interface TabProps {
   content: SiteContent;
   update: (field: keyof SiteContent, value: string) => void;
+}
+
+function BrandingTab({ content, update }: TabProps) {
+  return (
+    <>
+      <Section
+        title="Site Logo"
+        description="Shown in the header, footer and mobile menu across the whole site. Upload a JPEG, PNG or WebP — a transparent PNG or WebP is best so it sits cleanly on both light and dark backgrounds. It is fitted to the header height automatically, so extra width or height around the artwork is trimmed to fit. Leave it empty to use the default Solomon Islands Arts & Crafts logo."
+      >
+        <ImageUpload
+          value={content.siteLogo}
+          onChange={(url) => update('siteLogo', url)}
+          altText={content.siteLogoAlt}
+          onAltTextChange={(alt) => update('siteLogoAlt', alt)}
+          label="Logo image"
+          aspectHint="wide (about 2:1)"
+        />
+        <p className="text-xs text-warm-gray-400">
+          The logo sits inside a link that already reads &ldquo;Solomon Islands Arts &amp; Crafts —
+          home&rdquo; to screen readers, so alt text is optional. Add it only if the artwork shows
+          something the name doesn&apos;t.
+        </p>
+      </Section>
+    </>
+  );
 }
 
 function ImagesTab({ content, update }: TabProps) {

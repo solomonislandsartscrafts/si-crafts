@@ -75,9 +75,7 @@ export async function SponsorBanner({
 
   return (
     <section
-      // Borders separate the supporters band from the content above it and from
-      // the "Meet the makers" section below it.
-      className={`border-y border-sand ${padded ? 'py-md lg:py-lg' : ''}`.trim()}
+      className={padded ? 'py-md lg:py-lg' : undefined}
       aria-label="Our supporters"
     >
       {contained ? <div className="site-container">{band}</div> : band}

@@ -103,54 +103,68 @@ export default function StockistApplyPage() {
       width="narrow"
     >
       <div className="max-w-lg mt-lg">
-        <form onSubmit={handleSubmit} noValidate className="space-y-md">
-          <FormField label="Business Name" htmlFor="businessName" error={errors.businessName}>
-            <input id="businessName" type="text" value={form.businessName}
-              onChange={(e) => setForm({ ...form, businessName: e.target.value })}
-              className={inputClasses}
-              data-error={!!errors.businessName || undefined} />
-          </FormField>
+        <form onSubmit={handleSubmit} noValidate className="space-y-sm">
+          {/* Short related fields pair up into two columns from sm: up, so the
+              form reads as three tight rows on a laptop instead of six stacked
+              inputs. Stays single-column on mobile. */}
+          <div className="grid grid-cols-1 gap-sm sm:grid-cols-2">
+            <FormField label="Business name" htmlFor="businessName" required error={errors.businessName}>
+              <input id="businessName" type="text" value={form.businessName}
+                autoComplete="organization"
+                onChange={(e) => setForm({ ...form, businessName: e.target.value })}
+                className={inputClasses}
+                data-error={!!errors.businessName || undefined} />
+            </FormField>
 
-          <FormField label="ABN (11 digits)" htmlFor="abn" error={errors.abn}>
-            <input id="abn" type="text" value={form.abn}
-              onChange={(e) => setForm({ ...form, abn: e.target.value })}
-              className={inputClasses}
-              data-error={!!errors.abn || undefined} />
-          </FormField>
+            <FormField label="ABN" htmlFor="abn" required helperText="11 digits" error={errors.abn}>
+              <input id="abn" type="text" value={form.abn}
+                inputMode="numeric" placeholder="12 345 678 901"
+                onChange={(e) => setForm({ ...form, abn: e.target.value })}
+                className={inputClasses}
+                data-error={!!errors.abn || undefined} />
+            </FormField>
+          </div>
 
-          <FormField label="Contact Name" htmlFor="contactName" error={errors.contactName}>
-            <input id="contactName" type="text" value={form.contactName}
-              onChange={(e) => setForm({ ...form, contactName: e.target.value })}
-              className={inputClasses}
-              data-error={!!errors.contactName || undefined} />
-          </FormField>
+          <div className="grid grid-cols-1 gap-sm sm:grid-cols-2">
+            <FormField label="Contact name" htmlFor="contactName" required error={errors.contactName}>
+              <input id="contactName" type="text" value={form.contactName}
+                autoComplete="name"
+                onChange={(e) => setForm({ ...form, contactName: e.target.value })}
+                className={inputClasses}
+                data-error={!!errors.contactName || undefined} />
+            </FormField>
 
-          <FormField label="Email" htmlFor="email" error={errors.email}>
+            <FormField label="Phone" htmlFor="phone" required error={errors.phone}>
+              <input id="phone" type="tel" value={form.phone}
+                autoComplete="tel" inputMode="tel"
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                className={inputClasses}
+                data-error={!!errors.phone || undefined} />
+            </FormField>
+          </div>
+
+          <FormField label="Email" htmlFor="email" required error={errors.email}>
             <input id="email" type="email" value={form.email}
+              autoComplete="email" inputMode="email"
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               className={inputClasses}
               data-error={!!errors.email || undefined} />
           </FormField>
 
-          <FormField label="Phone" htmlFor="phone" error={errors.phone}>
-            <input id="phone" type="tel" value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className={inputClasses}
-              data-error={!!errors.phone || undefined} />
-          </FormField>
-
           <div>
             <FormField
-              label="About your business (max 500 characters)"
+              label="About your business"
               htmlFor="description"
+              required
               error={errors.description}
             >
-              <textarea id="description" rows={4} maxLength={500} value={form.description}
+              <textarea id="description" rows={3} maxLength={500} value={form.description}
+                placeholder="Tell us what your shop sells and where you're based."
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 className={`${inputClasses} resize-y`}
                 data-error={!!errors.description || undefined} />
             </FormField>
-            <p className="text-xs text-warm-gray-400 mt-3xs">{form.description.length}/500</p>
+            <p className="text-sm text-warm-gray-400 mt-3xs text-right">{form.description.length}/500</p>
           </div>
 
           {submitError && (

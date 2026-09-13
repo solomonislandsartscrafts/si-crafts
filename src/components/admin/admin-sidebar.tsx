@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, UsersRound, Package, Palette, Store, ClipboardList, Shield, Inbox, Newspaper, LogOut, ExternalLink, ImageIcon, Tags, BookOpen, SlidersHorizontal, KeyRound, HelpCircle, MapPin, Handshake } from 'lucide-react';
+import { LayoutDashboard, Users, UsersRound, Package, Palette, Store, ClipboardList, Shield, Inbox, Newspaper, LogOut, ExternalLink, ImageIcon, Tags, BookOpen, SlidersHorizontal, KeyRound, HelpCircle, MapPin, Handshake, Megaphone } from 'lucide-react';
 import type { AdminRole } from '@/types';
 
 interface AdminSidebarProps {
@@ -58,6 +58,7 @@ const NAV_GROUPS: NavGroup[] = [
     roles: ['super_admin', 'editor'],
     items: [
       { href: '/admin/site-content', label: 'Site Content', icon: ImageIcon, roles: ['super_admin', 'editor'] },
+      { href: '/admin/announcement', label: 'Announcement', icon: Megaphone, roles: ['super_admin', 'editor'] },
       { href: '/admin/slideshow', label: 'Slideshow', icon: SlidersHorizontal, roles: ['super_admin', 'editor'] },
       { href: '/admin/supporters', label: 'Supporters', icon: Handshake, roles: ['super_admin', 'editor'] },
       { href: '/admin/news', label: 'News', icon: Newspaper, roles: ['super_admin', 'editor'] },
@@ -161,7 +162,7 @@ export function AdminSidebar({
         {onLogout && (
           <button
             onClick={onLogout}
-            className="tap-target w-full flex items-center gap-2xs px-xs py-2xs text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+            className="focus-ring-on-dark tap-target w-full flex items-center gap-2xs px-xs py-2xs text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors"
           >
             <LogOut className="w-4 h-4" />
             Logout

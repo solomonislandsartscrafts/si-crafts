@@ -6,6 +6,7 @@ import {
   IconParcelLeaf,
 } from '@/components/icons/craft-icons';
 import { PageHeader, PageCta } from '@/components/layout';
+import { AccordionItem } from '@/components/ui/accordion';
 import { ButtonLink } from '@/components/ui/button';
 import { CmsText } from '@/components/ui/cms-text';
 import { generatePageMetadata } from '@/lib/metadata';
@@ -110,18 +111,17 @@ export default async function WholesalePage() {
               {text['wholesale.faqHeading']}
             </h2>
 
-            <dl className="space-y-md">
+            <div>
               {faqs.map((faq) => (
-                <div key={faq.question}>
-                  <dt className="font-heading text-lg font-semibold text-deep-blue mb-3xs">
-                    {faq.question}
-                  </dt>
-                  <dd className="text-base text-warm-gray-600 leading-relaxed">
-                    <CmsText value={faq.answer} className="space-y-xs" />
-                  </dd>
-                </div>
+                <AccordionItem key={faq.question} title={faq.question}>
+                  <CmsText
+                    value={faq.answer}
+                    className="space-y-xs"
+                    paragraphClassName="text-base text-warm-gray-600 leading-relaxed"
+                  />
+                </AccordionItem>
               ))}
-            </dl>
+            </div>
 
             {/* Minimum-order note — lives on Site Content → Wholesale. */}
             {siteContent.wholesaleMinimumOrder && (

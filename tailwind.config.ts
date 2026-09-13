@@ -242,7 +242,18 @@ const config: Config = {
                                       // one block under its heading
       },
       boxShadow: {
-        card: '0 2px 8px rgba(0, 0, 0, 0.06)',
+        // Card resting shadow. Two layers give a subtle raised / 3D feel on the
+        // white canvas: a soft ambient shadow spread wide and low, plus a tighter
+        // contact shadow right under the edge. Deliberately kept BELOW shadow-md
+        // (the locked ceiling, which hover steps up to) so the resting state
+        // reads as "lifted off the page" while hover still reads as a further
+        // lift. One token, so every card on the site changes from this one edit.
+        card: '0 1px 2px rgba(27, 58, 75, 0.06), 0 6px 16px -4px rgba(27, 58, 75, 0.12)',
+        // Card hover shadow — a clear step up from the resting `card` shadow so
+        // a lifted card reads as lifted. Same brand-blue tint; the ambient layer
+        // drops lower and darkens, matching the `-translate-y-1` rise. Kept in
+        // proportion so it still reads as a card, not a floating dialog.
+        'card-hover': '0 2px 4px rgba(27, 58, 75, 0.08), 0 14px 28px -6px rgba(27, 58, 75, 0.2)',
       },
       borderRadius: {
         none: '0',

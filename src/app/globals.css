@@ -43,13 +43,15 @@
       writes `pb-section` rather than `pb-10 lg:pb-20`: the responsive step is
       owned by the token, in one place, not repeated at every call site.
 
-   HIERARCHY (largest gap → smallest). Enforced by the semantic tokens, and it
-   is a STRICT descent — no two rungs share a value:
+   HIERARCHY (largest gap → smallest). Enforced by the semantic tokens. This is
+   the DENSE rhythm — sections sit close together for a tight, card-led look
+   (modelled on health.govt.nz). Still a descent, though several rungs now sit
+   close together:
 
-        section  48 → 96   between major page sections
-        block    32 → 64   between blocks inside one section
-        stack    24 → 32   section heading/subtitle → the content below it
-        grid     16 → 24   card grid gutters
+        section  24 → 48   between major page sections
+        block    16 → 24   between blocks inside one section
+        stack    12 → 16   section heading/subtitle → the content below it
+        grid     12 → 16   card grid gutters
         2xs       8        heading → subtitle, and other same-group pairs
 
    `grid` sitting a clear rung below `stack` is load-bearing, not incidental.
@@ -104,21 +106,23 @@
     --gutter: var(--space-sm);       /* 16px */
 
     /* Top/bottom padding for a whole page's content. */
-    --page-y: var(--space-md);       /* 24px */
+    --page-y: var(--space-xs);       /* 12px */
 
     /* Vertical padding inside a major section band. Two adjacent bands always
        change background, so this reads as the band's own padding rather than
-       as a gap — which is why it is the largest value in the system. */
-    --section-y: var(--space-xl);    /* 48px */
+       as a gap — which is why it is the largest value in the system. Tightened
+       two rungs from the original 48→96 to a dense 24→48 rhythm, so sections
+       sit close together (the dense, card-led look) rather than spaced apart. */
+    --section-y: var(--space-md);    /* 24px */
 
     /* Separation between blocks WITHIN one section (a prose block and the grid
-       under it, two rules-separated groups on a detail page). Deliberately half
-       of --section-y at both breakpoints, so a block break can never be
-       mistaken for a section break. */
-    --block-y: var(--space-lg);      /* 32px */
+       under it, two rules-separated groups on a detail page). Kept below
+       --section-y at both breakpoints, so a block break always reads lighter
+       than a section break. */
+    --block-y: var(--space-sm);      /* 16px */
 
     /* A section heading (+ its subtitle) down to the content it introduces. */
-    --stack-y: var(--space-md);      /* 24px */
+    --stack-y: var(--space-xs);      /* 12px */
 
     /* Card grid gutters — row and column, the same value in both directions.
        Deliberately the SMALLEST gap in the hierarchy, and a clear rung below
@@ -128,7 +132,7 @@
        the grid began, and a row of tiles read as separate objects rather than
        one block of imagery. A tight gutter under a wide heading gap is what
        makes a card grid cohere. */
-    --grid-gap: var(--space-sm);     /* 16px */
+    --grid-gap: var(--space-xs);     /* 12px */
 
     /* Component-internal button padding. Exposed as variables so the four
        .btn-* classes cannot drift apart. */
@@ -147,8 +151,7 @@
          to the images and is still three rungs above the 16px mobile gutter, so
          the page never reads as edge-to-edge. */
       --gutter: var(--space-xl);     /* 48px */
-      --page-y: var(--space-lg);     /* 32px */
-      --grid-gap: var(--space-md);   /* 24px */
+      --page-y: var(--space-sm);     /* 16px */
     }
   }
 
@@ -158,12 +161,22 @@
     }
   }
 
-  /* 1024px — the point at which there is room for the full vertical rhythm. */
+  /* 1024px — the point at which there is room for the full vertical rhythm.
+     Dense rhythm: section 48, block 24, stack 16 (was 96 / 64 / 32 at launch).
+     block stays half of section, so a block break never reads as a section
+     break. */
   @media (min-width: 1024px) {
     :root {
-      --section-y: var(--space-3xl); /* 96px */
-      --block-y: var(--space-2xl);   /* 64px */
-      --stack-y: var(--space-lg);    /* 32px */
+      --section-y: var(--space-xl);  /* 48px */
+      --block-y: var(--space-md);    /* 24px */
+      --stack-y: var(--space-sm);    /* 16px */
+      /* Grid gutter tightens to 12→16px so cards pack tighter still, matching
+         the dense card-grid density. Held to 1024px (not 920px) so it never
+         exceeds --stack-y, which also rises to 16px here: between 920 and 1023
+         --stack-y is still 12px, so a 16px grid gutter there would break the
+         grid ≤ stack invariant. Keeping both changes on this breakpoint holds
+         it. */
+      --grid-gap: var(--space-sm);   /* 16px */
     }
   }
 
@@ -514,6 +527,41 @@
   .btn-danger[aria-disabled='true'] {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  /* Shared focus ring for HAND-ROLLED interactive controls — icon buttons,
+     carousel arrows, tabs, toggles, text-link buttons. These do NOT use a
+     `.btn-*` class (which carries its own `:focus-visible` outline), so each
+     used to spell out `focus-visible:outline-none focus-visible:ring-2
+     focus-visible:ring-ocean` by hand, and several drifted — a wrong ring
+     colour, or no ring at all (an accessibility bug for keyboard users).
+
+     One class, one appearance. `ocean` (not `ocean-light`) is the site-wide
+     ring colour; the offset keeps the ring clear of the control's own edge.
+     Add `.focus-ring` to any bespoke control instead of retyping the trio. */
+  .focus-ring:focus-visible {
+    outline: 3px solid #1E5AA8;
+    outline-offset: 2px;
+  }
+
+  /* Focus ring for controls on a DARK surface (the admin sidebar, the mobile
+     nav drawer, dark banners). `ocean` (#1E5AA8) is too close to deep-blue to
+     read there; `ocean-light` (#3D7AC4) is the lighter step the design system
+     already reserves for focus-ring offsets on dark. Same 3px/2px geometry as
+     `.focus-ring`, so the two are one family — only the colour differs by
+     surface. */
+  .focus-ring-on-dark:focus-visible {
+    outline: 3px solid #3D7AC4;
+    outline-offset: 2px;
+  }
+
+  /* Pressed feedback for hand-rolled controls that have no fill to darken
+     (icon buttons, text-link buttons). A 1px sink on press, matching the
+     quiet language of the `.btn-*` `:active` states. There is no transition on
+     it — the shift is instantaneous, so it reads as a press, not as motion, and
+     needs no `prefers-reduced-motion` guard. */
+  .press-sink:active {
+    transform: translateY(1px);
   }
 }
 

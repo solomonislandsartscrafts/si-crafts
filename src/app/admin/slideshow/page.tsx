@@ -180,7 +180,7 @@ export default function AdminSlideshowPage() {
                   key={cat}
                   onClick={() => toggleCategory(cat)}
                   aria-pressed={enabled}
-                  className={`tap-target flex items-center gap-xs p-sm rounded-lg border-2 transition-colors ${
+                  className={`focus-ring tap-target flex items-center gap-xs p-sm rounded-lg border-2 transition-colors ${
                     enabled
                       ? 'border-ocean bg-ocean/5'
                       : 'border-sand-dark bg-warm-gray-100 opacity-60'
@@ -316,7 +316,7 @@ function ItemSection({ title, description, items, isItemEnabled, toggleItem, set
               <button
                 onClick={() => toggleItem(item.id, item.kind)}
                 aria-pressed={enabled}
-                className="tap-target flex items-center gap-xs flex-1 min-w-0 text-left"
+                className="focus-ring rounded-md tap-target flex items-center gap-xs flex-1 min-w-0 text-left"
               >
                 {/* Thumbnail */}
                 <div className="w-10 h-10 rounded overflow-hidden bg-sand-light flex-shrink-0 relative">

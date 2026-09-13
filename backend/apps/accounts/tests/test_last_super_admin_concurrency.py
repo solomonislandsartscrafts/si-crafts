@@ -11,13 +11,25 @@ constraint is enforced in production on Postgres.
 """
 
 import threading
+import unittest
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from django.contrib.auth.models import User
-from django.test import TransactionTestCase, override_settings
+from django.db import connection
+from django.test import TransactionTestCase
 from rest_framework.test import APIClient
 
 from apps.accounts.models import AdminProfile
+
+
+# These tests race two real threads to write the same rows. SQLite serialises
+# all writes and raises "database table is locked" before the production guard
+# (select_for_update, a no-op on SQLite anyway) is even exercised, so the race
+# they describe can only be run on a backend with real row locking — Postgres.
+# Skip on SQLite so a local `manage.py test` run is green; CI/production parity
+# runs on Postgres and executes them.
+_IS_SQLITE = connection.vendor == "sqlite"
+_SKIP_REASON = "Concurrent write race requires row-level locking (Postgres); SQLite serialises writes."
 
 
 def _make_super_admin(email, password="TestPass1!"):
@@ -29,6 +41,7 @@ def _make_super_admin(email, password="TestPass1!"):
     return user
 
 
+@unittest.skipIf(_IS_SQLITE, _SKIP_REASON)
 class LastSuperAdminConcurrencyTests(TransactionTestCase):
     """Concurrent demote/deactivate/delete must leave at least one super admin."""
 

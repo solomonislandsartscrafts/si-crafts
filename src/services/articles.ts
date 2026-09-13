@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch, apiDelete, getAdminToken } from '@/lib/api-client';
+import { apiGet, apiGetPublic, apiPost, apiPatch, apiDelete, getAdminToken } from '@/lib/api-client';
 import type { Article } from '@/types';
 
 interface WagtailArticleResponse {
@@ -52,20 +52,20 @@ function mapArticle(raw: WagtailArticleResponse): Article {
 // --- Public ---
 
 export async function getPublishedArticles(): Promise<Article[]> {
-  const data = await apiGet<WagtailListResponse>('/api/v2/articles/?published_flag=true&fields=*');
+  const data = await apiGetPublic<WagtailListResponse>('/api/v2/articles/?published_flag=true&fields=*');
   return data.items.map(mapArticle).sort(
     (a, b) => new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime()
   );
 }
 
 export async function getFeaturedArticle(): Promise<Article | null> {
-  const data = await apiGet<WagtailListResponse>('/api/v2/articles/?published_flag=true&featured=true&fields=*');
+  const data = await apiGetPublic<WagtailListResponse>('/api/v2/articles/?published_flag=true&featured=true&fields=*');
   if (data.items.length === 0) return null;
   return mapArticle(data.items[0]);
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
-  const data = await apiGet<WagtailListResponse>(`/api/v2/articles/?slug=${slug}&published_flag=true&fields=*`);
+  const data = await apiGetPublic<WagtailListResponse>(`/api/v2/articles/?slug=${slug}&published_flag=true&fields=*`);
   if (data.items.length === 0) return null;
   return mapArticle(data.items[0]);
 }

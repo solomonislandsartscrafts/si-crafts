@@ -15,9 +15,25 @@ import { RouteProgressBar } from '@/components/shared/route-progress-bar';
 export function LayoutShell({
   children,
   footer,
+  banner,
+  logoSrc,
+  logoAlt,
 }: {
   children: React.ReactNode;
   footer?: React.ReactNode;
+  /**
+   * The admin-controlled announcement bar. Rendered pre-built as a server
+   * component (like `footer`) because this shell is a client component and
+   * cannot await the copy itself. Shown above the header on public routes only.
+   */
+  banner?: React.ReactNode;
+  /**
+   * Admin-editable site logo, resolved on the server in RootLayout because the
+   * header/mobile-nav are client components. Empty falls back to the bundled
+   * artwork inside <Logo>.
+   */
+  logoSrc?: string;
+  logoAlt?: string;
 }) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith('/admin');
@@ -38,10 +54,13 @@ export function LayoutShell({
       <Suspense fallback={null}>
         <RouteProgressBar />
       </Suspense>
-      <Header />
+      {/* Top chrome — announcement banner (if any) + header — is a normal
+          in-flow block, so it scrolls away with the page rather than staying
+          pinned to the viewport. The banner sits above the header. */}
+      {banner}
+      <Header logoSrc={logoSrc} logoAlt={logoAlt} />
 
-      {/* Flag stripe sits below the header, NOT inside it — so it does not
-          scroll with the sticky header. Shown on every public page. */}
+      {/* Flag stripe scrolls with the page, just under the header. */}
       <FlagDivider />
 
       <main id="main-content" className="flex-1">

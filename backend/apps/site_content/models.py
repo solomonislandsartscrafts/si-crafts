@@ -8,6 +8,13 @@ class SiteContent(models.Model):
     Admins edit these via the Site Content admin panel.
     """
 
+    # --- Branding ---
+    # The site logo shown in the header, footer and mobile nav. Blank falls back
+    # to the bundled artwork in the <Logo> component, so an unset value is a
+    # valid state rather than a broken image.
+    site_logo_url = models.CharField(max_length=500, blank=True, default="")
+    site_logo_alt = models.CharField(max_length=300, blank=True, default="")
+
     # --- About page images (existing) ---
     about_solomon_islands_image_url = models.CharField(max_length=500, blank=True, default="")
     about_solomon_islands_image_alt = models.CharField(max_length=300, blank=True, default="")
@@ -60,6 +67,15 @@ class SiteContent(models.Model):
         blank=True,
         default=dict,
         help_text="Homepage slideshow configuration: enabled categories and per-item toggles.",
+    )
+
+    # --- Announcement banner (JSON) ---
+    # Site-wide notice bar shown at the top of every public page.
+    # Shape: {"enabled": bool, "message": str, "variant": "blue"|"green"|"gold"}.
+    announcement = models.JSONField(
+        blank=True,
+        default=dict,
+        help_text="Site-wide announcement banner: enabled flag, message, and colour variant.",
     )
 
     class Meta:

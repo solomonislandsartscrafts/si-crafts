@@ -36,6 +36,9 @@ def _validate_safe_url(value: str) -> str:
 
 # Mapping of camelCase frontend keys → snake_case model fields
 FIELD_MAP = {
+    # Branding
+    "siteLogo": "site_logo_url",
+    "siteLogoAlt": "site_logo_alt",
     # Images (existing)
     "aboutSolomonIslandsImage": "about_solomon_islands_image_url",
     "aboutSolomonIslandsImageAlt": "about_solomon_islands_image_alt",
@@ -78,6 +81,8 @@ FIELD_MAP = {
     "contactResponseTime": "contact_response_time",
     # Slideshow
     "slideshowSettings": "slideshow_settings",
+    # Announcement banner
+    "announcement": "announcement",
 }
 
 # Reverse mapping: snake_case → camelCase
@@ -91,6 +96,11 @@ class SiteContentSerializer(serializers.Serializer):
     """
 
     # Declare all fields so DRF validates them
+    # Branding — the site logo. Stored as an uploaded image URL (R2 or local
+    # /uploads path), so it is NOT run through _validate_safe_url the way the
+    # link fields are; the upload endpoint already restricts what can land here.
+    site_logo_url = serializers.CharField(required=False, allow_blank=True, default="", max_length=500)
+    site_logo_alt = serializers.CharField(required=False, allow_blank=True, default="", max_length=300)
     # Images
     about_solomon_islands_image_url = serializers.CharField(required=False, allow_blank=True, default="")
     about_solomon_islands_image_alt = serializers.CharField(required=False, allow_blank=True, default="")
@@ -133,6 +143,40 @@ class SiteContentSerializer(serializers.Serializer):
     contact_response_time = serializers.CharField(required=False, allow_blank=True, default="", max_length=200)
     # Slideshow
     slideshow_settings = serializers.JSONField(required=False, default=dict)
+    # Announcement banner
+    announcement = serializers.JSONField(required=False, default=dict)
+
+    def validate_announcement(self, value):
+        """Enforce the announcement banner contract before saving.
+
+        The stored shape is {"enabled": bool, "message": str,
+        "variant": "blue"|"green"|"gold"}. Reject arrays, scalars, and invalid
+        field types outright rather than letting the frontend parseAnnouncement
+        silently coerce a malformed value (which would alter the message or
+        disable the banner without the admin knowing). An empty object is
+        allowed — that is the unset default.
+        """
+        # `default=dict` / an empty save means "unset" — leave it be.
+        if value == {} or value is None:
+            return {}
+
+        if not isinstance(value, dict):
+            raise serializers.ValidationError(
+                "Announcement must be an object with enabled, message, and variant."
+            )
+
+        if "enabled" in value and not isinstance(value["enabled"], bool):
+            raise serializers.ValidationError({"enabled": "Must be a boolean."})
+
+        if "message" in value and not isinstance(value["message"], str):
+            raise serializers.ValidationError({"message": "Must be a string."})
+
+        if "variant" in value and value["variant"] not in ("blue", "green", "gold"):
+            raise serializers.ValidationError(
+                {"variant": "Must be one of: blue, green, gold."}
+            )
+
+        return value
 
     def validate_about_solomon_islands_link_url(self, value):
         return _validate_safe_url(value)
@@ -149,7 +193,7 @@ class SiteContentSerializer(serializers.Serializer):
         for camel_key, snake_field in FIELD_MAP.items():
             value = getattr(instance, snake_field, "")
             # JSON fields return dict/list, not string — pass through as-is
-            if snake_field == "slideshow_settings":
+            if snake_field in ("slideshow_settings", "announcement"):
                 result[camel_key] = value if value else {}
             else:
                 result[camel_key] = value or ""

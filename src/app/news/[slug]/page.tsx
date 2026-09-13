@@ -172,9 +172,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           {/* Cover image */}
           {article.coverImageUrl && (
             <div className="aspect-[2/1] relative overflow-hidden rounded-lg mb-block">
+              {/* Decorative: the cover sits directly under the <h1>, which is
+                  the article title, so a descriptive alt here would make a
+                  screen reader announce the headline twice (WCAG 1.1.1). The
+                  empty alt tells assistive tech to skip the image; the headline
+                  above already names it. */}
               <SafeImage
                 src={article.coverImageUrl}
-                alt={article.title}
+                alt=""
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 720px"

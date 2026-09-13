@@ -59,9 +59,14 @@ export function ImageUpload({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      setError('Please select an image file (JPEG, PNG, or WebP)');
+    // Validate file type against the exact set the backend accepts
+    // (JPEG/PNG/WebP). A looser `image/*` check let formats like GIF or SVG
+    // through the picker to fail later — at client-side compression or at the
+    // backend — with a confusing error. Rejecting them here gives one clear
+    // message at the point of selection.
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setError('Please select a JPEG, PNG, or WebP image.');
       return;
     }
 
