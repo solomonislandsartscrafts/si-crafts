@@ -214,7 +214,7 @@ function ToastItem({
       <p className="text-base leading-body flex-1">{toast.message}</p>
       <button
         onClick={() => onDismiss(toast.id)}
-        className="tap-target p-3xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors shrink-0 -mr-3xs -mt-3xs"
+        className="focus-ring tap-target p-3xs text-warm-gray-400 hover:text-warm-gray-800 transition-colors shrink-0 -mr-3xs -mt-3xs"
         aria-label="Dismiss notification"
       >
         <X className="w-4 h-4" />

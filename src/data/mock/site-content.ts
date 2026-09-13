@@ -1,6 +1,8 @@
 import type { SiteContent } from '@/types';
 
 export let mockSiteContent: SiteContent = {
+  siteLogo: '',
+  siteLogoAlt: '',
   aboutSolomonIslandsImage: '',
   aboutSolomonIslandsImageAlt: '',
   aboutTeamImage: '',

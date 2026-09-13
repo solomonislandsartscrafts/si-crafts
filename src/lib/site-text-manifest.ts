@@ -1354,7 +1354,7 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
         ],
       },
       {
-        title: 'Where to buy tab',
+        title: 'Where to buy',
         fields: [
           {
             key: 'provenance.whereToBuyIntro',

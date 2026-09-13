@@ -64,7 +64,11 @@ export function MakersPageContent({
             {/* Filter bar. The province select stays mounted whether or not a
                 province is selected — previously selecting one replaced the
                 dropdown with a clear button, so you could not switch province
-                without clearing first. */}
+                without clearing first. On mobile the select leads the row; on
+                desktop it is hidden (the map is the filter) and the row holds
+                the result count + an inline clear, left-aligned so it reads as
+                the heading for the grid below rather than a stat floating over
+                the map panel to the right. */}
             <div className="flex flex-wrap items-end gap-sm mb-stack">
               <div className="lg:hidden">
                 <Select
@@ -78,24 +82,40 @@ export function MakersPageContent({
               </div>
 
               <p
-                className="text-base font-medium text-warm-gray-800 ml-auto"
+                className="text-base text-warm-gray-600 lg:mr-auto"
                 aria-live="polite"
               >
                 {selectedProvince ? (
                   <>
-                    <span className="text-ocean font-semibold">
+                    Showing{' '}
+                    <span className="font-semibold text-warm-gray-800">
                       {filteredMakers.length}
                     </span>{' '}
                     maker{filteredMakers.length !== 1 ? 's' : ''} in{' '}
-                    {selectedProvince}
+                    <span className="font-semibold text-warm-gray-800">
+                      {selectedProvince}
+                    </span>
                   </>
                 ) : (
                   <>
-                    <span className="font-semibold">{filteredMakers.length}</span>{' '}
+                    Showing all{' '}
+                    <span className="font-semibold text-warm-gray-800">
+                      {filteredMakers.length}
+                    </span>{' '}
                     makers
                   </>
                 )}
               </p>
+
+              {selectedProvince && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedProvince(null)}
+                  className="text-sm font-medium text-ocean hover:text-ocean-dark tap-target underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean rounded-sm"
+                >
+                  Clear filter
+                </button>
+              )}
             </div>
 
             {filteredMakers.length === 0 ? (
@@ -122,6 +142,7 @@ export function MakersPageContent({
                     key={maker.id}
                     maker={maker}
                     craftName={maker.craftName || undefined}
+                    layout="row"
                   />
                 ))}
               </div>
@@ -129,11 +150,13 @@ export function MakersPageContent({
           </div>
 
           {/* Right: province map — desktop filter. Framed in a sand-light
-              panel so it reads as a deliberate filter tool rather than a map
-              floating on the page. */}
+              panel with a border so it reads as a deliberate filter tool rather
+              than a map floating on the page. The heading is capped with a
+              hairline divider so the title + hint read as the panel's header,
+              and the map below it as the control. */}
           <div className="hidden lg:block lg:sticky lg:top-24 lg:self-start">
-            <div className="rounded-lg bg-sand-light p-md">
-              <div className="pb-xs">
+            <div className="rounded-lg border border-sand bg-sand-light p-md">
+              <div className="pb-sm mb-sm border-b border-sand">
                 <h2 className="font-heading text-lg font-semibold text-deep-blue">
                   {filterHeading}
                 </h2>
@@ -145,7 +168,7 @@ export function MakersPageContent({
                 availableProvinces={provinces}
               />
               {selectedProvince && (
-                <div className="pt-sm flex justify-center">
+                <div className="pt-sm mt-sm border-t border-sand flex justify-center">
                   <Button
                     variant="secondary"
                     size="sm"

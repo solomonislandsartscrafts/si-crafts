@@ -2,6 +2,9 @@ import { apiGet, apiGetPublic, apiPut, getAdminToken } from '@/lib/api-client';
 import type { SiteContent } from '@/types';
 
 const EMPTY_SITE_CONTENT: SiteContent = {
+  // Branding — blank means "use the bundled logo artwork" (see <Logo>).
+  siteLogo: '',
+  siteLogoAlt: '',
   // Images
   aboutSolomonIslandsImage: '',
   aboutSolomonIslandsImageAlt: '',

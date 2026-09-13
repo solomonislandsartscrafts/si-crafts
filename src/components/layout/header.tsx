@@ -1,22 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, User, Shield, ShoppingCart } from 'lucide-react';
+import { Menu, User, Shield, ShoppingCart, Search, X } from 'lucide-react';
 import { MobileNav } from './mobile-nav';
 import { Logo } from './logo';
+import { HeaderSearch } from './header-search';
 import { ButtonLink } from '@/components/ui/button';
 import { getCart } from '@/lib/cart';
 
-// Split into two groups so the primary nav stays lean. The primary set is the
-// browse journey — the pages a public visitor moves through. Wholesale and
-// Contact are utility destinations (act on / get in touch), so they sit after
+// The desktop nav is deliberately lean. "Home" is NOT a link here — the logo
+// already goes home, so a separate Home item was redundant and just added
+// weight. The primary set is the browse journey a public visitor moves through.
+// Wholesale and Contact are utility/conversion destinations, so they sit after
 // a hairline divider, grouped with the auth control rather than competing with
-// the browse links. Keeping them in one row, just visually separated, means no
-// item is hidden while the primary nav still reads as six focused links.
+// the browse links.
 const PRIMARY_NAV = [
-  { href: '/', label: 'Home' },
   { href: '/catalogue', label: 'Catalogue' },
   { href: '/makers', label: 'Makers' },
   { href: '/crafts-and-techniques', label: 'Crafts' },
@@ -60,10 +60,22 @@ function navLinkClasses(active: boolean): string {
  * treatment was desktop-only, because the flip was unreliable on mobile
  * browsers), and the light nav/divider/auth-button variants.
  */
-export function Header() {
+interface HeaderProps {
+  /**
+   * Admin-editable site logo, resolved on the server and threaded down from
+   * RootLayout (this is a client component and cannot fetch it). Empty falls
+   * back to the bundled artwork inside <Logo>.
+   */
+  logoSrc?: string;
+  logoAlt?: string;
+}
+
+export function Header({ logoSrc, logoAlt }: HeaderProps = {}) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [authState, setAuthState] = useState<AuthState>('none');
   const pathname = usePathname();
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const adminToken = localStorage.getItem('admin_session');
@@ -77,6 +89,30 @@ export function Header() {
     }
   }, [pathname]);
 
+  // Search is a deliberate action on a wholesale catalogue, not something a
+  // first-time public visitor needs front-and-centre — so the desktop bar shows
+  // a search ICON by default and reveals the field on click, freeing the middle
+  // of the row for the nav. When it opens, move focus into the field; Escape
+  // closes it. The field navigates away on submit, so no explicit close needed
+  // there. Below `lg` the drawer still carries a full-width search, untouched.
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setSearchOpen(false);
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [searchOpen]);
+
+  // Close the field on route change (e.g. after a search submit navigates).
+  useEffect(() => {
+    setSearchOpen(false);
+  }, [pathname]);
+
   function isActive(href: string) {
     if (href === '/') return pathname === '/';
     return pathname.startsWith(href);
@@ -87,8 +123,14 @@ export function Header() {
       {/* The `border-b border-sand` is the separation between the header and the
           page below it — interior pages open with a full coloured
           `<PageHeader banner>` band flush against it, and the homepage opens on
-          white. There is deliberately no flag stripe under the header. */}
-      <header className="sticky top-0 z-40 border-b border-sand bg-cream/95 backdrop-blur-sm transition-colors duration-300">
+          white. There is deliberately no flag stripe under the header.
+
+          The bar scrolls away with the page: LayoutShell renders this header
+          (together with the announcement banner above it) as a normal in-flow
+          block, so it is not pinned to the viewport and disappears as the
+          visitor scrolls down. Solid `bg-cream` so the mobile nav drawer, which
+          overlays page content, has an opaque backdrop. */}
+      <header className="border-b border-sand bg-cream">
         <div className="site-container">
           {/* Row height stepped up from h-16 (64px) to h-20 (80px) so the bar
               has vertical breathing room that matches the page's spacing
@@ -104,15 +146,19 @@ export function Header() {
               aria-label="Solomon Islands Arts & Crafts — home"
             >
               {/* Standard dark-ink logo at every width — the header bar is
-                  always light. */}
-              <Logo />
+                  always light. `src`/`alt` are the admin-editable logo; empty
+                  falls back to the bundled artwork. */}
+              <Logo src={logoSrc} alt={logoAlt} />
             </Link>
 
-            {/* `lg:` (1024), not `md:` (768). Eight links plus the hairline and
-                the auth control need ~670px at their tightest; with the logo and
-                the page gutters that is ~950px, so between 768 and ~850px the
-                header did not fit and the whole page scrolled sideways — and up
-                to 900px it only "fit" by crushing the logo. The drawer serves
+            {/* Search now lives behind a toggle in the utility cluster (right),
+                not as an always-open box in the middle — so the nav has the
+                whole row to breathe. See the search-toggle notes in the effect
+                hooks above. */}
+
+            {/* `lg:` (1024), not `md:` (768). The links plus the search toggle
+                and the auth control don't fit at 768px with the logo and page
+                gutters, so the whole page scrolled sideways. The drawer serves
                 every width below 1024 instead: it is a full-quality nav, and a
                 tablet is a touch device anyway. */}
             <nav className="hidden lg:flex items-center gap-3xs" aria-label="Primary">
@@ -142,6 +188,24 @@ export function Header() {
                 </Link>
               ))}
 
+              {/* Search toggle — icon by default; opening it reveals the field
+                  as a row spanning the full site container below the bar (see
+                  the search panel outside this <nav>). */}
+              <button
+                type="button"
+                onClick={() => setSearchOpen((open) => !open)}
+                className="tap-target ml-2xs flex items-center justify-center rounded-md text-warm-gray-600 transition-colors hover:bg-sand-light hover:text-deep-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+                aria-label={searchOpen ? 'Close search' : 'Search the catalogue'}
+                aria-expanded={searchOpen}
+                aria-controls="header-search-panel"
+              >
+                {searchOpen ? (
+                  <X className="w-5 h-5" aria-hidden="true" />
+                ) : (
+                  <Search className="w-5 h-5" aria-hidden="true" />
+                )}
+              </button>
+
               {/* Auth control — changes based on login state. Uses ButtonLink so
                   the header matches every other button on the site. */}
               {authState === 'admin' && (
@@ -165,11 +229,20 @@ export function Header() {
                     <ShoppingCart className="w-5 h-5" aria-hidden="true" />
                     <CartBadge />
                   </Link>
+                  {/* Secondary (ocean-outline), not the default green fill.
+                      The green fill is reserved for the single primary action
+                      on a page (the design system's rule), and in the header
+                      that is never "My Account" — it is a utility link. Same
+                      reasoning as the logged-out "Login" control below. The
+                      stockist's actual primary action, the order/cart, sits to
+                      the left as its own icon. */}
                   <ButtonLink
                     href="/stockist/account"
+                    variant="secondary"
                     size="sm"
                     className="ml-3xs"
                   >
+                    <User className="w-4 h-4" aria-hidden="true" />
                     My Account
                   </ButtonLink>
                 </>
@@ -212,6 +285,22 @@ export function Header() {
               )}
             </button>
           </div>
+
+          {/* Desktop search panel — revealed when the toggle is open. It drops
+              below the bar as its own full-width row rather than squeezing into
+              the row, so opening it never reflows the nav. `lg:`-only, since the
+              drawer owns search below 1024. */}
+          {searchOpen && (
+            <div
+              id="header-search-panel"
+              className="hidden lg:block border-t border-sand py-sm"
+            >
+              <HeaderSearch
+                inputRef={searchInputRef}
+                className="mx-auto w-full max-w-xl"
+              />
+            </div>
+          )}
         </div>
       </header>
 
@@ -219,6 +308,8 @@ export function Header() {
         isOpen={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
         authState={authState}
+        logoSrc={logoSrc}
+        logoAlt={logoAlt}
       />
     </>
   );

@@ -177,7 +177,6 @@ export default async function PiecePage({ params }: PiecePageProps) {
         { name: 'Catalogue', url: '/catalogue' },
         { name: product.name },
       ]}
-      backLink={{ label: 'Browse all pieces', href: '/catalogue' }}
     >
       <JsonLd data={jsonLd} />
 
@@ -196,7 +195,6 @@ export default async function PiecePage({ params }: PiecePageProps) {
           whereToBuyQuote: text['provenance.whereToBuyQuote'],
         }}
         tradeOnlyNotice={text['provenance.tradeOnlyNotice']}
-        makerStoryFallback={text['provenance.makerStoryFallback']}
       />
 
       {/* Related Products. Needs at least two to read as a set — a single card
@@ -214,6 +212,7 @@ export default async function PiecePage({ params }: PiecePageProps) {
                   key={relatedProduct.id}
                   product={relatedProduct}
                   makerName={relatedMaker?.name}
+                  makerLocation={relatedMaker?.province}
                 />
               );
             })}

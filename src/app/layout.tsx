@@ -3,10 +3,13 @@ import { Poppins, DM_Sans } from 'next/font/google';
 import { SkipLink } from '@/components/layout';
 import { LayoutShell } from '@/components/layout/layout-shell';
 import { Footer } from '@/components/layout/footer';
+import { AnnouncementBanner } from '@/components/layout/announcement-banner';
 import { SwRegister } from '@/components/shared/sw-register';
 import { Providers } from '@/components/providers';
 import { SITE_URL } from '@/lib/metadata';
 import { SiteJsonLd } from '@/components/shared/site-json-ld';
+import { getSiteContentSafe } from '@/services/site-content';
+import { resolveImageUrl } from '@/lib/api-client';
 import './globals.css';
 
 const poppins = Poppins({
@@ -65,11 +68,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // The header/mobile-nav are client components and cannot fetch site content
+  // themselves, so the admin-editable logo is resolved here on the server and
+  // passed down through LayoutShell. Blank means "use the bundled artwork" —
+  // resolveImageUrl leaves an empty string empty, and <Logo> falls back.
+  const { siteLogo, siteLogoAlt } = await getSiteContentSafe();
+  const logoSrc = siteLogo ? resolveImageUrl(siteLogo) : '';
+
   return (
     <html lang="en" className={`${poppins.variable} ${dmSans.variable}`}>
       <head>
@@ -80,7 +90,12 @@ export default function RootLayout({
         <SkipLink />
         <Providers>
           <div className="flex flex-col flex-1">
-            <LayoutShell footer={<Footer />}>
+            <LayoutShell
+              banner={<AnnouncementBanner />}
+              footer={<Footer />}
+              logoSrc={logoSrc}
+              logoAlt={siteLogoAlt}
+            >
               {children}
             </LayoutShell>
           </div>

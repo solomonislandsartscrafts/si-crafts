@@ -42,3 +42,4 @@ export type {
 export type { TeamMember } from './team';
 export type { Faq } from './faq';
 export type { SlideCategory, SlideItemToggle, SlideshowSettings } from './slideshow';
+export type { AnnouncementBanner, AnnouncementVariant } from './announcement';

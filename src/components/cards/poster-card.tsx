@@ -71,11 +71,13 @@ export const ARTICLE_ASPECT = 'aspect-video';
  * The grid every poster-card listing uses — products, makers, crafts, news.
  *
  * One definition so column counts cannot drift page to page. ONE column on a
- * phone: image-forward, one piece at a time, the editorial "scroll through a
- * beautiful thing at a time" feel of a craft/jewellery storefront. It steps to
- * 2-up at `sm` (640), 3 at `lg`, 4 at `xl` — density returns as the screen
- * widens. (It was previously 2-up on the phone; a full-width single column
- * gives each piece far more presence, which is the look the site is after.)
+ * phone: a single full-width card per row gives each piece real presence and
+ * matches the health.nz mobile pattern (one card, one row) the rest of the site
+ * now follows — the same single-column mobile listing the maker cards use. It
+ * steps to 2 at `sm`, 3 at `lg`, 4 at `xl` — density returns as the screen
+ * widens. (It was briefly 2-up on the phone for a compact-storefront look; that
+ * put two cramped cards per row on a 320px screen, so it is single-column
+ * again.)
  *
  * The gutter is `gap-grid` — 16px, stepping to 24px at 920px — and it is the
  * SAME value horizontally and vertically. It used to be tighter across than
@@ -159,36 +161,40 @@ export const shortArticleGridClasses =
 /**
  * Pill sitting on the image, top right. Set via PosterFrame's `pill` prop.
  *
- * Solid `deep-blue` with white text (11.6:1), NOT a white pill. A white pill was
- * the same "arbitrary photograph underneath" problem the caption scrim had, only
- * moved to the badge: product photos are `contain`-fit studio shots, which very
- * often means a white or near-white background, so a white chip with a 6%-opacity
- * shadow all but disappeared on exactly the images it was labelling. A solid
- * dark fill is legible over any photo — light, dark, or empty letterboxing —
- * without depending on what was uploaded.
+ * An OUTLINED chip: solid white fill, `ocean` border, `ocean` text. The solid
+ * `deep-blue` fill it used to have read too strongly against the quiet card, so
+ * it was softened to an outline that labels without shouting.
+ *
+ * The fill is solid white, NOT transparent. Product photos are `contain`-fit
+ * studio shots, which very often means a white or near-white background — a
+ * transparent chip with only a border would lose its outline against exactly
+ * those images. A solid white fill keeps the pill and its ocean border legible
+ * over any photo, light or dark, without depending on what was uploaded. Ocean
+ * text on white is 4.5:1 (AA).
  *
  * Kept as tight as the label allows: `px-xs` (12) not `px-sm` (16), and no
  * shadow. This is the ONLY thing now drawn over the photograph — the "View"
  * hover overlay was removed for exactly that reason — so it has to earn its
  * space. It does: material category and article tag are content a buyer scans,
- * not decoration. The dropped `shadow-card` was invisible against a dark fill
- * anyway and only made the chip's footprint read larger than it is.
+ * not decoration.
  */
 export const posterPillClasses =
-  'inline-flex items-center rounded-full bg-deep-blue px-xs py-3xs text-xs font-medium capitalize text-white';
+  'inline-flex items-center rounded-full border border-ocean bg-white px-xs py-3xs text-xs font-medium capitalize text-ocean';
 
 /**
  * Typography for the caption, exported so each card composes the same text
  * treatment instead of retyping the class strings (same reason `inputClasses`
  * exists for forms).
  *
- * Both title classes carry `group-hover:text-ocean`, and this is the card's real
- * hover affordance. The frame's shadow step (`shadow-card` is
- * `0 2px 8px rgba(0,0,0,0.06)`, hover is `shadow-md`) is a few percent of opacity
- * on a white card sitting on a white page — a change you have to look for. The
- * title turning ocean is the same signal a link gives anywhere else on the site,
- * and it costs nothing. It relies on `PosterCard`'s `group`, so any card
- * composing the frame directly must put `group` on its own link wrapper.
+ * Both title classes carry `group-hover:text-ocean`, and this is a supporting
+ * hover affordance alongside the panel's shadow/lift. `shadow-card` is now a
+ * two-layer brand-tinted shadow (see `tailwind.config.ts`) that lifts the card
+ * clearly off the white page at rest, and hover steps it up to
+ * `shadow-card-hover` under a `-translate-y-1` rise — so the shadow does real
+ * work now, not just the title colour. The title still turns ocean because it
+ * is the same signal a link gives anywhere else on the site, and it costs
+ * nothing. It relies on `PosterCard`'s `group`, so any card composing the frame
+ * directly must put `group` on its own link wrapper.
  *
  * Two sizes for a supporting line, and the distinction is meaning, not layout:
  * `posterBodyClasses` (16px) for anything that is content — a maker's name, a
@@ -239,6 +245,15 @@ interface PosterFrameProps {
    */
   fallback?: React.ReactNode;
   /**
+   * When the frame sits INSIDE a card panel (the `PosterCard` layout, where the
+   * whole card — image + caption — is one shadowed rounded surface), the frame
+   * must not draw its own surface: no shadow, no rounding, no hover-shadow. The
+   * panel owns all of that, and the panel's `overflow-hidden` clips the image to
+   * the panel's top corners. Defaults to `false` so a standalone `PosterFrame`
+   * (the hero gallery, the stockist card) keeps being its own surface.
+   */
+  bare?: boolean;
+  /**
    * Content laid over the image, positioned absolutely by the caller against
    * this frame. Nothing uses it today — every card captions below the frame.
    * Prefer `PosterCard`'s caption slot over reaching for this.
@@ -259,16 +274,20 @@ export function PosterFrame({
   fit = 'cover',
   aspect = FRAME_ASPECT,
   pill,
-  sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw',
+  sizes = '(max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw',
   priority,
   fallback,
+  bare = false,
   children,
 }: PosterFrameProps) {
   const hasImage = typeof src === 'string' && src.trim() !== '';
+  // A bare frame draws no surface — the enclosing card panel owns the shadow,
+  // rounding and hover-shadow, and clips this image to its top corners.
+  const surface = bare
+    ? 'bg-card-bg'
+    : 'rounded-lg bg-card-bg shadow-card transition-shadow duration-200 group-hover:shadow-card-hover';
   return (
-    <div
-      className={`relative ${aspect} overflow-hidden bg-card-bg shadow-card transition-shadow duration-200 group-hover:shadow-md`}
-    >
+    <div className={`relative ${aspect} overflow-hidden ${surface}`}>
       {!hasImage && fallback ? (
         fallback
       ) : (
@@ -314,17 +333,26 @@ export function PosterFrame({
 
 interface PosterCardProps extends PosterFrameProps {
   href: string;
-  /** The caption, rendered below the frame on the page background. */
+  /** The caption, rendered inside the card panel below the image. */
   children: React.ReactNode;
 }
 
 /**
- * Poster card — the shared frame with a caption below it, wrapped in one link.
+ * Poster card — image and caption in ONE shadowed rounded panel, wrapped in one
+ * link, so the whole card reads as a single object.
  *
- * The frame keeps a fixed ratio whatever the caption holds, so the images in a
- * grid line up row to row; a frame that grew with its caption pulled
- * neighbouring cards out of step. The link itself carries no panel or `overflow-hidden`, so
- * the focus ring is never clipped.
+ * The caption used to sit on the bare page background below a shadowed frame,
+ * with no panel around the pair. That made the title/maker/price line look
+ * detached from its own image — two separate things stacked, rather than one
+ * card. So the surface (rounded corners, `shadow-card`, the hover-shadow step)
+ * now lives on this outer panel: the image is a `bare` `PosterFrame` clipped to
+ * the panel's top corners by `overflow-hidden`, and the caption gets its own
+ * padding inside the same panel.
+ *
+ * The frame keeps a fixed ratio whatever the caption holds, so images in a grid
+ * line up row to row. The focus ring is on the panel (`focus-within`-safe: it is
+ * on the link, which fills the panel), and `overflow-hidden` on the panel does
+ * not clip it because the ring is drawn just inside the rounded edge.
  */
 export function PosterCard({ href, children, ...frame }: PosterCardProps) {
   return (
@@ -337,15 +365,27 @@ export function PosterCard({ href, children, ...frame }: PosterCardProps) {
     <div role="listitem">
       <Link
         href={href}
-        className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+        // The panel: one rounded, shadowed white surface holding image + caption
+        // so the card reads as a single object. `overflow-hidden` clips the bare
+        // image to the panel's top corners. The focus ring is `ring-inset` so
+        // `overflow-hidden` never clips it.
+        //
+        // Hover, the Health-NZ move adapted to this warm/light palette: the whole
+        // card RESPONDS, not just the title. Three signals together —
+        //   • a gentle lift (`-translate-y-1`) so the card physically rises,
+        //   • the shadow steps up to `shadow-md` under the lift, and
+        //   • the panel warms to `section-warm` so the surface itself reacts
+        // — plus the title going `ocean` (baked into `posterTitleClasses`) and
+        // the image scaling (in `PosterFrame`). All on one `duration-200`
+        // transition so they move as a unit. `prefers-reduced-motion` is handled
+        // globally in `globals.css`, which neutralises the transform.
+        className="group block overflow-hidden rounded-lg bg-card-bg shadow-card transition-all duration-200 hover:-translate-y-1 hover:bg-section-warm hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ocean"
       >
-        <PosterFrame {...frame} />
-        {/* Caption centred on a phone (`text-center`), left-aligned from `sm`
-            up. On mobile the grid is a single full-width column, so a centred
-            caption sits balanced under the image — the editorial storefront
-            look. From `sm` the grid returns to multiple columns where captions
-            read better flush-left against the card edge. */}
-        <div className="pt-xs text-center sm:text-left">{children}</div>
+        <PosterFrame {...frame} bare />
+        {/* Caption inside the panel, left-aligned at every width. `p-sm` gives
+            the text real breathing room from the panel edges so it reads as part
+            of the card rather than crowding the border. */}
+        <div className="p-sm text-left">{children}</div>
       </Link>
     </div>
   );

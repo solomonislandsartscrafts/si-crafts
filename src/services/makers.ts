@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch, apiDelete, getAdminToken } from '@/lib/api-client';
+import { apiGet, apiGetPublic, apiPost, apiPatch, apiDelete, getAdminToken } from '@/lib/api-client';
 import type { Maker, ConsentStatus } from '@/types';
 
 interface WagtailMakerResponse {
@@ -98,7 +98,7 @@ function mapMaker(raw: WagtailMakerResponse): Maker {
  * ```
  */
 export async function getPublicMakers(): Promise<Maker[]> {
-  const data = await apiGet<WagtailListResponse>(
+  const data = await apiGetPublic<WagtailListResponse>(
     '/api/v2/makers/?consent_status=Signed&published_flag=true&fields=*'
   );
   return data.items.map(mapMaker).sort((a, b) => a.name.localeCompare(b.name));
@@ -121,7 +121,7 @@ export async function getPublicMakers(): Promise<Maker[]> {
  * ```
  */
 export async function getPublicMakerBySlug(slug: string): Promise<Maker | null> {
-  const data = await apiGet<WagtailListResponse>(
+  const data = await apiGetPublic<WagtailListResponse>(
     `/api/v2/makers/?slug=${slug}&consent_status=Signed&published_flag=true&fields=*`
   );
   if (data.items.length === 0) return null;
@@ -144,7 +144,7 @@ export async function getPublicMakerBySlug(slug: string): Promise<Maker | null> 
  * ```
  */
 export async function getMakersByCraft(craftId: string): Promise<Maker[]> {
-  const data = await apiGet<WagtailListResponse>(
+  const data = await apiGetPublic<WagtailListResponse>(
     `/api/v2/makers/?craft=${craftId}&consent_status=Signed&published_flag=true&fields=*`
   );
   return data.items.map(mapMaker);

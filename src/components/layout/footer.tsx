@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { Logo } from './logo';
 import { AcknowledgementFooterNote } from './acknowledgement-of-country';
 import { getSiteTextSafe } from '@/services/site-text';
+import { getSiteContentSafe } from '@/services/site-content';
+import { resolveImageUrl } from '@/lib/api-client';
 
 /**
  * Footer navigation — grouped by intent, mirroring the header.
@@ -50,7 +52,11 @@ const FOOTER_NAV: { heading: string; links: { label: string; href: string }[] }[
 ];
 
 export async function Footer() {
-  const text = await getSiteTextSafe();
+  const [text, { siteLogo, siteLogoAlt }] = await Promise.all([
+    getSiteTextSafe(),
+    getSiteContentSafe(),
+  ]);
+  const logoSrc = siteLogo ? resolveImageUrl(siteLogo) : '';
 
   return (
     // `mt-block` (32 → 64), one rung below a section break. The last section on
@@ -77,7 +83,7 @@ export async function Footer() {
                 className="inline-flex rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-light"
                 aria-label="Solomon Islands Arts & Crafts — home"
               >
-                <Logo onDark />
+                <Logo onDark src={logoSrc} alt={siteLogoAlt} />
               </Link>
               {text['footer.tagline'] && (
                 <p className="mt-sm max-w-xs text-base text-white/70 leading-body">

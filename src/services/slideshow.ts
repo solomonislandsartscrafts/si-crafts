@@ -1,4 +1,4 @@
-import { apiGet, apiPut, getAdminToken } from '@/lib/api-client';
+import { apiGet, apiGetPublic, apiPut, getAdminToken } from '@/lib/api-client';
 import type { SlideshowSettings } from '@/types';
 
 /** Default settings: all categories enabled, no per-item overrides */
@@ -73,10 +73,19 @@ export async function updateSlideshowSettings(settings: SlideshowSettings): Prom
 
 /**
  * Safe variant for public pages — returns defaults on failure.
+ *
+ * Reads via apiGetPublic so the homepage is served from the ISR edge cache
+ * rather than re-rendered (and re-fetched from the free-tier backend) on every
+ * visit. It deliberately does NOT reuse getSlideshowSettings(), which stays
+ * un-cached for the admin editor: caching the shared function would leave a
+ * just-saved change invisible in the admin for up to PUBLIC_REVALIDATE_SECONDS.
+ * Same split as getSiteContent (admin, no-store) vs getSiteContentSafe (public,
+ * cached), reading the same /api/site-content/ endpoint.
  */
 export async function getSlideshowSettingsSafe(): Promise<SlideshowSettings> {
   try {
-    return await getSlideshowSettings();
+    const data = await apiGetPublic<Record<string, unknown>>('/api/site-content/');
+    return parseSlideshowSettings(data?.slideshowSettings);
   } catch {
     return { ...DEFAULT_SETTINGS };
   }

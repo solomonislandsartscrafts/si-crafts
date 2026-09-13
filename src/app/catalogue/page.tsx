@@ -14,8 +14,15 @@ export const metadata = generatePageMetadata({
   path: '/catalogue',
 });
 
-export default async function CataloguePage() {
-  const [products, makers, materialCategories, text] = await Promise.all([
+export default async function CataloguePage({
+  searchParams,
+}: {
+  // The header search navigates here as `/catalogue?q=<term>`; read it so the
+  // catalogue's own search field opens pre-filled with the term.
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const [{ q }, products, makers, materialCategories, text] = await Promise.all([
+    searchParams,
     getPublicProducts(),
     getPublicMakers(),
     getMaterialCategories(),
@@ -39,6 +46,7 @@ export default async function CataloguePage() {
         products={products}
         makers={makers}
         materialCategories={materialCategories}
+        initialQuery={typeof q === 'string' ? q : ''}
         emptyTitle={text['catalogue.emptyTitle']}
         emptyDescription={text['catalogue.emptyDescription']}
       />

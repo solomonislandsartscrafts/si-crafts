@@ -11,16 +11,15 @@ import {
   getSlideshowProductCandidates,
   getSlideshowMakerCandidates,
 } from '@/lib/slideshow-candidates';
-import { ProductCard } from '@/components/cards/product-card';
 import { ArticleCard } from '@/components/cards/article-card';
 import {
-  posterGridClasses,
   articleGridClasses,
   shortArticleGridClasses,
 } from '@/components/cards/poster-card';
 import { HeroCodeToggle } from '@/components/shared/hero-code-toggle';
 import { HeroSlideshow, type SlideItem } from '@/components/shared/hero-slideshow';
 import { MakersCarousel } from '@/components/shared/makers-carousel';
+import { ProductsCarousel } from '@/components/shared/products-carousel';
 import { PageCta } from '@/components/layout/page-cta';
 import { FlagDivider } from '@/components/layout/flag-divider';
 import { SponsorBanner } from '@/components/shared/sponsor-banner';
@@ -324,49 +323,51 @@ export default async function HomePage() {
           rather than running two same-coloured sections together. */}
       <section className="section-y section-band">
         <div className="site-container">
-          {/* No visible heading or "View all" link, so the frames read as a
-              clean grid of imagery on their own. The <h2> is kept but visually
-              hidden (`sr-only`) so the section still has a landmark in the
-              heading outline — a screen-reader user paging by heading would
-              otherwise jump straight from the hero to "Meet the makers", with
-              the featured products invisible to that navigation. The route to
-              the full catalogue lives on the mobile button below and in the
-              main nav. */}
-          <h2 className="sr-only">{text['homepage.productsHeading']}</h2>
-          <div role="list" aria-label="Featured products" className={posterGridClasses}>
-            {featuredProducts.map((product) => {
-              const maker = makers.find((m) => m.id === product.makerId);
-              return (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  makerName={maker?.name}
-                />
-              );
-            })}
+          {/* Visible heading + "View all" link, matching "Meet the makers"
+              below so the two homepage showcases read as siblings. The heading
+              also gives the section a landmark in the heading outline — a
+              screen-reader user paging by heading would otherwise jump straight
+              from the hero to "Meet the makers". Both strings come from the CMS
+              (`homepage.productsHeading` / `homepage.productsButton`). */}
+          <div className="flex items-end justify-between mb-stack">
+            <div>
+              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
+                {text['homepage.productsHeading']}
+              </h2>
+              <FlagDivider variant="mark" className="mt-xs" />
+            </div>
+            <Link
+              href="/catalogue"
+              className="inline-flex items-center gap-3xs text-base font-medium text-ocean hover:text-ocean-dark transition-colors"
+            >
+              {text['homepage.productsButton']}
+            </Link>
           </div>
-          {/* Why there are no prices. A visitor who has just scrolled a grid of
-              unpriced products has no way to tell whether the site is broken,
-              sold out, or not selling to them — the wholesale-only rule is a
-              business decision. Presented as an info callout (the design
-              system's `ocean` info treatment + an Info glyph) so it reads as a
-              deliberate notice rather than stray copy under the grid. Sits
-              directly under the grid, where the question occurs. Clearing the
-              CMS field hides it. */}
+          {/* Featured pieces as a single swipeable track, matching "Meet the
+              makers" below — on a phone the visitor swipes through pieces; on
+              desktop prev/next arrows page through them. A partial next card is
+              always visible so the "there's more" cue is present. Replaces the
+              static grid so the two homepage showcases share one interaction. */}
+          <ProductsCarousel products={featuredProducts} makers={makers} />
+          {/* Why there are no prices. Each card carries only a quiet "Trade
+              pricing" status in the spot a price would sit; this note gives the
+              rule ONCE below the row rather than repeating it on every card. The
+              CMS copy already carries the "Approved stockists" sign-in link
+              inline, so there is no separate "Sign in to see pricing" button —
+              it went to the same place and stacked a second CTA under the note.
+              A thin ocean left-accent (no filled panel) marks it as a quiet
+              notice. Clearing the CMS field hides it. */}
           {text['homepage.productsPricingNote'] && (
-            <div className="mt-stack flex items-start gap-xs rounded-lg bg-ocean/10 p-md max-w-2xl">
-              <Info className="w-5 h-5 text-ocean shrink-0 mt-3xs" aria-hidden="true" />
-              <CmsText
-                value={text['homepage.productsPricingNote']}
-                paragraphClassName="text-base leading-body text-warm-gray-800"
-              />
+            <div className="mt-stack max-w-2xl border-l-2 border-ocean pl-sm">
+              <div className="flex items-start gap-2xs">
+                <Info className="w-4 h-4 text-ocean shrink-0 mt-3xs" aria-hidden="true" />
+                <CmsText
+                  value={text['homepage.productsPricingNote']}
+                  paragraphClassName="text-sm text-warm-gray-600"
+                />
+              </div>
             </div>
           )}
-          <div className="sm:hidden mt-stack text-center">
-            <ButtonLink href="/catalogue" variant="secondary">
-              {text['homepage.productsButton']}
-            </ButtonLink>
-          </div>
         </div>
       </section>
 
@@ -420,6 +421,7 @@ export default async function HomePage() {
 
       {/* Wholesale CTA */}
       <PageCta
+        contained
         heading={text['homepage.ctaHeading']}
         description={text['homepage.ctaDescription']}
       >

@@ -27,6 +27,8 @@
  * that page's own h1 rather than inventing a new size.
  */
 
+import { FlagDivider } from './flag-divider';
+
 /** The one h1 treatment. Exported for bespoke layouts that supply their own container. */
 export const pageTitleClasses =
   'font-heading text-3xl md:text-4xl font-medium text-deep-blue leading-heading';
@@ -322,22 +324,43 @@ export function PageHeader({
       className={[
         width === 'narrow' ? 'max-w-2xl' : 'max-w-site',
         // Gutters come from .site-px so the title lines up exactly with the
-        // body container below it. `pb-stack` (24 → 32) is the same
-        // heading-to-content step every section heading on the site uses, so a
-        // page title sits the same distance above its content as an h2 does.
-        // The content below then owns its own bottom padding.
-        'mx-auto site-px page-y pb-stack',
+        // body container below it.
+        //
+        // `pt-section` (48 → 96) on top: the plain header sits the SAME distance
+        // below the site header as the homepage hero does — the homepage hero
+        // section uses `py-section`, so matching it here keeps the gap from the
+        // header down to the eyebrow/title identical across every page. Using
+        // the old `page-y` (12 → 16) made interior eyebrows sit noticeably
+        // tighter to the header than the homepage's, which read as inconsistent.
+        //
+        // `pb-stack` (16 → 24) on the bottom: the same heading-to-content step
+        // every section heading on the site uses, so a page title sits the same
+        // distance above its content as an h2 does. The content below then owns
+        // its own bottom padding.
+        'mx-auto site-px pt-section pb-stack',
         centered ? 'text-center' : '',
       ]
         .filter(Boolean)
         .join(' ')}
     >
-      {eyebrow ? <div className="mb-md">{eyebrow}</div> : null}
+      {eyebrow ? (
+        typeof eyebrow === 'string' ? (
+          <div className={['mb-md flex items-center gap-xs', centered ? 'justify-center' : ''].filter(Boolean).join(' ')}>
+            <span className="h-px w-8 bg-ocean/50" aria-hidden="true" />
+            <span className="text-sm font-medium uppercase tracking-wide text-warm-gray-600">
+              {eyebrow}
+            </span>
+          </div>
+        ) : (
+          <div className="mb-md">{eyebrow}</div>
+        )
+      ) : null}
       <h1 className={`${pageTitleClasses} mb-2xs`}>{title}</h1>
+      <FlagDivider variant="mark" className={centered ? 'mx-auto' : ''} />
       {intro ? (
         <p
           className={[
-            'text-base sm:text-lg text-warm-gray-600 leading-body-lg max-w-2xl',
+            'mt-stack text-base sm:text-lg text-warm-gray-600 leading-body-lg max-w-2xl',
             centered ? 'mx-auto' : '',
           ]
             .filter(Boolean)

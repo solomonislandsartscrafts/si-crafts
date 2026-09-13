@@ -124,7 +124,7 @@ export default async function CraftPage({ params }: CraftPageProps) {
         {makers.length > 0 ? (
           <div role="list" aria-label="Makers of this craft" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-grid">
             {makers.map((maker) => (
-              <MakerCard key={maker.id} maker={maker} craftName={craft.name} />
+              <MakerCard key={maker.id} maker={maker} craftName={craft.name} layout="row" />
             ))}
           </div>
         ) : (
@@ -159,7 +159,7 @@ export default async function CraftPage({ params }: CraftPageProps) {
           )}
         </div>
         {previewProducts.length > 0 ? (
-          <div role="list" aria-label="Pieces in this craft" className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-grid">
+          <div role="list" aria-label="Pieces in this craft" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-grid">
             {previewProducts.map((product) => {
               const maker = makers.find((m) => m.id === product.makerId);
               return (
@@ -167,6 +167,7 @@ export default async function CraftPage({ params }: CraftPageProps) {
                   key={product.id}
                   product={product}
                   makerName={maker?.name}
+                  makerLocation={maker?.province}
                 />
               );
             })}

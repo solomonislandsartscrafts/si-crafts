@@ -15,9 +15,41 @@ interface PageCtaProps {
   description?: string;
   /** Buttons or links. Use <ButtonLink> so styling matches everywhere. */
   children: React.ReactNode;
+  /**
+   * Render the deep-blue as a rounded panel constrained to the page container
+   * (white canvas showing around it) instead of a full-bleed band that runs to
+   * the screen edges. Matches the contained wholesale panel on the maker page.
+   */
+  contained?: boolean;
 }
 
-export function PageCta({ heading, description, children }: PageCtaProps) {
+export function PageCta({ heading, description, children, contained }: PageCtaProps) {
+  if (contained) {
+    // Contained variant — the deep-blue is a rounded panel inside the standard
+    // page container, so the band stops at the content width rather than
+    // bleeding to the viewport edges. Same colour, text treatment and button
+    // flip as the full-bleed band below; only the framing differs.
+    return (
+      <section className="section-y">
+        <div className="site-container">
+          <div className="rounded-lg bg-deep-blue px-md py-lg sm:px-lg text-center">
+            <h2 className="font-heading text-2xl md:text-3xl font-medium !text-white mb-2xs">
+              {heading}
+            </h2>
+            {description && (
+              <p className="text-white/80 leading-relaxed mb-md max-w-xl mx-auto">
+                {description}
+              </p>
+            )}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-xs [&_.btn-secondary]:!border-white/70 [&_.btn-secondary]:!text-white [&_.btn-secondary:hover]:!bg-white/10 [&_.btn-secondary:hover]:!border-white">
+              {children}
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     // Solid deep-blue band — the ONE bold accent surface in the page's vertical
     // rhythm. It leads into the still-darker footer below it (footer-bg is a

@@ -1,4 +1,9 @@
 export interface SiteContent {
+  // Branding — the site logo shown in the header, footer and mobile nav. Blank
+  // falls back to the bundled artwork in the <Logo> component.
+  siteLogo: string;
+  siteLogoAlt: string;
+
   // About page images
   aboutSolomonIslandsImage: string;
   aboutSolomonIslandsImageAlt: string;

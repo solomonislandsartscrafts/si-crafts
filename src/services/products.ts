@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch, apiDelete, getAdminToken } from '@/lib/api-client';
+import { apiGet, apiGetPublic, apiPost, apiPatch, apiDelete, getAdminToken } from '@/lib/api-client';
 import type { Product, MaterialCategory, ProductType } from '@/types';
 
 interface WagtailProductResponse {
@@ -127,7 +127,7 @@ function buildQueryString(filters?: ProductFilters): string {
  */
 export async function getPublicProducts(filters?: ProductFilters): Promise<Product[]> {
   const qs = buildQueryString(filters);
-  const data = await apiGet<WagtailListResponse>(
+  const data = await apiGetPublic<WagtailListResponse>(
     `/api/v2/products/?published_flag=true&fields=*${qs}`
   );
   return data.items.map(mapProduct);
@@ -150,7 +150,7 @@ export async function getPublicProducts(filters?: ProductFilters): Promise<Produ
  */
 export async function getFeaturedProducts(): Promise<Product[]> {
   try {
-    const data = await apiGet<WagtailListResponse>(
+    const data = await apiGetPublic<WagtailListResponse>(
       `/api/v2/products/?published_flag=true&featured=true&fields=*`
     );
     return data.items.map(mapProduct);
@@ -178,7 +178,7 @@ export async function getFeaturedProducts(): Promise<Product[]> {
  * ```
  */
 export async function getPublicProductByCode(productCode: string): Promise<Product | null> {
-  const data = await apiGet<WagtailListResponse>(
+  const data = await apiGetPublic<WagtailListResponse>(
     `/api/v2/products/?product_code=${productCode}&published_flag=true&fields=*`
   );
   if (data.items.length === 0) return null;
@@ -201,7 +201,7 @@ export async function getPublicProductByCode(productCode: string): Promise<Produ
  * ```
  */
 export async function getProductsByMaker(makerId: string): Promise<Product[]> {
-  const data = await apiGet<WagtailListResponse>(
+  const data = await apiGetPublic<WagtailListResponse>(
     `/api/v2/products/?maker=${makerId}&published_flag=true&fields=*`
   );
   return data.items.map(mapProduct);

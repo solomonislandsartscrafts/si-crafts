@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch, apiDelete, getAdminToken } from '@/lib/api-client';
+import { apiGet, apiGetPublic, apiPost, apiPatch, apiDelete, getAdminToken } from '@/lib/api-client';
 import type { Craft } from '@/types';
 
 interface WagtailCraftResponse {
@@ -50,12 +50,12 @@ function mapCraft(raw: WagtailCraftResponse): Craft {
 // cultural material. An empty result now stays empty.
 
 export async function getAllCrafts(): Promise<Craft[]> {
-  const data = await apiGet<WagtailListResponse>('/api/v2/crafts/?fields=*');
+  const data = await apiGetPublic<WagtailListResponse>('/api/v2/crafts/?fields=*');
   return data.items.map(mapCraft);
 }
 
 export async function getCraftBySlug(slug: string): Promise<Craft | null> {
-  const data = await apiGet<WagtailListResponse>(`/api/v2/crafts/?slug=${slug}&fields=*`);
+  const data = await apiGetPublic<WagtailListResponse>(`/api/v2/crafts/?slug=${slug}&fields=*`);
   if (data.items.length > 0) return mapCraft(data.items[0]);
   return null;
 }

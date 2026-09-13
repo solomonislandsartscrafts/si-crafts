@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import type { Product, Maker } from '@/types';
 import { MakerFilter } from '@/components/catalogue/maker-filter';
-import { CategoryFilter } from '@/components/catalogue/category-filter';
 import { SearchInput } from '@/components/catalogue/search-input';
 import { ProductGrid } from '@/components/catalogue/product-grid';
 import { StockistProductGrid } from '@/components/catalogue/stockist-product-grid';
@@ -31,18 +30,12 @@ const STOCKIST_SORTS: { value: SortKey; label: string }[] = [
   { value: 'price-desc', label: 'Price (high to low)' },
 ];
 
-/**
- * The small caps label above each control in the filter rail. Defined once
- * rather than retyped per section — the same reason `inputClasses` exists.
- * `text-xs` is legitimate here: these are field labels, not reading content.
- */
-const filterLabelClasses =
-  'text-xs font-semibold uppercase tracking-wide text-warm-gray-400';
-
 interface CatalogueClientProps {
   products: Product[];
   makers: Maker[];
   materialCategories: MaterialCategoryOption[];
+  /** Seed for the search field, from the `?q=` param the header search sets. */
+  initialQuery?: string;
   /** Admin-editable copy, passed down so this stays a pure client component. */
   emptyTitle: string;
   emptyDescription: string;
@@ -52,14 +45,25 @@ export function CatalogueClient({
   products,
   makers,
   materialCategories,
+  initialQuery = '',
   emptyTitle,
   emptyDescription,
 }: CatalogueClientProps) {
   const [selectedMaker, setSelectedMaker] = useState<string | null>(null);
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [isStockist, setIsStockist] = useState(false);
+
+  // `initialQuery` seeds the field from the `?q=` param, but on client-side
+  // navigation (the header search setting a new `?q=`) React keeps this
+  // component mounted, so the initial value alone would leave the field and
+  // results showing the previous query. Re-sync whenever the incoming query
+  // changes. Local user edits still win between navigations — this only fires
+  // when the seed itself changes.
+  useEffect(() => {
+    setSearchQuery(initialQuery);
+  }, [initialQuery]);
 
   // Confirm the session with the backend rather than trusting the presence of
   // a localStorage key, so an expired token stops showing wholesale pricing.
@@ -168,163 +172,111 @@ export function CatalogueClient({
     setSortKey(null);
   }
 
-  // Material options as a compact Select — used only in the mobile filter bar.
-  // The desktop rail keeps the CategoryFilter list; on a phone a single-line
-  // dropdown is far lighter than an expanding panel of stacked controls.
+  // Material as a compact Select — the top bar puts every control on one row,
+  // so the vertical CategoryFilter list (which suited the old left rail) is
+  // replaced by a single-line dropdown that sits beside search and maker.
   const materialSelectOptions = materialCategories.map((c) => ({
     value: c.value,
     label: c.label,
   }));
 
-  // The filter controls, shared between the desktop rail and the mobile stacked
-  // layout — same markup, different container.
-  //
-  // Order is deliberate and it is not the order these were originally in:
-  // Search, then Material, then Maker. Search is the shortest path for a visitor
-  // who already knows what they want ("bowl", a product code), so it goes first.
-  // It used to sit third, below a six-item material list, which buried the one
-  // control that can answer a specific question in one action.
-  //
-  // Sort is NOT here. It orders results rather than narrowing them, so it lives
-  // beside the result count above the grid — see the product column below.
-  const filtersPanel = (
-    <div className="space-y-md">
-      <div className="flex flex-col gap-2xs">
-        <span className={filterLabelClasses}>Search</span>
-        <SearchInput value={searchQuery} onChange={setSearchQuery} fullWidth />
-      </div>
-
-      <div className="flex flex-col gap-2xs">
-        <span className={filterLabelClasses}>Material</span>
-        <CategoryFilter
-          selected={selectedMaterial}
-          onChange={setSelectedMaterial}
-          options={materialCategories}
-        />
-      </div>
-
-      <div className="flex flex-col gap-2xs">
-        <span className={filterLabelClasses}>Maker</span>
-        <MakerFilter
-          makers={makers}
-          selected={selectedMaker}
-          onChange={setSelectedMaker}
-        />
-      </div>
-
-      {hasActiveFilters && (
-        <Button variant="secondary" size="sm" fullWidth onClick={clearFilters}>
-          Clear all filters
-        </Button>
-      )}
-    </div>
-  );
-
   return (
     <div className="site-container pb-section">
-      {/* Mobile filter bar — lightweight, inline, and always visible below lg.
-          Replaces the old "Filters" toggle that expanded the full stacked rail
-          (search + material list + maker select + clear) and pushed the grid
-          down the page. On a phone the two controls a visitor reaches for most —
-          search and material — sit in one compact row that reflows to two lines
-          on the narrowest screens. Maker filtering stays on the desktop rail;
-          on mobile, search covers a maker's name. */}
-      <div className="mb-stack flex flex-wrap items-center gap-sm lg:hidden">
-        <div className="flex-1 min-w-[12rem]">
+      {/* Horizontal filter bar across the top — Search, Material, Maker and Sort
+          all in one row, so the grid below runs the full page width. This
+          replaces the old left rail (260px sidebar) + separate mobile bar: one
+          layout for every breakpoint, controls up top, results underneath.
+
+          Order is deliberate: Search, Material, Maker — the three controls that
+          narrow the results ("show me fewer things") — then a flexible gap, then
+          Sort pushed to the right, since it reorders rather than narrows. Search
+          leads because it is the shortest path for a visitor who already knows
+          what they want (a product type, a product code).
+
+          The row wraps on narrow screens (`flex-wrap`): search takes a flexible
+          first slot, then the selects stack under it on a phone. Every control
+          is 44px tall (h-11) so the bar reads as one aligned strip. No boxed
+          panel — a near-white fill on a white page adds weight without adding
+          separation (the same conclusion the filter rail and poster card
+          reached); the `mb-block` gap below the bar does the separating. */}
+      <div className="mb-block flex flex-wrap items-center gap-sm">
+        <div className="min-w-[12rem] flex-1 sm:max-w-xs">
           <SearchInput value={searchQuery} onChange={setSearchQuery} fullWidth />
         </div>
+
         <Select
-          id="material-mobile"
+          id="material-filter"
           value={selectedMaterial}
           onChange={setSelectedMaterial}
           options={materialSelectOptions}
           placeholder="All materials"
           label="Filter by material"
         />
+
+        <MakerFilter
+          makers={makers}
+          selected={selectedMaker}
+          onChange={setSelectedMaker}
+        />
+
         {hasActiveFilters && (
           <Button variant="secondary" size="sm" onClick={clearFilters}>
             Clear
           </Button>
         )}
-      </div>
 
-      {/* Sidebar (desktop) + grid. On mobile this collapses to a single column
-          (the rail is hidden, replaced by the compact bar above); from lg it
-          becomes a fixed 260px rail on the left with the products beside it. */}
-      <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-block items-start">
-        {/* Filter rail — desktop only (`hidden lg:block`), sticky so it stays in
-            view as the grid scrolls. Mobile uses the compact bar above instead,
-            so the full stacked panel never pushes the grid down the page.
-            No panel: this was a `bg-warm-gray-100` (#FAFAFA) box with a
-            `border-sand` outline and `p-md`. On a white page a near-white fill
-            adds weight without adding separation — the same conclusion the
-            poster card reached when it dropped the panel around its caption.
-            The `gap-block` (32 → 64px) between rail and grid already separates
-            them, so the labels and options can do the work unboxed. */}
-        <aside
-          id="catalogue-filters"
-          aria-label="Filter products"
-          className="hidden lg:sticky lg:top-24 lg:block"
-        >
-          {filtersPanel}
-        </aside>
-
-        {/* Product column */}
-        <div>
-          {/* Result count + sort, on one row above the grid.
-              Sort belongs here rather than in the filter rail: it reorders the
-              results instead of narrowing them, and this is where the visitor is
-              already looking once the count changes. It also keeps the rail to
-              three controls that all answer "show me fewer things". */}
-          <div className="mb-stack flex flex-wrap items-center justify-between gap-sm">
-            <p
-              className="text-base text-warm-gray-600"
-              aria-live="polite"
-              aria-atomic="true"
-            >
-              {filteredProducts.length === 0 ? (
-                emptyTitle
-              ) : (
-                <>
-                  <span className="font-semibold text-warm-gray-800">
-                    {filteredProducts.length}
-                  </span>{' '}
-                  {filteredProducts.length === 1 ? 'piece' : 'pieces'}
-                </>
-              )}
-            </p>
-
-            <Select
-              id="sort"
-              value={sortKey}
-              onChange={(v) => setSortKey((v as SortKey) || null)}
-              options={sortOptions}
-              placeholder="Featured"
-              label="Sort products"
-              align="right"
-            />
-          </div>
-
-          {/* A single flat grid — no per-material section headings. The craft
-              filter already narrows by category. */}
-          {filteredProducts.length === 0 ? (
-            <EmptyState
-              icon={PackageSearch}
-              title={emptyTitle}
-              description={emptyDescription}
-              action={
-                <Button variant="secondary" size="sm" onClick={clearFilters}>
-                  Clear all filters
-                </Button>
-              }
-            />
-          ) : isStockist ? (
-            <StockistProductGrid products={filteredProducts} makers={makers} />
-          ) : (
-            <ProductGrid products={filteredProducts} makers={makers} />
-          )}
+        {/* Sort pushed to the right edge of the bar (`ml-auto`), separated from
+            the narrowing controls. Falls to the next line on a phone with the
+            rest. */}
+        <div className="ml-auto">
+          <Select
+            id="sort"
+            value={sortKey}
+            onChange={(v) => setSortKey((v as SortKey) || null)}
+            options={sortOptions}
+            placeholder="Featured"
+            label="Sort products"
+            align="right"
+          />
         </div>
       </div>
+
+      {/* Result count above the full-width grid. */}
+      <p
+        className="mb-stack text-base text-warm-gray-600"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {filteredProducts.length === 0 ? (
+          emptyTitle
+        ) : (
+          <>
+            <span className="font-semibold text-warm-gray-800">
+              {filteredProducts.length}
+            </span>{' '}
+            {filteredProducts.length === 1 ? 'piece' : 'pieces'}
+          </>
+        )}
+      </p>
+
+      {/* A single flat, full-width grid — no per-material section headings. The
+          material filter already narrows by category. */}
+      {filteredProducts.length === 0 ? (
+        <EmptyState
+          icon={PackageSearch}
+          title={emptyTitle}
+          description={emptyDescription}
+          action={
+            <Button variant="secondary" size="sm" onClick={clearFilters}>
+              Clear all filters
+            </Button>
+          }
+        />
+      ) : isStockist ? (
+        <StockistProductGrid products={filteredProducts} makers={makers} />
+      ) : (
+        <ProductGrid products={filteredProducts} makers={makers} />
+      )}
     </div>
   );
 }

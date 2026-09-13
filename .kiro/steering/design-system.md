@@ -161,8 +161,8 @@ Defined in `globals.css`. Use these rather than inventing new dividers:
 | `.flag-mark` | 4px × 64px | Stub under interior page titles |
 
 `<Logo>` (`src/components/layout/logo.tsx`) is the brand lockup: the SIAC logo
-image (`/images/sica logo.png`), which already contains the frangipani mark and
-the "Solomon Islands Arts & Crafts" wordmark. Never set text beside it.
+image (`/images/sica logo new.png`), which already contains the frangipani mark
+and the "Solomon Islands Arts & Crafts" wordmark. Never set text beside it.
 
 - Sized by height with `w-auto` (`h-10 sm:h-11`) so the artwork cannot distort.
 - Renders `alt=""` on purpose: it always sits inside a link that carries its own
@@ -195,12 +195,12 @@ bugs.
 | `3xs` | 4px | Hairline nudges, icon-to-baseline alignment |
 | `2xs` | 8px | Heading → its own subtitle; icon → its label |
 | `xs` | 12px | Button rows, chip rows, inline metadata |
-| `sm` | 16px | Card padding, tight stacks, grid gutters (mobile) |
-| `md` | 24px | Roomier card padding, block internals, grid gutters (desktop) |
-| `lg` | 32px | Heading → content (desktop) |
-| `xl` | 48px | Section band padding (mobile), page gutter (desktop) |
-| `2xl` | 64px | Block separation (desktop) |
-| `3xl` | 96px | Section band padding (desktop) |
+| `sm` | 16px | Card padding, grid gutters (both breakpoints), page gutter (mobile), heading → content + page padding (mobile) |
+| `md` | 24px | Roomier card padding, block internals, heading → content + page padding (desktop), section band padding (mobile) |
+| `lg` | 32px | Section band padding (desktop), block separation (desktop) |
+| `xl` | 48px | Page gutter (desktop) |
+| `2xl` | 64px | Section band padding (desktop) |
+| `3xl` | 96px | Unused by the semantic layer in the compact rhythm; available for one-off large gaps |
 
 Usable as `p-md`, `gap-lg`, `mt-2xs`, `space-y-md`, `-mx-2xl`, and so on.
 
@@ -222,11 +222,20 @@ reintroduces the per-call-site drift they exist to prevent.
 | Token | Mobile | Desktop | Use |
 |-------|--------|---------|-----|
 | `gutter` | 16px | 48px @920 | Page side gutters (via `.site-px`) |
-| `page` | 24px | 32px @920 | Whole-page top/bottom padding (via `.page-y`) |
-| `section` | 48px | 96px @1024 | Between major page sections (via `.section-y`) |
-| `block` | 32px | 64px @1024 | Between blocks inside one section |
-| `stack` | 24px | 32px @1024 | Section heading/subtitle → the content below |
-| `grid` | 16px | 24px @920 | Card grid gutters, both axes |
+| `page` | 12px | 16px @920 | Whole-page top/bottom padding (via `.page-y`) |
+| `section` | 24px | 48px @1024 | Between major page sections (via `.section-y`) |
+| `block` | 16px | 24px @1024 | Between blocks inside one section |
+| `stack` | 12px | 16px @1024 | Section heading/subtitle → the content below |
+| `grid` | 12px | 16px @1024 | Card grid gutters, both axes |
+
+This is the DENSE rhythm: sections sit close together for a tight, card-led look
+(modelled on health.govt.nz), rather than the airy spacing the site launched
+with. The values are still every one on the 4px raw scale, and the descent
+`grid ≤ stack ≤ block ≤ section` still holds — but several rungs now sit close
+together, so the hierarchy is a gentle descent rather than a strict one. If you
+need the original airy rhythm back, the launch values were `page` 24→32,
+`section` 48→96, `block` 32→64, `stack` 24→32, `grid` 16→24 — change them in the
+one place they live, `globals.css`.
 
 The desktop `gutter` is 48px, not 64px. The gutter is pure margin — every pixel
 of it comes off the content column, and on an image-led wholesale catalogue that
@@ -239,21 +248,21 @@ noticeably narrower than they needed to be. 48px is still three rungs above the
 Largest to smallest. This ordering is the whole point of the system — check any
 new spacing against it:
 
-1. **`section`** (48 → 96) between major page sections — hero, "Meet the
+1. **`section`** (24 → 48) between major page sections — hero, "Meet the
    makers", "Featured Crafts", the CTA band, "Latest news", the footer.
-2. **`block`** (32 → 64) between blocks inside one section. Deliberately exactly
-   half of `section` at both breakpoints, so a block break can never be mistaken
-   for a section break.
-3. **`stack`** (24 → 32) from a section heading down to the content it
+2. **`block`** (16 → 24) between blocks inside one section. Exactly half of
+   `section` on desktop (24 vs 48) and three-quarters on mobile (16 vs 24), so a
+   block break always reads lighter than a section break. The load-bearing rule
+   is `block < section`, which holds at both breakpoints.
+3. **`stack`** (12 → 16) from a section heading down to the content it
    introduces.
-4. **`grid`** (16 → 24) between cards in a grid — the smallest structural gap,
-   and a clear rung below `stack`. That gap between rungs 3 and 4 is
-   load-bearing. The two used to be equal (24 → 32 each), which meant the space
-   under a section heading was exactly the space between two cards: nothing
-   marked where the heading ended and the grid began, and a row of tiles read as
-   separate objects rather than one block of imagery. Roughly 1:2 between the
-   grid gutter and the heading gap is what makes a grid cohere under its
-   heading. If you widen `grid`, widen `stack` with it.
+4. **`grid`** (12 → 16) between cards in a grid — the smallest structural gap,
+   at or below `stack`. In the compact rhythm the desktop grid gutter (16) sits
+   at the heading gap (`stack` 16), so a row of tiles still reads as one block
+   of imagery under its heading rather than as separate objects. Keep
+   `grid ≤ stack`: if you widen `grid`, widen `stack` with it. Both step to 16px
+   on the SAME 1024px breakpoint, so the invariant holds at every width — a
+   16px grid gutter never lands above a 12px stack gap in the 920–1023px range.
 5. **`2xs`** (8px) between a heading and its own subtitle, an icon and its label,
    or any other pair that has to read as one unit.
 
@@ -266,28 +275,29 @@ step down to the content grid. If a heading has no subtitle it still takes
 
 Padding inside a component is never larger than the gap separating it from its
 neighbours. Card padding is `sm` (16) or `md` (24) against a `grid` gutter of
-16 → 24. Check this whenever you add a card or panel variant.
+12 → 16 (compact rhythm). Check this whenever you add a card or panel variant.
 
-Note the margin here is now zero rather than comfortable: `sm` padding EQUALS the
-gutter at both breakpoints, and `md` padding exceeds the mobile gutter. So `p-md`
-is no longer safe on a panel that sits inside a card grid. Poster cards have no
-panel padding at all — their only internal spacing is the 12px frame → caption —
-so this only bites if you add a padded panel variant to a grid. `p-md` remains
-correct everywhere else (note boxes, admin panels, standalone panels).
+Note the margin here is now zero or negative: `sm` padding meets or exceeds the
+gutter (16 vs 12 on mobile, 16 vs 16 on desktop), and `md` (24) padding EXCEEDS
+the gutter at both breakpoints. So `p-md` is not safe on a panel that sits inside
+a card grid. Poster cards have no panel padding at all — their only internal
+spacing is the 12px frame → caption — so this only bites if you add a padded
+panel variant to a grid. `p-md` remains correct everywhere else (note boxes,
+admin panels, standalone panels).
 
 ### Mobile is the same ladder, one rung down
 
 Every semantic token steps to a smaller rung of the **same** scale on small
-screens — it never switches to a different set of numbers. `section` (48 → 96)
-and `block` (32 → 64) are both exactly 1:2.
+screens — it never switches to a different set of numbers. `section` (24 → 48)
+is exactly 1:2; `block`, `stack` and `page` step by one rung.
 
 ### Utilities in `globals.css`
 
 | Class | Value | Use |
 |-------|-------|-----|
-| `.page-y` | `--page-y` (24 → 32) | Top/bottom padding for a whole page |
-| `.section-y` | `--section-y` (48 → 96) | Padding for a major band within a page |
-| `.site-px` | `--gutter` (16 → 64) | Page gutters, nothing else |
+| `.page-y` | `--page-y` (12 → 16) | Top/bottom padding for a whole page |
+| `.section-y` | `--section-y` (24 → 48) | Padding for a major band within a page |
+| `.site-px` | `--gutter` (16 → 48) | Page gutters, nothing else |
 | `.site-container` | `.site-px` + `max-width:1440px` + centred | The standard page container |
 
 `.page-y` and `.section-y` live in the `components` layer, so **any Tailwind
@@ -606,7 +616,7 @@ Fixed, and each position is load-bearing. Do not reorder without re-reading why:
 
 **Banner size.** Every banner is the SAME height regardless of how much text it
 holds, so the bands read as one consistent device across the site. The band has
-a fixed `min-h-[17rem]` (`tabtop:min-h-[19rem]`) with `flex items-center`, so a
+a fixed `min-h-[20rem]` (`tabtop:min-h-[21rem]`) with `flex items-center`, so a
 short header (one-line title, no metadata — Catalogue) and a tall one (two-line
 title + a stats row — Makers) fill the same block with their content optically
 centred. Banner height is a deliberate one-off dimension — it is NOT on the 4px
@@ -614,10 +624,13 @@ spacing scale, and it is the one sanctioned arbitrary height. Width is the
 standard `max-w-site` + `site-px`, identical to the page body below, so the band
 never changes width between pages and the text lines up with the content.
 
-**Banner spacing.** `py-block` (32 → 64) top and bottom is a floor inside the
-band (so an unusually long intro can still grow it past the min-height rather
-than overflow), balanced top and bottom. The gap from the band down to the page
-content is `mb-block` (32 → 64) on the `<section>` itself: a coloured band
+**Banner spacing.** `py-xl` (48) top and bottom is a floor inside the band (so
+an unusually long intro can still grow it past the min-height rather than
+overflow), balanced top and bottom. `py-xl` rather than `py-block`: a smaller
+vertical padding leaves more room for content INSIDE the fixed height, so the
+`min-h` reliably governs the band height and the tallest banner (Makers) does
+not push the band past it. The gap from the band down to the page
+content is `mb-block` (16 → 24) on the `<section>` itself: a coloured band
 cannot create that gap with bottom padding (that only grows the band), so it
 lives as an outside margin. Pages that follow a banner add NO top padding of
 their own — the `mb-block` is the whole gap. `block` (a rung below `section`) is
@@ -967,8 +980,8 @@ need a 44px+ hit area (`tap-target`).
 | default | 0–639 | Mobile, single column |
 | `sm:` | 640+ | 2-column grids |
 | `md:` | 768+ | 2-col text splits |
-| `tabtop:` | 920+ | **`--gutter` 16→48px; `--grid-gap` 16→24px; `--page-y` 24→32px** |
-| `lg:` | 1024+ | 3-column grids, **desktop nav appears**; `--section-y` 48→96px, `--block-y` 32→64px, `--stack-y` 24→32px |
+| `tabtop:` | 920+ | **`--gutter` 16→48px; `--page-y` 16→24px** (`--grid-gap` stays 16px) |
+| `lg:` | 1024+ | 3-column grids, **desktop nav appears**; `--section-y` 32→64px, `--block-y` 24→32px, `--stack-y` 16→24px |
 | `xl:` | 1280+ | 4-column grids |
 
 `tabtop` is declared in `theme.screens` (not `theme.extend.screens`) so it is

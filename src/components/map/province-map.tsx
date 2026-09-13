@@ -244,7 +244,7 @@ export function SolomonIslandsProvinceMap({
                   onClick={() => onProvinceSelect(province === selectedProvince ? null : province)}
                   onMouseEnter={() => handleLabelEnter(province)}
                   onMouseLeave={() => handleLabelLeave(province)}
-                  className={`absolute inline-flex items-center rounded-full border px-2xs py-3xs text-[11px] font-semibold uppercase tracking-wide shadow-card transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean ${
+                  className={`focus-ring absolute inline-flex items-center rounded-full border px-xs py-2xs text-[11px] font-semibold uppercase tracking-wide shadow-card transition-colors cursor-pointer ${
                     isActive || isSelected
                       ? 'border-ocean bg-ocean text-white'
                       : 'border-sand bg-white text-deep-blue hover:border-ocean hover:text-ocean'
