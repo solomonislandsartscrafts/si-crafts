@@ -102,6 +102,15 @@ DATABASES = {
     )
 }
 
+# `dumpdata` streams rows through a named server-side cursor. Render's Postgres
+# sits behind a connection pooler that does not preserve that cursor between
+# fetches, so a remote `dumpdata` (the production backup script) fails with
+# 'cursor "_django_curs_..." does not exist'. Setting this env var for the
+# backup run makes Django fetch client-side instead, which the tiny free-tier
+# DB handles easily. Off by default so normal request handling is unaffected.
+if os.environ.get("DISABLE_SERVER_SIDE_CURSORS") == "1":
+    DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
+
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},

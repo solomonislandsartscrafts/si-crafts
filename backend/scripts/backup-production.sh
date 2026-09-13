@@ -89,7 +89,11 @@ esac
 # --natural-foreign lets FKs to contenttypes/users resolve by name on load,
 # which is what makes excluding contenttypes safe. Page primary keys are left
 # intact because Wagtail's treebeard paths depend on them.
-DATABASE_URL="$DUMP_DATABASE_URL" "$PYTHON" manage.py dumpdata \
+# Render's Postgres sits behind a connection pooler that drops the server-side
+# cursor dumpdata streams through, which fails with 'cursor "_django_curs_..."
+# does not exist'. This flag (read in settings.py) switches dumpdata to a
+# client-side fetch, which the small free-tier DB handles easily.
+DATABASE_URL="$DUMP_DATABASE_URL" DISABLE_SERVER_SIDE_CURSORS=1 "$PYTHON" manage.py dumpdata \
   --natural-foreign \
   --indent 2 \
   --exclude contenttypes \
