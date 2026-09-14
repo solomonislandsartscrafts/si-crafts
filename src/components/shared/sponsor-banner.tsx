@@ -3,6 +3,7 @@ import type { Supporter } from '@/types';
 import { resolveImageUrl } from '@/lib/api-client';
 import { getSupportersSafe } from '@/services/supporters';
 import { getSiteTextSafe } from '@/services/site-text';
+import { getShowSupportersSafe } from '@/services/supporters-visibility';
 
 /** Below this count the band uses the credit line rather than the wall. */
 const WALL_THRESHOLD = 3;
@@ -56,7 +57,14 @@ export async function SponsorBanner({
   contained = true,
   padded = true,
 }: SponsorBannerProps = {}) {
-  const [supporters, text] = await Promise.all([getSupportersSafe(), getSiteTextSafe()]);
+  const [supporters, text, show] = await Promise.all([
+    getSupportersSafe(),
+    getSiteTextSafe(),
+    getShowSupportersSafe(),
+  ]);
+
+  // Admin has turned the whole band off — hide it regardless of supporters.
+  if (!show) return null;
 
   // A supporter with no artwork would render an empty box.
   const visible = supporters.filter((supporter) => supporter.logoUrl);

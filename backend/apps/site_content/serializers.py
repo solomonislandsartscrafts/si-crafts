@@ -52,6 +52,7 @@ FIELD_MAP = {
     "homepageCtaText": "homepage_cta_text",
     "homepageMakersHeading": "homepage_makers_heading",
     "homepageMakersIntro": "homepage_makers_intro",
+    "showSupporters": "show_supporters",
     # About page text
     "aboutPageIntro": "about_page_intro",
     "aboutSolomonIslandsHeading": "about_solomon_islands_heading",
@@ -113,6 +114,9 @@ class SiteContentSerializer(serializers.Serializer):
     homepage_intro = serializers.CharField(required=False, allow_blank=True, default="")
     homepage_cta_text = serializers.CharField(required=False, allow_blank=True, default="", max_length=100)
     homepage_makers_heading = serializers.CharField(required=False, allow_blank=True, default="", max_length=200)
+    # Show/hide the homepage "Supported by" band. Real boolean, defaulting False
+    # so the band stays hidden until an admin explicitly turns it on.
+    show_supporters = serializers.BooleanField(required=False, default=False)
     homepage_makers_intro = serializers.CharField(required=False, allow_blank=True, default="")
     # About
     about_page_intro = serializers.CharField(required=False, allow_blank=True, default="")
@@ -195,6 +199,10 @@ class SiteContentSerializer(serializers.Serializer):
             # JSON fields return dict/list, not string — pass through as-is
             if snake_field in ("slideshow_settings", "announcement"):
                 result[camel_key] = value if value else {}
+            # Boolean toggle — pass the real bool through, not `value or ""`
+            # (which would stringify False to "" and read as "off" everywhere).
+            elif snake_field == "show_supporters":
+                result[camel_key] = bool(value)
             else:
                 result[camel_key] = value or ""
         return result

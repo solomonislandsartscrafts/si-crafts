@@ -37,7 +37,7 @@ export function SiteJsonLd() {
     url: SITE_URL,
     logo: {
       '@type': 'ImageObject',
-      url: absoluteUrl('/images/sica%20logo.png'),
+      url: absoluteUrl('/images/sica%20logo%20new.png'),
     },
     description:
       'Wholesale supplier of authentic Solomon Islands handicrafts — pandanus weaving, wood carving and shell-money jewellery — to Australian museum and gallery shops.',

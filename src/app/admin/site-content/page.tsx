@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Save, AlertTriangle } from 'lucide-react';
+import { Save, AlertTriangle, Eye, EyeOff } from 'lucide-react';
 import type { SiteContent } from '@/types';
 import { AdminLayout } from '@/components/admin';
 import { ImageUpload } from '@/components/admin/image-upload';
@@ -29,9 +29,11 @@ import { useModalA11y } from '@/lib/use-modal-a11y';
  */
 const IMAGES_TAB = 'images';
 const BRANDING_TAB = 'branding';
+const HOMEPAGE_TAB = 'homepage';
 
+// Homepage is rendered explicitly (not via this map) so it can receive the
+// extra supporters-toggle props. Every other page has only string fields.
 const SITE_CONTENT_EDITORS: Record<string, React.ComponentType<TabProps>> = {
-  homepage: HomepageTab,
   about: AboutTab,
   wholesale: WholesaleTab,
   'care-guide': CareGuideTab,
@@ -86,6 +88,16 @@ export default function AdminSiteContentPage() {
   const [content, setContent] = useState<SiteContent>(EMPTY);
   const [text, setText] = useState<SiteTextMap>({});
   /**
+   * The homepage "Supported by" band on/off toggle. Kept as its own state and
+   * saved via its own service (like the announcement banner and slideshow),
+   * because it is a real boolean and the SiteContent string store cannot carry
+   * one. `initialShowSupporters` lets save skip the write when it is unchanged.
+   */
+  // Initialised to false to match the "hidden until turned on" default, so the
+  // toggle does not flash "ON" before the real value loads from the backend.
+  const [showSupporters, setShowSupporters] = useState(false);
+  const [initialShowSupporters, setInitialShowSupporters] = useState(false);
+  /**
    * The copy as loaded, so save can send only what changed. Sending everything
    * would freeze today's manifest defaults into the database for all 169 keys,
    * and would let two admins editing different pages overwrite each other.
@@ -100,17 +112,22 @@ export default function AdminSiteContentPage() {
   useEffect(() => {
     async function load() {
       try {
-        const [{ getSiteContent }, { getSiteTextForAdmin }] = await Promise.all([
-          import('@/services/site-content'),
-          import('@/services/site-text'),
-        ]);
-        const [contentData, textData] = await Promise.all([
+        const [{ getSiteContent }, { getSiteTextForAdmin }, { getShowSupporters }] =
+          await Promise.all([
+            import('@/services/site-content'),
+            import('@/services/site-text'),
+            import('@/services/supporters-visibility'),
+          ]);
+        const [contentData, textData, showData] = await Promise.all([
           getSiteContent(),
           getSiteTextForAdmin(),
+          getShowSupporters(),
         ]);
         setContent(contentData);
         setText(textData);
         setInitialText(textData);
+        setShowSupporters(showData);
+        setInitialShowSupporters(showData);
         setLoadFailed(false);
       } catch {
         setLoadFailed(true);
@@ -150,6 +167,7 @@ export default function AdminSiteContentPage() {
   }
 
   const changedTextKeys = Object.keys(text).filter((key) => text[key] !== initialText[key]);
+  const supportersChanged = showSupporters !== initialShowSupporters;
 
   function handleSaveClick() {
     // Validate image alt text
@@ -177,6 +195,11 @@ export default function AdminSiteContentPage() {
 
     const changes = Object.fromEntries(changedTextKeys.map((key) => [key, text[key]]));
     let contentPublished = contentSavedRef.current;
+    // Track how far the save got, so the catch branch can name the phase that
+    // actually failed rather than always blaming the text write. Without this,
+    // a failed supporters toggle told the user to retry text that had already
+    // published.
+    let textPublished = changedTextKeys.length === 0;
 
     try {
       if (!contentPublished) {
@@ -192,19 +215,36 @@ export default function AdminSiteContentPage() {
         // Only now is this the published copy — moving it earlier made a failed
         // text write look saved and the unsaved-changes count drop to zero.
         setInitialText((prev) => ({ ...prev, ...changes }));
+        textPublished = true;
+      }
+
+      if (supportersChanged) {
+        const { updateShowSupporters } = await import('@/services/supporters-visibility');
+        await updateShowSupporters(showSupporters);
+        // Same "commit only after the write lands" rule as the text store.
+        setInitialShowSupporters(showSupporters);
       }
 
       contentSavedRef.current = false;
       toastSuccess('Site content published successfully.');
     } catch {
-      // Say which half landed. "Failed to save" was wrong half the time: the
-      // images and page copy had already published and only the text had not.
-      toastError(
-        contentPublished && changedTextKeys.length > 0
-          ? 'Images and page copy were published, but the text changes were not. ' +
-              'Press Save & Publish to retry just the text.'
-          : 'Nothing was published. Please try again.'
-      );
+      // Name the phase that failed. Report supporter-specific failure only when
+      // both the content and the text writes already landed — otherwise the
+      // failure is the text write (or nothing published at all), and we must not
+      // imply already-published text needs retrying.
+      let message: string;
+      if (!contentPublished) {
+        message = 'Nothing was published. Please try again.';
+      } else if (!textPublished) {
+        message =
+          'Images and page copy were published, but the text changes were not. ' +
+          'Press Save & Publish to retry just the text.';
+      } else {
+        message =
+          'Content was published, but the supporters section setting was not. ' +
+          'Press Save & Publish to retry just that setting.';
+      }
+      toastError(message);
     } finally {
       setSaving(false);
     }
@@ -231,12 +271,15 @@ export default function AdminSiteContentPage() {
               Edit text and images across all pages. Changes can take a few minutes to appear on
               the live site.
             </p>
-            {changedTextKeys.length > 0 && (
-              <p className="text-sm text-warning-text mt-3xs" role="status">
-                {changedTextKeys.length} unsaved{' '}
-                {changedTextKeys.length === 1 ? 'change' : 'changes'}
-              </p>
-            )}
+            {(() => {
+              const count = changedTextKeys.length + (supportersChanged ? 1 : 0);
+              if (count === 0) return null;
+              return (
+                <p className="text-sm text-warning-text mt-3xs" role="status">
+                  {count} unsaved {count === 1 ? 'change' : 'changes'}
+                </p>
+              );
+            })()}
           </div>
           <Button
             onClick={handleSaveClick}
@@ -275,6 +318,15 @@ export default function AdminSiteContentPage() {
               <SiteContentEditor content={content} update={update} />
             ) : null;
           })()}
+
+          {activeTab === HOMEPAGE_TAB && (
+            <HomepageTab
+              content={content}
+              update={update}
+              showSupporters={showSupporters}
+              onToggleSupporters={() => setShowSupporters((prev) => !prev)}
+            />
+          )}
 
           {activeTab === BRANDING_TAB && <BrandingTab content={content} update={update} />}
 
@@ -407,7 +459,12 @@ function ImagesTab({ content, update }: TabProps) {
   );
 }
 
-function HomepageTab({ content, update }: TabProps) {
+interface HomepageTabProps extends TabProps {
+  showSupporters: boolean;
+  onToggleSupporters: () => void;
+}
+
+function HomepageTab({ content, update, showSupporters, onToggleSupporters }: HomepageTabProps) {
   return (
     <>
       <Section title="Hero Section" description="The main heading and intro text visitors see first.">
@@ -415,6 +472,36 @@ function HomepageTab({ content, update }: TabProps) {
         <Field label="Heading" value={content.homepageMakersHeading} onChange={(v) => update('homepageMakersHeading', v)} placeholder="Handmade in Solomon Islands" />
         <TextArea label="Intro paragraph" value={content.homepageIntro} onChange={(v) => update('homepageIntro', v)} placeholder="Every product is handmade. When you buy from us..." rows={3} />
         <Field label="Primary CTA button text" value={content.homepageCtaText} onChange={(v) => update('homepageCtaText', v)} placeholder="Browse Catalogue" />
+      </Section>
+      <Section
+        title="Supported by"
+        description="The band of supporter/partner logos shown below the hero. Turn it off to hide the whole section from the homepage."
+      >
+        <button
+          type="button"
+          onClick={onToggleSupporters}
+          aria-pressed={showSupporters}
+          className={`focus-ring tap-target flex items-center gap-xs p-sm rounded-lg border-2 transition-colors w-full sm:w-auto ${
+            showSupporters ? 'border-ocean bg-ocean/5' : 'border-sand-dark bg-warm-gray-100'
+          }`}
+        >
+          <span
+            className={`flex items-center justify-center w-8 h-8 rounded-full ${
+              showSupporters ? 'bg-brand-green' : 'bg-warm-gray-400'
+            }`}
+          >
+            {showSupporters ? (
+              <Eye className="w-4 h-4 text-white" />
+            ) : (
+              <EyeOff className="w-4 h-4 text-white" />
+            )}
+          </span>
+          <span className="text-base font-medium text-deep-blue">
+            {showSupporters
+              ? 'Supporters section is ON — shown on the homepage'
+              : 'Supporters section is OFF — hidden'}
+          </span>
+        </button>
       </Section>
     </>
   );

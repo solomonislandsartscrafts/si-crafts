@@ -29,6 +29,10 @@ class SiteContent(models.Model):
     homepage_cta_text = models.CharField(max_length=100, blank=True, default="")
     homepage_makers_heading = models.CharField(max_length=200, blank=True, default="")
     homepage_makers_intro = models.TextField(blank=True, default="")
+    # Show/hide the "Supported by" band on the homepage. Defaults to False so the
+    # band stays hidden until an admin explicitly turns it on in Admin →
+    # Supporters — the section never appears until it is deliberately activated.
+    show_supporters = models.BooleanField(default=False)
 
     # --- About page text ---
     about_page_intro = models.TextField(blank=True, default="")
