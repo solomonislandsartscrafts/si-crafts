@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { X, Search, ChevronRight, LogIn, User, Shield } from 'lucide-react';
+import { X, ChevronRight, User, Shield } from 'lucide-react';
 import { useModalA11y } from '@/lib/use-modal-a11y';
 import { Logo } from './logo';
-import { HeaderSearch } from './header-search';
+import { ButtonLink } from '@/components/ui/button';
 
 // Primary destinations — each renders as a full-width row with a trailing
 // chevron, modelled on the health.govt.nz mobile menu. No leading icons: the
@@ -38,7 +38,6 @@ export function MobileNav({ isOpen, onClose, authState, logoSrc, logoAlt }: Mobi
   const pathname = usePathname();
   const [animating, setAnimating] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
 
   // Shared modal a11y: focus trap, Escape to close, body-scroll lock, and focus
   // restored to the hamburger trigger when the drawer closes. The hook focuses
@@ -67,7 +66,6 @@ export function MobileNav({ isOpen, onClose, authState, logoSrc, logoAlt }: Mobi
       return () => clearTimeout(enter);
     }
     setAnimating(false);
-    setSearchOpen(false);
     const timer = setTimeout(() => setMounted(false), 300);
     return () => clearTimeout(timer);
   }, [isOpen]);
@@ -88,9 +86,9 @@ export function MobileNav({ isOpen, onClose, authState, logoSrc, logoAlt }: Mobi
         animating ? 'translate-y-0 opacity-100' : '-translate-y-2xs opacity-0'
       }`}
     >
-      {/* Deep-blue top bar — the brand lockup (white ink on the dark surface),
-          a search toggle, and the close button. Mirrors the coloured bar in the
-          health.govt.nz overlay. */}
+      {/* Deep-blue top bar — the brand lockup (white ink on the dark surface)
+          and the close button. Mirrors the coloured bar in the health.govt.nz
+          overlay. */}
       <div className="flex items-center justify-between gap-sm bg-deep-blue px-md py-sm">
         <Link
           href="/"
@@ -100,38 +98,17 @@ export function MobileNav({ isOpen, onClose, authState, logoSrc, logoAlt }: Mobi
         >
           <Logo onDark src={logoSrc} alt={logoAlt} />
         </Link>
-        <div className="flex items-center gap-2xs">
-          <button
-            type="button"
-            onClick={() => setSearchOpen((open) => !open)}
-            className="focus-ring-on-dark tap-target flex items-center justify-center w-10 h-10 rounded-full text-white transition-colors hover:bg-white/10"
-            aria-label={searchOpen ? 'Close search' : 'Search the catalogue'}
-            aria-expanded={searchOpen}
-            aria-controls="mobile-nav-search"
-          >
-            {searchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
-          </button>
-          <button
-            onClick={onClose}
-            className="focus-ring-on-dark tap-target flex items-center justify-center w-10 h-10 rounded-full text-white transition-colors hover:bg-white/10"
-            aria-label="Close menu"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+        <button
+          onClick={onClose}
+          className="focus-ring-on-dark tap-target flex items-center justify-center w-10 h-10 rounded-full text-white transition-colors hover:bg-white/10"
+          aria-label="Close menu"
+        >
+          <X className="h-5 w-5" />
+        </button>
       </div>
 
       {/* Everything below the bar scrolls if it overflows a short viewport. */}
       <div className="flex-1 overflow-y-auto">
-        {/* Search — revealed by the top-bar toggle, closes the menu when it
-            runs (it navigates to the catalogue). Same component as the desktop
-            header search, so behaviour is shared. */}
-        {searchOpen && (
-          <div id="mobile-nav-search" className="border-b border-sand px-md py-sm">
-            <HeaderSearch onSubmit={onClose} />
-          </div>
-        )}
-
         {/* Primary links — full-width chevron rows. */}
         <nav aria-label="Main navigation">
           <ul className="site-px py-sm">
@@ -175,36 +152,40 @@ export function MobileNav({ isOpen, onClose, authState, logoSrc, logoAlt }: Mobi
             ))}
           </ul>
 
+          {/* Auth control — the same shared <ButtonLink> and variants the
+              desktop header uses (admin fill for admins, ocean outline for
+              stockist/logged-out), so the button matches every other button on
+              the site. `onClose` closes the drawer on navigation. */}
           <div className="mt-sm">
             {authState === 'admin' && (
-              <Link
+              <ButtonLink
                 href="/admin/dashboard"
                 onClick={onClose}
-                className="tap-target inline-flex items-center gap-2xs rounded-full border border-sand-dark px-md py-xs text-base font-medium text-deep-blue transition-colors hover:bg-sand-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+                variant="admin"
               >
-                <Shield className="w-5 h-5" aria-hidden="true" />
+                <Shield className="w-4 h-4" aria-hidden="true" />
                 Admin
-              </Link>
+              </ButtonLink>
             )}
             {authState === 'stockist' && (
-              <Link
+              <ButtonLink
                 href="/stockist/account"
                 onClick={onClose}
-                className="tap-target inline-flex items-center gap-2xs rounded-full border border-sand-dark px-md py-xs text-base font-medium text-deep-blue transition-colors hover:bg-sand-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+                variant="secondary"
               >
-                <User className="w-5 h-5" aria-hidden="true" />
+                <User className="w-4 h-4" aria-hidden="true" />
                 My Account
-              </Link>
+              </ButtonLink>
             )}
             {authState === 'none' && (
-              <Link
+              <ButtonLink
                 href="/login"
                 onClick={onClose}
-                className="tap-target inline-flex items-center gap-2xs rounded-full border border-sand-dark px-md py-xs text-base font-medium text-deep-blue transition-colors hover:bg-sand-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+                variant="secondary"
               >
-                <LogIn className="w-5 h-5" aria-hidden="true" />
+                <User className="w-4 h-4" aria-hidden="true" />
                 Login
-              </Link>
+              </ButtonLink>
             )}
           </div>
         </div>

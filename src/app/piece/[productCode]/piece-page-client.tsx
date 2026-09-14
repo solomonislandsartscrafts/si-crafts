@@ -269,15 +269,6 @@ export function PiecePageClient({
             </div>
           )}
 
-          {/* Share — a secondary action, so it sits quietly under the primary
-              CTA (Add to Order for stockists, the trade notice for public
-              visitors) and above the reference detail. Left-aligned in the
-              column with a thin rule above so it reads as its own line rather
-              than crowding the buy action. */}
-          <div className="mb-md flex items-center border-t border-sand pt-sm">
-            <ShareButtons title={product.name} />
-          </div>
-
           {/* Product details — the drier reference facts, collapsed so they
               don't compete with the description, provenance and buy action
               above. Part of a single-open accordion group with "How it's made"
@@ -399,6 +390,13 @@ export function PiecePageClient({
               note the page ends on, in their own words. Renders nothing unless
               the maker is published (consent gate lives in MakerSection). ─── */}
       <MakerSection maker={maker} craft={craft} />
+
+      {/* Share — moved to the foot of the page as the closing action, once the
+          visitor has read the piece and met the maker. A thin rule above marks
+          it off as its own line rather than crowding the maker section. */}
+      <div className="flex items-center border-t border-sand pt-sm">
+        <ShareButtons title={product.name} />
+      </div>
 
       {/* Sticky bottom bar — mobile only, stockists only */}
       {isStockist && showStickyBar && (
