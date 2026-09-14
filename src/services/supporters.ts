@@ -66,7 +66,7 @@ const BUNDLED_SUPPORTERS: Supporter[] = [
   {
     id: 'sica',
     name: 'SICA',
-    logoUrl: '/images/sica logo.png',
+    logoUrl: '/images/sica logo new.png',
     // The name is the accessible name, and the artwork is a wordmark saying the
     // same thing, so a separate alt would only repeat it.
     logoAlt: '',
