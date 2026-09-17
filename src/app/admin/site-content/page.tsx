@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/toast';
 import { pageTitleClasses } from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
 import { FormField, inputClasses } from '@/components/ui/form-field';
+import { Select } from '@/components/ui/select';
 import { SkeletonText } from '@/components/ui/skeleton';
 import { SITE_TEXT_GROUPS, type SiteTextField } from '@/lib/site-text-manifest';
 import type { SiteTextMap } from '@/services/site-text';
@@ -292,21 +293,27 @@ export default function AdminSiteContentPage() {
           </Button>
         </div>
 
-        {/* Tab navigation */}
-        <div className="flex gap-3xs border-b border-sand mb-md overflow-x-auto scrollbar-hide">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`focus-ring tap-target whitespace-nowrap px-sm py-xs text-sm font-medium border-b-2 transition-colors ${
-                activeTab === tab.id
-                  ? 'border-ocean text-ocean'
-                  : 'border-transparent text-warm-gray-600 hover:text-deep-blue hover:border-sand-dark'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        {/* Section chooser. There are ~14 sections — far too many to sit in a
+            readable tab strip at this container width, where the labels
+            overlapped into an unreadable row. A single labelled dropdown (the
+            shared <Select>) scales cleanly to any number of sections, is easy to
+            scan, and reuses the site's control rather than a cramped scroller. */}
+        <div className="mb-md flex flex-col gap-2xs border-b border-sand pb-md sm:flex-row sm:items-center sm:gap-sm">
+          <label
+            htmlFor="site-content-section"
+            className="text-sm font-medium text-warm-gray-600"
+          >
+            Editing section
+          </label>
+          <Select
+            id="site-content-section"
+            label="Choose the section to edit"
+            value={activeTab}
+            onChange={(value) => setActiveTab(value ?? TABS[0].id)}
+            options={TABS.map((tab) => ({ value: tab.id, label: tab.label }))}
+            className="sm:w-64"
+            fullWidth
+          />
         </div>
 
         {/* Tab content — the hand-written SiteContent editor for this page (if

@@ -81,15 +81,18 @@ const config: Config = {
         cream: '#FFFFFF',
         'page-bg': '#FFFFFF',
         'card-bg': '#FFFFFF',
-        // Subtle warm section band — the alternating body-section background.
-        // A barely-there warm off-white (NOT cool grey): it reads as a gentle
-        // change of surface so successive content sections are visually
-        // distinct, without the wireframe/disabled feel that bg-sand-light
-        // (#F0F0F0, a cool grey) gave and without fighting the warm craft
-        // palette. Dark body text on it is effectively unchanged for contrast
-        // (11.7:1 for warm-gray-800). Use via `.section-band` on a `.section-y`
-        // section, alternated with plain white sections — see globals.css.
-        'section-warm': '#FBF7F2',
+        // Subtle section band — the alternating body-section background.
+        // A barely-there neutral grey with a whisper of warmth: it reads as a
+        // gentle change of surface so successive content sections are visually
+        // distinct. Deliberately kept OFF the cold `bg-sand-light` (#F0F0F0),
+        // which reads as a wireframe/disabled surface and clashes with the warm
+        // craft photography — this sits just warm of neutral so it looks grey,
+        // not cream, without fighting the palette. Dark body text on it is
+        // effectively unchanged for contrast (~11.9:1 for warm-gray-800). Use
+        // via `.section-band` on a `.section-y` section, alternated with plain
+        // white sections — see globals.css. (Token name kept as `section-warm`
+        // so every call site and `.section-band` stay untouched.)
+        'section-warm': '#F4F4F3',
         // Footer — the darkest surface on the site, on purpose. It is the same
         // flag-blue hue as deep-blue (#1B3A4B) taken down in lightness, so it
         // stays on-brand while reading as a distinct, heavier anchor than the
