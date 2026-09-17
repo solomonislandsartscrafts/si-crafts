@@ -374,12 +374,20 @@ export function PosterCard({ href, children, ...frame }: PosterCardProps) {
         // card RESPONDS, not just the title. Three signals together —
         //   • a gentle lift (`-translate-y-1`) so the card physically rises,
         //   • the shadow steps up to `shadow-md` under the lift, and
-        //   • the panel warms to `section-warm` so the surface itself reacts
+        //   • the panel tints to `ocean/5` so the surface itself reacts
         // — plus the title going `ocean` (baked into `posterTitleClasses`) and
         // the image scaling (in `PosterFrame`). All on one `duration-200`
         // transition so they move as a unit. `prefers-reduced-motion` is handled
         // globally in `globals.css`, which neutralises the transform.
-        className="group block overflow-hidden rounded-lg bg-card-bg shadow-card transition-all duration-200 hover:-translate-y-1 hover:bg-section-warm hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ocean"
+        //
+        // The tint is `ocean/5`, NOT `section-warm`: the section band is itself
+        // `section-warm` (a subtle grey), so warming the card to the same value
+        // made it vanish into the band on hover. `ocean/5` is the design
+        // system's established subtle-interactive surface (setup wizard cards,
+        // selected toggles, info panels), so it stays clearly distinct on both
+        // the white page and the grey band, and its cool cast reinforces the
+        // same "interactive" cue the title's ocean colour gives.
+        className="group block overflow-hidden rounded-lg bg-card-bg shadow-card transition-all duration-200 hover:-translate-y-1 hover:bg-ocean/5 hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ocean"
       >
         <PosterFrame {...frame} bare />
         {/* Caption inside the panel, left-aligned at every width. `p-sm` gives

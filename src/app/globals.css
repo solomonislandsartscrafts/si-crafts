@@ -311,14 +311,16 @@
   }
 
   /* Alternating body-section surface.
-     Add to a `.section-y` content section to give it the subtle warm band
-     (`section-warm`, a barely-there warm off-white) instead of plain white, so
-     successive sections read as distinct surfaces. Deliberately WARM, not the
-     cool `bg-sand-light` grey — that clashes with the craft palette and reads
-     as a disabled/wireframe surface. This is the single source of truth for the
-     band: alternate plain-white sections with `.section-band` ones rather than
-     hand-rolling `bg-section-warm` at call sites. It does NOT set padding — it
-     composes with `.section-y`, which owns the vertical rhythm. */
+     Add to a `.section-y` content section to give it the subtle band
+     (`section-warm`, a barely-there neutral grey with a whisper of warmth)
+     instead of plain white, so successive sections read as distinct surfaces.
+     Deliberately kept off the cold `bg-sand-light` grey — that clashes with the
+     craft palette and reads as a disabled/wireframe surface; this sits just
+     warm of neutral so it looks grey, not cream. This is the single source of
+     truth for the band: alternate plain-white sections with `.section-band`
+     ones rather than hand-rolling `bg-section-warm` at call sites. It does NOT
+     set padding — it composes with `.section-y`, which owns the vertical
+     rhythm. */
   .section-band {
     background-color: theme('colors.section-warm');
   }

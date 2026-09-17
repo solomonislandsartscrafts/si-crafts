@@ -34,7 +34,7 @@ lead; the UI stays quiet.
 | `crest-red` | `#C0392B` | Error states only |
 | `cream` / `page-bg` | `#FFFFFF` | Page background — white |
 | `card-bg` | `#FFFFFF` | Card backgrounds — white |
-| `section-warm` | `#FBF7F2` | Alternating body-section band (via `.section-band`). Barely-there **warm** off-white — not cool grey |
+| `section-warm` | `#F4F4F3` | Alternating body-section band (via `.section-band`). Barely-there neutral **grey** with a whisper of warmth — reads grey, not cream, but deliberately off the cold `sand-light` grey |
 | `footer-bg` | `#0E2129` | Footer — deepest surface. Deep-blue hue taken darker; distinct from the deep-blue banners above it |
 | `footer-text` | `#FFFFFF` | Footer primary text |
 | `footer-muted` | `#CBD5DC` | Footer secondary text |
@@ -921,18 +921,20 @@ success, warning, error, info, neutral.
 
 ### Section backgrounds
 
-Body sections alternate between white (the page canvas) and a subtle **warm**
-band. The band is `section-warm` (`#FBF7F2`), applied with the `.section-band`
+Body sections alternate between white (the page canvas) and a subtle **grey**
+band. The band is `section-warm` (`#F4F4F3`), applied with the `.section-band`
 utility on a `.section-y` section — `.section-band` sets only the background and
 composes with `.section-y`, which still owns the vertical rhythm. It is a
-barely-there warm off-white so successive sections read as distinct surfaces
-without a hard edge.
+barely-there neutral grey with a whisper of warmth, so successive sections read
+as distinct surfaces without a hard edge, and it reads as grey rather than cream.
+(The token keeps the name `section-warm` so every call site and `.section-band`
+are unaffected by the value change.)
 
-Do NOT tint sections with `bg-sand-light` (`#F0F0F0`) — that is a cool grey, and
-between white bands it reads as a wireframe / disabled surface and clashes with
-the warm craft palette. The band is `section-warm`, never `sand-light`.
-`bg-sand-light` is still fine for small local surfaces (note boxes, admin
-panels), just not as a full-width section band.
+Do NOT tint sections with `bg-sand-light` (`#F0F0F0`) — that is a colder, darker
+grey, and between white bands it reads as a wireframe / disabled surface and
+clashes with the warm craft palette. The band is `section-warm`, never
+`sand-light`. `bg-sand-light` is still fine for small local surfaces (note
+boxes, admin panels), just not as a full-width section band.
 
 Alternate deliberately — do not band every section. A page of solid warm bands
 is as flat as a page of solid white. Warm and white take turns, so the warm
