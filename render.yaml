@@ -53,17 +53,25 @@ services:
       # suffix Render assigned) 404s.
       - key: WAGTAILADMIN_BASE_URL
         value: "https://si-crafts-iwcd.onrender.com"
+      # Email goes out over Resend's HTTP API, NOT SMTP.
+      #
+      # Render's free plan blocks outbound traffic to SMTP ports (25/465/587),
+      # so Gmail SMTP cannot deliver from here: the connection to
+      # smtp.gmail.com is dropped silently rather than refused, the send hangs,
+      # gunicorn kills the worker at 30s, and the visitor gets a 500 on a
+      # contact form that had already saved. Resend is HTTPS on 443, which is
+      # not blocked. Do not "restore" the SMTP backend here without also moving
+      # this service to a paid instance type.
+      #
+      # DEFAULT_FROM_EMAIL must use a domain verified in the Resend dashboard,
+      # or Resend rejects the send with a 403.
       - key: EMAIL_BACKEND
-        value: "django.core.mail.backends.smtp.EmailBackend"
-      - key: EMAIL_HOST
-        value: "smtp.gmail.com"
-      - key: EMAIL_PORT
-        value: "587"
-      - key: EMAIL_USE_TLS
-        value: "True"
-      - key: EMAIL_HOST_USER
+        value: "apps.notifications.email_backends.ResendEmailBackend"
+      - key: RESEND_API_KEY
         sync: false
-      - key: EMAIL_HOST_PASSWORD
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+      - key: ADMIN_NOTIFICATION_EMAIL
         sync: false
       - key: DJANGO_SUPERUSER_USERNAME
         value: "admin"

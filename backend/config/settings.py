@@ -208,8 +208,21 @@ CORS_ALLOW_HEADERS = [
 
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 
-# --- Email (SMTP) ---
-EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+# --- Email ---
+# Transport: Resend's HTTP API when a key is present, SMTP/console otherwise.
+#
+# Render's free plan blocks outbound SMTP (ports 25/465/587), so Gmail SMTP can
+# never deliver from production there — the connection is dropped silently and
+# hangs. Resend talks HTTPS on 443, which is not blocked. Setting RESEND_API_KEY
+# therefore switches transport automatically; an explicit EMAIL_BACKEND still
+# wins, so SMTP or the console backend can be forced when needed.
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "").strip()
+_default_email_backend = (
+    "apps.notifications.email_backends.ResendEmailBackend"
+    if RESEND_API_KEY
+    else "django.core.mail.backends.console.EmailBackend"
+)
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", _default_email_backend)
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True").lower() in ("true", "1", "yes")
