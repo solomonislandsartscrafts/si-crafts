@@ -21,4 +21,4 @@ Solomon Islands Arts & Crafts (SI Crafts / SIAC) is a volunteer-run **wholesale*
 - Only publish makers whose Consent status is "Signed" (controlled by a "Published to web" flag).
 - Orders are "expressions of interest" / wholesale order requests — bank transfer, not card payments.
 - Warn when a draft order exceeds A$1 000 (GST threshold note).
-- Target domain: solomonislandsartsandcrafts.com.au
+- Target domain: solomonislandsartscrafts.com.au

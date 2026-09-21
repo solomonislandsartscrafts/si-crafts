@@ -41,7 +41,7 @@ export function toPlainDescription(value: string | null | undefined): string {
  *
  * Env-driven rather than hardcoded because the site's public home has changed
  * once already and will change again: it currently answers on a workers.dev
- * subdomain, and moves to solomonislandsartsandcrafts.com.au once that domain
+ * subdomain, and moves to solomonislandsartscrafts.com.au once that domain
  * is registered. A canonical URL pointing at a host that doesn't resolve is
  * worse than none at all — Google follows it, gets NXDOMAIN, and drops the
  * page from the index. So this must always name the host actually serving the
@@ -56,7 +56,7 @@ export const SITE_URL = (
 ).replace(/\/+$/, '');
 
 /**
- * Just the hostname of SITE_URL, e.g. "solomonislandsartsandcrafts.com.au".
+ * Just the hostname of SITE_URL, e.g. "solomonislandsartscrafts.com.au".
  *
  * Exported so middleware can compare it against the incoming Host header
  * without re-reading and re-parsing the env var. One derivation, one source of

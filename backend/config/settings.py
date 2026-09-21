@@ -238,7 +238,7 @@ EMAIL_HOST_PASSWORD = re.sub(r"\s+", "", os.environ.get("EMAIL_HOST_PASSWORD", "
 # the send raises promptly, the caller's try/except logs it, and the request
 # returns 201 as it should.
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", "10"))
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "SIAC <noreply@solomonislandsartsandcrafts.com.au>")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "SIAC <noreply@solomonislandsartscrafts.com.au>")
 ADMIN_NOTIFICATION_EMAIL = os.environ.get("ADMIN_NOTIFICATION_EMAIL", DEFAULT_FROM_EMAIL)
 SITE_URL = os.environ.get("SITE_URL", FRONTEND_URL)
 
