@@ -2,6 +2,7 @@
 Django settings for SI Crafts Wagtail backend.
 """
 import os
+import re
 from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
@@ -212,8 +213,12 @@ EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.conso
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True").lower() in ("true", "1", "yes")
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "").strip()
+# Gmail app passwords are shown grouped with spaces (e.g. "abcd efgh ijkl mnop"),
+# and copy-pasting from Google's UI can introduce non-breaking spaces (U+00A0).
+# Those separators are not part of the password and break SMTP AUTH (ascii encode
+# error on login), so strip ALL whitespace — regular and non-breaking — here.
+EMAIL_HOST_PASSWORD = re.sub(r"\s+", "", os.environ.get("EMAIL_HOST_PASSWORD", "").replace("\xa0", ""))
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "SIAC <noreply@solomonislandsartsandcrafts.com.au>")
 ADMIN_NOTIFICATION_EMAIL = os.environ.get("ADMIN_NOTIFICATION_EMAIL", DEFAULT_FROM_EMAIL)
 SITE_URL = os.environ.get("SITE_URL", FRONTEND_URL)
