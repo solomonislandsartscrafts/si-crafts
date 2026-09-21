@@ -51,12 +51,31 @@ def _send(
 
 
 def _get_admin_emails() -> list[str]:
-    """Get all active admin email addresses for notifications."""
+    """Recipient(s) for admin notifications: the superuser's email address.
+
+    Notifications (new contact message, stockist application, order, etc.) are
+    the site owner's business, so they go to the Django superuser account —
+    a single, stable inbox — rather than fanning out to every active admin/editor.
+
+    Falls back gracefully so a notification is never dropped silently:
+      1. active superusers' emails,
+      2. else any active AdminProfile email,
+      3. else ADMIN_NOTIFICATION_EMAIL (env-configured).
+    """
+    from django.contrib.auth.models import User
     from apps.accounts.models import AdminProfile
+
+    superuser_emails = [
+        u.email
+        for u in User.objects.filter(is_superuser=True, is_active=True)
+        if u.email
+    ]
+    if superuser_emails:
+        return superuser_emails
+
     profiles = AdminProfile.objects.filter(is_active=True).select_related("user")
-    emails = [p.user.email for p in profiles if p.user.email]
-    # Fallback to ADMIN_NOTIFICATION_EMAIL if no admins found
-    return emails or [ADMIN_EMAIL]
+    admin_emails = [p.user.email for p in profiles if p.user.email]
+    return admin_emails or [ADMIN_EMAIL]
 
 
 # --- 1. Stockist Application Received (notify admins) ---
