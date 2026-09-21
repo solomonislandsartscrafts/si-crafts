@@ -34,7 +34,7 @@ export default async function CraftsAndTechniquesPage() {
             description={text['crafts.emptyDescription']}
             action={
               <ButtonLink href="/makers" variant="secondary" size="sm">
-                Meet the makers
+                {text['crafts.emptyActionLabel']}
               </ButtonLink>
             }
           />
@@ -55,9 +55,9 @@ export default async function CraftsAndTechniquesPage() {
         heading={text['crafts.ctaHeading']}
         description={text['crafts.ctaDescription']}
       >
-        <ButtonLink href="/makers">Meet the makers</ButtonLink>
+        <ButtonLink href="/makers">{text['crafts.ctaPrimaryButton']}</ButtonLink>
         <ButtonLink href="/catalogue" variant="secondary">
-          Browse the catalogue
+          {text['crafts.ctaSecondaryButton']}
         </ButtonLink>
       </PageCta>
     </div>

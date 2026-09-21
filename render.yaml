@@ -53,17 +53,16 @@ services:
       # suffix Render assigned) 404s.
       - key: WAGTAILADMIN_BASE_URL
         value: "https://si-crafts-iwcd.onrender.com"
-      - key: EMAIL_BACKEND
-        value: "django.core.mail.backends.smtp.EmailBackend"
-      - key: EMAIL_HOST
-        value: "smtp.gmail.com"
-      - key: EMAIL_PORT
-        value: "587"
-      - key: EMAIL_USE_TLS
-        value: "True"
-      - key: EMAIL_HOST_USER
+      # Email is sent via the Resend HTTP API (port 443). Render's free plan
+      # blocks outbound SMTP ports (25/465/587), so SMTP can never connect from
+      # here — settings.py auto-selects the Resend backend when RESEND_API_KEY
+      # is present. Do NOT set EMAIL_BACKEND here, or it overrides that choice.
+      - key: RESEND_API_KEY
         sync: false
-      - key: EMAIL_HOST_PASSWORD
+      # From address for all outgoing mail. Must be an address on a domain you
+      # have verified in Resend (e.g. noreply@solomonislandsartsandcrafts.com.au).
+      # Until the domain is verified, only Resend's onboarding@resend.dev works.
+      - key: DEFAULT_FROM_EMAIL
         sync: false
       - key: DJANGO_SUPERUSER_USERNAME
         value: "admin"

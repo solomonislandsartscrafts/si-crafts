@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Clock } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { getArticleBySlug, getPublishedArticles } from '@/services/articles';
+import { getSiteTextSafe } from '@/services/site-text';
 import { renderArticleHtml } from '@/lib/article-html';
 import { generatePageMetadata, toPlainDescription } from '@/lib/metadata';
 import { resolveImageUrl } from '@/lib/api-client';
@@ -53,9 +54,10 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params;
-  const [article, allArticles] = await Promise.all([
+  const [article, allArticles, text] = await Promise.all([
     getArticleBySlug(slug),
     getPublishedArticles(),
+    getSiteTextSafe(),
   ]);
 
   if (!article) {
@@ -208,7 +210,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 href="/news"
                 className="tap-target inline-flex items-center gap-2xs text-base font-medium text-ocean hover:text-ocean-dark transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean rounded-sm"
               >
-                ← More articles
+                {text['newsArticle.moreArticlesLabel']}
               </Link>
             </div>
           </div>
@@ -225,7 +227,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 id="keep-reading-heading"
                 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack"
               >
-                Keep reading
+                {text['newsArticle.keepReadingHeading']}
               </h2>
               <div className={articleGridClasses} role="list" aria-label="Related articles">
                 {relatedArticles.map((related) => (

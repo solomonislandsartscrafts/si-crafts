@@ -146,7 +146,7 @@ export default async function MakerPage({ params }: MakerPageProps) {
       <section id="pieces" className="border-t border-sand pt-block mt-block scroll-mt-24">
         {/* Heading with count */}
         <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack">
-          Pieces by {maker.name}
+          {text['makerDetail.piecesHeading'].replaceAll('{name}', maker.name)}
           {products.length > 0 && (
             <span className="text-base font-normal text-warm-gray-600 ml-2xs">
               ({products.length})
@@ -157,11 +157,11 @@ export default async function MakerPage({ params }: MakerPageProps) {
         {products.length === 0 ? (
           <EmptyState
             icon={Package}
-            title={`No pieces by ${maker.name} are listed right now.`}
+            title={text['makerDetail.piecesEmptyTitle'].replaceAll('{name}', maker.name)}
             description={text['makerDetail.piecesEmptyDescription']}
             action={
               <ButtonLink href="/catalogue" variant="secondary" size="sm">
-                Browse the catalogue
+                {text['makerDetail.piecesEmptyActionLabel']}
               </ButtonLink>
             }
           />

@@ -8,8 +8,9 @@ class MakerEnquiry(models.Model):
     village = models.CharField(max_length=200)
     province = models.CharField(max_length=200)
     craft = models.CharField(max_length=200)
-    message = models.TextField()
+    message = models.TextField(blank=True)
     contact = models.CharField(max_length=200)
+    whatsapp = models.CharField(max_length=200, blank=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
     handled = models.BooleanField(default=False)
 

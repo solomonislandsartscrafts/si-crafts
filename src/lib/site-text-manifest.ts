@@ -234,6 +234,12 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
         description: 'Shown under the image in the “Why we’re doing this” section. Update this whenever you change that image.',
         fields: [
           {
+            key: 'about.photoCreditPrefix',
+            label: 'Credit prefix',
+            defaultValue: 'Photo by',
+            help: 'The words shown before the photographer’s name, e.g. “Photo by”.',
+          },
+          {
             key: 'about.photoCreditName',
             label: 'Photographer name',
             defaultValue: 'Harjono Djoyobisono',
@@ -600,6 +606,11 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
             defaultValue:
               'We have received your expression of interest. If we are able to work together, we will reach out using the contact details you provided.',
             type: 'multiline',
+          },
+          {
+            key: 'forMakers.backLabel',
+            label: 'Back-to-home link',
+            defaultValue: '← Back to home',
           },
         ],
       },
@@ -973,6 +984,45 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
               'We’re still documenting makers across Solomon Islands. Try another province.',
             type: 'multiline',
           },
+          {
+            key: 'makers.statMakersLabel',
+            label: 'Stat label — makers',
+            defaultValue: 'makers',
+            help: 'The word after the maker count in the banner, e.g. “12 makers”.',
+          },
+          {
+            key: 'makers.statProvincesLabel',
+            label: 'Stat label — provinces',
+            defaultValue: 'provinces',
+            help: 'The word after the province count in the banner, e.g. “6 provinces”.',
+          },
+          {
+            key: 'makers.resultsFiltered',
+            label: 'Result count — filtered',
+            defaultValue: 'Showing {count} makers in {province}',
+            help: 'Placeholders: {count} and {province}. Shown when a province filter is active.',
+          },
+          {
+            key: 'makers.resultsAll',
+            label: 'Result count — all',
+            defaultValue: 'Showing all {count} makers',
+            help: 'Placeholder: {count}. Shown when no province filter is active.',
+          },
+          {
+            key: 'makers.clearFilterLabel',
+            label: 'Clear filter link',
+            defaultValue: 'Clear filter',
+          },
+          {
+            key: 'makers.emptyActionLabel',
+            label: 'Empty state button',
+            defaultValue: 'Show all makers',
+          },
+          {
+            key: 'makers.clearProvincesLabel',
+            label: 'Map “show all” button',
+            defaultValue: 'Show all provinces',
+          },
         ],
       },
       {
@@ -1014,6 +1064,21 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
               'Read the stories of the weavers, carvers, and jewellers who keep these traditions alive.',
             type: 'multiline',
           },
+          {
+            key: 'crafts.ctaPrimaryButton',
+            label: 'Closing banner primary button',
+            defaultValue: 'Meet the makers',
+          },
+          {
+            key: 'crafts.ctaSecondaryButton',
+            label: 'Closing banner secondary button',
+            defaultValue: 'Browse the catalogue',
+          },
+          {
+            key: 'crafts.emptyActionLabel',
+            label: 'Empty state button',
+            defaultValue: 'Meet the makers',
+          },
         ],
       },
       {
@@ -1041,6 +1106,11 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
             type: 'multiline',
           },
           {
+            key: 'news.emptyActionLabel',
+            label: 'Empty state button',
+            defaultValue: 'Meet the makers',
+          },
+          {
             key: 'news.cta.title',
             label: 'Closing banner heading',
             defaultValue: 'Meet the makers behind the stories',
@@ -1051,6 +1121,33 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
             defaultValue:
               'Every piece begins with a person. Get to know the weavers, carvers, and jewellers of Solomon Islands.',
             type: 'multiline',
+          },
+          {
+            key: 'news.cta.primaryButton',
+            label: 'Closing banner primary button',
+            defaultValue: 'Meet the makers',
+          },
+          {
+            key: 'news.cta.secondaryButton',
+            label: 'Closing banner secondary button',
+            defaultValue: 'Browse the catalogue',
+          },
+        ],
+      },
+      {
+        title: 'Article page',
+        description:
+          'Shown at the foot of a single news article. The articles themselves are managed under Admin → News.',
+        fields: [
+          {
+            key: 'newsArticle.keepReadingHeading',
+            label: 'Related stories heading',
+            defaultValue: 'Keep reading',
+          },
+          {
+            key: 'newsArticle.moreArticlesLabel',
+            label: 'Back-to-news link',
+            defaultValue: '← More articles',
           },
         ],
       },
@@ -1267,6 +1364,18 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
             help: 'Shown when a maker has no story recorded yet.',
           },
           {
+            key: 'makerDetail.piecesHeading',
+            label: 'Pieces section heading',
+            defaultValue: 'Pieces by {name}',
+            help: 'Placeholder: {name} is replaced with the maker’s name.',
+          },
+          {
+            key: 'makerDetail.piecesEmptyTitle',
+            label: 'No pieces heading',
+            defaultValue: 'No pieces by {name} are listed right now.',
+            help: 'Placeholder: {name} is replaced with the maker’s name.',
+          },
+          {
             key: 'makerDetail.piecesEmptyDescription',
             label: 'No pieces description',
             defaultValue:
@@ -1274,11 +1383,23 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
             type: 'multiline',
           },
           {
+            key: 'makerDetail.piecesEmptyActionLabel',
+            label: 'No pieces button',
+            defaultValue: 'Browse the catalogue',
+          },
+          {
             key: 'makerDetail.ctaPrompt',
             label: 'Wholesale prompt',
             defaultValue: 'Interested in stocking {name}’s pieces?',
             type: 'multiline',
             help: 'Placeholder: {name} is replaced with the maker’s name.',
+          },
+          {
+            key: 'makerDetail.ctaSubtext',
+            label: 'Wholesale prompt subtext',
+            defaultValue:
+              'Log in or apply as a stockist to see wholesale pricing and place an order request.',
+            type: 'multiline',
           },
           {
             key: 'makerDetail.ctaButton',
@@ -1406,9 +1527,39 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
             defaultValue: 'You might also like',
           },
           {
+            key: 'provenance.collectionSuffix',
+            label: 'Craft collection suffix',
+            defaultValue: 'collection',
+            help: 'The word after the craft name in the eyebrow, e.g. “Pandanus weaving collection”.',
+          },
+          {
+            key: 'provenance.readMorePrefix',
+            label: '“How it’s made” read-more prefix',
+            defaultValue: 'Read more about',
+            help: 'Shown before the craft name in the “How it’s made” link, e.g. “Read more about Wood carving →”.',
+          },
+          {
+            key: 'provenance.creditLine',
+            label: 'Product details credit line',
+            defaultValue: 'Solomon Islands Arts & Crafts, on behalf of the maker',
+          },
+          {
             key: 'provenance.notFoundTitle',
             label: 'Unknown code heading',
             defaultValue: 'Piece not found',
+          },
+          {
+            key: 'provenance.notFoundIntro',
+            label: 'Unknown code intro',
+            defaultValue:
+              'We couldn’t find a piece with the code “{code}”. It may have been removed, or the code might be incorrect.',
+            type: 'multiline',
+            help: 'Placeholder: {code} is replaced with the code the visitor entered.',
+          },
+          {
+            key: 'provenance.notFoundButton',
+            label: 'Unknown code button',
+            defaultValue: 'Browse the catalogue',
           },
           {
             key: 'provenance.lookupTitle',

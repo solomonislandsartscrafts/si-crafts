@@ -9,6 +9,7 @@ export const mockMakerEnquiries: MakerEnquiry[] = [
     craft: 'Wood carving — small bowls and fish from local ebony',
     message: 'I have been carving for 15 years and sell at the Buala market. I would like to know how I can sell my carvings to shops in Australia.',
     contact: '+677 7412345',
+    whatsapp: '+677 7412345',
     submittedAt: '2024-05-20T08:30:00Z',
     handled: false,
   },

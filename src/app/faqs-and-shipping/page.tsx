@@ -35,7 +35,7 @@ export default async function FaqsAndShippingPage() {
         )}
 
         {text['faqs.footerNote'] && (
-          <div className="mt-xl bg-sand-light rounded-lg p-md">
+          <div className="mt-lg max-w-3xl bg-sand-light rounded-lg p-md">
             <CmsText
               value={text['faqs.footerNote']}
               className="space-y-xs"

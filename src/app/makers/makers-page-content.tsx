@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { MapPin, Users } from 'lucide-react';
 import type { Maker } from '@/types';
 import { SolomonIslandsProvinceMap } from '@/components/map';
@@ -14,6 +14,29 @@ interface MakerWithCraft extends Maker {
   craftName: string;
 }
 
+/**
+ * Renders an admin-editable template, substituting {token} placeholders with
+ * emphasised (bold) values. Anything between the tokens is plain text, so an
+ * editor can reword the sentence freely and the counts stay highlighted.
+ */
+function renderTemplate(
+  template: string,
+  values: Record<string, string>
+): ReactNode[] {
+  const parts = template.split(/(\{[a-zA-Z]+\})/g);
+  return parts.map((part, i) => {
+    const match = part.match(/^\{([a-zA-Z]+)\}$/);
+    if (match && values[match[1]] !== undefined) {
+      return (
+        <span key={i} className="font-semibold text-warm-gray-800">
+          {values[match[1]]}
+        </span>
+      );
+    }
+    return part;
+  });
+}
+
 interface Props {
   makers: MakerWithCraft[];
   /** Admin-editable copy, passed down so this stays a pure client component. */
@@ -23,6 +46,15 @@ interface Props {
   filterHint: string;
   emptyTitle: string;
   emptyDescription: string;
+  statMakersLabel: string;
+  statProvincesLabel: string;
+  /** Template with {count} and {province} placeholders. */
+  resultsFiltered: string;
+  /** Template with a {count} placeholder. */
+  resultsAll: string;
+  clearFilterLabel: string;
+  emptyActionLabel: string;
+  clearProvincesLabel: string;
 }
 
 export function MakersPageContent({
@@ -33,6 +65,13 @@ export function MakersPageContent({
   filterHint,
   emptyTitle,
   emptyDescription,
+  statMakersLabel,
+  statProvincesLabel,
+  resultsFiltered,
+  resultsAll,
+  clearFilterLabel,
+  emptyActionLabel,
+  clearProvincesLabel,
 }: Props) {
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
 
@@ -48,11 +87,11 @@ export function MakersPageContent({
         <div className="mt-sm flex flex-wrap gap-sm text-sm">
           <span className="flex items-center gap-2xs">
             <Users className="w-4 h-4" aria-hidden="true" />
-            {makers.length} makers
+            {makers.length} {statMakersLabel}
           </span>
           <span className="flex items-center gap-2xs">
             <MapPin className="w-4 h-4" aria-hidden="true" />
-            {provinces.length} provinces
+            {provinces.length} {statProvincesLabel}
           </span>
         </div>
       </PageHeader>
@@ -85,26 +124,14 @@ export function MakersPageContent({
                 className="text-base text-warm-gray-600 lg:mr-auto"
                 aria-live="polite"
               >
-                {selectedProvince ? (
-                  <>
-                    Showing{' '}
-                    <span className="font-semibold text-warm-gray-800">
-                      {filteredMakers.length}
-                    </span>{' '}
-                    maker{filteredMakers.length !== 1 ? 's' : ''} in{' '}
-                    <span className="font-semibold text-warm-gray-800">
-                      {selectedProvince}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    Showing all{' '}
-                    <span className="font-semibold text-warm-gray-800">
-                      {filteredMakers.length}
-                    </span>{' '}
-                    makers
-                  </>
-                )}
+                {selectedProvince
+                  ? renderTemplate(resultsFiltered, {
+                      count: String(filteredMakers.length),
+                      province: selectedProvince,
+                    })
+                  : renderTemplate(resultsAll, {
+                      count: String(filteredMakers.length),
+                    })}
               </p>
 
               {selectedProvince && (
@@ -113,7 +140,7 @@ export function MakersPageContent({
                   onClick={() => setSelectedProvince(null)}
                   className="text-sm font-medium text-ocean hover:text-ocean-dark tap-target underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean rounded-sm"
                 >
-                  Clear filter
+                  {clearFilterLabel}
                 </button>
               )}
             </div>
@@ -129,7 +156,7 @@ export function MakersPageContent({
                     size="sm"
                     onClick={() => setSelectedProvince(null)}
                   >
-                    Show all makers
+                    {emptyActionLabel}
                   </Button>
                 }
               />
@@ -174,7 +201,7 @@ export function MakersPageContent({
                     size="sm"
                     onClick={() => setSelectedProvince(null)}
                   >
-                    Show all provinces
+                    {clearProvincesLabel}
                   </Button>
                 </div>
               )}

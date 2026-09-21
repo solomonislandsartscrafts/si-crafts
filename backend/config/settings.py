@@ -208,8 +208,19 @@ CORS_ALLOW_HEADERS = [
 
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 
-# --- Email (SMTP) ---
-EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+# --- Email ---
+# Resend (HTTP API over port 443) is the production sender because Render's free
+# plan blocks outbound SMTP ports (25/465/587), so SMTP can never connect there.
+# When RESEND_API_KEY is set we use the custom Resend backend; otherwise we fall
+# back to the console backend for local dev (or an explicit EMAIL_BACKEND
+# override, e.g. SMTP, if one is provided). A custom EMAIL_BACKEND always wins.
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "").strip()
+if os.environ.get("EMAIL_BACKEND"):
+    EMAIL_BACKEND = os.environ["EMAIL_BACKEND"]
+elif RESEND_API_KEY:
+    EMAIL_BACKEND = "apps.notifications.resend_backend.ResendEmailBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True").lower() in ("true", "1", "yes")
@@ -219,6 +230,14 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "").strip()
 # Those separators are not part of the password and break SMTP AUTH (ascii encode
 # error on login), so strip ALL whitespace — regular and non-breaking — here.
 EMAIL_HOST_PASSWORD = re.sub(r"\s+", "", os.environ.get("EMAIL_HOST_PASSWORD", "").replace("\xa0", ""))
+# Never let a stalled mail server take the whole request down with it.
+# Django passes timeout=None to the socket by default, so if outbound SMTP is
+# filtered rather than refused (Render's free plan blocks ports 25/465/587) the
+# connection hangs forever, gunicorn kills the worker at its 30s timeout, and the
+# visitor gets a 500 on a form submission that actually succeeded. With a timeout
+# the send raises promptly, the caller's try/except logs it, and the request
+# returns 201 as it should.
+EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", "10"))
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "SIAC <noreply@solomonislandsartsandcrafts.com.au>")
 ADMIN_NOTIFICATION_EMAIL = os.environ.get("ADMIN_NOTIFICATION_EMAIL", DEFAULT_FROM_EMAIL)
 SITE_URL = os.environ.get("SITE_URL", FRONTEND_URL)

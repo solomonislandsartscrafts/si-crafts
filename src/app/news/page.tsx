@@ -52,7 +52,7 @@ export default async function NewsPage() {
             description={text['news.emptyDescription']}
             action={
               <ButtonLink href="/makers" variant="secondary" size="sm">
-                Meet the makers
+                {text['news.emptyActionLabel']}
               </ButtonLink>
             }
           />
@@ -86,10 +86,10 @@ export default async function NewsPage() {
         description={text['news.cta.description']}
       >
         <ButtonLink href="/makers" variant="primary">
-          Meet the makers
+          {text['news.cta.primaryButton']}
         </ButtonLink>
         <ButtonLink href="/catalogue" variant="secondary">
-          Browse the catalogue
+          {text['news.cta.secondaryButton']}
         </ButtonLink>
       </PageCta>
     </div>

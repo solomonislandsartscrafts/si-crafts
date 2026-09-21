@@ -152,7 +152,7 @@ export default async function AboutPage() {
                   the photo without updating this would misattribute it. */}
               {photoCreditName && (
                 <figcaption className="text-xs text-warm-gray-400 mt-2xs">
-                  Photo by{' '}
+                  {text['about.photoCreditPrefix']}{' '}
                   {photoCreditUrl ? (
                     <SmartLink
                       href={photoCreditUrl}

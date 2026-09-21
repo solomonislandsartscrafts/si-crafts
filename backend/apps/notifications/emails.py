@@ -137,17 +137,20 @@ def notify_contact_form(name: str, email: str, reason: str, message: str):
 
 # --- 6. Maker Enquiry (notify admins) ---
 
-def notify_maker_enquiry(name: str, village: str, province: str, craft: str, message: str, contact: str):
+def notify_maker_enquiry(name: str, village: str, province: str, craft: str, message: str, contact: str, whatsapp: str = ""):
     """Notify admins that a maker has expressed interest in working with SIAC."""
     subject = f"[SIAC] Maker enquiry: {name} from {village}, {province}"
+    whatsapp_line = f"WhatsApp: {whatsapp}\n" if whatsapp else ""
+    message_block = f"Message:\n{message}\n\n" if message else ""
     body = (
         f"A maker has expressed interest in working with SIAC.\n\n"
         f"Name: {name}\n"
         f"Village: {village}\n"
         f"Province: {province}\n"
         f"Craft: {craft}\n"
-        f"Contact: {contact}\n\n"
-        f"Message:\n{message}\n\n"
+        f"Contact: {contact}\n"
+        f"{whatsapp_line}\n"
+        f"{message_block}"
         f"Manage in: {SITE_URL}/admin/inbox\n"
     )
     _send(subject, body, _get_admin_emails())
