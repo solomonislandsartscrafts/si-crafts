@@ -6,28 +6,45 @@ Fails silently (logs errors) so email issues never block user actions.
 """
 
 import logging
+import re
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
 logger = logging.getLogger(__name__)
+
+# Loose check for "is this a usable email address" — enough to decide whether a
+# free-form contact value can be used as a Reply-To. Not RFC-complete validation.
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 ADMIN_EMAIL = getattr(settings, "ADMIN_NOTIFICATION_EMAIL", settings.DEFAULT_FROM_EMAIL)
 SITE_NAME = "Solomon Islands Arts & Crafts"
 SITE_URL = getattr(settings, "SITE_URL", "https://solomonislandsartscrafts.com.au")
 
 
-def _send(subject: str, body: str, recipient_list: list[str], html_body: str | None = None):
-    """Send an email, failing silently with a log message on error."""
+def _send(
+    subject: str,
+    body: str,
+    recipient_list: list[str],
+    html_body: str | None = None,
+    reply_to: str | None = None,
+):
+    """Send an email, failing silently with a log message on error.
+
+    reply_to, when set, makes the admin's "Reply" go to that address (e.g. the
+    visitor who submitted the contact form) rather than to our no-reply From.
+    """
     try:
-        send_mail(
+        message = EmailMultiAlternatives(
             subject=subject,
-            message=body,
+            body=body,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=recipient_list,
-            html_message=html_body,
-            fail_silently=False,
+            to=recipient_list,
+            reply_to=[reply_to] if reply_to else None,
         )
+        if html_body:
+            message.attach_alternative(html_body, "text/html")
+        message.send(fail_silently=False)
         logger.info(f"[email] Sent '{subject}' to {recipient_list}")
     except Exception as e:
         logger.error(f"[email] Failed to send '{subject}' to {recipient_list}: {e}")
@@ -132,7 +149,8 @@ def notify_contact_form(name: str, email: str, reason: str, message: str):
         f"Reply directly to: {email}\n"
         f"Or manage in: {SITE_URL}/admin/inbox\n"
     )
-    _send(subject, body, _get_admin_emails())
+    # Hitting "Reply" goes straight to the visitor, not our no-reply From.
+    _send(subject, body, _get_admin_emails(), reply_to=email if _EMAIL_RE.match(email or "") else None)
 
 
 # --- 6. Maker Enquiry (notify admins) ---
@@ -153,7 +171,9 @@ def notify_maker_enquiry(name: str, village: str, province: str, craft: str, mes
         f"{message_block}"
         f"Manage in: {SITE_URL}/admin/inbox\n"
     )
-    _send(subject, body, _get_admin_emails())
+    # The maker's contact field is free-form (may be a phone number), so only
+    # use it as Reply-To when it's actually an email address.
+    _send(subject, body, _get_admin_emails(), reply_to=contact if _EMAIL_RE.match(contact or "") else None)
 
 
 # --- 7. Stockist Application Confirmation (sent to the applicant) ---
