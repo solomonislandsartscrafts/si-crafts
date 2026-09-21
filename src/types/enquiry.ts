@@ -7,6 +7,7 @@ export interface MakerEnquiry {
   craft: string; // what they make / materials used
   message: string;
   contact: string; // phone, email, or however they can be reached
+  whatsapp: string; // WhatsApp number — optional; the easiest way to reach makers
   submittedAt: string;
   handled: boolean;
 }

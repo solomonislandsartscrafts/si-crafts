@@ -31,6 +31,7 @@ class MakerEnquiryViewSet(viewsets.ModelViewSet):
             craft=enquiry.craft,
             message=enquiry.message,
             contact=enquiry.contact,
+            whatsapp=enquiry.whatsapp,
         )
 
     @action(detail=True, methods=["post"])

@@ -91,10 +91,10 @@ export default async function PiecePage({ params }: PiecePageProps) {
         title={text['provenance.notFoundTitle']}
         align="center"
         width="narrow"
-        intro={`We couldn't find a piece with the code "${productCode}". It may have been removed, or the code might be incorrect.`}
+        intro={text['provenance.notFoundIntro'].replaceAll('{code}', productCode)}
       >
         <div className="mt-lg flex justify-center">
-          <ButtonLink href="/catalogue">Browse the catalogue</ButtonLink>
+          <ButtonLink href="/catalogue">{text['provenance.notFoundButton']}</ButtonLink>
         </div>
       </PageHeader>
     );
@@ -193,6 +193,9 @@ export default async function PiecePage({ params }: PiecePageProps) {
           whereToBuyIntro: text['provenance.whereToBuyIntro'],
           whereToBuyShopPrompt: text['provenance.whereToBuyShopPrompt'],
           whereToBuyQuote: text['provenance.whereToBuyQuote'],
+          collectionSuffix: text['provenance.collectionSuffix'],
+          readMorePrefix: text['provenance.readMorePrefix'],
+          creditLine: text['provenance.creditLine'],
         }}
         tradeOnlyNotice={text['provenance.tradeOnlyNotice']}
       />

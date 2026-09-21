@@ -36,10 +36,10 @@ const EMPTY_SITE_CONTENT: SiteContent = {
   homepageCtaText: 'Browse Catalogue',
   homepageMakersHeading: 'Handmade in Solomon Islands',
   // About
-  aboutPageIntro: 'Solomon Islands Arts & Crafts connects makers in Solomon Islands with museum and gallery shops in Australia — telling authentic stories and building respectful trade relationships.',
+  aboutPageIntro: 'Solomon Islands Arts & Crafts connects makers in Solomon Islands with museum and gallery shops in Australia and their customers — telling authentic stories and building respectful trade relationships.',
   aboutSolomonIslandsHeading: 'About Solomon Islands',
   aboutSolomonIslandsText: [
-    'Solomon Islands is a sovereign nation of over 990 islands spread across the southwestern Pacific Ocean. It is about three hours by plane from Brisbane. Home to around 700,000 people speaking more than 70 languages, the country holds one of the most diverse cultural heritages in the Pacific region.',
+    'Solomon Islands is a sovereign nation of over 990 islands spread across the southwestern Pacific Ocean. It is about three hours by plane from Brisbane. Home to around 700,000 mostly Melanesian people speaking more than 70 languages, the country holds one of the most diverse cultural heritages in the Pacific region.',
     'The islands are rich with tropical rainforest, coral reefs, and volcanic landscapes. Communities are spread across nine provinces from the large island of Guadalcanal in the south to the remote Temotu Province in the far east. Each province has distinct traditions, art forms, and materials shaped by geography and ancestry. The capital, Honiara, is on Guadalcanal and was a strategic military base during World War II.',
     'Craft traditions — pandanus weaving, wood carving, and shell-money making — are living practices passed through families and communities, not museum artefacts. They carry stories of place, kinship, and identity.',
   ].join('\n\n'),

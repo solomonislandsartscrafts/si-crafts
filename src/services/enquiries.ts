@@ -26,12 +26,13 @@ export interface SubmitMakerEnquiryInput {
   craft: string;
   message: string;
   contact: string;
+  whatsapp?: string;
 }
 
 export async function submitMakerEnquiry(data: SubmitMakerEnquiryInput): Promise<MakerEnquiry> {
   const raw = await apiPost<{
     id: number; name: string; village: string; province: string;
-    craft: string; message: string; contact: string; submitted_at: string; handled: boolean;
+    craft: string; message: string; contact: string; whatsapp: string; submitted_at: string; handled: boolean;
   }>('/api/enquiries/maker/', data);
   return {
     id: String(raw.id),
@@ -41,6 +42,7 @@ export async function submitMakerEnquiry(data: SubmitMakerEnquiryInput): Promise
     craft: raw.craft,
     message: raw.message,
     contact: raw.contact,
+    whatsapp: raw.whatsapp,
     submittedAt: raw.submitted_at,
     handled: raw.handled,
   };
@@ -114,14 +116,14 @@ export async function listEnquiries(filter?: EnquiryType): Promise<AnyEnquiry[]>
       : Promise.resolve([]),
   ]);
 
-  const makers = extractItems<{ id: number; name: string; village: string; province: string; craft: string; message: string; contact: string; submitted_at: string; handled: boolean }>(makersRaw);
+  const makers = extractItems<{ id: number; name: string; village: string; province: string; craft: string; message: string; contact: string; whatsapp: string; submitted_at: string; handled: boolean }>(makersRaw);
   const stockistReqs = extractItems<{ id: number; stockist: number; request_data: unknown; submitted_at: string; handled: boolean }>(stockistReqsRaw);
   const contacts = extractItems<{ id: number; name: string; email: string; reason: string; message: string; submitted_at: string; handled: boolean }>(contactsRaw);
 
   for (const raw of makers) {
     all.push({
       type: 'maker-enquiry',
-      data: { id: String(raw.id), name: raw.name, village: raw.village, province: raw.province, craft: raw.craft, message: raw.message, contact: raw.contact, submittedAt: raw.submitted_at, handled: raw.handled },
+      data: { id: String(raw.id), name: raw.name, village: raw.village, province: raw.province, craft: raw.craft, message: raw.message, contact: raw.contact, whatsapp: raw.whatsapp, submittedAt: raw.submitted_at, handled: raw.handled },
     });
   }
 

@@ -27,6 +27,12 @@ export interface ProvenanceCopy {
   whereToBuyIntro: string;
   whereToBuyShopPrompt: string;
   whereToBuyQuote: string;
+  /** The word after the craft name in the eyebrow, e.g. "collection". */
+  collectionSuffix: string;
+  /** Prefix before the craft name in the "How it's made" link. */
+  readMorePrefix: string;
+  /** The fixed credit line shown in the Product details table. */
+  creditLine: string;
 }
 
 interface PiecePageClientProps {
@@ -129,10 +135,10 @@ export function PiecePageClient({
                     href={`/craft/${craftSlug}`}
                     className="text-ocean transition-colors hover:text-ocean-dark"
                   >
-                    {craftName} collection
+                    {craftName} {copy.collectionSuffix}
                   </Link>
                 ) : (
-                  <span>{craftName} collection</span>
+                  <span>{craftName} {copy.collectionSuffix}</span>
                 )}
               </>
             )}
@@ -295,7 +301,7 @@ export function PiecePageClient({
               />
               <AttributeRow
                 label="Credit line"
-                value="Solomon Islands Arts & Crafts, on behalf of the maker"
+                value={copy.creditLine}
               />
             </dl>
           </AccordionItem>
@@ -323,7 +329,7 @@ export function PiecePageClient({
                   href={`/craft/${craftSlug}`}
                   className="mt-sm inline-flex font-medium text-ocean transition-colors hover:text-ocean-dark"
                 >
-                  Read more about {craftName} →
+                  {copy.readMorePrefix} {craftName} →
                 </Link>
               )}
             </AccordionItem>

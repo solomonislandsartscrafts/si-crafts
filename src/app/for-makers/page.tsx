@@ -78,7 +78,7 @@ export default async function ForMakersPage() {
         {/* Back to home */}
         <div className="mt-xl border-t border-sand pt-lg">
           <ButtonLink href="/" variant="secondary">
-            ← Back to home
+            {text['forMakers.backLabel']}
           </ButtonLink>
         </div>
       </div>

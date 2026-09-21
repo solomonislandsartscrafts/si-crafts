@@ -146,6 +146,7 @@ function EnquiryCard({ item, onMarkHandled }: { item: AnyEnquiry; onMarkHandled:
           <p className="text-sm text-warm-gray-600 mt-2xs">{item.data.craft}</p>
           {item.data.message && <p className="text-base text-warm-gray-600 mt-3xs italic">{item.data.message}</p>}
           <p className="text-xs text-ocean mt-2xs">Contact: {item.data.contact}</p>
+          {item.data.whatsapp && <p className="text-xs text-ocean mt-3xs">WhatsApp: {item.data.whatsapp}</p>}
         </div>
       )}
 

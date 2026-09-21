@@ -5,8 +5,12 @@ from .models import MakerEnquiry, StockistRequest, ContactEnquiry
 class MakerEnquirySerializer(serializers.ModelSerializer):
     class Meta:
         model = MakerEnquiry
-        fields = ["id", "name", "village", "province", "craft", "message", "contact", "submitted_at", "handled"]
+        fields = ["id", "name", "village", "province", "craft", "message", "contact", "whatsapp", "submitted_at", "handled"]
         read_only_fields = ["id", "submitted_at"]
+        extra_kwargs = {
+            "message": {"required": False, "allow_blank": True},
+            "whatsapp": {"required": False, "allow_blank": True},
+        }
 
 
 class StockistRequestSerializer(serializers.ModelSerializer):

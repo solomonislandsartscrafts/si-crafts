@@ -32,6 +32,13 @@ export default async function MakersPage() {
       filterHint={text['makers.filterHint']}
       emptyTitle={text['makers.emptyTitle']}
       emptyDescription={text['makers.emptyDescription']}
+      statMakersLabel={text['makers.statMakersLabel']}
+      statProvincesLabel={text['makers.statProvincesLabel']}
+      resultsFiltered={text['makers.resultsFiltered']}
+      resultsAll={text['makers.resultsAll']}
+      clearFilterLabel={text['makers.clearFilterLabel']}
+      emptyActionLabel={text['makers.emptyActionLabel']}
+      clearProvincesLabel={text['makers.clearProvincesLabel']}
     />
   );
 }
