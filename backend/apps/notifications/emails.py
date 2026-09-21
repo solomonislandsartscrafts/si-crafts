@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 ADMIN_EMAIL = getattr(settings, "ADMIN_NOTIFICATION_EMAIL", settings.DEFAULT_FROM_EMAIL)
 SITE_NAME = "Solomon Islands Arts & Crafts"
-SITE_URL = getattr(settings, "SITE_URL", "https://solomonislandsartsandcrafts.com.au")
+SITE_URL = getattr(settings, "SITE_URL", "https://solomonislandsartscrafts.com.au")
 
 
 def _send(subject: str, body: str, recipient_list: list[str], html_body: str | None = None):

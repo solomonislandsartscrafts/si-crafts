@@ -51,7 +51,7 @@ describe('Property 1: Open Graph tags valid on all public pages', () => {
   it('og:url includes the configured site host', () => {
     // Asserts against SITE_HOST (derived from NEXT_PUBLIC_SITE_URL) rather than
     // a hardcoded domain. The public host is env-driven and deliberately still
-    // the workers.dev fallback until solomonislandsartsandcrafts.com.au is
+    // the workers.dev fallback until solomonislandsartscrafts.com.au is
     // registered — see metadata.ts. Checking the configured host keeps this
     // test correct now AND after the domain switch, and still catches a genuine
     // regression where og:url loses its origin entirely.

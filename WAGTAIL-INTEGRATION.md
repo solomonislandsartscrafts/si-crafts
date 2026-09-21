@@ -241,8 +241,8 @@ class ContactEnquiry(models.Model):
 - Options: Fly.io, Railway, AWS ECS, or any Django host
 - Database: PostgreSQL
 - Media: Cloudflare R2 or AWS S3 for images
-- URL: e.g. `https://api.solomonislandsartsandcrafts.com.au`
-- CORS: Allow `https://solomonislandsartsandcrafts.com.au`
+- URL: e.g. `https://api.solomonislandsartscrafts.com.au`
+- CORS: Allow `https://solomonislandsartscrafts.com.au`
 
 ### SEO & Performance Post-Integration
 - OG tags: Generated from Wagtail page fields via `generatePageMetadata()`
@@ -275,7 +275,7 @@ When ready to connect real data:
 ### Step 1: Environment setup
 ```bash
 # .env.local
-WAGTAIL_API_URL=https://api.solomonislandsartsandcrafts.com.au
+WAGTAIL_API_URL=https://api.solomonislandsartscrafts.com.au
 ```
 
 ### Step 2: Create API client utility

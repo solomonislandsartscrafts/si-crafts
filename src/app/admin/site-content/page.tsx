@@ -572,7 +572,7 @@ function ContactTab({ content, update }: TabProps) {
     <>
       <Section title="Contact Page" description="Details shown on the contact page.">
         <TextArea label="Intro text" value={content.contactIntro} onChange={(v) => update('contactIntro', v)} placeholder="We'd love to hear from you..." rows={3} />
-        <Field label="Contact email" value={content.contactEmail} onChange={(v) => update('contactEmail', v)} placeholder="hello@solomonislandsartsandcrafts.com.au" />
+        <Field label="Contact email" value={content.contactEmail} onChange={(v) => update('contactEmail', v)} placeholder="hello@solomonislandsartscrafts.com.au" />
         <Field label="Response time note" value={content.contactResponseTime} onChange={(v) => update('contactResponseTime', v)} placeholder="We usually respond within 2 business days." />
       </Section>
     </>

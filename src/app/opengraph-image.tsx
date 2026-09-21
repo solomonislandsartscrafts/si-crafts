@@ -67,7 +67,7 @@ export default async function OpengraphImage() {
         </div>
 
         <div style={{ fontSize: 26, color: '#736B62' }}>
-          solomonislandsartsandcrafts.com.au
+          solomonislandsartscrafts.com.au
         </div>
       </div>
     ),

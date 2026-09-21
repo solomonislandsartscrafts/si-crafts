@@ -36,9 +36,9 @@ services:
       # file, so a blueprint sync would have reverted production to the dead
       # origin and blocked the admin dashboard on CORS.
       - key: CORS_ALLOWED_ORIGINS
-        value: "https://si-crafts.siacrafts.workers.dev,https://solomonislandsartsandcrafts.com.au,https://www.solomonislandsartsandcrafts.com.au,http://localhost:3000"
+        value: "https://si-crafts.siacrafts.workers.dev,https://solomonislandsartscrafts.com.au,https://www.solomonislandsartscrafts.com.au,http://localhost:3000"
       - key: CSRF_TRUSTED_ORIGINS
-        value: "https://si-crafts-iwcd.onrender.com,https://si-crafts.siacrafts.workers.dev,https://solomonislandsartsandcrafts.com.au,https://www.solomonislandsartsandcrafts.com.au"
+        value: "https://si-crafts-iwcd.onrender.com,https://si-crafts.siacrafts.workers.dev,https://solomonislandsartscrafts.com.au,https://www.solomonislandsartscrafts.com.au"
       # SITE_URL is not cosmetic: notifications/emails.py builds the stockist
       # set-password and password-reset links from it. Pointing it at a host
       # that 404s ships dead links in every approval and reset email.
@@ -60,7 +60,7 @@ services:
       - key: RESEND_API_KEY
         sync: false
       # From address for all outgoing mail. Must be an address on a domain you
-      # have verified in Resend (e.g. noreply@solomonislandsartsandcrafts.com.au).
+      # have verified in Resend (e.g. noreply@solomonislandsartscrafts.com.au).
       # Until the domain is verified, only Resend's onboarding@resend.dev works.
       - key: DEFAULT_FROM_EMAIL
         sync: false

@@ -75,7 +75,7 @@ const EMPTY_SITE_CONTENT: SiteContent = {
   // Contact
   contactIntro: 'Get in touch with the Solomon Islands Arts & Crafts team.',
   // Deliberately the address the Contact page has been showing all along. The
-  // previous default here was hello@solomonislandsartsandcrafts.com.au, which
+  // previous default here was hello@solomonislandsartscrafts.com.au, which
   // never rendered because the page hardcoded its own — so wiring the field up
   // would have silently changed a live contact address. Change it in the admin
   // once you've confirmed which inbox is monitored.

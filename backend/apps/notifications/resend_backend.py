@@ -71,7 +71,7 @@ class ResendEmailBackend(BaseEmailBackend):
                 # Cloudflare fronts the Resend API and blocks the default
                 # "Python-urllib/x.y" agent as a bot (HTTP 403, "error code: 1010").
                 # A real User-Agent gets the request through to the API.
-                "User-Agent": "SIAC-Backend/1.0 (+https://solomonislandsartsandcrafts.com.au)",
+                "User-Agent": "SIAC-Backend/1.0 (+https://solomonislandsartscrafts.com.au)",
             },
         )
         try:
