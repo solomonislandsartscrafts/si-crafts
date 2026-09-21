@@ -53,25 +53,16 @@ services:
       # suffix Render assigned) 404s.
       - key: WAGTAILADMIN_BASE_URL
         value: "https://si-crafts-iwcd.onrender.com"
-      # Email goes out over Resend's HTTP API, NOT SMTP.
-      #
-      # Render's free plan blocks outbound traffic to SMTP ports (25/465/587),
-      # so Gmail SMTP cannot deliver from here: the connection to
-      # smtp.gmail.com is dropped silently rather than refused, the send hangs,
-      # gunicorn kills the worker at 30s, and the visitor gets a 500 on a
-      # contact form that had already saved. Resend is HTTPS on 443, which is
-      # not blocked. Do not "restore" the SMTP backend here without also moving
-      # this service to a paid instance type.
-      #
-      # DEFAULT_FROM_EMAIL must use a domain verified in the Resend dashboard,
-      # or Resend rejects the send with a 403.
-      - key: EMAIL_BACKEND
-        value: "apps.notifications.email_backends.ResendEmailBackend"
+      # Email is sent via the Resend HTTP API (port 443). Render's free plan
+      # blocks outbound SMTP ports (25/465/587), so SMTP can never connect from
+      # here — settings.py auto-selects the Resend backend when RESEND_API_KEY
+      # is present. Do NOT set EMAIL_BACKEND here, or it overrides that choice.
       - key: RESEND_API_KEY
         sync: false
+      # From address for all outgoing mail. Must be an address on a domain you
+      # have verified in Resend (e.g. noreply@solomonislandsartsandcrafts.com.au).
+      # Until the domain is verified, only Resend's onboarding@resend.dev works.
       - key: DEFAULT_FROM_EMAIL
-        sync: false
-      - key: ADMIN_NOTIFICATION_EMAIL
         sync: false
       - key: DJANGO_SUPERUSER_USERNAME
         value: "admin"
