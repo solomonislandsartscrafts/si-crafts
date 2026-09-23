@@ -676,9 +676,13 @@
      colour — cards keep their white `bg-card-bg` + `shadow-card` and so read
      as lifted off this tinted canvas exactly as in the reference.
 
-     The watermark artwork is `/images/_FINALsolomonislandslogo_GREY SHELL.svg`,
-     the grey shell-flower brand mark (its filename has spaces, so the url() in
-     the rule below is percent-encoded). NOT shown on /admin — that
+     The watermark artwork is `/images/solomonislands-grey-shell.svg`, the grey
+     shell-flower brand mark. The filename deliberately has NO leading underscore
+     and NO spaces: on Cloudflare Workers (via OpenNext) `public/` files are
+     served as static assets, and a path beginning with `_` collides with the
+     platform's reserved `_next`/`_headers`/`_routes` convention and 404s in
+     production even though `next dev` serves it fine off disk. NOT shown on
+     /admin — that
      surface is dense tabular data on its own layout and a watermark would fight
      it (see LayoutShell, which only renders this on public routes). Hidden
      entirely under forced-colors so it cannot interfere with high-contrast mode.
@@ -697,13 +701,12 @@
        LARGE marks anchored to the corners/edges and cropped off the edge, with
        the centre of the page left clear so content breathes. The mark is used
        three times via three stacked background layers (comma-separated),
-       each with its own position and size below. Not repeated. The URL is
-       percent-encoded because the filename has spaces. The asset already
+       each with its own position and size below. Not repeated. The asset already
        carries a faint 0.25 opacity on its own artwork. */
     background-image:
-      url('/images/_FINALsolomonislandslogo_GREY%20SHELL.svg'),
-      url('/images/_FINALsolomonislandslogo_GREY%20SHELL.svg'),
-      url('/images/_FINALsolomonislandslogo_GREY%20SHELL.svg');
+      url('/images/solomonislands-grey-shell.svg'),
+      url('/images/solomonislands-grey-shell.svg'),
+      url('/images/solomonislands-grey-shell.svg');
     background-repeat: no-repeat;
     /* One position + size per layer, in the same order as the image list.
        Negative offsets crop each mark off the nearest edge so only part shows.
