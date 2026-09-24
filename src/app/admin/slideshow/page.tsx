@@ -69,6 +69,8 @@ export default function AdminSlideshowPage() {
       }
     }
     load();
+    // Load once on mount; toastError is a stable toast helper.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function toggleCategory(category: SlideCategory) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CheckCircle, XCircle, ChevronDown, ChevronUp, Mail, Phone, Building2, FileText, Pause, Play, Trash2, Plus, X, Store } from 'lucide-react';
 import type { Stockist } from '@/types';
 import { AdminLayout } from '@/components/admin';

@@ -354,6 +354,10 @@ export function RichTextEditor({
     rememberSelection();
     emit();
     editorRef.current?.focus();
+    // restoreSelection/rememberSelection are plain functions recreated each
+    // render; listing them would rebuild this callback every render. emit is
+    // the only stable (memoised) dependency.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [emit]);
 
   /* --- Images --- */

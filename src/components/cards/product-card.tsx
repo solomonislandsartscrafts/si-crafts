@@ -4,7 +4,6 @@ import { materialLabel } from '@/lib/labels';
 import {
   PosterCard,
   posterTitleClasses,
-  posterBodyClasses,
 } from '@/components/cards/poster-card';
 
 interface ProductCardProps {

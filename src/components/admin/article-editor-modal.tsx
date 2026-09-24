@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import type { Article } from '@/types';
-import { getPublishedArticles, getAllArticles } from '@/services/articles';
+import { getAllArticles } from '@/services/articles';
 import { ImageUpload } from './image-upload';
 import { RichTextEditor } from './rich-text-editor';
 import { singleAltError, htmlHasImageMissingAlt } from '@/lib/image-alt';

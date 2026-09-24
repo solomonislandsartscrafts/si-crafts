@@ -42,6 +42,9 @@ export default function AdminInboxPage() {
   const [filter, setFilter] = useState<EnquiryType | 'all'>('all');
   const [loading, setLoading] = useState(true);
 
+  // Reload whenever the filter changes. loadEnquiries is defined below and only
+  // reads `filter`, so filter alone is the correct trigger.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadEnquiries(); }, [filter]);
 
   async function loadEnquiries() {
