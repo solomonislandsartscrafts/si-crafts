@@ -86,7 +86,10 @@ export default async function RootLayout({
         <meta name="theme-color" content="#1B3A4B" />
         <SiteJsonLd />
       </head>
-      <body className="font-body text-base leading-body bg-page-bg min-h-screen flex flex-col">
+      {/* No `bg-page-bg` here: the base canvas is painted on <html> and the
+          public-site map watermark is a fixed `.map-backdrop` layer (see
+          LayoutShell + globals.css). An opaque body background would hide it. */}
+      <body className="font-body text-base leading-body min-h-screen flex flex-col">
         <SkipLink />
         <Providers>
           <div className="flex flex-col flex-1">

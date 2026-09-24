@@ -51,27 +51,30 @@ def _send(
 
 
 def _get_admin_emails() -> list[str]:
-    """Recipient(s) for admin notifications: the superuser's email address.
+    """Recipient(s) for admin notifications: the app's Super Admin accounts.
 
-    Notifications (new contact message, stockist application, order, etc.) are
-    the site owner's business, so they go to the Django superuser account —
-    a single, stable inbox — rather than fanning out to every active admin/editor.
+    Notifications (new contact message, stockist application, order, etc.) go to
+    the admins whose AdminProfile role is "super_admin" — the role shown as
+    "Super Admin" on the Admin Users screen. This is deliberately based on the
+    app-level role, NOT Django's `is_superuser` flag: an account can be a Django
+    superuser (e.g. the bootstrap account created with `createsuperuser`) while
+    being only an Editor in the app, and such an account should not receive
+    these notifications.
 
     Falls back gracefully so a notification is never dropped silently:
-      1. active superusers' emails,
+      1. active Super Admin profile emails,
       2. else any active AdminProfile email,
       3. else ADMIN_NOTIFICATION_EMAIL (env-configured).
     """
-    from django.contrib.auth.models import User
     from apps.accounts.models import AdminProfile
 
-    superuser_emails = [
-        u.email
-        for u in User.objects.filter(is_superuser=True, is_active=True)
-        if u.email
-    ]
-    if superuser_emails:
-        return superuser_emails
+    super_admins = (
+        AdminProfile.objects.filter(is_active=True, role="super_admin")
+        .select_related("user")
+    )
+    super_admin_emails = [p.user.email for p in super_admins if p.user.email]
+    if super_admin_emails:
+        return super_admin_emails
 
     profiles = AdminProfile.objects.filter(is_active=True).select_related("user")
     admin_emails = [p.user.email for p in profiles if p.user.email]
@@ -157,19 +160,53 @@ def notify_order_status_update(stockist_email: str, reference_number: str, new_s
 # --- 5. Contact Form Submission (notify admins) ---
 
 def notify_contact_form(name: str, email: str, reason: str, message: str):
-    """Notify admins of a new contact form submission."""
-    subject = f"[SIAC] Contact form: {reason} — from {name}"
-    body = (
+    """Notify admins of a new contact form submission, and confirm to the sender.
+
+    Two emails go out, regardless of whether the visitor was logged in:
+      1. an admin notification to the admin inbox(es), and
+      2. a confirmation copy to the email address entered in the form.
+
+    The visitor's address is taken from the form's Email field (`email`), never
+    from the logged-in account — so a stockist enquiring on behalf of someone
+    else still has the copy go where they typed.
+    """
+    visitor_email = (email or "").strip()
+    visitor_is_email = bool(_EMAIL_RE.match(visitor_email))
+
+    # --- 1. Admin notification ---
+    admin_subject = f"[SIAC] Contact form: {reason} — from {name}"
+    admin_body = (
         f"New contact form submission.\n\n"
         f"Name: {name}\n"
-        f"Email: {email}\n"
+        f"Email: {visitor_email}\n"
         f"Reason: {reason}\n\n"
         f"Message:\n{message}\n\n"
-        f"Reply directly to: {email}\n"
+        f"Reply directly to: {visitor_email}\n"
         f"Or manage in: {SITE_URL}/admin/inbox\n"
     )
     # Hitting "Reply" goes straight to the visitor, not our no-reply From.
-    _send(subject, body, _get_admin_emails(), reply_to=email if _EMAIL_RE.match(email or "") else None)
+    _send(
+        admin_subject,
+        admin_body,
+        _get_admin_emails(),
+        reply_to=visitor_email if visitor_is_email else None,
+    )
+
+    # --- 2. Confirmation copy to the sender (only if they gave a valid email) ---
+    if visitor_is_email:
+        confirm_subject = f"[SIAC] We received your message"
+        confirm_body = (
+            f"Hi {name or 'there'},\n\n"
+            f"Thank you for getting in touch with {SITE_NAME}. "
+            f"We've received your message and will get back to you as soon as we can.\n\n"
+            f"Here's a copy of what you sent:\n\n"
+            f"Reason: {reason}\n\n"
+            f"Message:\n{message}\n\n"
+            f"If you need to add anything, just reply to this email.\n\n"
+            f"Kind regards,\n"
+            f"The {SITE_NAME} Team\n"
+        )
+        _send(confirm_subject, confirm_body, [visitor_email])
 
 
 # --- 6. Maker Enquiry (notify admins) ---

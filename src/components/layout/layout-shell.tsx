@@ -51,6 +51,12 @@ export function LayoutShell({
 
   return (
     <>
+      {/* Faint Solomon Islands map watermark behind every public page — the
+          Solomon Airlines backdrop treatment. A single fixed, decorative layer
+          that stays put while the page scrolls. Public routes only; the admin
+          branch above never reaches here. See `.map-backdrop` in globals.css. */}
+      <div className="map-backdrop" aria-hidden="true" />
+
       <Suspense fallback={null}>
         <RouteProgressBar />
       </Suspense>

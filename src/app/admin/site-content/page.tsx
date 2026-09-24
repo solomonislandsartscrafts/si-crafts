@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Save, AlertTriangle, Eye, EyeOff } from 'lucide-react';
+import Link from 'next/link';
+import { Save, AlertTriangle, Eye, EyeOff, ArrowRight, HelpCircle } from 'lucide-react';
 import type { SiteContent } from '@/types';
 import { AdminLayout } from '@/components/admin';
 import { ImageUpload } from '@/components/admin/image-upload';
@@ -31,6 +32,27 @@ import { useModalA11y } from '@/lib/use-modal-a11y';
 const IMAGES_TAB = 'images';
 const BRANDING_TAB = 'branding';
 const HOMEPAGE_TAB = 'homepage';
+const FAQS_TAB = 'faqs';
+
+/**
+ * Some tabs edit only the copy that WRAPS a list of records (the FAQ page's
+ * title/intro/CTA), while the records themselves — the accordion questions and
+ * answers — are managed on their own admin screen because they are add/reorder/
+ * delete rows, not flat fields. Without a signpost, an admin editing the FAQ
+ * tab reasonably assumes the questions are missing. This maps a tab to the
+ * screen that owns its records so we can render a "manage them here" callout.
+ */
+const RECORD_MANAGER_LINKS: Record<
+  string,
+  { href: string; label: string; description: string }
+> = {
+  [FAQS_TAB]: {
+    href: '/admin/faqs',
+    label: 'Manage questions & answers',
+    description:
+      'The fields below only control the text around the FAQ accordion (title, intro and the closing banner). The accordion questions and answers themselves are added, edited, reordered and deleted on the FAQs page.',
+  },
+};
 
 // Homepage is rendered explicitly (not via this map) so it can receive the
 // extra supporters-toggle props. Every other page has only string fields.
@@ -339,6 +361,10 @@ export default function AdminSiteContentPage() {
 
           {activeTab === IMAGES_TAB && <ImagesTab content={content} update={update} />}
 
+          {RECORD_MANAGER_LINKS[activeTab] && (
+            <RecordManagerCallout {...RECORD_MANAGER_LINKS[activeTab]} />
+          )}
+
           {SITE_TEXT_GROUPS.find((group) => group.id === activeTab)?.sections.map((section) => (
             <Section key={section.title} title={section.title} description={section.description}>
               {section.fields.map((field) => (
@@ -580,6 +606,37 @@ function ContactTab({ content, update }: TabProps) {
 }
 
 // --- Reusable form primitives ---
+
+/**
+ * A signpost shown at the top of a tab whose records live on another admin
+ * screen (e.g. the FAQ accordion items). It makes clear that this tab edits the
+ * surrounding copy only, and links straight to the screen that owns the records.
+ */
+function RecordManagerCallout({
+  href,
+  label,
+  description,
+}: {
+  href: string;
+  label: string;
+  description: string;
+}) {
+  return (
+    <div className="flex flex-col gap-sm rounded-lg border border-ocean/30 bg-ocean/5 p-md sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-start gap-xs">
+        <HelpCircle className="mt-3xs h-5 w-5 flex-shrink-0 text-ocean" aria-hidden="true" />
+        <p className="text-base text-warm-gray-800 leading-body">{description}</p>
+      </div>
+      <Link
+        href={href}
+        className="focus-ring tap-target inline-flex flex-shrink-0 items-center justify-center gap-2xs rounded-lg bg-ocean px-md py-xs text-base font-medium text-white transition-colors hover:bg-ocean-dark"
+      >
+        {label}
+        <ArrowRight className="h-4 w-4" aria-hidden="true" />
+      </Link>
+    </div>
+  );
+}
 
 function Section({
   title,

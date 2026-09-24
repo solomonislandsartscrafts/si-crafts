@@ -74,12 +74,9 @@ const EMPTY_SITE_CONTENT: SiteContent = {
   careGuideShell: 'Wipe gently with a soft damp cloth\nStore separately to avoid scratching\nAvoid contact with perfume or chemicals\nKeep away from prolonged moisture',
   // Contact
   contactIntro: 'Get in touch with the Solomon Islands Arts & Crafts team.',
-  // Deliberately the address the Contact page has been showing all along. The
-  // previous default here was hello@solomonislandsartscrafts.com.au, which
-  // never rendered because the page hardcoded its own — so wiring the field up
-  // would have silently changed a live contact address. Change it in the admin
-  // once you've confirmed which inbox is monitored.
-  contactEmail: 'hello@siac.com.au',
+  // Fallback default only — the live address is set in the admin Site Content
+  // editor and stored in the backend, which overrides this value when present.
+  contactEmail: 'hello@solomonislandsartscrafts.com.au',
   contactResponseTime:
     'We’re a small volunteer team based in Sydney, Australia and Dunedin, New Zealand. We aim to respond to all enquiries within 2–3 business days.',
 };

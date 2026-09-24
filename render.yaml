@@ -43,9 +43,9 @@ services:
       # set-password and password-reset links from it. Pointing it at a host
       # that 404s ships dead links in every approval and reset email.
       - key: FRONTEND_URL
-        value: "https://si-crafts.siacrafts.workers.dev"
+        value: "https://solomonislandsartscrafts.com.au"
       - key: SITE_URL
-        value: "https://si-crafts.siacrafts.workers.dev"
+        value: "https://solomonislandsartscrafts.com.au"
       - key: PYTHON_VERSION
         value: "3.12.2"
       # Must be this service's own hostname — Wagtail builds absolute image and
