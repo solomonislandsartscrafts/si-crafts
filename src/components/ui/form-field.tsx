@@ -37,6 +37,13 @@ interface FormFieldProps {
    * ignored.
    */
   inlineHint?: string;
+  /**
+   * An interactive element rendered at the right end of the label row — e.g. an
+   * <InfoTip> info icon that reveals a format example on hover/click. Like
+   * `inlineHint` it stays on the label row so it never adds a line, but it's a
+   * node rather than plain text. If both are given, `inlineAction` wins.
+   */
+  inlineAction?: ReactNode;
   /** Error message — when set, the field enters error state */
   error?: string;
   /**
@@ -61,6 +68,7 @@ export function FormField({
   required = false,
   helperText,
   inlineHint,
+  inlineAction,
   error,
   reserveErrorSpace = false,
   children,
@@ -73,9 +81,16 @@ export function FormField({
   // An inline hint takes the place of block helper text: it describes the same
   // thing (expected format) but on the label row. Collapse to one source of
   // truth so the label→input aria-describedby wiring below stays simple.
+  // An inlineAction (e.g. an InfoTip) sits in the same slot and, when present,
+  // supersedes the text hint — the two would compete for the right of the row.
   const hint = inlineHint || helperText;
-  const showInlineHint = Boolean(inlineHint);
-  const showBlockHelper = Boolean(helperText) && !inlineHint;
+  const showInlineAction = Boolean(inlineAction);
+  const showInlineHint = Boolean(inlineHint) && !showInlineAction;
+  const showBlockHelper = Boolean(helperText) && !inlineHint && !showInlineAction;
+  // A text hint sits at the FAR right of the row; the action (info icon) hugs
+  // the label instead. The spacer that pushes content to the far edge is only
+  // needed when a text hint is shown.
+  const showFarRightHint = showInlineHint;
 
   return (
     // Top-aligned, flows downward. NOT `h-full`/`mt-auto` stretched: a stretched
@@ -85,9 +100,11 @@ export function FormField({
     // always one line — the inline hint sits ON it — so every field in a row
     // starts its input at the same y; the error opens BELOW the input.
     <div className={`flex flex-col gap-2xs ${className}`.trim()}>
-      {/* Label row. An inline hint (e.g. "11 digits") sits at the right end of
-          this row so it never adds a line — `mr-auto` on the label side pushes
-          it out to the far edge, keeping the label + required mark on the left. */}
+      {/* Label row. Reading order left-to-right: label, required mark, then the
+          info action (an InfoTip) hugging the label so it reads as one unit —
+          the icon belongs to the field it explains, not the far edge of the
+          row. A text hint (e.g. "11 digits"), by contrast, sits at the FAR
+          right: the `mr-auto` spacer after the action pushes it there. */}
       <div className="flex items-baseline gap-3xs">
         <label
           htmlFor={htmlFor}
@@ -96,11 +113,14 @@ export function FormField({
           {label}
         </label>
         {required && (
-          <span className="text-crest-red text-sm mr-auto" aria-hidden="true">
+          <span className="text-crest-red text-sm" aria-hidden="true">
             *
           </span>
         )}
-        {!required && showInlineHint && <span className="mr-auto" aria-hidden="true" />}
+        {showInlineAction && <span className="-my-2xs">{inlineAction}</span>}
+        {/* Spacer: only when a far-right text hint follows, to push it to the
+            edge. Without a hint, the row ends after the action so it hugs. */}
+        {showFarRightHint && <span className="mr-auto" aria-hidden="true" />}
         {showInlineHint && (
           <span id={helperId} className="text-sm text-warm-gray-400">
             {hint}

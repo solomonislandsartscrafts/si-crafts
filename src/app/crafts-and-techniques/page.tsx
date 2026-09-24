@@ -51,9 +51,12 @@ export default async function CraftsAndTechniquesPage() {
         )}
       </div>
 
+      {/* Contained so the deep-blue is a rounded panel within the page width
+          rather than a full-bleed band running to the screen edges. */}
       <PageCta
         heading={text['crafts.ctaHeading']}
         description={text['crafts.ctaDescription']}
+        contained
       >
         <ButtonLink href="/makers">{text['crafts.ctaPrimaryButton']}</ButtonLink>
         <ButtonLink href="/catalogue" variant="secondary">
