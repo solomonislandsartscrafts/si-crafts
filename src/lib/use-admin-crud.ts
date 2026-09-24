@@ -75,7 +75,7 @@ export function useAdminCrud<T extends { id: string; name?: string }, TFormData 
       if (requestId === loadRequestId.current) {
         setItems(data);
       }
-    } catch (err) {
+    } catch {
       if (requestId === loadRequestId.current) {
         toastError(`Failed to load ${entityName}s. Please refresh the page.`);
       }
@@ -172,7 +172,7 @@ export function useAdminCrud<T extends { id: string; name?: string }, TFormData 
         }
         toastSuccess(`"${displayName}" deleted.`);
         loadItems();
-      } catch (err) {
+      } catch {
         toastError(`Failed to delete "${displayName}". Please try again.`);
       }
     },

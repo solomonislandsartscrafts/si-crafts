@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Package, ClipboardList, MessageSquare, LogOut, ShoppingCart, Save, Upload, Lock } from 'lucide-react';
-import { validateStockistSession } from '@/lib/auth-client';
+import { useRequireStockist } from '@/lib/use-require-stockist';
 import { getCart } from '@/lib/cart';
 import { compressImage } from '@/lib/compress-image';
 import { pageTitleClasses } from '@/components/layout/page-header';
@@ -26,8 +26,9 @@ interface StockistProfile {
 
 export default function StockistAccountPage() {
   const router = useRouter();
+  const { stockist, loading: authLoading } = useRequireStockist();
   const [profile, setProfile] = useState<StockistProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [cartCount, setCartCount] = useState(0);
 
   // Edit state
@@ -49,20 +50,20 @@ export default function StockistAccountPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    // The hook gates access and redirects to login when unauthenticated; only
+    // load the profile once it has confirmed a valid stockist.
+    if (!stockist) return;
+    let cancelled = false;
+
     async function load() {
       const token = localStorage.getItem('stockist_session');
-      if (!token) { router.push('/stockist/login'); return; }
-
-      const s = await validateStockistSession(token);
-      if (!s) { localStorage.removeItem('stockist_session'); router.push('/stockist/login'); return; }
-
       // Load full profile from backend
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       try {
         const res = await fetch(`${API_URL}/api/stockists/profile/`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
-        if (res.ok) {
+        if (res.ok && !cancelled) {
           const data = await res.json();
           setProfile(data);
           setEditForm(data);
@@ -71,11 +72,15 @@ export default function StockistAccountPage() {
         // Fall back to basic session data
       }
 
+      if (cancelled) return;
       setCartCount(getCart().reduce((sum, i) => sum + i.quantity, 0));
-      setLoading(false);
+      setProfileLoading(false);
     }
     load();
-  }, [router]);
+    return () => { cancelled = true; };
+  }, [stockist]);
+
+  const loading = authLoading || !stockist || profileLoading;
 
   async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();

@@ -30,6 +30,37 @@ const SESSION_KEYS: Record<AccountType, string> = {
   admin: 'admin_session',
 };
 
+// The section each account type is allowed to be returned to after login. A
+// `?next=` value is only honoured when it points inside this section, so the
+// redirect target can never be an off-site URL or another role's area.
+const ALLOWED_NEXT_PREFIX: Record<AccountType, string> = {
+  stockist: '/stockist/',
+  admin: '/admin/',
+};
+
+/**
+ * Resolve where to send the user after a successful login.
+ *
+ * Prefers a `?next=` return path (set when a protected page bounced them here —
+ * e.g. an admin clicking a notification-email link while logged out), but only
+ * when it is a safe, same-origin path inside this role's own section. Anything
+ * else — an absolute URL, a protocol-relative `//host`, a backslash trick, or
+ * another role's area — is ignored in favour of the role's default landing
+ * page. This is the standard open-redirect guard: never navigate to an
+ * attacker-supplied destination.
+ */
+function resolveDestination(accountType: AccountType, next: string | null): string {
+  if (
+    next &&
+    next.startsWith(ALLOWED_NEXT_PREFIX[accountType]) &&
+    !next.startsWith('//') &&
+    !next.startsWith('/\\')
+  ) {
+    return next;
+  }
+  return DESTINATIONS[accountType];
+}
+
 export function LoginForm({
   showAccountTypeChooser = false,
   defaultAccountType = 'stockist',
@@ -65,7 +96,13 @@ export function LoginForm({
         const otherType: AccountType = accountType === 'admin' ? 'stockist' : 'admin';
         localStorage.removeItem(SESSION_KEYS[otherType]);
         localStorage.setItem(SESSION_KEYS[accountType], result.sessionToken);
-        router.push(DESTINATIONS[accountType]);
+        // Return them to the page that bounced them here, when it's a safe
+        // internal path for this role; otherwise the role's default landing.
+        // Read `next` from the live URL rather than useSearchParams(): login is
+        // a client-only submit action, and useSearchParams() would force every
+        // page rendering <LoginForm> into a Suspense boundary (CSR bailout).
+        const next = new URLSearchParams(window.location.search).get('next');
+        router.push(resolveDestination(accountType, next));
       } else {
         setError(
           result.lockedUntil

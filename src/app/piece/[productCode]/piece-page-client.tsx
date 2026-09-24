@@ -8,7 +8,7 @@ import { AccordionItem } from '@/components/ui/accordion';
 import type { Product, Maker, Craft } from '@/types';
 import { ImageGallery } from '@/components/provenance/image-gallery';
 import { MakerSection } from '@/components/provenance/maker-section';
-import { CmsInline, CmsText } from '@/components/ui/cms-text';
+import { CmsInline, CmsText, extractCmsLinks } from '@/components/ui/cms-text';
 import { QuantityStepper } from '@/components/ui/quantity-stepper';
 import { ShieldCheck } from 'lucide-react';
 import { ShareButtons } from '@/components/shared/share-buttons';
@@ -261,19 +261,47 @@ export function PiecePageClient({
             </div>
           )}
 
-          {/* Trade-only notice — public visitors. States the wholesale rule and
-              links to next steps inline; the action buttons live once, in the
-              "Where to buy" section below. */}
-          {!isStockist && tradeOnlyNotice && (
-            <div className="mb-md px-sm py-sm bg-ocean/5 border border-ocean/20 rounded-lg">
-              <p className="text-sm text-warm-gray-600">
-                <CmsInline
-                  value={tradeOnlyNotice}
-                  linkClassName="text-ocean hover:text-ocean-dark font-medium"
-                />
-              </p>
-            </div>
-          )}
+          {/* Trade-only notice — public visitors. States the wholesale rule,
+              then promotes the notice's two links to action buttons: the first
+              (Apply) as the primary action, the second (Find a stockist) as the
+              secondary. The labels and targets still come from the one
+              admin-editable field via extractCmsLinks, so an editor keeps
+              control of the wording; the component only decides they render as
+              buttons rather than inline links. If the copy has no links it
+              falls back to the plain inline sentence. */}
+          {!isStockist && tradeOnlyNotice && (() => {
+            const { text, links } = extractCmsLinks(tradeOnlyNotice);
+            return (
+              <div className="mb-md px-sm py-sm bg-ocean/5 border border-ocean/20 rounded-lg">
+                {links.length > 0 ? (
+                  <>
+                    {text && (
+                      <p className="text-sm text-warm-gray-600">{text}</p>
+                    )}
+                    <div className="mt-xs flex flex-col flex-wrap gap-xs sm:flex-row">
+                      {links.map((link, i) => (
+                        <ButtonLink
+                          key={link.href}
+                          href={link.href}
+                          size="sm"
+                          variant={i === 0 ? 'primary' : 'secondary'}
+                        >
+                          {link.label}
+                        </ButtonLink>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-warm-gray-600">
+                    <CmsInline
+                      value={tradeOnlyNotice}
+                      linkClassName="text-ocean hover:text-ocean-dark font-medium"
+                    />
+                  </p>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Product details — the drier reference facts, collapsed so they
               don't compete with the description, provenance and buy action

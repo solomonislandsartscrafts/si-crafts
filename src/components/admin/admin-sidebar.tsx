@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Users, UsersRound, Package, Palette, Store, ClipboardList, Shield, Inbox, Newspaper, LogOut, ExternalLink, ImageIcon, Tags, BookOpen, SlidersHorizontal, KeyRound, HelpCircle, MapPin, Handshake, Megaphone } from 'lucide-react';
 import type { AdminRole } from '@/types';
+import { NotificationBell } from './notification-bell';
 
 interface AdminSidebarProps {
   role: AdminRole;
@@ -93,12 +94,15 @@ export function AdminSidebar({
 
   return (
     <aside className="w-64 lg:w-56 flex-shrink-0 bg-deep-blue text-white min-h-screen flex flex-col">
-      {/* Logo */}
-      <div className="px-sm py-md border-b border-white/10">
-        <Link href="/" className="font-heading text-lg font-semibold text-white hover:text-white/80 transition-colors">
-          SIAC
-        </Link>
-        <p className="text-xs text-white/40 mt-3xs">Admin Panel</p>
+      {/* Logo + notifications */}
+      <div className="px-sm py-md border-b border-white/10 flex items-start justify-between gap-xs">
+        <div>
+          <Link href="/" className="font-heading text-lg font-semibold text-white hover:text-white/80 transition-colors">
+            SIAC
+          </Link>
+          <p className="text-xs text-white/40 mt-3xs">Admin Panel</p>
+        </div>
+        <NotificationBell tone="dark" onNavigate={onNavigate} />
       </div>
 
       {/* Navigation — grouped with section headers */}

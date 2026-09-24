@@ -121,7 +121,6 @@ describe('Property 3: Product codes valid and unique', () => {
 describe('Property 4: Filter AND logic', () => {
   const publicProducts = getPublicProducts(mockProducts, mockMakers);
   const categories = [...new Set(publicProducts.map((p) => p.materialCategory))];
-  const types = [...new Set(publicProducts.map((p) => p.productType))];
   const makerIds = [...new Set(publicProducts.map((p) => p.makerId))];
 
   it('applying materialCategory filter returns only products of that category', () => {

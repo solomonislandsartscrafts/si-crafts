@@ -8,7 +8,6 @@ import {
   EyeOff,
   Check,
   X,
-  ArrowRight,
 } from 'lucide-react';
 
 /** Section list for the in-page navigation. Ids match the sections below. */

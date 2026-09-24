@@ -11,6 +11,12 @@ import { type ReactNode, type ReactElement, isValidElement, cloneElement } from 
  *
  * The `htmlFor` prop links the label to the input. If omitted, provide an `id`
  * matching the child input's id attribute.
+ *
+ * Layout invariant: the label and input NEVER move. The field flows top-down
+ * and is not stretched to fill its grid cell, so a neighbour in the same row
+ * growing (e.g. its error message appearing as the user types) cannot shift
+ * this field's input. Errors open below the input, extending the field
+ * downward only.
  */
 
 interface FormFieldProps {
@@ -22,8 +28,27 @@ interface FormFieldProps {
   required?: boolean;
   /** Helper/description text below the label, before the input */
   helperText?: string;
+  /**
+   * A short hint shown inline on the label row itself (right of the label /
+   * required mark) rather than as a block line below it. Use for a brief format
+   * cue like "11 digits" so it doesn't add a line and drop the input below a
+   * neighbouring field in the same grid row. For longer descriptions, prefer
+   * `helperText`. If both are given, `inlineHint` wins and `helperText` is
+   * ignored.
+   */
+  inlineHint?: string;
   /** Error message — when set, the field enters error state */
   error?: string;
+  /**
+   * Reserve a fixed line of space under the input for the error message, so the
+   * field's height is identical whether or not an error is showing. Use this on
+   * forms where fields validate live as the user types (like the stockist apply
+   * form): without it, an error appearing/clearing changes the field height and
+   * nudges everything below it. Assumes single-line error messages. Off by
+   * default so forms that validate only on submit don't gain a blank line under
+   * every field.
+   */
+  reserveErrorSpace?: boolean;
   /** The form control (input, textarea, select, etc.) */
   children: ReactNode;
   /** Additional class names for the wrapper */
@@ -35,7 +60,9 @@ export function FormField({
   htmlFor,
   required = false,
   helperText,
+  inlineHint,
   error,
+  reserveErrorSpace = false,
   children,
   className = '',
 }: FormFieldProps) {
@@ -43,9 +70,24 @@ export function FormField({
   const helperId = htmlFor ? `${htmlFor}-helper` : undefined;
   const errorId = htmlFor ? `${htmlFor}-error` : undefined;
 
+  // An inline hint takes the place of block helper text: it describes the same
+  // thing (expected format) but on the label row. Collapse to one source of
+  // truth so the label→input aria-describedby wiring below stays simple.
+  const hint = inlineHint || helperText;
+  const showInlineHint = Boolean(inlineHint);
+  const showBlockHelper = Boolean(helperText) && !inlineHint;
+
   return (
-    <div className={`space-y-2xs ${className}`.trim()}>
-      {/* Label row */}
+    // Top-aligned, flows downward. NOT `h-full`/`mt-auto` stretched: a stretched
+    // field pushes its input to a shared bottom edge, so when a neighbour in the
+    // same grid row grows (usually its error appearing mid-typing) this field's
+    // input would move to track it. The input must never move. The label row is
+    // always one line — the inline hint sits ON it — so every field in a row
+    // starts its input at the same y; the error opens BELOW the input.
+    <div className={`flex flex-col gap-2xs ${className}`.trim()}>
+      {/* Label row. An inline hint (e.g. "11 digits") sits at the right end of
+          this row so it never adds a line — `mr-auto` on the label side pushes
+          it out to the far edge, keeping the label + required mark on the left. */}
       <div className="flex items-baseline gap-3xs">
         <label
           htmlFor={htmlFor}
@@ -54,14 +96,21 @@ export function FormField({
           {label}
         </label>
         {required && (
-          <span className="text-crest-red text-sm" aria-hidden="true">
+          <span className="text-crest-red text-sm mr-auto" aria-hidden="true">
             *
+          </span>
+        )}
+        {!required && showInlineHint && <span className="mr-auto" aria-hidden="true" />}
+        {showInlineHint && (
+          <span id={helperId} className="text-sm text-warm-gray-400">
+            {hint}
           </span>
         )}
       </div>
 
-      {/* Helper text — shown before input, describes expected format */}
-      {helperText && !error && (
+      {/* Block helper text — shown before input, describes expected format.
+          Suppressed when an inline hint is used (it takes the label row). */}
+      {showBlockHelper && (
         <p
           id={helperId}
           className="text-base text-warm-gray-400 leading-relaxed"
@@ -81,12 +130,14 @@ export function FormField({
             id: htmlFor || (children as ReactElement<Record<string, unknown>>).props.id,
             'aria-describedby':
               [
-                // Reference the error message when there is one; otherwise the
-                // helper text — but only when it is actually rendered, which is
-                // when `helperText` is set and there is no error. Pointing
-                // `aria-describedby` at an id that no element carries is itself
-                // a violation, so an empty `helperText` must not contribute one.
-                error ? errorId : helperText ? helperId : '',
+                // Reference BOTH the hint (if any) and the error (if any). The
+                // hint stays visible during an error, since it describes the
+                // format a user fixing the error needs, so both ids can be
+                // present at once. Pointing `aria-describedby` at an id no
+                // element carries is itself a violation, so each id is added
+                // only when its element renders.
+                showInlineHint || showBlockHelper ? helperId : '',
+                error ? errorId : '',
                 (children as ReactElement<Record<string, unknown>>).props['aria-describedby'],
               ]
                 .filter(Boolean)
@@ -99,16 +150,34 @@ export function FormField({
           })
         : children}
 
-      {/* Error message — replaces helper text when present */}
-      {error && (
+      {/* Error message. With `reserveErrorSpace` the slot is ALWAYS rendered at
+          a fixed one-line min-height (`leading-body` = 28px, the height one
+          line of `text-base` error copy takes), so toggling the error text in
+          and out never changes the field's height and nothing below it moves.
+          Without it, the slot only exists when there's an error (the field
+          grows downward, which is fine for submit-only forms). `aria-live`
+          means the empty reserved <p> still announces the message when it later
+          populates. */}
+      {reserveErrorSpace ? (
         <p
           id={errorId}
-          className="text-base text-error mt-3xs"
+          className="text-base text-error leading-body min-h-7"
           role="alert"
           aria-live="assertive"
         >
           {error}
         </p>
+      ) : (
+        error && (
+          <p
+            id={errorId}
+            className="text-base text-error"
+            role="alert"
+            aria-live="assertive"
+          >
+            {error}
+          </p>
+        )
       )}
 
       {/* Screen-reader only required hint */}

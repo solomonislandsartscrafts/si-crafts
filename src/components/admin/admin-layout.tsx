@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Menu } from 'lucide-react';
 import type { AdminUser } from '@/types';
 import { AdminSidebar } from './admin-sidebar';
+import { NotificationBell } from './notification-bell';
 import { validateAdminSession } from '@/lib/auth-client';
 import { useModalA11y } from '@/lib/use-modal-a11y';
 import { pageTitleClasses } from '@/components/layout/page-header';
@@ -38,11 +39,23 @@ export function AdminLayout({ children, requiredRole = null }: AdminLayoutProps)
 
   useEffect(() => {
     async function checkAuth() {
+      // Send an unauthenticated visitor to the admin login, remembering where
+      // they were headed so login can return them there. This is the path a
+      // notification email link takes (e.g. /admin/stockists): logged out →
+      // admin login → back to the page after signing in; logged in → the
+      // session below validates and they never see the login at all. The
+      // current path + query is preserved as `next`; the login form only
+      // honours a safe internal admin path (see login-form.tsx).
+      function redirectToLogin() {
+        const next = `${pathname}${window.location.search}`;
+        router.replace(`/admin/login?next=${encodeURIComponent(next)}`);
+      }
+
       const token = localStorage.getItem('admin_session');
-      if (!token) { router.push('/'); return; }
+      if (!token) { redirectToLogin(); return; }
 
       const user = await validateAdminSession(token);
-      if (!user) { localStorage.removeItem('admin_session'); router.push('/'); return; }
+      if (!user) { localStorage.removeItem('admin_session'); redirectToLogin(); return; }
 
       if (requiredRole && user.role !== requiredRole) {
         setDenied(true);
@@ -54,7 +67,7 @@ export function AdminLayout({ children, requiredRole = null }: AdminLayoutProps)
       setLoading(false);
     }
     checkAuth();
-  }, [router, requiredRole]);
+  }, [router, requiredRole, pathname]);
 
   async function handleLogout() {
     try {
@@ -151,6 +164,9 @@ export function AdminLayout({ children, requiredRole = null }: AdminLayoutProps)
           <span className="font-heading text-base font-semibold">
             SIAC Admin
           </span>
+          <div className="ml-auto">
+            <NotificationBell tone="dark" />
+          </div>
         </div>
 
         {/* Admin takes the md/lg rungs of the shared scale (24 → 32) but

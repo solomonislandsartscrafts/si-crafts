@@ -42,6 +42,8 @@ export default function AdminRetailStockistsPage() {
 
   useEffect(() => {
     load();
+    // Load once on mount. load() takes no reactive inputs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function load() {

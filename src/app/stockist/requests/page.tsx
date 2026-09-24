@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { validateStockistSession } from '@/lib/auth-client';
+import { useRequireStockist } from '@/lib/use-require-stockist';
 import { submitStockistRequest } from '@/services/enquiries';
 import type { ReplacementTagRequest, CustomBulkRequest } from '@/types';
 import { PageHeader } from '@/components/layout/page-header';
@@ -16,10 +15,7 @@ import { SuccessPanel } from '@/components/ui/success-panel';
 type RequestKind = 'replacement-tag' | 'custom-bulk';
 
 export default function StockistRequestsPage() {
-  const router = useRouter();
-  const [authenticated, setAuthenticated] = useState(false);
-  const [stockistId, setStockistId] = useState('');
-  const [loading, setLoading] = useState(true);
+  const { stockist, loading: authLoading } = useRequireStockist();
   const [kind, setKind] = useState<RequestKind>('replacement-tag');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -35,18 +31,9 @@ export default function StockistRequestsPage() {
   const [customQty, setCustomQty] = useState('1');
   const [customNotes, setCustomNotes] = useState('');
 
-  useEffect(() => {
-    async function checkAuth() {
-      const token = localStorage.getItem('stockist_session');
-      if (!token) { router.push('/stockist/login'); return; }
-      const stockist = await validateStockistSession(token);
-      if (!stockist) { localStorage.removeItem('stockist_session'); router.push('/stockist/login'); return; }
-      setStockistId(stockist.id);
-      setAuthenticated(true);
-      setLoading(false);
-    }
-    checkAuth();
-  }, [router]);
+  const authenticated = Boolean(stockist);
+  const loading = authLoading || !stockist;
+  const stockistId = stockist?.id ?? '';
 
   function validate(): Record<string, string> {
     const errs: Record<string, string> = {};

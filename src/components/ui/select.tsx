@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { ChevronDown, Check } from 'lucide-react';
 
 /**
@@ -73,11 +73,12 @@ export function Select({
   const listRef = useRef<HTMLUListElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  // All items including the "all" placeholder as first option
-  const allOptions: SelectOption[] = [
-    { value: '', label: placeholder },
-    ...options,
-  ];
+  // All items including the "all" placeholder as first option. Memoised so the
+  // useCallback hooks that depend on it aren't rebuilt on every render.
+  const allOptions: SelectOption[] = useMemo(
+    () => [{ value: '', label: placeholder }, ...options],
+    [placeholder, options]
+  );
 
   const selectedOption = allOptions.find((o) => o.value === (value ?? ''));
   const displayLabel = selectedOption?.label || placeholder;

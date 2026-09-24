@@ -64,6 +64,14 @@ services:
       # Until the domain is verified, only Resend's onboarding@resend.dev works.
       - key: DEFAULT_FROM_EMAIL
         sync: false
+      # Where admin notifications (new stockist application, new order, contact
+      # message) land. _get_admin_emails() prefers active Super Admin account
+      # emails and only falls back to this — but that fallback matters: if no
+      # active Super Admin has an email set, without this every admin
+      # notification goes to the no-reply From address, which nobody monitors.
+      # Set this to a real, monitored inbox so notifications can never be lost.
+      - key: ADMIN_NOTIFICATION_EMAIL
+        sync: false
       - key: DJANGO_SUPERUSER_USERNAME
         value: "admin"
       - key: DJANGO_SUPERUSER_EMAIL

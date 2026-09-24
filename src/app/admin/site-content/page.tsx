@@ -160,6 +160,8 @@ export default function AdminSiteContentPage() {
       }
     }
     load();
+    // Load once on mount; toastError is a stable toast helper.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [showConfirm, setShowConfirm] = useState(false);

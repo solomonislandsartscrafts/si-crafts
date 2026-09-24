@@ -7,7 +7,7 @@ import type { Product, Maker } from '@/types';
 import { MakerFilter } from '@/components/catalogue/maker-filter';
 import { SearchInput } from '@/components/catalogue/search-input';
 import { StockistProductGrid } from '@/components/catalogue/stockist-product-grid';
-import { validateStockistSession } from '@/lib/auth-client';
+import { useRequireStockist } from '@/lib/use-require-stockist';
 import { getWholesaleProducts } from '@/services/products';
 import { getPublicMakers } from '@/services/makers';
 import { pageTitleClasses } from '@/components/layout/page-header';
@@ -19,29 +19,29 @@ const MATERIAL_LABELS: Record<string, string> = { pandanus: 'Pandanus', wood: 'W
 
 export default function StockistCataloguePage() {
   const router = useRouter();
+  const { stockist, loading: authLoading } = useRequireStockist();
   const [products, setProducts] = useState<Product[]>([]);
   const [makers, setMakers] = useState<Maker[]>([]);
   const [selectedMaker, setSelectedMaker] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [authenticated, setAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
-    async function checkAuth() {
-      const token = localStorage.getItem('stockist_session');
-      if (!token) { router.push('/stockist/login'); return; }
-
-      const stockist = await validateStockistSession(token);
-      if (!stockist) { localStorage.removeItem('stockist_session'); router.push('/stockist/login'); return; }
-
-      setAuthenticated(true);
+    if (!stockist) return;
+    let cancelled = false;
+    async function loadData() {
       const [prods, mkrs] = await Promise.all([getWholesaleProducts(), getPublicMakers()]);
+      if (cancelled) return;
       setProducts(prods);
       setMakers(mkrs);
-      setLoading(false);
+      setDataLoading(false);
     }
-    checkAuth();
-  }, [router]);
+    loadData();
+    return () => { cancelled = true; };
+  }, [stockist]);
+
+  const authenticated = Boolean(stockist);
+  const loading = authLoading || !stockist || dataLoading;
 
   async function handleLogout() {
     try {

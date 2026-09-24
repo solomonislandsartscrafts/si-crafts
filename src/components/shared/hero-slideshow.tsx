@@ -207,7 +207,7 @@ export function HeroSlideshow({ items, interval = 5000, tone = 'light' }: HeroSl
     lastMoveTime.current = e.timeStamp;
   }
 
-  function handleTouchEnd(e: React.TouchEvent) {
+  function handleTouchEnd() {
     if (touchStartX.current === null) return;
 
     const totalDx = touchDeltaX.current;

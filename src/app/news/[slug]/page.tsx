@@ -10,7 +10,6 @@ import type { Metadata } from 'next';
 import { ShareButtons } from '@/components/shared/share-buttons';
 import { NewsSidebar } from '@/components/news/news-sidebar';
 import { ReadingProgress } from '@/components/news/reading-progress';
-import { DetailPageLayout } from '@/components/layout/detail-page-layout';
 import { pageTitleClasses } from '@/components/layout/page-header';
 import { SafeImage } from '@/components/ui/safe-image';
 import { Breadcrumb } from '@/components/ui/breadcrumb';

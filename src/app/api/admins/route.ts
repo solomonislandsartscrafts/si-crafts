@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
 
   const admins = await getAllAdmins(token);
   // Strip passwordHash before sending to client
-  const safe = admins.map(({ passwordHash, ...rest }) => rest);
+  const safe = admins.map(({ passwordHash: _passwordHash, ...rest }) => rest);
   return NextResponse.json(safe);
 }
 
