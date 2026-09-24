@@ -188,10 +188,12 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      {/* Closing CTA */}
+      {/* Closing CTA — contained so the deep-blue is a rounded panel within the
+          page width rather than a full-bleed band running to the screen edges. */}
       <PageCta
         heading={text['about.ctaHeading']}
         description={text['about.ctaDescription']}
+        contained
       >
         <ButtonLink href="/makers">{text['about.ctaPrimaryButton']}</ButtonLink>
         <ButtonLink href="/catalogue" variant="secondary">

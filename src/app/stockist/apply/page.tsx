@@ -6,6 +6,7 @@ import { Send } from 'lucide-react';
 import { PageHeader } from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
 import { FormField, inputClasses } from '@/components/ui/form-field';
+import { InfoTip } from '@/components/ui/info-tip';
 import { SuccessPanel } from '@/components/ui/success-panel';
 
 const DESCRIPTION_LIMIT = 500;
@@ -202,13 +203,24 @@ export default function StockistApplyPage() {
               />
             </FormField>
 
-            <FormField label="ABN" htmlFor="abn" required inlineHint="11 digits" reserveErrorSpace error={errors.abn}>
+            <FormField
+              label="ABN"
+              htmlFor="abn"
+              required
+              reserveErrorSpace
+              error={errors.abn}
+              inlineAction={
+                <InfoTip label="About ABN">
+                  Your 11-digit Australian Business Number. Enter the digits with
+                  or without spaces — for example, 12&nbsp;345&nbsp;678&nbsp;901.
+                </InfoTip>
+              }
+            >
               <input
                 id="abn"
                 type="text"
                 value={form.abn}
                 inputMode="numeric"
-                placeholder="12 345 678 901"
                 ref={(el) => { fieldRefs.current.abn = el; }}
                 onChange={(e) => update('abn', e.target.value)}
                 className={inputClasses}
