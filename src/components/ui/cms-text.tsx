@@ -144,3 +144,50 @@ export function splitCmsList(value: string): string[] {
     .map((line) => line.trim())
     .filter(Boolean);
 }
+
+/** One `[label](target)` link pulled out of a CMS string. */
+export interface CmsLink {
+  label: string;
+  href: string;
+}
+
+/**
+ * Splits a CMS string into its prose and its links.
+ *
+ * A call site that wants to render the links as buttons (rather than inline)
+ * needs them as data, not React nodes — and needs the surrounding sentence
+ * with the links removed so it doesn't read as a fragment ("… or ."). This
+ * returns both: `text` is the copy with every `[label](target)` stripped and
+ * whitespace/trailing "or"/punctuation tidied, and `links` is those targets in
+ * order. Only links with a safe href (same rule as the inline renderer) are
+ * returned, so an unsafe target degrades to plain text exactly as it would
+ * inline. Admins keep editing one field; the call site decides the presentation.
+ */
+export function extractCmsLinks(value: string): { text: string; links: CmsLink[] } {
+  if (!value) return { text: '', links: [] };
+
+  const links: CmsLink[] = [];
+  const withoutLinks = value.replace(/\[([^\]\n]+)\]\(([^)\s]+)\)/g, (_match, label, href) => {
+    if (isSafeHref(href)) {
+      links.push({ label, href });
+      return '';
+    }
+    // Unsafe target: keep the visible label, drop nothing into links.
+    return label;
+  });
+
+  // Tidy the prose left behind. Removing "… stockists. [Apply](…) or
+  // [find](…)." leaves stray spaces, a dangling "or", and a doubled full stop.
+  // In order: pull punctuation back against the preceding word, drop a
+  // connective ("or"/"and") that now sits before punctuation or end of string,
+  // collapse repeated .,! ? runs down to one, collapse spaces, trim.
+  const text = withoutLinks
+    .replace(/\s+([.,!?])/g, '$1')
+    .replace(/\s+(?:or|and)\s*(?=[.,!?]|$)/gi, '')
+    .replace(/([.,!?])[\s.,!?]*\1/g, '$1')
+    .replace(/([.,!?]){2,}/g, '$1')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+
+  return { text, links };
+}

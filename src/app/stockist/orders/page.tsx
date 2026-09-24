@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Trash2, AlertTriangle, ArrowLeft, Send, X, MessageSquare, ShoppingCart } from 'lucide-react';
 import type { CartItem } from '@/types';
 import { getCart, updateQuantity, updateNote, removeFromCart, clearCart, getCartTotal, GST_THRESHOLD } from '@/lib/cart';
-import { validateStockistSession } from '@/lib/auth-client';
+import { useRequireStockist } from '@/lib/use-require-stockist';
 import { createOrderRequest } from '@/services/orders';
 import { formatPrice } from '@/lib/price';
 import { PageHeader } from '@/components/layout/page-header';
@@ -19,26 +18,19 @@ import { SuccessPanel } from '@/components/ui/success-panel';
 import { useModalA11y } from '@/lib/use-modal-a11y';
 
 export default function StockistOrdersPage() {
-  const router = useRouter();
+  const { stockist, loading: authLoading } = useRequireStockist();
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [authenticated, setAuthenticated] = useState(false);
   const [submitted, setSubmitted] = useState<{ ref: string; time: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function checkAuth() {
-      const token = localStorage.getItem('stockist_session');
-      if (!token) { router.push('/stockist/login'); return; }
-      const stockist = await validateStockistSession(token);
-      if (!stockist) { localStorage.removeItem('stockist_session'); router.push('/stockist/login'); return; }
-      setAuthenticated(true);
-      setCart(getCart());
-      setLoading(false);
-    }
-    checkAuth();
-  }, [router]);
+    if (!stockist) return;
+    setCart(getCart());
+  }, [stockist]);
+
+  const authenticated = Boolean(stockist);
+  const loading = authLoading || !stockist;
 
   const [noteModalItem, setNoteModalItem] = useState<string | null>(null);
   const [noteText, setNoteText] = useState('');
@@ -81,13 +73,9 @@ export default function StockistOrdersPage() {
     if (submitting) return;
 
     setSubmitError('');
+    if (!stockist) return;
     setSubmitting(true);
     try {
-      const token = localStorage.getItem('stockist_session');
-      if (!token) return;
-      const stockist = await validateStockistSession(token);
-      if (!stockist) return;
-
       const order = await createOrderRequest(stockist.id, cart);
       clearCart();
       setSubmitted({ ref: order.referenceNumber, time: order.submittedAt });

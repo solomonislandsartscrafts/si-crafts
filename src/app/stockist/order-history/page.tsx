@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Package } from 'lucide-react';
 import type { OrderRequest } from '@/types';
-import { validateStockistSession } from '@/lib/auth-client';
+import { useRequireStockist } from '@/lib/use-require-stockist';
 import { getOrdersByStockist } from '@/services/orders';
 import { PageHeader } from '@/components/layout/page-header';
 import { ButtonLink } from '@/components/ui/button';
@@ -30,23 +29,25 @@ function statusVariant(status: OrderRequest['status']) {
 }
 
 export default function OrderHistoryPage() {
-  const router = useRouter();
+  const { stockist, loading: authLoading } = useRequireStockist();
   const [orders, setOrders] = useState<OrderRequest[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [ordersLoading, setOrdersLoading] = useState(true);
 
   useEffect(() => {
+    if (!stockist) return;
+    let cancelled = false;
     async function load() {
-      const token = localStorage.getItem('stockist_session');
-      if (!token) { router.push('/stockist/login'); return; }
-      const stockist = await validateStockistSession(token);
-      if (!stockist) { localStorage.removeItem('stockist_session'); router.push('/stockist/login'); return; }
-
-      const result = await getOrdersByStockist(stockist.id);
+      const result = await getOrdersByStockist(stockist!.id);
+      if (cancelled) return;
       setOrders(result);
-      setLoading(false);
+      setOrdersLoading(false);
     }
     load();
-  }, [router]);
+    return () => { cancelled = true; };
+  }, [stockist]);
+
+  // Still checking the session, redirecting, or loading orders.
+  const loading = authLoading || !stockist || ordersLoading;
 
   if (loading) {
     return (
