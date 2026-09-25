@@ -9,6 +9,7 @@
 
 # Unlighthouse audit output (generated tooling artifacts — not source)
 .unlighthouse/
+.unlighthouse-run/
 
 # next.js
 /.next/
