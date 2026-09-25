@@ -170,6 +170,7 @@ export function MakersPageContent({
                     maker={maker}
                     craftName={maker.craftName || undefined}
                     layout="row"
+                    titleAs="h2"
                   />
                 ))}
               </div>

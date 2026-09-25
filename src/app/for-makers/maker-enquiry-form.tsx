@@ -75,7 +75,17 @@ export function MakerEnquiryForm({
   }
 
   if (submitted) {
-    return <SuccessPanel title={successHeading} icon={CheckCircle} description={successBody} />;
+    // h2, not the default h1: this panel replaces the enquiry form inside the
+    // for-makers page, which already renders a <PageHeader> h1. Two h1s on one
+    // page breaks the heading outline (WCAG 1.3.1).
+    return (
+      <SuccessPanel
+        title={successHeading}
+        headingLevel="h2"
+        icon={CheckCircle}
+        description={successBody}
+      />
+    );
   }
 
   return (

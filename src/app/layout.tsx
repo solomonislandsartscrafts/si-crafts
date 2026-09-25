@@ -81,10 +81,34 @@ export default async function RootLayout({
   const logoSrc = siteLogo ? resolveImageUrl(siteLogo) : '';
 
   return (
-    <html lang="en" className={`${poppins.variable} ${dmSans.variable}`}>
+    // suppressHydrationWarning: the blocking theme script in <head> adds
+    // `dp-dark-os` to <html> before hydration, and dark-mode browser extensions
+    // (Dark Reader etc.) also mutate <html>'s class/attributes pre-hydration.
+    // Both are deliberate/expected pre-paint mutations of THIS element, so React
+    // should not warn that the hydrated <html> differs from its render. Scoped
+    // to <html> only — children still get full hydration checking.
+    <html lang="en" className={`${poppins.variable} ${dmSans.variable}`} suppressHydrationWarning>
       <head>
-        <meta name="theme-color" content="#1B3A4B" />
+        <meta name="theme-color" content="#1B3A4B" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#0E1E27" media="(prefers-color-scheme: dark)" />
         <SiteJsonLd />
+        {/*
+          No-FOUC dark activation. Runs before first paint and resolves the
+          effective theme from the STORED preference (si-theme: light|dark|
+          system), falling back to the OS for 'system'. When the result is dark
+          it sets `dp-dark-os` on <html>, which the CSS uses to paint the canvas
+          and key above-the-fold surfaces dark on the first frame — so switching
+          to Dark (or a dark OS under System) shows no white flash. LayoutShell
+          then owns the full palette after hydration via the `.dp-dark` class on
+          the public wrapper. Kept in sync with the storage key + resolution used
+          by src/lib/theme.ts. Wrapped in try/catch so it can never block paint.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var p=localStorage.getItem('si-theme');var d=p==='dark'||((p===null||p==='system')&&matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.classList.add('dp-dark-os')}}catch(e){}",
+          }}
+        />
       </head>
       {/* No `bg-page-bg` here: the base canvas is painted on <html> and the
           public-site map watermark is a fixed `.map-backdrop` layer (see

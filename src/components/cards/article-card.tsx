@@ -10,6 +10,14 @@ import {
 
 interface ArticleCardProps {
   article: Article;
+  /**
+   * Heading level for the card headline. Defaults to `h3`, correct on the
+   * homepage "Latest news" block and a news article's "Keep reading" block,
+   * where the grid sits under a section `h2`. Pass `h2` on the `/news` listing
+   * when the grid is the first content under the page `h1` (no featured lead
+   * card above it), so the document does not skip h1 → h3.
+   */
+  titleAs?: 'h2' | 'h3';
 }
 
 /**
@@ -49,7 +57,7 @@ export function ArticleImageFallback({ tag }: { tag?: string }) {
  * caption is much taller than a product's), or `centeredArticleGridClasses` when
  * there are fewer than three stories to show.
  */
-export function ArticleCard({ article }: ArticleCardProps) {
+export function ArticleCard({ article, titleAs: TitleTag = 'h3' }: ArticleCardProps) {
   const date = article.publishedAt || article.createdAt;
 
   return (
@@ -67,7 +75,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
           thing a reader wants. `posterMetaClasses` rather than the muted grey —
           at 4.7:1 the muted tone is borderline for a line that carries meaning. */}
       <p className={posterMetaClasses}>{formatArticleDate(date)}</p>
-      <h3 className={`mt-3xs ${posterHeadlineClasses} line-clamp-2`}>{article.title}</h3>
+      <TitleTag className={`mt-3xs ${posterHeadlineClasses} line-clamp-2`}>{article.title}</TitleTag>
       {/* Three lines, not the two a product caption gets. A standfirst is doing
           real work here — it is what decides whether the story gets opened. */}
       {article.excerpt && (

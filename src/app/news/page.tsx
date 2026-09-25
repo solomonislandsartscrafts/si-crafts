@@ -71,7 +71,15 @@ export default async function NewsPage() {
                 className={`${featured ? `${articleGridClasses} mt-block` : centeredArticleGridClasses}`}
               >
                 {rest.map((article) => (
-                  <ArticleCard key={article.id} article={article} />
+                  // With a featured lead card, that card supplies the page's h2,
+                  // so grid cards below it are h3. Without one (short list), the
+                  // grid is the first content under the h1, so its cards are h2 —
+                  // no h1 → h3 skip.
+                  <ArticleCard
+                    key={article.id}
+                    article={article}
+                    titleAs={featured ? 'h3' : 'h2'}
+                  />
                 ))}
               </div>
             )}

@@ -172,10 +172,19 @@ export function AdminLayout({ children, requiredRole = null }: AdminLayoutProps)
         {/* Admin takes the md/lg rungs of the shared scale (24 → 32) but
             deliberately NOT `.site-px`'s 64px desktop gutter — admin is dense
             tabular data, and 128px of side padding would cost real column
-            width. Same scale as the public site, two rungs lower. */}
-        <div className="flex-1 p-md tabtop:p-lg bg-warm-gray-100 overflow-x-hidden">
+            width. Same scale as the public site, two rungs lower.
+
+            This is the admin surface's `<main>` landmark. The public shell
+            (LayoutShell) returns early for /admin routes and renders no `<main>`,
+            so without this an admin page would have no main region and the
+            global skip link would have no `#main-content` target. Matches the
+            id the SkipLink points at. */}
+        <main
+          id="main-content"
+          className="flex-1 p-md tabtop:p-lg bg-warm-gray-100 overflow-x-hidden"
+        >
           {children}
-        </div>
+        </main>
       </div>
     </div>
   );

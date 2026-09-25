@@ -128,9 +128,9 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
           // on the page is worse than not offering the box.
           {
             key: 'homepage.makersButton',
-            label: 'Link text (beside the heading)',
-            defaultValue: 'View all',
-            help: 'The link to the full makers list, shown to the right of the section heading.',
+            label: 'Button text',
+            defaultValue: 'View all makers',
+            help: 'The button to the full makers list, centred below the makers row.',
           },
         ],
       },
@@ -157,8 +157,9 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
           },
           {
             key: 'homepage.productsButton',
-            label: 'Button text (mobile only)',
-            defaultValue: 'View all products',
+            label: 'Button text',
+            defaultValue: 'View all crafts',
+            help: 'The button to the full catalogue, centred below the crafts row.',
           },
         ],
       },

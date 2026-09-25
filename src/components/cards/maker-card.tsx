@@ -32,6 +32,13 @@ interface MakerCardProps {
    * single-column grids (makers page, craft page).
    */
   layout?: 'poster' | 'row';
+  /**
+   * Heading level for the maker name. Defaults to `h3`, correct in the homepage
+   * carousel (under a section `h2`) and a craft page's makers block. Pass `h2`
+   * on the `/makers` listing, where the grid is the first content under the page
+   * `h1`, so the document does not skip h1 → h3.
+   */
+  titleAs?: 'h2' | 'h3';
 }
 
 /**
@@ -47,7 +54,7 @@ interface MakerCardProps {
  * `cover` fit — a portrait is framed expecting a crop — on the `MAKER_ASPECT`
  * frame (square, like every other card). See `MAKER_ASPECT`.
  */
-export function MakerCard({ maker, craftName, layout = 'poster' }: MakerCardProps) {
+export function MakerCard({ maker, craftName, layout = 'poster', titleAs: TitleTag = 'h3' }: MakerCardProps) {
   const href = `/maker/${maker.slug}`;
   const alt = `${maker.name}, ${craftName || 'maker'} from ${maker.village}`;
 
@@ -63,7 +70,7 @@ export function MakerCard({ maker, craftName, layout = 'poster' }: MakerCardProp
           reinforce "go to this maker". aria-hidden: the whole card is one link
           whose accessible name already comes from the heading, so the arrow is
           decorative to a screen reader. */}
-      <h3
+      <TitleTag
         className={`${posterTitleClasses} flex items-center gap-2xs ${
           justify === 'center' ? 'justify-center sm:justify-start' : 'justify-start'
         }`}
@@ -73,7 +80,7 @@ export function MakerCard({ maker, craftName, layout = 'poster' }: MakerCardProp
           className="h-4 w-4 shrink-0 text-ocean transition-transform duration-200 group-hover:translate-x-3xs"
           aria-hidden="true"
         />
-      </h3>
+      </TitleTag>
       {/* The two supporting lines are ONE block, set 8px below the name with 4px
           between them. Previously all three lines sat 4px apart, which is the
           hairline rung of the spacing scale — at that distance a name, a craft

@@ -4,11 +4,21 @@ import { useId, useState, type ReactNode } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 /**
- * The one accordion look on the site. A hairline `border-t border-sand` seam,
- * an uppercase tiny-caps label, and a `ChevronDown` that rotates 180° when
- * open — the treatment first built for the product page's "Product details" /
- * "How it's made" panels, now shared so every accordion (FAQ, wholesale,
- * product) reads as one device.
+ * The one accordion look on the site. Each item is a SOLID WHITE CARD
+ * (`bg-card-bg` + `shadow-card` + `rounded-lg`) rather than rows joined by
+ * hairline seams, so:
+ *   - the text always sits on an opaque white surface — no page background or
+ *     decorative artwork bleeds through behind it, and
+ *   - there are no divider "underlines" between items; the cards are separated
+ *     by a small gap instead, which reads simpler and cleaner.
+ *
+ * State is made obvious, which the old seam-only treatment did not do:
+ *   - HOVER / FOCUS — the trigger fills solid `sand-light` (an accessible light
+ *     surface: the `warm-gray-600`/`deep-blue` label stays AA over it) so it is
+ *     clear the header is interactive and which one you are pointing at.
+ *   - OPEN — a `brand-green` left accent bar runs down the card and the label
+ *     goes `deep-blue`, so an open panel is unmistakably the active one. The
+ *     `ChevronDown` still rotates 180°.
  *
  * The header is a <button> inside a heading (so each panel is a stop in
  * heading-based navigation), with `aria-expanded` / `aria-controls` wired to a
@@ -67,7 +77,21 @@ export function AccordionItem({
   const panelId = `accordion-panel-${uid}`;
 
   return (
-    <div className="border-t border-sand">
+    // The card. Solid white surface so nothing behind the accordion shows
+    // through the text. When open, a `brand-green` left accent bar marks it as
+    // the active panel; when closed the border-left is transparent so every
+    // card keeps the same width and only the colour changes. `overflow-hidden`
+    // keeps the rounded corners clean over the trigger's hover fill.
+    <div
+      // `mb-xs` gives a small, consistent gap between stacked items so they read
+      // as separate cards without the old divider seams. It is intrinsic to the
+      // item so every caller (product page, wholesale, FAQ) gets the same rhythm
+      // with no wrapper changes; the trailing margin on the last item is
+      // harmless (callers own the spacing to whatever follows).
+      className={`mb-xs overflow-hidden rounded-lg border-l-4 bg-card-bg shadow-card transition-colors ${
+        open ? 'border-brand-green' : 'border-transparent'
+      }`}
+    >
       <Heading>
         <button
           type="button"
@@ -75,19 +99,24 @@ export function AccordionItem({
           aria-expanded={open}
           aria-controls={panelId}
           id={headerId}
-          className="tap-target flex w-full cursor-pointer items-center justify-between gap-sm py-xs text-left text-xs font-semibold uppercase tracking-wider text-warm-gray-600 transition-colors hover:text-deep-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+          // Hover/focus fill is a solid, accessible `sand-light`, so it is
+          // obvious which header you are on. Open headers read `deep-blue` +
+          // (already) semibold; closed headers are `warm-gray-600`.
+          className={`tap-target flex w-full cursor-pointer items-center justify-between gap-sm px-sm py-sm text-left text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-sand-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ocean ${
+            open ? 'text-deep-blue' : 'text-warm-gray-600 hover:text-deep-blue'
+          }`}
         >
           {title}
           <ChevronDown
-            className={`w-4 h-4 flex-shrink-0 text-warm-gray-400 transition-transform duration-200 ${
-              open ? 'rotate-180' : ''
+            className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${
+              open ? 'rotate-180 text-brand-green' : 'text-warm-gray-400'
             }`}
             aria-hidden="true"
           />
         </button>
       </Heading>
       {open && (
-        <div id={panelId} role="region" aria-labelledby={headerId} className="pb-xs">
+        <div id={panelId} role="region" aria-labelledby={headerId} className="px-sm pb-sm">
           {children}
         </div>
       )}

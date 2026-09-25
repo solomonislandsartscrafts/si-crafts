@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { Pause, Play } from 'lucide-react';
 import { SafeImage } from '@/components/ui/safe-image';
 
 /** What the slide is showing. Decides the image fit — see `imageFit` below. */
@@ -151,11 +152,18 @@ export function HeroSlideshow({ items, interval = 5000, tone = 'light' }: HeroSl
   // Autoplay pauses while the pointer/focus is over the carousel.
   const [hovering, setHovering] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
+  // The user's explicit pause choice, made with the visible Pause/Play control.
+  // This is separate from `hovering` (the transient hover/focus pause): it is a
+  // deliberate, persistent stop, which is what WCAG 2.2.2 (Pause, Stop, Hide)
+  // requires for content that auto-updates for more than five seconds. Without a
+  // control that does not depend on hovering or focusing the carousel, a
+  // keyboard or touch user who never lands on it has no way to stop the motion.
+  const [paused, setPaused] = useState(false);
   const count = items.length;
 
   // Autoplay only runs when nothing is holding it: more than one slide, not
-  // hovered/focused, and motion is allowed.
-  const autoplaying = count > 1 && !hovering && !reduceMotion;
+  // hovered/focused, not explicitly paused by the user, and motion is allowed.
+  const autoplaying = count > 1 && !hovering && !paused && !reduceMotion;
 
   const touchStartX = useRef<number | null>(null);
   const touchDeltaX = useRef(0);
@@ -441,6 +449,36 @@ export function HeroSlideshow({ items, interval = 5000, tone = 'light' }: HeroSl
           >
             {active.title}
           </span>
+        </div>
+      )}
+
+      {/* Explicit Pause / Play control (WCAG 2.2.2 Pause, Stop, Hide). The
+          hover/focus pause is not enough on its own: a user who never puts the
+          pointer or keyboard focus on the carousel still needs a way to stop
+          the auto-advance. This is that control, and its state is the persistent
+          `paused` flag rather than the transient hover pause. It is hidden under
+          reduced motion, where there is no autoplay to stop, and when there is
+          only one slide. Placed just above the live region so a keyboard user
+          reaches it right after the slides. */}
+      {count > 1 && !reduceMotion && (
+        <div className="mt-xs flex justify-center">
+          <button
+            type="button"
+            onClick={() => setPaused((p) => !p)}
+            aria-pressed={paused}
+            aria-label={paused ? 'Play slideshow' : 'Pause slideshow'}
+            className={`focus-ring tap-target inline-flex items-center justify-center rounded-full transition-colors ${
+              tone === 'dark'
+                ? 'text-white/80 hover:text-white hover:bg-white/10'
+                : 'text-warm-gray-600 hover:text-deep-blue hover:bg-sand-light'
+            }`}
+          >
+            {paused ? (
+              <Play className="h-5 w-5" aria-hidden="true" />
+            ) : (
+              <Pause className="h-5 w-5" aria-hidden="true" />
+            )}
+          </button>
         </div>
       )}
 

@@ -70,14 +70,16 @@ export const ARTICLE_ASPECT = 'aspect-video';
 /**
  * The grid every poster-card listing uses — products, makers, crafts, news.
  *
- * One definition so column counts cannot drift page to page. ONE column on a
- * phone: a single full-width card per row gives each piece real presence and
- * matches the health.nz mobile pattern (one card, one row) the rest of the site
- * now follows — the same single-column mobile listing the maker cards use. It
- * steps to 2 at `sm`, 3 at `lg`, 4 at `xl` — density returns as the screen
- * widens. (It was briefly 2-up on the phone for a compact-storefront look; that
- * put two cramped cards per row on a 320px screen, so it is single-column
- * again.)
+ * One definition so column counts cannot drift page to page. TWO columns on a
+ * phone: a compact-storefront look modelled on the reference gallery
+ * (galleryaustralia.com.au), where two pieces per row let a browsing visitor
+ * scan more of the collection at once. It steps to 3 at `lg` and 4 at `xl` —
+ * density returns as the screen widens. (This was single-column for a while,
+ * for a "one card, one row" health.nz feel; it is 2-up again by request, to
+ * match the reference storefront. The catalogue and crafts pages pair this with
+ * a narrower centred container — `catalogueGridWidth` — so the two mobile
+ * columns keep comfortable side gutters and wide desktops get generous side
+ * margins rather than running the grid edge to edge.)
  *
  * The gutter is `gap-grid` — 16px, stepping to 24px at 920px — and it is the
  * SAME value horizontally and vertically. It used to be tighter across than
@@ -95,7 +97,21 @@ export const ARTICLE_ASPECT = 'aspect-video';
  * Change it in `globals.css` (`--grid-gap`), never here.
  */
 export const posterGridClasses =
-  'grid grid-cols-1 gap-grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4';
+  'grid grid-cols-2 gap-grid lg:grid-cols-3 xl:grid-cols-4';
+
+/**
+ * Width cap for the CATALOGUE and CRAFTS listing grids.
+ *
+ * The reference storefront holds its product grid in a container noticeably
+ * narrower than the page, so on a wide desktop there is generous empty margin
+ * on both sides and the cards stay a comfortable size rather than stretching to
+ * fill a 1440px canvas. This caps those grids at `max-w-5xl` (1024px) and
+ * centres them, on top of the page's own `.site-container` gutters. Products
+ * and crafts use it; makers, news and the homepage showcases keep the full
+ * `.site-container` width. Applied on the grid wrapper, not the page container,
+ * so the page header/banner still spans the normal width.
+ */
+export const catalogueGridWidth = 'mx-auto max-w-5xl';
 
 /**
  * The FEATURED poster grid — the homepage variant, capped at three columns.
@@ -380,14 +396,19 @@ export function PosterCard({ href, children, ...frame }: PosterCardProps) {
         // transition so they move as a unit. `prefers-reduced-motion` is handled
         // globally in `globals.css`, which neutralises the transform.
         //
-        // The tint is `ocean/5`, NOT `section-warm`: the section band is itself
-        // `section-warm` (a subtle grey), so warming the card to the same value
-        // made it vanish into the band on hover. `ocean/5` is the design
-        // system's established subtle-interactive surface (setup wizard cards,
-        // selected toggles, info panels), so it stays clearly distinct on both
-        // the white page and the grey band, and its cool cast reinforces the
-        // same "interactive" cue the title's ocean colour gives.
-        className="group block overflow-hidden rounded-lg bg-card-bg shadow-card transition-all duration-200 hover:-translate-y-1 hover:bg-ocean/5 hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ocean"
+        // The hover fill is SOLID `sand-light` (`#F0F0F0`), not a translucent
+        // tint. A translucent `ocean/5` let the surface behind the card bleed
+        // through; a solid fill gives a clean, opaque colour change on hover.
+        // `sand-light` is chosen for accessibility: it is light enough that
+        // every caption text token stays AA (4.5:1) over it — `warm-gray-400`
+        // (the muted "Trade pricing" line, the tightest case) clears 4.5:1, and
+        // `deep-blue`, `warm-gray-600` and `ocean` all clear it comfortably. A
+        // solid darker fill (e.g. `ocean`) would fail contrast for the dark
+        // caption text, so it is deliberately not used. `sand-light` is darker
+        // than the white card, so the change reads on the white page; on the
+        // grey `section-warm` band the lift + `shadow-card-hover` carry the
+        // hover cue alongside the title going `ocean`.
+        className="group block overflow-hidden rounded-lg bg-card-bg shadow-card transition-all duration-200 hover:-translate-y-1 hover:bg-sand-light hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ocean"
       >
         <PosterFrame {...frame} bare />
         {/* Caption inside the panel, left-aligned at every width. `p-sm` gives

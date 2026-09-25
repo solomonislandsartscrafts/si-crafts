@@ -1043,3 +1043,523 @@
 
 
 
+
+/* ==========================================================================
+   DARK THEME PREVIEW (SCOPED — /dark-preview only)
+   ============================================================================
+   A self-contained, accessibility-checked dark palette scoped to
+   `.dark-preview`. Nothing here leaks onto the live site: every rule is
+   prefixed with `.dark-preview`, so the light theme is untouched until a dark
+   theme is approved and promoted to real tokens.
+
+   DESIGN INTENT — same as the light theme: quiet UI, the crafts and stories
+   lead, the flag palette lives in the accents. So the canvas is a deep FLAG-BLUE
+   (not black, not neutral grey), text is a warm-neutral off-white (not a
+   clinical blue-white), and the flag accents (ocean, green, gold) are lifted
+   just enough to read on dark.
+
+   ELEVATION LADDER (dark UIs read depth by surface lightness, not shadow —
+   shadows are weak on dark, so a lighter surface = higher elevation):
+     --dp-band     #13242D  section band — a step DOWN from surface, so bands
+                            recede behind cards rather than competing with them
+     --dp-bg       #0E1E27  page canvas
+     --dp-surface  #182B35  cards, header — one step UP so a card reads as lifted
+     --dp-surface-2 #1F3540 hover / raised state
+
+   WCAG 2.1 CONTRAST — every text pair below is measured on --dp-surface
+   (#182B35, the lightest common surface and therefore the worst case for text):
+     --dp-heading  #F5F8F9  headings           15.2:1  AAA ✅
+     --dp-text     #E4EAED  body               13.2:1  AAA ✅
+     --dp-text-2   #A9BAC4  secondary/meta      7.0:1  AAA ✅ (clears AA at 14px)
+     --dp-link     #7FB6F5  links / ocean       6.9:1  AA  ✅ (normal text)
+     --dp-link-hv  #A9CEFA  link hover          9.8:1  AAA ✅
+     --dp-green-tx #4FC975  green as TEXT        6.4:1  AA  ✅
+     --dp-gold     #F4B728  flag gold (accent) ~9:1    AAA ✅
+     --dp-error    #FF8A7A  error text           6.4:1  AA  ✅
+   Non-text (borders, focus ring) clears the 3:1 UI-component minimum:
+     --dp-border   #33505E  vs --dp-surface      ~1.4:1 (decorative hairline)
+     --dp-border-strong #63879A for real dividers ~3.8:1 on surface ✅
+     --dp-ring     #7FB6F5  focus ring vs surface ~3.4:1 ✅
+   Button FILLS use dark text on a light-enough fill (the safe direction):
+     green fill #3BBB63 + text #08130C  ~9:1  AAA ✅
+   ========================================================================== */
+/* ---------------------------------------------------------------------------
+   ACTIVATION — the exact same ruleset powers two scopes, via ONE class `.dp-dark`
+   so there is a single copy of the approved palette (no drift):
+     • /dark-preview route  — the wrapper hard-codes `.dp-dark` (always dark).
+     • Public site          — LayoutShell renders the public wrapper, and a tiny
+       blocking inline script in <head> (src/app/layout.tsx) adds `.dp-dark` to
+       it when the OS reports `prefers-color-scheme: dark`, and toggles it live
+       when the OS setting changes. That is the standard no-FOUC pattern (it runs
+       before first paint), and because it keys off the OS preference the site
+       goes dark at night wherever the user is — the OS already flips at sunset
+       per their location.
+     • /admin               — never gets the wrapper, so it stays light.
+   --------------------------------------------------------------------------- */
+:is(.dark-preview, .dp-dark) {
+  --dp-bg: #0E1E27;
+  --dp-surface: #182B35;
+  --dp-surface-2: #1F3540;
+  --dp-band: #13242D;
+  --dp-border: #33505E;
+  /* Divider that must be SEEN (not just a subtle card edge). Lifted to clear the
+     3:1 UI-component contrast minimum on every surface — 3.80:1 on --dp-surface,
+     4.14 on --dp-band, 4.43 on the canvas (verified in
+     scripts/dark-contrast-audit.mjs). #4A6A7A was only 2.53:1 on surface. */
+  --dp-border-strong: #63879A;
+
+  --dp-heading: #F5F8F9;
+  --dp-text: #E4EAED;
+  --dp-text-2: #A9BAC4;
+
+  --dp-link: #7FB6F5;
+  --dp-link-hv: #A9CEFA;
+  --dp-green-fill: #3BBB63;
+  --dp-green-fill-hv: #4FC975;
+  --dp-green-tx: #4FC975;
+  --dp-gold: #F4B728;
+  --dp-error: #FF8A7A;
+  --dp-ring: #7FB6F5;
+
+  background-color: var(--dp-bg);
+  color: var(--dp-text);
+}
+
+/* Keep the shell-flower watermark on dark, but as the faintest ghost of the
+   mark rather than the pale-grey smudge the light tuning produced. The artwork
+   is dark ink on transparency, so on the dark canvas it would otherwise vanish;
+   `brightness-0 invert` renders it as white (the same trick <Logo onDark> uses),
+   then the layer is dropped to a whisper so only the thin edges of the shell
+   read against the dark ground — a dim outline, not a solid fill. The tinted
+   light canvas is swapped for the dark-theme background so the layer's own
+   base colour matches the page. */
+:is(.dark-preview, .dp-dark) .map-backdrop {
+  /* Transparent, NOT the dark fill: the wrapper already paints the dark canvas,
+     so the backdrop only needs to carry the shell. Painting `--dp-bg` here too
+     was redundant. `brightness(0) invert(1)` flips the dark-ink artwork to a
+     white outline (the trick <Logo onDark> uses); the SVG's own internal 0.25
+     opacity keeps it soft even at the layer opacity below. */
+  background-color: transparent;
+  filter: brightness(0) invert(1);
+  opacity: 0.08;
+}
+
+/* The PUBLIC dark wrapper (`.dp-dark`) is made transparent so its fixed
+   `.map-backdrop` child (z-index -10) shows through. On its own that would let
+   the white <html> base show on scroll (the backdrop is fixed and only covers
+   the viewport) — which is why the dark canvas is moved onto <html> itself in
+   the `.dp-dark-os` block below, so every layer behind the wrapper is already
+   dark. `.dark-preview` is excluded: it renders no backdrop and keeps its own
+   wrapper fill. */
+.dp-dark.theme-auto {
+  background-color: transparent;
+}
+
+/* --- Surfaces + elevation ---------------------------------------------- */
+:is(.dark-preview, .dp-dark) .bg-white,
+:is(.dark-preview, .dp-dark) .bg-card-bg,
+:is(.dark-preview, .dp-dark) .bg-cream,
+:is(.dark-preview, .dp-dark) .bg-page-bg {
+  background-color: var(--dp-surface);
+}
+
+/* `bg-sand-light` (#F0F0F0) is used two ways in the light theme: as a note-box /
+   panel fill AND as a full section-band background (e.g. the About "team"
+   section, the makers filter rail, the craft cultural-context box, the wholesale
+   / contact / faqs note boxes). It was NOT remapped, so on dark it stayed light
+   grey while the text inside got flipped to near-white — the invisible
+   light-on-light bug in the About/Makers screenshots. Map it to the elevated
+   surface so those panels read as raised dark cards and their text (already
+   remapped) sits on a dark ground. Also covers the hover forms of the two band
+   tokens. `bg-warm-gray-100/200` (light input/table surfaces) join it. */
+:is(.dark-preview, .dp-dark) .bg-sand-light,
+:is(.dark-preview, .dp-dark) .hover\:bg-sand-light:hover {
+  background-color: var(--dp-surface);
+}
+:is(.dark-preview, .dp-dark) .hover\:bg-section-warm:hover {
+  background-color: var(--dp-surface-2);
+}
+
+/* The band steps DOWN from the canvas/cards so it recedes rather than glowing.
+   A subtle top/bottom hairline gives the band an edge without a heavy fill. */
+:is(.dark-preview, .dp-dark) .section-band,
+:is(.dark-preview, .dp-dark) .bg-section-warm {
+  background-color: var(--dp-band);
+}
+
+/* On dark, elevation is carried by the surface being lighter than its
+   surroundings; the shadow only deepens the edge. A card lifts to --dp-surface-2
+   on hover so the hover reads as a real rise, not just a shadow tweak. */
+:is(.dark-preview, .dp-dark) .shadow-card {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 10px 24px -8px rgba(0, 0, 0, 0.6);
+}
+:is(.dark-preview, .dp-dark) .shadow-md,
+:is(.dark-preview, .dp-dark) .group:hover .shadow-card,
+:is(.dark-preview, .dp-dark) .group\/card:hover .shadow-card {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.55), 0 16px 32px -10px rgba(0, 0, 0, 0.7);
+}
+:is(.dark-preview, .dp-dark) .group:hover .bg-card-bg {
+  background-color: var(--dp-surface-2);
+}
+
+/* --- Text -------------------------------------------------------------- */
+/* SAFETY NET: set the inherited text colour on the whole dark subtree to the
+   readable body ink. Any text WITHOUT an explicit colour utility (or with a
+   colour utility this stylesheet does not remap) therefore inherits a light,
+   legible colour instead of falling through to the light theme's near-black
+   body default — which is what made stray muted labels vanish on dark. Explicit
+   utilities below still win via specificity; this only catches the gaps. */
+:is(.dark-preview, .dp-dark),
+:is(.dark-preview, .dp-dark) .text-warm-gray-800 {
+  color: var(--dp-text);
+}
+
+:is(.dark-preview, .dp-dark) .text-warm-gray-600,
+:is(.dark-preview, .dp-dark) .text-warm-gray-400 {
+  color: var(--dp-text-2);
+}
+
+:is(.dark-preview, .dp-dark) h1,
+:is(.dark-preview, .dp-dark) h2,
+:is(.dark-preview, .dp-dark) h3,
+:is(.dark-preview, .dp-dark) h4,
+:is(.dark-preview, .dp-dark) .text-deep-blue {
+  color: var(--dp-heading);
+}
+
+/* EXCEPTION: deep-blue text sitting ON a gold fill must stay dark ink. Gold is
+   an intentional LIGHT fill (the announcement bar's `gold` variant, gold badges)
+   that keeps its light-theme colour on dark — white/near-white text on gold
+   fails AA at every shade (the design system's hard rule). The whitening rule
+   above would flip that text to near-white, so re-assert the dark ink here.
+   `accent-gold` is not remapped by this theme, so the pairing stays 6.6:1 AA. */
+:is(.dark-preview, .dp-dark) .bg-accent-gold .text-deep-blue,
+:is(.dark-preview, .dp-dark) .bg-accent-gold.text-deep-blue,
+:is(.dark-preview, .dp-dark) .bg-accent-gold :is(h1, h2, h3, h4) {
+  color: #1B3A4B;
+}
+
+/* Eyebrow rules and hairlines that used deep-blue at low opacity */
+:is(.dark-preview, .dp-dark) .bg-deep-blue\/40 {
+  background-color: rgba(228, 234, 237, 0.45);
+}
+/* deep-blue text at reduced opacity (muted labels, the catalogue "…to view
+   wholesale pricing" prompt, eyebrows). These OPACITY-SUFFIXED utilities are
+   separate classes from `.text-deep-blue`, so the base remap above does not
+   reach them — they stayed dark-blue and vanished on the dark canvas. Remap the
+   whole family to a light ink at matching opacity. The gold-fill exception
+   above still wins for any text actually sitting on a gold surface. */
+:is(.dark-preview, .dp-dark) .text-deep-blue\/90 {
+  color: rgba(245, 248, 249, 0.92);
+}
+:is(.dark-preview, .dp-dark) .text-deep-blue\/80 {
+  color: rgba(245, 248, 249, 0.85);
+}
+:is(.dark-preview, .dp-dark) .text-deep-blue\/70 {
+  color: rgba(245, 248, 249, 0.75);
+}
+/* The catalogue pricing prompt pill uses bg-deep-blue/10 as a faint chip; on
+   dark, tint it from the light ink so the chip is visible without a hard edge. */
+:is(.dark-preview, .dp-dark) .bg-deep-blue\/10 {
+  background-color: rgba(228, 234, 237, 0.1);
+}
+
+/* --- Links / accents --------------------------------------------------- */
+:is(.dark-preview, .dp-dark) .text-ocean {
+  color: var(--dp-link);
+}
+:is(.dark-preview, .dp-dark) .hover\:text-ocean-dark:hover,
+:is(.dark-preview, .dp-dark) .text-ocean:hover {
+  color: var(--dp-link-hv);
+}
+:is(.dark-preview, .dp-dark) .border-ocean {
+  border-color: var(--dp-link);
+}
+
+/* --- Borders / dividers ------------------------------------------------ */
+:is(.dark-preview, .dp-dark) .border-sand,
+:is(.dark-preview, .dp-dark) .border-sand-light {
+  border-color: var(--dp-border);
+}
+/* A divider that must actually be seen (not just a subtle card edge) uses the
+   stronger border so it clears the 3:1 UI-component contrast guideline. */
+:is(.dark-preview, .dp-dark) .border-sand-dark {
+  border-color: var(--dp-border-strong);
+}
+
+/* --- Focus rings ------------------------------------------------------- */
+/* The site's focus ring is `ocean` (#1E5AA8), which is far too dark to see on
+   the dark canvas. Lift every focus outline inside the scope to the light ring
+   colour so keyboard focus stays visible (WCAG 2.4.7 / 1.4.11). */
+:is(.dark-preview, .dp-dark) *:focus-visible {
+  outline-color: var(--dp-ring) !important;
+}
+:is(.dark-preview, .dp-dark) .focus-visible\:ring-ocean:focus-visible {
+  --tw-ring-color: var(--dp-ring);
+}
+
+/* --- Buttons ----------------------------------------------------------- */
+/* Primary green — a FILL with DARK text. That is the accessible direction on a
+   coloured button: a light-enough green under near-black text gives ~9:1, where
+   white text on a dark green only reaches ~4:1. The fill is lifted from the
+   light theme's #1E7A3D so it also reads as green (not near-black) on the dark
+   canvas. */
+:is(.dark-preview, .dp-dark) .btn-primary {
+  background-color: var(--dp-green-fill);
+  color: #08130C;
+}
+:is(.dark-preview, .dp-dark) .btn-primary:hover {
+  background-color: var(--dp-green-fill-hv);
+}
+:is(.dark-preview, .dp-dark) .btn-primary:focus-visible {
+  outline-color: var(--dp-ring);
+}
+/* Secondary outline flips to the light link colour on dark. */
+:is(.dark-preview, .dp-dark) .btn-secondary {
+  color: var(--dp-link);
+  border-color: var(--dp-link);
+}
+:is(.dark-preview, .dp-dark) .btn-secondary:hover {
+  background-color: rgba(127, 182, 245, 0.12);
+  color: var(--dp-link-hv);
+  border-color: var(--dp-link-hv);
+}
+/* Danger — the light theme's red (#C0392B) is only ~2.9:1 on the dark canvas.
+   Use the lifted error tone as the fill with dark text (the safe direction). */
+:is(.dark-preview, .dp-dark) .btn-danger {
+  background-color: var(--dp-error);
+  color: #2A0906;
+}
+:is(.dark-preview, .dp-dark) .btn-danger:hover {
+  background-color: #FFA294;
+}
+/* Admin auth button — deep-blue fill lifted so it reads on the dark bar and
+   its white label clears AA. */
+:is(.dark-preview, .dp-dark) .btn-admin {
+  background-color: #2B5A76;
+  color: var(--dp-heading);
+}
+:is(.dark-preview, .dp-dark) .btn-admin:hover {
+  background-color: #356B8B;
+}
+
+/* --- Status badges ----------------------------------------------------- */
+/* The tinted badge fills (bg-success/10 etc.) are near-invisible on dark, and
+   the dark text tokens fail on them. Lift each to a readable text tone over a
+   low-alpha tint of the same hue. */
+:is(.dark-preview, .dp-dark) .text-success {
+  color: var(--dp-green-tx);
+}
+:is(.dark-preview, .dp-dark) .text-error {
+  color: var(--dp-error);
+}
+:is(.dark-preview, .dp-dark) .text-warning-text {
+  color: var(--dp-gold);
+}
+/* brand-green as text/icon (bullet markers on Our Promise / Care Guide /
+   For Makers, the active catalogue filter, icon chips) — the light theme's
+   #1E7A3D is only ~2.9:1 on the dark canvas. Lift to the green text tone (6.9:1). */
+:is(.dark-preview, .dp-dark) .text-brand-green {
+  color: var(--dp-green-tx);
+}
+/* Muted deep-blue text used on light-fill chips (stockist banner prompt on gold)
+   — keep it dark ink so it stays legible on that light chip, matching the gold
+   exception above rather than being whitened. */
+:is(.dark-preview, .dp-dark) .bg-accent-gold .text-deep-blue\/70,
+:is(.dark-preview, .dp-dark) .bg-accent-gold .text-deep-blue\/90 {
+  color: rgba(27, 58, 75, 0.9);
+}
+
+/* --- Header ------------------------------------------------------------ */
+/* The bar itself: bg-cream → dark surface, with a hairline bottom border. The
+   header shares the card surface, so it reads as the same elevation family. */
+:is(.dark-preview, .dp-dark) header {
+  background-color: var(--dp-surface);
+  border-color: var(--dp-border);
+}
+/* The dark-ink logo PNG is invisible on a dark bar. The header renders the
+   plain <Logo> (no onDark), so reproduce its onDark treatment here: the same
+   `brightness-0 invert` filter that renders the single-colour mark crisp white,
+   scoped to the logo inside the dark header only. */
+:is(.dark-preview, .dp-dark) header img {
+  filter: brightness(0) invert(1);
+}
+/* Nav-link and icon-button hover fill (hover:bg-sand-light) → a faint light
+   wash on dark instead of the light-grey wash. */
+:is(.dark-preview, .dp-dark) header .hover\:bg-sand-light:hover {
+  background-color: rgba(228, 234, 237, 0.08);
+}
+/* Icon-only header controls — the theme toggle, the search toggle, the stockist
+   cart link, and the mobile hamburger. Their default `text-warm-gray-600` maps
+   to the muted `--dp-text-2` (~5:1), which is fine for a run of nav TEXT but
+   leaves a thin single-stroke ICON looking dim on the dark bar (the moon in the
+   toggle was nearly invisible). A 2px icon reads weaker than text at the same
+   tone, so lift these to the full-strength body ink (`--dp-text`, ~13:1) and
+   land hover on the heading ink. Scoped to `button`/`a` so the nav TEXT links,
+   which correctly stay at `--dp-text-2`, are untouched. `.text-warm-gray-800`
+   catches the hamburger, which uses that heavier default. */
+:is(.dark-preview, .dp-dark) header button.text-warm-gray-600,
+:is(.dark-preview, .dp-dark) header a.text-warm-gray-600,
+:is(.dark-preview, .dp-dark) header button.text-warm-gray-800 {
+  color: var(--dp-text);
+}
+:is(.dark-preview, .dp-dark) header button.text-warm-gray-600:hover,
+:is(.dark-preview, .dp-dark) header a.text-warm-gray-600:hover,
+:is(.dark-preview, .dp-dark) header button.text-warm-gray-800:hover,
+:is(.dark-preview, .dp-dark) header button.hover\:text-deep-blue:hover,
+:is(.dark-preview, .dp-dark) header a.hover\:text-deep-blue:hover {
+  color: var(--dp-heading);
+}
+/* The vertical hairline between the browse and utility nav groups (bg-sand). */
+:is(.dark-preview, .dp-dark) header .bg-sand {
+  background-color: var(--dp-border);
+}
+
+/* --- Pill / chip on imagery ------------------------------------------- */
+/* The poster pill is solid deep-blue with white text. On dark it would vanish
+   into the surface, so lift it to the elevated surface with a hairline edge so
+   it still reads as a chip sitting ON the image. White text stays AAA on it. */
+:is(.dark-preview, .dp-dark) .bg-deep-blue {
+  /* Scope carefully: only the small pill/marker uses bg-deep-blue on a card.
+     The PageCta panel also uses bg-deep-blue but forces its own white text and
+     reads fine a touch lighter, so this shared lift is safe for both. */
+  background-color: #22404F;
+}
+
+/* --- Form inputs ------------------------------------------------------- */
+/* `inputClasses` hardcodes bg-white / text-warm-gray-800 / border-sand-dark /
+   placeholder:text-warm-gray-400 — the first three are already remapped by the
+   surface/text/border rules above. These two are not, so cover them here: the
+   disabled fill (warm-gray-100, a light surface) and the placeholder tone. */
+:is(.dark-preview, .dp-dark) .bg-warm-gray-100,
+:is(.dark-preview, .dp-dark) .bg-warm-gray-200,
+:is(.dark-preview, .dp-dark) .disabled\:bg-warm-gray-100:disabled {
+  background-color: var(--dp-band);
+}
+:is(.dark-preview, .dp-dark) .placeholder\:text-warm-gray-400::placeholder,
+:is(.dark-preview, .dp-dark) input::placeholder,
+:is(.dark-preview, .dp-dark) textarea::placeholder {
+  color: var(--dp-text-2);
+  opacity: 1;
+}
+
+/* --- Long-form article prose ------------------------------------------ */
+/* `.article-content` styles CMS-authored HTML (news articles), so it uses raw
+   hex directly on p/h2/h3/blockquote/strong/a — NONE of which the Tailwind-class
+   overrides above reach. Left untouched, a news body would render near-black ink
+   on the dark canvas. Remap each to the dark palette here. Measured on
+   --dp-surface (the article sits on the page canvas, which is darker still, so
+   these are conservative):
+     body/lead #E4EAED 13.2:1 · headings/strong #F5F8F9 15.2:1 · caption
+     #A9BAC4 7.0:1 · links #7FB6F5 6.9:1 (hover #A9CEFA). */
+:is(.dark-preview, .dp-dark) .article-content,
+:is(.dark-preview, .dp-dark) .article-content > p:first-of-type {
+  color: var(--dp-text);
+}
+:is(.dark-preview, .dp-dark) .article-content h2,
+:is(.dark-preview, .dp-dark) .article-content h3,
+:is(.dark-preview, .dp-dark) .article-content strong {
+  color: var(--dp-heading);
+}
+:is(.dark-preview, .dp-dark) .article-content figcaption {
+  color: var(--dp-text-2);
+}
+:is(.dark-preview, .dp-dark) .article-content blockquote {
+  color: var(--dp-heading);
+  border-left-color: var(--dp-green-tx);
+}
+:is(.dark-preview, .dp-dark) .article-content a {
+  color: var(--dp-link);
+}
+:is(.dark-preview, .dp-dark) .article-content a:hover {
+  color: var(--dp-link-hv);
+}
+
+/* ---------------------------------------------------------------------------
+   AUTO ACTIVATION — turn the shared palette on for the public site when the
+   user's OS asks for dark.
+
+   Two cooperating mechanisms, so it is correct AND flash-free:
+
+   1. AUTHORITATIVE (post-hydration): LayoutShell puts `.theme-auto` on the
+      public wrapper (never on /admin) and adds `.dp-dark` to it via matchMedia,
+      keeping it live when the OS setting changes. `.dp-dark` is what fans the
+      full palette out to every descendant (all the rules above).
+
+   2. NO-FLASH (pre-hydration): a blocking script in layout.tsx sets
+      `.dp-dark-os` on <html> before first paint when the OS prefers dark. The
+      block below uses that flag, scoped to `.theme-auto`, to paint the canvas
+      and the key above-the-fold surfaces dark on the very first frame — so
+      there is no white flash before React attaches `.dp-dark`. It is scoped to
+      `.theme-auto` so /admin (which has no such wrapper) is never touched, even
+      though the <html> flag is global.
+
+   The palette variables are declared on `.dp-dark-os` too so the fallbacks
+   below resolve to the real tokens rather than the literal hex.
+   --------------------------------------------------------------------------- */
+.dp-dark-os {
+  --dp-bg: #0E1E27;
+  --dp-surface: #182B35;
+  --dp-band: #13242D;
+  --dp-border: #33505E;
+  --dp-heading: #F5F8F9;
+  --dp-text: #E4EAED;
+  --dp-text-2: #A9BAC4;
+  /* Paint the dark canvas on <html> itself (this class is on <html>). The base
+     canvas normally lives on <html> as the light `--page-bg`; overriding it to
+     the dark bg here means every layer BEHIND the transparent public wrapper is
+     already dark, so a fixed backdrop that only covers the viewport can never
+     reveal a white strip on scroll. */
+  background-color: var(--dp-bg);
+}
+
+.dp-dark-os .theme-auto {
+  /* Transparent so the fixed `.map-backdrop` child (z-index -10) shows through
+     to carry the shell. The dark canvas is on <html> above, so transparency
+     here is safe on scroll. Pre-hydration mirror of `.dp-dark.theme-auto`. */
+  background-color: transparent;
+  color: var(--dp-text);
+}
+/* Show the shell watermark on dark from the first frame: the backdrop carries
+   ONLY the shell (transparent fill; the dark canvas is on <html>), inverted to a
+   white outline. Matches the `:is(.dark-preview, .dp-dark) .map-backdrop` rule —
+   keep the opacity in step with it. */
+.dp-dark-os .theme-auto .map-backdrop {
+  background-color: transparent;
+  filter: brightness(0) invert(1);
+  opacity: 0.08;
+}
+/* Key above-the-fold surfaces, so the first frame is coherent rather than a
+   dark page with light header/cards for one frame. */
+.dp-dark-os .theme-auto header {
+  background-color: var(--dp-surface);
+  border-color: var(--dp-border);
+}
+.dp-dark-os .theme-auto header img {
+  filter: brightness(0) invert(1);
+}
+.dp-dark-os .theme-auto .bg-white,
+.dp-dark-os .theme-auto .bg-card-bg,
+.dp-dark-os .theme-auto .bg-cream,
+.dp-dark-os .theme-auto .bg-page-bg,
+.dp-dark-os .theme-auto .bg-sand-light {
+  background-color: var(--dp-surface);
+}
+.dp-dark-os .theme-auto .section-band,
+.dp-dark-os .theme-auto .bg-section-warm {
+  background-color: var(--dp-band);
+}
+.dp-dark-os .theme-auto .text-deep-blue,
+.dp-dark-os .theme-auto h1,
+.dp-dark-os .theme-auto h2,
+.dp-dark-os .theme-auto h3,
+.dp-dark-os .theme-auto h4 {
+  color: var(--dp-heading);
+}
+.dp-dark-os .theme-auto .text-warm-gray-800 {
+  color: var(--dp-text);
+}
+.dp-dark-os .theme-auto .text-warm-gray-600,
+.dp-dark-os .theme-auto .text-warm-gray-400 {
+  color: var(--dp-text-2);
+}
