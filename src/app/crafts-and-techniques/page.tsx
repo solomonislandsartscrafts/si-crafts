@@ -4,7 +4,7 @@ import { PageHeader, PageCta } from '@/components/layout';
 import { getAllCrafts } from '@/services/crafts';
 import { getSiteTextSafe } from '@/services/site-text';
 import { CraftCard } from '@/components/cards/craft-card';
-import { posterGridClasses, catalogueGridWidth } from '@/components/cards/poster-card';
+import { posterGridClasses } from '@/components/cards/poster-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ButtonLink } from '@/components/ui/button';
 
@@ -42,11 +42,13 @@ export default async function CraftsAndTechniquesPage() {
           /* Shared poster grid — the same import every other listing uses. This
              was a hand-typed copy of the same column ramp (with a redundant
              `sm:grid-cols-2`), which is exactly the drift the shared constant
-             exists to prevent. */
+             exists to prevent. Spans the full `.site-container` width so the
+             grid lines up with the page banner and the CTA band, matching the
+             catalogue. */
           <div
             role="list"
             aria-label="Crafts and techniques"
-            className={`${posterGridClasses} ${catalogueGridWidth}`}
+            className={posterGridClasses}
           >
             {crafts.map((craft) => (
               <CraftCard key={craft.id} craft={craft} titleAs="h2" />

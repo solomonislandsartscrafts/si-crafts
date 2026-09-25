@@ -133,7 +133,7 @@ export function LoginForm({
             aria-pressed={isStockist}
             className={`tap-target flex-1 inline-flex items-center justify-center gap-2xs px-sm py-xs rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean ${
               isStockist
-                ? 'bg-white text-deep-blue shadow-card'
+                ? 'bg-ocean text-white shadow-card'
                 : 'text-warm-gray-600 hover:text-deep-blue'
             }`}
           >
@@ -146,7 +146,7 @@ export function LoginForm({
             aria-pressed={!isStockist}
             className={`tap-target flex-1 inline-flex items-center justify-center gap-2xs px-sm py-xs rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean ${
               !isStockist
-                ? 'bg-white text-deep-blue shadow-card'
+                ? 'bg-ocean text-white shadow-card'
                 : 'text-warm-gray-600 hover:text-deep-blue'
             }`}
           >
@@ -160,7 +160,7 @@ export function LoginForm({
         {error && (
           <div
             id="login-error"
-            className="bg-error/10 border border-error/20 text-error text-base rounded-md p-xs"
+            className="bg-error/10 border border-error/20 text-error text-base rounded-md p-sm"
             role="alert"
             aria-live="assertive"
           >

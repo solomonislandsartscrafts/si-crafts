@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Trash2, AlertTriangle, ArrowLeft, Send, X, MessageSquare, ShoppingCart } from 'lucide-react';
+import { Trash2, ArrowLeft, Send, X, MessageSquare, ShoppingCart } from 'lucide-react';
 import type { CartItem } from '@/types';
 import { getCart, updateQuantity, updateNote, removeFromCart, clearCart, getCartTotal, GST_THRESHOLD } from '@/lib/cart';
 import { useRequireStockist } from '@/lib/use-require-stockist';
@@ -10,6 +10,7 @@ import { createOrderRequest } from '@/services/orders';
 import { formatPrice } from '@/lib/price';
 import { PageHeader } from '@/components/layout/page-header';
 import { Button, ButtonLink } from '@/components/ui/button';
+import { Callout } from '@/components/ui/callout';
 import { EmptyState } from '@/components/ui/empty-state';
 import { inputClasses } from '@/components/ui/form-field';
 import { QuantityStepper } from '@/components/ui/quantity-stepper';
@@ -118,14 +119,13 @@ export default function StockistOrdersPage() {
           <p className="text-base text-warm-gray-600 mb-2xs">Reference: <strong>{submitted.ref}</strong></p>
           <p className="text-sm text-warm-gray-400 mb-md">{new Date(submitted.time).toLocaleString()}</p>
         </div>
-        <div className="bg-sand-light rounded-md p-sm text-base text-warm-gray-600">
+        <Callout variant="info" title="What happens next">
           This is an expression of interest. We&apos;ll confirm availability and send bank transfer details by email.
-        </div>
+        </Callout>
         {showGstWarning && (
-          <div className="bg-warning/10 border border-warning/20 text-warning-text text-base rounded-md p-xs mt-md flex items-center gap-2xs">
-            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-            <span>This order exceeds A$1,000. GST registration obligations may apply.</span>
-          </div>
+          <Callout variant="warning" className="mt-md">
+            This order exceeds A$1,000. GST registration obligations may apply.
+          </Callout>
         )}
       </SuccessPanel>
     );
@@ -203,16 +203,15 @@ export default function StockistOrdersPage() {
 
             {/* GST Warning */}
             {showGstWarning && (
-              <div className="bg-warning/10 border border-warning/20 text-warning-text text-base rounded-md p-xs mb-md flex items-center gap-2xs">
-                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                <span>This order exceeds A$1,000. GST registration obligations may apply.</span>
-              </div>
+              <Callout variant="warning" className="mb-md">
+                This order exceeds A$1,000. GST registration obligations may apply.
+              </Callout>
             )}
 
             {/* Bank transfer notice */}
-            <div className="bg-sand-light rounded-md p-sm text-base text-warm-gray-600 mb-md">
+            <Callout variant="note" className="mb-md">
               Orders are expressions of interest paid by bank transfer. This is not a confirmed purchase.
-            </div>
+            </Callout>
 
             {submitError && (
               <div

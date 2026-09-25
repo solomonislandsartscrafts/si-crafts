@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { Users, Package } from 'lucide-react';
 import { getAllCrafts, getCraftBySlug } from '@/services/crafts';
-import { getMakersByCraft } from '@/services/makers';
+import { getPublicMakers } from '@/services/makers';
 import { getPublicProducts } from '@/services/products';
 import { getSiteTextSafe } from '@/services/site-text';
 import { MakerCard } from '@/components/cards/maker-card';
@@ -59,11 +59,19 @@ export default async function CraftPage({ params }: CraftPageProps) {
     notFound();
   }
 
-  const [makers, products, text] = await Promise.all([
-    getMakersByCraft(craft.id),
+  const [allMakers, products, text] = await Promise.all([
+    getPublicMakers(),
     getPublicProducts({ materialCategory: craft.materialCategory }),
     getSiteTextSafe(),
   ]);
+
+  // Derive the makers for this craft from the pieces actually on the page,
+  // rather than the maker's optional `craft` link (which is often unset). A
+  // maker appears here when they made a published piece in this craft's
+  // material category AND they themselves are published (consent-gated —
+  // getPublicMakers only returns signed, published makers).
+  const makerIdsWithPieces = new Set(products.map((product) => product.makerId));
+  const makers = allMakers.filter((maker) => makerIdsWithPieces.has(maker.id));
 
   const previewProducts = products.slice(0, PRODUCT_PREVIEW_COUNT);
   const hasMoreProducts = products.length > PRODUCT_PREVIEW_COUNT;

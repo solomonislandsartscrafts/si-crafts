@@ -164,6 +164,61 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
         ],
       },
       {
+        title: 'How wholesale works (homepage)',
+        description:
+          'A short three-step summary of how buying wholesale works, shown on the homepage between the makers and the wholesale banner. The full four-step version lives on the Wholesale page. Clear the heading to hide the whole band.',
+        fields: [
+          {
+            key: 'homepage.howItWorksHeading',
+            label: 'Heading',
+            defaultValue: 'How wholesale works',
+            help: 'Clear this to hide the whole band.',
+          },
+          {
+            key: 'homepage.howItWorksStep1Heading',
+            label: 'Step 1 heading',
+            defaultValue: 'Apply',
+          },
+          {
+            key: 'homepage.howItWorksStep1Body',
+            label: 'Step 1 text',
+            defaultValue:
+              'Submit a short application with your business details. We review and approve within a few days.',
+            type: 'multiline',
+          },
+          {
+            key: 'homepage.howItWorksStep2Heading',
+            label: 'Step 2 heading',
+            defaultValue: 'Browse & order',
+          },
+          {
+            key: 'homepage.howItWorksStep2Body',
+            label: 'Step 2 text',
+            defaultValue:
+              'Sign in to see wholesale pricing and build an order request by material, type, or maker.',
+            type: 'multiline',
+          },
+          {
+            key: 'homepage.howItWorksStep3Heading',
+            label: 'Step 3 heading',
+            defaultValue: 'Pay & receive',
+          },
+          {
+            key: 'homepage.howItWorksStep3Body',
+            label: 'Step 3 text',
+            defaultValue:
+              'We confirm availability and send an invoice. Pay by bank transfer and we ship — each piece with a QR tag linking to its maker.',
+            type: 'multiline',
+          },
+          {
+            key: 'homepage.howItWorksButton',
+            label: 'Button text',
+            defaultValue: 'See how wholesale works',
+            help: 'Links to the full Wholesale page. Centred below the steps.',
+          },
+        ],
+      },
+      {
         title: 'Wholesale banner',
         fields: [
           {
@@ -180,8 +235,14 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
           },
           {
             key: 'homepage.ctaButton',
-            label: 'Button text',
+            label: 'Primary button text',
             defaultValue: 'Learn about wholesale',
+          },
+          {
+            key: 'homepage.ctaSecondaryButton',
+            label: 'Secondary button text',
+            defaultValue: 'Browse the catalogue',
+            help: 'A softer second option for a visitor not ready to apply — links to the catalogue. Clear it to show only the primary button.',
           },
         ],
       },

@@ -76,10 +76,9 @@ export const ARTICLE_ASPECT = 'aspect-video';
  * scan more of the collection at once. It steps to 3 at `lg` and 4 at `xl` —
  * density returns as the screen widens. (This was single-column for a while,
  * for a "one card, one row" health.nz feel; it is 2-up again by request, to
- * match the reference storefront. The catalogue and crafts pages pair this with
- * a narrower centred container — `catalogueGridWidth` — so the two mobile
- * columns keep comfortable side gutters and wide desktops get generous side
- * margins rather than running the grid edge to edge.)
+ * match the reference storefront. Every listing that uses it — catalogue,
+ * crafts, makers, news — spans the full `.site-container` width so the grid
+ * lines up with the page banner and any CTA band rather than sitting narrower.)
  *
  * The gutter is `gap-grid` — 16px, stepping to 24px at 920px — and it is the
  * SAME value horizontally and vertically. It used to be tighter across than
@@ -98,20 +97,6 @@ export const ARTICLE_ASPECT = 'aspect-video';
  */
 export const posterGridClasses =
   'grid grid-cols-2 gap-grid lg:grid-cols-3 xl:grid-cols-4';
-
-/**
- * Width cap for the CATALOGUE and CRAFTS listing grids.
- *
- * The reference storefront holds its product grid in a container noticeably
- * narrower than the page, so on a wide desktop there is generous empty margin
- * on both sides and the cards stay a comfortable size rather than stretching to
- * fill a 1440px canvas. This caps those grids at `max-w-5xl` (1024px) and
- * centres them, on top of the page's own `.site-container` gutters. Products
- * and crafts use it; makers, news and the homepage showcases keep the full
- * `.site-container` width. Applied on the grid wrapper, not the page container,
- * so the page header/banner still spans the normal width.
- */
-export const catalogueGridWidth = 'mx-auto max-w-5xl';
 
 /**
  * The FEATURED poster grid — the homepage variant, capped at three columns.
