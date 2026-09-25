@@ -58,7 +58,7 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
     // catalogue does not change shape when a stockist logs in. The panel is a
     // `div`, not a link, because the caption holds buttons (a button cannot nest
     // in a link); the image and title are each their own link inside it.
-    <div role="listitem" className="group flex h-full flex-col overflow-hidden rounded-lg bg-card-bg shadow-card transition-all duration-200 hover:-translate-y-1 hover:bg-section-warm hover:shadow-card-hover">
+    <div role="listitem" className="group flex h-full flex-col overflow-hidden rounded-lg bg-card-bg shadow-card transition-all duration-200 hover:-translate-y-1 hover:bg-sand-light hover:shadow-card-hover">
       {/* Shared poster frame — links to the piece page. `bare` so the panel owns
           the surface; same frame, fit, and hover as ProductCard. */}
       <Link

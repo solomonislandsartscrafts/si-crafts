@@ -315,7 +315,7 @@ export function PiecePageClient({
             isOpen={openPanel === 'details'}
             onToggle={() => togglePanel('details')}
           >
-            <dl className="border-t border-sand text-base">
+            <dl className="text-base">
               <AttributeRow
                 label="Materials"
                 value={<span className="capitalize">{materialLabel(product.materialCategory)}</span>}

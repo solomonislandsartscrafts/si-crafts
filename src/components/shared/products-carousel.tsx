@@ -18,9 +18,10 @@ interface ProductsCarouselProps {
  *
  * The layout is breakpoint-dependent:
  *
- * - Below `lg` (phone/tablet) it is a plain responsive grid — every card is
- *   shown stacked (1-up on a phone, 2-up from `sm`), so a phone user sees all
- *   the pieces at once with no swipe.
+ * - Below `lg` (phone/tablet) it is a plain responsive grid — 2-up at every
+ *   width, matching the catalogue grid (`posterGridClasses`), so a phone user
+ *   sees the pieces at once with no swipe and the homepage and catalogue read
+ *   the same on mobile.
  * - From `lg` up the same markup becomes a single scroll-snap row driven by
  *   prev/next arrows that page by one card. Arrows only appear once there is
  *   somewhere to scroll (disabled at each end), so a short list never shows dead
@@ -102,9 +103,9 @@ export function ProductsCarousel({ products, makers }: ProductsCarouselProps) {
         <ChevronRight className="h-5 w-5" aria-hidden="true" />
       </button>
 
-      {/* The track. Below `lg` it is a plain responsive grid — every card is
-          shown stacked (1-up on a phone, 2-up from `sm`), so a phone user sees
-          all the pieces at once with no swipe. From `lg` up it becomes a single
+      {/* The track. Below `lg` it is a plain responsive grid — 2-up at every
+          width to match the catalogue grid (`posterGridClasses`), so a phone
+          user sees the pieces at once with no swipe. From `lg` up it becomes a single
           scroll-snap row driven by the arrows above: `lg:-mx-0 … lg:px-0` and
           the flex/snap utilities only apply at that breakpoint. `scrollbar-hide`
           keeps the native scrollbar off the design. `div role="list"` (not a
@@ -115,7 +116,7 @@ export function ProductsCarousel({ products, makers }: ProductsCarouselProps) {
         role="list"
         ref={trackRef}
         aria-label="Featured products"
-        className="grid grid-cols-1 gap-grid sm:grid-cols-2 lg:flex lg:snap-x lg:snap-mandatory lg:overflow-x-auto lg:scroll-smooth lg:scroll-pl-0 lg:px-0 lg:pb-3xs lg:scrollbar-hide"
+        className="grid grid-cols-2 gap-grid lg:flex lg:snap-x lg:snap-mandatory lg:overflow-x-auto lg:scroll-smooth lg:scroll-pl-0 lg:px-0 lg:pb-3xs lg:scrollbar-hide"
       >
         {products.map((product) => {
           const maker = makers.find((m) => m.id === product.makerId);
@@ -124,8 +125,8 @@ export function ProductsCarousel({ products, makers }: ProductsCarouselProps) {
               key={product.id}
               data-carousel-item
               // Below `lg` the cards are grid cells and take their width from the
-              // grid (full width on a phone, half from `sm`), so a phone shows
-              // every piece stacked with no swipe. From `lg` up they become
+              // grid (2-up at every width, matching the catalogue), so a phone
+              // shows the pieces with no swipe. From `lg` up they become
               // fixed-width flex items in the scroll row, always leaving a
               // partial next card visible as the "there is more" cue — settling
               // at 4-up on desktop, matching the maker carousel's rhythm.

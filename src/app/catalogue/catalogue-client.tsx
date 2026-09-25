@@ -275,7 +275,7 @@ export function CatalogueClient({
       ) : isStockist ? (
         <StockistProductGrid products={filteredProducts} makers={makers} />
       ) : (
-        <ProductGrid products={filteredProducts} makers={makers} />
+        <ProductGrid products={filteredProducts} makers={makers} titleAs="h2" />
       )}
     </div>
   );

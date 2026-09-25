@@ -7,6 +7,12 @@ import {
 
 interface CraftCardProps {
   craft: Craft;
+  /**
+   * Heading level for the card title. Defaults to `h3`. Pass `h2` on the
+   * `/crafts-and-techniques` listing, where the grid is the first content under
+   * the page `h1`, so the document does not skip h1 → h3.
+   */
+  titleAs?: 'h2' | 'h3';
 }
 
 /**
@@ -28,7 +34,7 @@ interface CraftCardProps {
  * No pill. A craft's name already IS its material category ("Pandanus
  * weaving"), so a material pill would just repeat the title back.
  */
-export function CraftCard({ craft }: CraftCardProps) {
+export function CraftCard({ craft, titleAs: TitleTag = 'h3' }: CraftCardProps) {
   return (
     <PosterCard
       href={`/craft/${craft.slug}`}
@@ -37,7 +43,7 @@ export function CraftCard({ craft }: CraftCardProps) {
       fit="contain"
       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
     >
-      <h3 className={`${posterTitleClasses} line-clamp-2`}>{craft.name}</h3>
+      <TitleTag className={`${posterTitleClasses} line-clamp-2`}>{craft.name}</TitleTag>
       <p className={`mt-2xs ${posterBodyClasses}`}>{craft.description}</p>
     </PosterCard>
   );

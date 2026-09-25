@@ -16,6 +16,14 @@ interface ProductCardProps {
    */
   makerLocation?: string;
   showPrice?: boolean;
+  /**
+   * Heading level for the card title. Defaults to `h3`, correct wherever the
+   * grid sits under a section `h2` (homepage carousels, a maker/piece page's
+   * "Other pieces" block). Pass `h2` on a flat listing page where the grid is
+   * the first content under the page `h1` (the catalogue), so the document does
+   * not skip h1 → h3 — the heading-order rule Lighthouse flags.
+   */
+  titleAs?: 'h2' | 'h3';
 }
 
 /**
@@ -27,7 +35,7 @@ interface ProductCardProps {
  * The material pill sits on the image (top-right), so the grid doubles as a
  * visual index of craft type without a separate line of meta.
  */
-export function ProductCard({ product, makerName, makerLocation, showPrice = false }: ProductCardProps) {
+export function ProductCard({ product, makerName, makerLocation, showPrice = false, titleAs: TitleTag = 'h3' }: ProductCardProps) {
   return (
     <PosterCard
       href={`/piece/${product.productCode}`}
@@ -37,10 +45,11 @@ export function ProductCard({ product, makerName, makerLocation, showPrice = fal
       pill={materialLabel(product.materialCategory)}
       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
     >
-      {/* Reserve two lines for the title so a one-line title (e.g. "Shoulder
-          Bag") does not sit shorter than a two-line one ("Clutch Purse
-          (Small)"). Cards in a row then keep equal caption heights. */}
-      <h3 className={`${posterTitleClasses} line-clamp-2 min-h-[3rem]`}>{product.name}</h3>
+      {/* One line for the title, so the caption stays short and the whole card
+          reads as close to square as the content allows. Clamped to one line
+          keeps every card in a row the same height without reserving a second
+          line's worth of empty space under short titles. */}
+      <TitleTag className={`${posterTitleClasses} line-clamp-1`}>{product.name}</TitleTag>
       {/* Body size, not the 14px meta size. The maker's name IS the provenance
           on a product tile, and MakerCard already sets the same information
           (village, province) at 16px on the grounds that provenance is the point
@@ -52,6 +61,9 @@ export function ProductCard({ product, makerName, makerLocation, showPrice = fal
           lines while "Peter Kera · Western Province" fit on one, which is what
           made the cards in a row sit at different heights. One line keeps every
           maker/place line the same height. */}
+      {/* Relationship-based spacing (systematic, not equal): the maker/place
+          line is the piece's IDENTITY alongside the title, so it hugs the title
+          at `mt-2xs` (8px) — the two read as one group. */}
       {makerName && (
         <p className="mt-2xs text-base leading-body text-warm-gray-600 line-clamp-1">
           by {makerName}
@@ -60,6 +72,11 @@ export function ProductCard({ product, makerName, makerLocation, showPrice = fal
           )}
         </p>
       )}
+      {/* The price / trade-pricing line is a DIFFERENT kind of information (the
+          commercial status), so it steps away from the identity group at
+          `mt-xs` (12px) rather than sitting the same 8px from the maker line as
+          the maker line sits from the title. Unequal spacing groups title+maker
+          and sets the price apart, instead of three evenly-stacked lines. */}
       {showPrice ? (
         <p className="mt-2xs font-heading text-base font-semibold text-deep-blue">
           {formatPrice(product.wholesalePrice)}

@@ -10,8 +10,12 @@ interface StockistProductGridProps {
 export function StockistProductGrid({ products, makers }: StockistProductGridProps) {
   return (
     /* Shared poster grid — must match ProductGrid so the catalogue does not
-       reflow the moment a stockist logs in. */
-    <div role="list" aria-label="Products" className={posterGridClasses}>
+       reflow the moment a stockist logs in, spanning the full content column. */
+    <div
+      role="list"
+      aria-label="Products"
+      className={posterGridClasses}
+    >
       {products.map((product) => {
         const maker = makers.find((m) => m.id === product.makerId);
         return (

@@ -7,6 +7,7 @@ import { Menu, User, Shield, ShoppingCart, Search, X } from 'lucide-react';
 import { MobileNav } from './mobile-nav';
 import { Logo } from './logo';
 import { HeaderSearch } from './header-search';
+import { ThemeToggleButton } from './theme-toggle-button';
 import { ButtonLink } from '@/components/ui/button';
 import { getCart } from '@/lib/cart';
 
@@ -265,25 +266,36 @@ export function Header({ logoSrc, logoAlt }: HeaderProps = {}) {
                   Login
                 </ButtonLink>
               )}
+
+              {/* Light/dark toggle — furthest right, after the auth control.
+                  Sun by default; click flips to dark (Moon). */}
+              <ThemeToggleButton className="ml-2xs" />
             </nav>
 
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(true)}
-              // Only shows below `lg`. Dark treatment, on the light header bar.
-              className="lg:hidden tap-target relative flex items-center justify-center p-2xs rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean transition-colors text-warm-gray-800 hover:bg-sand-light"
-              aria-label="Menu"
-              aria-expanded={mobileMenuOpen}
-              aria-controls="mobile-nav-panel"
-            >
-              <Menu className="h-6 w-6" />
-              {authState !== 'none' && (
-                <span
-                  className="absolute top-2xs right-2xs w-2.5 h-2.5 rounded-full bg-ocean"
-                  aria-hidden="true"
-                />
-              )}
-            </button>
+            {/* Mobile utility cluster — the theme toggle sits on the bar itself
+                (not just inside the drawer) so it is reachable without opening
+                the menu, then the hamburger furthest right. */}
+            <div className="flex items-center gap-3xs lg:hidden">
+              <ThemeToggleButton className="p-2xs" />
+
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(true)}
+                // Only shows below `lg`. Dark treatment, on the light header bar.
+                className="tap-target relative flex items-center justify-center p-2xs rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean transition-colors text-warm-gray-800 hover:bg-sand-light"
+                aria-label="Menu"
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-nav-panel"
+              >
+                <Menu className="h-6 w-6" />
+                {authState !== 'none' && (
+                  <span
+                    className="absolute top-2xs right-2xs w-2.5 h-2.5 rounded-full bg-ocean"
+                    aria-hidden="true"
+                  />
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Desktop search panel — revealed when the toggle is open. It drops

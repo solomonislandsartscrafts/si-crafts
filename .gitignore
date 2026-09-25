@@ -7,6 +7,9 @@
 # testing
 /coverage
 
+# Unlighthouse audit output (generated tooling artifacts — not source)
+.unlighthouse/
+
 # next.js
 /.next/
 /out/

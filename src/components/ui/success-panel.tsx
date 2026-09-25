@@ -16,6 +16,17 @@ interface SuccessPanelProps {
   description?: React.ReactNode;
   /** Defaults to CheckCircle. Pass Send for "message sent" style flows. */
   icon?: LucideIcon;
+  /**
+   * Heading level for the title. Defaults to `h1`, which is correct when the
+   * panel REPLACES a whole page (the standalone stockist password / apply
+   * flows render nothing but this panel, so it owns the page's only h1).
+   *
+   * Pass `h2` when the panel is shown in place of a form that sits INSIDE a
+   * page which already renders its own `<PageHeader>` h1 (contact, for-makers).
+   * Otherwise the page would carry two h1s, which breaks the heading outline
+   * (WCAG 1.3.1). Only the element changes — size and styling are identical.
+   */
+  headingLevel?: 'h1' | 'h2';
   /** Reference numbers, timestamps, notices. Rendered above the actions. */
   children?: React.ReactNode;
   /** Next steps — usually one or two <ButtonLink> elements. */
@@ -26,6 +37,7 @@ export function SuccessPanel({
   title,
   description,
   icon: Icon = CheckCircle,
+  headingLevel: Heading = 'h1',
   children,
   actions,
 }: SuccessPanelProps) {
@@ -38,7 +50,7 @@ export function SuccessPanel({
         <Icon className="w-8 h-8 text-success" />
       </div>
 
-      <h1 className={`${pageTitleClasses} mb-xs`}>{title}</h1>
+      <Heading className={`${pageTitleClasses} mb-xs`}>{title}</Heading>
 
       {description && (
         <p className="text-base text-warm-gray-600 leading-relaxed">

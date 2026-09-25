@@ -67,7 +67,17 @@ export function ContactForm({
   }
 
   if (submitted) {
-    return <SuccessPanel title={successHeading} icon={Send} description={successBody} />;
+    // h2, not the default h1: this panel replaces the form inside the contact
+    // page, which already renders a <PageHeader> h1 ("Contact"). Two h1s on one
+    // page breaks the heading outline (WCAG 1.3.1).
+    return (
+      <SuccessPanel
+        title={successHeading}
+        headingLevel="h2"
+        icon={Send}
+        description={successBody}
+      />
+    );
   }
 
   return (

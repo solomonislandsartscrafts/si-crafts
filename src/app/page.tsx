@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { generatePageMetadata } from '@/lib/metadata';
 import { getPublicProducts, getFeaturedProducts } from '@/services/products';
 import { getPublicMakers } from '@/services/makers';
@@ -201,7 +200,7 @@ export default async function HomePage() {
             more. If a coloured hero is ever restored, all of those pieces have
             to come back together — a white heading on this white section, or a
             `tone="dark"` slideshow on it, is a contrast failure on its own. */}
-        <section className="relative overflow-hidden bg-white">
+        <section className="relative overflow-hidden">
           <div className="relative site-container">
             {/* Spacing:
 
@@ -321,27 +320,19 @@ export default async function HomePage() {
           page alternates hero (white) → Products (warm) → Makers (white) →
           deep-blue CTA → News (white), keeping the gentle warm/white swap
           rather than running two same-coloured sections together. */}
-      <section className="section-y section-band">
+      <section className="section-y">
         <div className="site-container">
-          {/* Visible heading + "View all" link, matching "Meet the makers"
-              below so the two homepage showcases read as siblings. The heading
+          {/* Visible heading, matching "Meet the makers" below so the two
+              homepage showcases read as siblings. The heading
               also gives the section a landmark in the heading outline — a
               screen-reader user paging by heading would otherwise jump straight
               from the hero to "Meet the makers". Both strings come from the CMS
               (`homepage.productsHeading` / `homepage.productsButton`). */}
-          <div className="flex items-end justify-between mb-stack">
-            <div>
-              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
-                {text['homepage.productsHeading']}
-              </h2>
-              <FlagDivider variant="mark" className="mt-xs" />
-            </div>
-            <Link
-              href="/catalogue"
-              className="inline-flex items-center gap-3xs text-base font-medium text-ocean hover:text-ocean-dark transition-colors"
-            >
-              {text['homepage.productsButton']}
-            </Link>
+          <div className="mb-stack">
+            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
+              {text['homepage.productsHeading']}
+            </h2>
+            <FlagDivider variant="mark" className="mt-xs" />
           </div>
           {/* Featured pieces as a single swipeable track, matching "Meet the
               makers" below — on a phone the visitor swipes through pieces; on
@@ -368,6 +359,14 @@ export default async function HomePage() {
               </div>
             </div>
           )}
+          {/* Single "view all" affordance for the section: a secondary button
+              centred below the row, matching Makers and News so all three
+              showcases share one style. */}
+          <div className="mt-stack text-center">
+            <ButtonLink href="/catalogue" variant="secondary">
+              {text['homepage.productsButton']}
+            </ButtonLink>
+          </div>
         </div>
       </section>
 
@@ -384,30 +383,25 @@ export default async function HomePage() {
               used to default to "Meet the Makers Behind Every Piece", which said
               the same thing one screen up; it now leads with what the business is
               instead. */}
-          <div className="flex items-end justify-between mb-stack">
-            <div>
-              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
-                {text['homepage.makersHeading']}
-              </h2>
-              <FlagDivider variant="mark" className="mt-xs" />
-            </div>
-            {/* Text comes from the CMS (`homepage.makersButton`). It used to be
-                hardcoded "View all" while the CMS field sat unused, so an editor
-                could change the string and nothing happened. */}
-            <Link
-              href="/makers"
-              className="inline-flex items-center gap-3xs text-base font-medium text-ocean hover:text-ocean-dark transition-colors"
-            >
-              {text['homepage.makersButton']}
-            </Link>
+          <div className="mb-stack">
+            <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
+              {text['homepage.makersHeading']}
+            </h2>
+            <FlagDivider variant="mark" className="mt-xs" />
           </div>
           {/* Makers as a single swipeable track rather than a static grid: on
               a phone the visitor swipes through faces; on desktop the prev/next
-              arrows (top-right of the section heading) page through them. Shows
-              a partial next card at every width so the "there's more" cue is
-              always present. The full-list link is the "View all" beside the
-              heading, shown at every width, so there is no second button below. */}
+              arrows page through them. Shows a partial next card at every width
+              so the "there's more" cue is always present. The full-list route is
+              the "view all" button centred below the row (see below), matching
+              Products and News. */}
           <MakersCarousel makers={featuredMakers} craftNameMap={craftNameMap} />
+          {/* Text comes from the CMS (`homepage.makersButton`). */}
+          <div className="mt-stack text-center">
+            <ButtonLink href="/makers" variant="secondary">
+              {text['homepage.makersButton']}
+            </ButtonLink>
+          </div>
         </div>
       </section>
 
@@ -432,19 +426,11 @@ export default async function HomePage() {
       {latestArticles.length > 0 && (
         <section className="section-y">
           <div className="site-container">
-            <div className="flex items-end justify-between mb-stack">
-              <div>
-                <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
-                  {text['homepage.newsHeading']}
-                </h2>
-                <FlagDivider variant="mark" className="mt-xs" />
-              </div>
-              <Link
-                href="/news"
-                className="hidden sm:inline-flex items-center gap-3xs text-base font-medium text-ocean hover:text-ocean-dark transition-colors"
-              >
-                All articles
-              </Link>
+            <div className="mb-stack">
+              <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue">
+                {text['homepage.newsHeading']}
+              </h2>
+              <FlagDivider variant="mark" className="mt-xs" />
             </div>
             {/* A 3-up grid holding only one or two cards leaves an empty third
                 column, so below three articles it caps at two. Left-aligned
@@ -464,11 +450,12 @@ export default async function HomePage() {
                 <ArticleCard key={article.id} article={article} />
               ))}
             </div>
-            {/* The header link above is hidden below sm, so without this the
-                news section was a dead end on a phone — no route to /news. */}
-            <div className="sm:hidden mt-stack text-center">
+            {/* Single "view all" affordance for the section, matching Products
+                and Makers: a secondary button centred below the row, shown at
+                every width. */}
+            <div className="mt-stack text-center">
               <ButtonLink href="/news" variant="secondary">
-                All articles
+                View all news
               </ButtonLink>
             </div>
           </div>

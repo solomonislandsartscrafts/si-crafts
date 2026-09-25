@@ -53,8 +53,8 @@ export default async function AboutPage() {
           section adds no top padding of its own. */}
       <section className="pb-section" id="solomon-islands">
         <div className="site-container">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-block items-start">
-            <figure className="lg:col-span-2">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-block items-center">
+            <figure>
               {/* Landscape crop — this is a scenery photo of Solomon Islands. A
                   square crop cut the horizon; 4/3 keeps the scene intact. */}
               <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-sand-light shadow-card">
@@ -64,11 +64,11 @@ export default async function AboutPage() {
                   fill
                   priority
                   className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 40vw"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>
             </figure>
-            <div className="lg:col-span-3">
+            <div>
               <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack">
                 {siteContent.aboutSolomonIslandsHeading}
               </h2>
@@ -96,8 +96,8 @@ export default async function AboutPage() {
       {/* Section 2: About the SIAC Team — image RIGHT (alternated) */}
       <section className="section-y bg-sand-light" id="team">
         <div className="site-container">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-block items-start">
-            <div className="lg:col-span-3 order-2 lg:order-1">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-block items-center">
+            <div className="order-2 lg:order-1">
               <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack">
                 {siteContent.aboutTeamHeading}
               </h2>
@@ -115,7 +115,7 @@ export default async function AboutPage() {
                 )}
               </div>
             </div>
-            <figure className="lg:col-span-2 order-1 lg:order-2">
+            <figure className="order-1 lg:order-2">
               {/* 4/3 — a group/scene photo, framed expecting a landscape crop. */}
               <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-sand-light shadow-card">
                 <SafeImage
@@ -123,7 +123,7 @@ export default async function AboutPage() {
                   alt={siteContent.aboutTeamImageAlt}
                   fill
                   className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 40vw"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>
             </figure>
@@ -134,8 +134,8 @@ export default async function AboutPage() {
       {/* Section 3: Why We're Doing This — image LEFT */}
       <section className="section-y" id="mission">
         <div className="site-container">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-block items-start">
-            <figure className="lg:col-span-2">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-block items-center">
+            <figure>
               {/* 4/3 — a workshop/process scene, framed expecting a landscape crop.
                   object-top so the crop favours the top of the photo (the
                   makers' faces) rather than centring and cutting them off. */}
@@ -145,7 +145,7 @@ export default async function AboutPage() {
                   alt={siteContent.whyWeDoThisImageAlt}
                   fill
                   className="object-cover object-top"
-                  sizes="(max-width: 1024px) 100vw, 40vw"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>
               {/* Credit is editable alongside the image it belongs to — swapping
@@ -166,7 +166,7 @@ export default async function AboutPage() {
                 </figcaption>
               )}
             </figure>
-            <div className="lg:col-span-3">
+            <div>
               <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack">
                 {siteContent.aboutWhyHeading}
               </h2>
