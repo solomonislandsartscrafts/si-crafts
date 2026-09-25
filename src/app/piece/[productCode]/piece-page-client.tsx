@@ -61,13 +61,37 @@ export function PiecePageClient({
   const [showStickyBar, setShowStickyBar] = useState(false);
   const ctaRef = useRef<HTMLDivElement>(null);
 
-  // Single-open accordion group covering "Product details" and "How it's made".
-  // One shared value means opening either panel closes the other. Both start
-  // closed (null), so the info column opens on collapsed rows the visitor
-  // chooses to expand.
-  const [openPanel, setOpenPanel] = useState<'details' | 'process' | null>(null);
-  const togglePanel = (panel: 'details' | 'process') =>
+  // Single-open accordion group for the info column: "Product details",
+  // "How it's made" and "Where to buy". One shared value means opening any one
+  // panel closes the others — only one is ever open at a time. Both start
+  // closed (null), so the column opens only on the row the visitor expands.
+  const [openPanel, setOpenPanel] = useState<'details' | 'process' | 'where' | null>(null);
+  const togglePanel = (panel: 'details' | 'process' | 'where') =>
     setOpenPanel((current) => (current === panel ? null : panel));
+
+  // The open panel floats over the page, so a click anywhere outside the
+  // accordion group — or Escape — should dismiss it, the way a popover behaves.
+  // `accordionRef` wraps the three panels; a pointerdown whose target is inside
+  // it is ignored (that is the visitor interacting with the panel), anything
+  // else closes. Only wired while a panel is open, and torn down when it closes.
+  const accordionRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (openPanel === null) return;
+    function handlePointerDown(e: PointerEvent) {
+      if (accordionRef.current && !accordionRef.current.contains(e.target as Node)) {
+        setOpenPanel(null);
+      }
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpenPanel(null);
+    }
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [openPanel]);
 
   useEffect(() => {
     async function checkStockistSession() {
@@ -112,9 +136,16 @@ export function PiecePageClient({
               the object; on desktop it takes the larger share (~55%) so it
               anchors the record rather than sitting small beside a long
               column. ─── */}
-      <div className="grid grid-cols-1 gap-block lg:grid-cols-[1.2fr_1fr]">
-        {/* Left column — Image gallery with thumbnails */}
-        <div className="w-full">
+      {/* Split layout on desktop: the two columns are fully independent.
+          `items-start` + `self-start` pin each column to the TOP of its grid
+          row and stop the grid from stretching or repositioning either one, so
+          expanding any accordion on the RIGHT grows only the right column — the
+          gallery on the LEFT stays exactly where it is and never moves down. On
+          mobile it is a single stacked column (gallery, then info). */}
+      <div className="grid grid-cols-1 items-start gap-block lg:grid-cols-[1.2fr_1fr]">
+        {/* Left column — Image gallery with thumbnails. Top-pinned, so it holds
+            its position no matter how tall the right column grows. */}
+        <div className="w-full self-start">
           <ImageGallery images={product.imageUrls} alt={product.name} />
         </div>
 
@@ -303,6 +334,12 @@ export function PiecePageClient({
             );
           })()}
 
+          {/* Single-open accordion group. `accordionRef` scopes the
+              click-outside/Escape dismissal: a pointerdown inside this wrapper
+              is the visitor using the panel and is left alone; anywhere else
+              closes the open panel. `relative` keeps each panel's floating
+              overlay body anchored to its own card, not to this wrapper. */}
+          <div ref={accordionRef} className="relative">
           {/* Product details — the drier reference facts, collapsed so they
               don't compete with the description, provenance and buy action
               above. Part of a single-open accordion group with "How it's made"
@@ -311,9 +348,11 @@ export function PiecePageClient({
               only render when they have a value. */}
           <AccordionItem
             as="h2"
+            variant="heading"
             title="Product details"
             isOpen={openPanel === 'details'}
             onToggle={() => togglePanel('details')}
+            overlayBody
           >
             <dl className="text-base">
               <AttributeRow
@@ -343,9 +382,11 @@ export function PiecePageClient({
           {copy.processText && (
             <AccordionItem
               as="h2"
+              variant="heading"
               title="How it's made"
               isOpen={openPanel === 'process'}
               onToggle={() => togglePanel('process')}
+              overlayBody
             >
               <CmsText
                 value={copy.processText}
@@ -364,14 +405,20 @@ export function PiecePageClient({
           )}
 
           {/* Where to buy — the closing call to action (not "information"),
-              now stacked directly under "How it's made" so all three panels
-              read as one accordion in the info column. Only shown to public
-              visitors; a logged-in stockist already has the Add to Order
-              control above. It is its own uncontrolled accordion (not part of
-              the `openPanel` group), so it opens independently of the
-              details/process panels. */}
+              stacked directly under "How it's made" so all three panels read as
+              one accordion in the info column. Only shown to public visitors; a
+              logged-in stockist already has the Add to Order control above. Part
+              of the same single-open `openPanel` group as details/process, so
+              opening it closes the others — only one panel is ever open. */}
           {!isStockist && (
-            <AccordionItem as="h2" title="Where to buy">
+            <AccordionItem
+              as="h2"
+              variant="heading"
+              title="Where to buy"
+              isOpen={openPanel === 'where'}
+              onToggle={() => togglePanel('where')}
+              overlayBody
+            >
               <div className="max-w-2xl space-y-md">
                 <CmsText
                   value={copy.whereToBuyIntro}
@@ -401,6 +448,7 @@ export function PiecePageClient({
               </div>
             </AccordionItem>
           )}
+          </div>
         </div>
       </div>
 
