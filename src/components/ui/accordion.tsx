@@ -25,20 +25,36 @@ import { ChevronDown } from 'lucide-react';
  * `role="region"` body. The body is UNMOUNTED when closed, not just hidden, so
  * collapsed content stays out of the tab order and the accessibility tree.
  *
- * The trigger label is `text-xs` uppercase — a LABEL, not prose, so it sits
- * outside the 16px readable-text floor exactly as the product page does. Body
- * content is the caller's, and stays `text-base`.
+ * Two trigger looks, chosen with `variant`:
+ *   - `label` (default) — `text-xs` uppercase, a LABEL not prose, so it sits
+ *     outside the 16px readable-text floor. The compact panel look used by the
+ *     wholesale FAQ block.
+ *   - `heading` — a sentence-case `text-base`/`text-lg` semibold heading in
+ *     `deep-blue`, matching the FAQs & Shipping page. Its open state tints the
+ *     card border `ocean` (rather than the green left bar) and the body is
+ *     separated with a top hairline, so a group of these reads as readable
+ *     questions rather than terse metadata panels. Used by the piece page.
+ *
+ * Body content is the caller's, and stays `text-base`.
  */
 
 /** Heading level for the wrapping element, so a page's outline stays correct. */
 type HeadingLevel = 'h2' | 'h3';
 
+/** Trigger typography + open-state treatment. See the file header. */
+type AccordionVariant = 'label' | 'heading';
+
 interface AccordionItemProps {
-  /** Visible label. Rendered uppercase via CSS, so pass it in sentence case. */
+  /**
+   * Visible label. In the `label` variant it is rendered uppercase via CSS, so
+   * pass it in sentence case; the `heading` variant shows it as written.
+   */
   title: string;
   children: ReactNode;
   /** Wrapping heading tag. Defaults to h3. */
   as?: HeadingLevel;
+  /** Trigger look. Defaults to `label` (the compact tiny-caps panel). */
+  variant?: AccordionVariant;
   /**
    * Controlled mode: parent owns open state (used by the single-open product
    * group, where opening one panel closes another). Omit both for the default
@@ -48,16 +64,28 @@ interface AccordionItemProps {
   onToggle?: () => void;
   /** Uncontrolled initial state. Ignored when `isOpen` is provided. */
   defaultOpen?: boolean;
+  /**
+   * When true, the open body is taken out of normal flow (absolutely
+   * positioned, floating over whatever follows) instead of pushing later
+   * content down. Used by the piece page's info column, where opening a panel
+   * should overlay the content below rather than move it. The floating body
+   * gets an opaque surface + shadow so it reads as a layer above the page.
+   * Off by default — every other accordion pushes content as normal.
+   */
+  overlayBody?: boolean;
 }
 
 export function AccordionItem({
   title,
   children,
   as: Heading = 'h3',
+  variant = 'label',
   isOpen: controlledOpen,
   onToggle,
   defaultOpen = false,
+  overlayBody = false,
 }: AccordionItemProps) {
+  const isHeading = variant === 'heading';
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : uncontrolledOpen;
@@ -88,9 +116,28 @@ export function AccordionItem({
       // item so every caller (product page, wholesale, FAQ) gets the same rhythm
       // with no wrapper changes; the trailing margin on the last item is
       // harmless (callers own the spacing to whatever follows).
-      className={`mb-xs overflow-hidden rounded-lg border-l-4 bg-card-bg shadow-card transition-colors ${
-        open ? 'border-brand-green' : 'border-transparent'
-      }`}
+      //
+      // Open-state accent differs by variant: the `label` panel gets a
+      // `brand-green` left bar; the `heading` question card matches the FAQs
+      // page — a full `ocean/40` border, no left bar.
+      className={[
+        // In overlay mode the card is a positioning context for its floating
+        // body and is lifted above later siblings while open, so the panel
+        // layers over the content below instead of pushing it. `overflow-hidden`
+        // is dropped in overlay mode — it would clip the absolutely-positioned
+        // body — so the rounded corners are carried by the body itself.
+        overlayBody ? 'relative' : 'overflow-hidden',
+        overlayBody && open ? 'z-20' : '',
+        isHeading
+          ? `mb-xs rounded-lg border transition-colors ${
+              open ? 'border-ocean/40 bg-card-bg shadow-card' : 'border-sand bg-card-bg'
+            }`
+          : `mb-xs rounded-lg border-l-4 bg-card-bg shadow-card transition-colors ${
+              open ? 'border-brand-green' : 'border-transparent'
+            }`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
     >
       <Heading>
         <button
@@ -99,24 +146,67 @@ export function AccordionItem({
           aria-expanded={open}
           aria-controls={panelId}
           id={headerId}
-          // Hover/focus fill is a solid, accessible `sand-light`, so it is
-          // obvious which header you are on. Open headers read `deep-blue` +
-          // (already) semibold; closed headers are `warm-gray-600`.
-          className={`tap-target flex w-full cursor-pointer items-center justify-between gap-sm px-sm py-sm text-left text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-sand-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ocean ${
-            open ? 'text-deep-blue' : 'text-warm-gray-600 hover:text-deep-blue'
-          }`}
+          // `label`: hover/focus fill is a solid, accessible `sand-light`, so it
+          // is obvious which header you are on; open headers read `deep-blue` +
+          // uppercase, closed ones `warm-gray-600`.
+          // `heading`: a sentence-case readable heading (FAQs page treatment);
+          // subtle `sand-light/60` hover fill, always `deep-blue`.
+          className={[
+            // In overlay mode the card drops `overflow-hidden` (so the floating
+            // body isn't clipped), so the header itself carries the rounding to
+            // keep its hover fill inside the card corners: all four when closed,
+            // just the top when open (the body rounds the bottom).
+            overlayBody ? (open ? 'rounded-t-lg' : 'rounded-lg') : '',
+            isHeading
+              ? 'tap-target flex w-full cursor-pointer items-center justify-between gap-sm px-sm py-sm text-left font-heading text-base font-semibold leading-title-sm text-deep-blue transition-colors hover:bg-sand-light/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ocean sm:px-md sm:text-lg'
+              : `tap-target flex w-full cursor-pointer items-center justify-between gap-sm px-sm py-sm text-left text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-sand-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ocean ${
+                  open ? 'text-deep-blue' : 'text-warm-gray-600 hover:text-deep-blue'
+                }`,
+          ]
+            .filter(Boolean)
+            .join(' ')}
         >
           {title}
-          <ChevronDown
-            className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${
-              open ? 'rotate-180 text-brand-green' : 'text-warm-gray-400'
-            }`}
-            aria-hidden="true"
-          />
+          {isHeading ? (
+            <ChevronDown
+              className={`h-5 w-5 flex-shrink-0 text-ocean transition-transform duration-200 ${
+                open ? 'rotate-180' : ''
+              }`}
+              aria-hidden="true"
+            />
+          ) : (
+            <ChevronDown
+              className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${
+                open ? 'rotate-180 text-brand-green' : 'text-warm-gray-400'
+              }`}
+              aria-hidden="true"
+            />
+          )}
         </button>
       </Heading>
       {open && (
-        <div id={panelId} role="region" aria-labelledby={headerId} className="px-sm pb-sm">
+        <div
+          id={panelId}
+          role="region"
+          aria-labelledby={headerId}
+          className={[
+            // The `heading` variant separates the body with a top hairline (FAQs
+            // page treatment); the `label` panel runs straight into its body.
+            isHeading ? 'border-t border-sand px-sm pb-sm pt-xs sm:px-md' : 'px-sm pb-sm',
+            // Overlay mode: pull the body out of flow so it floats over the
+            // content below instead of pushing it down. It is pinned to the
+            // full width of the card, sits just under the header, and carries an
+            // opaque surface + shadow + rounded bottom corners so it reads as a
+            // distinct floating layer. `overflow-y-auto` + a max height keep a
+            // very tall panel from running off the bottom of the viewport.
+            overlayBody
+              ? 'absolute inset-x-0 top-full z-20 max-h-[70vh] overflow-y-auto rounded-b-lg bg-card-bg shadow-md ' +
+                (isHeading ? 'border-x border-b border-ocean/40' : '')
+              : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
           {children}
         </div>
       )}

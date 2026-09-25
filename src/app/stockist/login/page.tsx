@@ -17,7 +17,7 @@ export default function StockistLoginPage() {
       <div className="max-w-md mt-lg">
         <LoginForm defaultAccountType="stockist" />
 
-        <p className="text-base text-warm-gray-400 mt-lg text-center">
+        <p className="text-base text-warm-gray-600 mt-lg text-center">
           Site administrator?{' '}
           <Link href="/admin/login" className="text-ocean hover:underline">
             Admin login

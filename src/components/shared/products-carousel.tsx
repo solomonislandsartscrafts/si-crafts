@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MoveHorizontal } from 'lucide-react';
 import type { Maker, Product } from '@/types';
 import { ProductCard } from '@/components/cards/product-card';
 
@@ -13,19 +13,16 @@ interface ProductsCarouselProps {
 
 /**
  * Horizontal, swipeable row of product cards for the homepage "Featured
- * products" section — the same interaction as `MakersCarousel`, applied to the
- * pieces so the two homepage showcases read as one family.
+ * products" section — the SAME interaction and layout as `MakersCarousel`, so
+ * the two homepage showcases read as one family at every breakpoint:
  *
- * The layout is breakpoint-dependent:
- *
- * - Below `lg` (phone/tablet) it is a plain responsive grid — 2-up at every
- *   width, matching the catalogue grid (`posterGridClasses`), so a phone user
- *   sees the pieces at once with no swipe and the homepage and catalogue read
- *   the same on mobile.
- * - From `lg` up the same markup becomes a single scroll-snap row driven by
- *   prev/next arrows that page by one card. Arrows only appear once there is
- *   somewhere to scroll (disabled at each end), so a short list never shows dead
- *   controls.
+ * - On a phone it is a native scroll-snap row: cards bleed to the screen edge so
+ *   a partial next card is always visible (the "there is more" cue), the user
+ *   swipes with a thumb, and a "Swipe to explore" hint sits under the track and
+ *   clears itself once the user reaches the end.
+ * - On desktop the same track is driven by prev/next arrows that page by one
+ *   card. Arrows only appear once there is somewhere to scroll (disabled at each
+ *   end), so a short list never shows dead controls.
  *
  * Native scroll rather than a JS-transformed carousel (KISS): the browser
  * handles momentum, snapping and keyboard/trackpad scrolling for free, and it
@@ -78,12 +75,12 @@ export function ProductsCarousel({ products, makers }: ProductsCarouselProps) {
   return (
     <div className="relative">
       {/* Desktop arrows — vertically centred on the left/right edges of the
-          track. Hidden below lg because the phone shows every card in a grid.
-          Each is disabled
-          (and hidden) at its end of the track so a short list never shows a
-          live control that does nothing. The square product frames are taller
-          than these buttons, so centring on the track keeps them clear of the
-          captions. */}
+          track. Each is disabled and faded to `opacity-0` when the track can't
+          scroll in that direction. Since the desktop layout is now a fixed
+          4-column grid with no overflow, both stay disabled → invisible on
+          desktop; they only ever appear if the grid is later made scrollable
+          again. On mobile they are hidden outright (`hidden`, no `lg:flex`
+          reached) since the phone uses swipe. */}
       <button
         type="button"
         onClick={() => scrollByCard(-1)}
@@ -103,20 +100,27 @@ export function ProductsCarousel({ products, makers }: ProductsCarouselProps) {
         <ChevronRight className="h-5 w-5" aria-hidden="true" />
       </button>
 
-      {/* The track. Below `lg` it is a plain responsive grid — 2-up at every
-          width to match the catalogue grid (`posterGridClasses`), so a phone
-          user sees the pieces at once with no swipe. From `lg` up it becomes a single
-          scroll-snap row driven by the arrows above: `lg:-mx-0 … lg:px-0` and
-          the flex/snap utilities only apply at that breakpoint. `scrollbar-hide`
+      {/* The track — identical to MakersCarousel. `-mx-gutter … px-gutter` lets
+          cards bleed to the screen edge on mobile so a card sits half-visible off
+          the right edge (the "there is more" cue), while the first card still
+          lines up with the page gutter. `scroll-pl-gutter` makes each snapped
+          card rest at the gutter rather than flush to the edge. `scrollbar-hide`
           keeps the native scrollbar off the design. `div role="list"` (not a
           native `ul`/`li`) because `PosterCard` already supplies each card's
-          `role="listitem"`, so a native `li` would nest a listitem inside a
-          listitem. */}
+          `role="listitem"`. */}
+      {/* Below `lg` this is a swipeable scroll-snap row (same as MakersCarousel
+          — cards bleed to the edge, thumb-swipe). From `lg` up it becomes a
+          fixed 4-column GRID instead of a scroll row: the homepage shows exactly
+          four featured crafts on desktop with no horizontal overflow, so there
+          is nothing to page and the prev/next arrows stay hidden (they only
+          appear when the track can scroll). `overflow-x-auto` is scoped to below
+          `lg` (`max-lg:overflow-x-auto`) so the grid does not reintroduce a
+          scrollbar. */}
       <div
         role="list"
         ref={trackRef}
-        aria-label="Featured products"
-        className="grid grid-cols-2 gap-grid lg:flex lg:snap-x lg:snap-mandatory lg:overflow-x-auto lg:scroll-smooth lg:scroll-pl-0 lg:px-0 lg:pb-3xs lg:scrollbar-hide"
+        aria-label="Featured crafts"
+        className="-mx-gutter flex snap-x snap-mandatory gap-grid max-lg:overflow-x-auto scroll-smooth scroll-pl-gutter px-gutter pb-3xs scrollbar-hide lg:mx-0 lg:grid lg:grid-cols-4 lg:px-0"
       >
         {products.map((product) => {
           const maker = makers.find((m) => m.id === product.makerId);
@@ -124,13 +128,11 @@ export function ProductsCarousel({ products, makers }: ProductsCarouselProps) {
             <div
               key={product.id}
               data-carousel-item
-              // Below `lg` the cards are grid cells and take their width from the
-              // grid (2-up at every width, matching the catalogue), so a phone
-              // shows the pieces with no swipe. From `lg` up they become
-              // fixed-width flex items in the scroll row, always leaving a
-              // partial next card visible as the "there is more" cue — settling
-              // at 4-up on desktop, matching the maker carousel's rhythm.
-              className="lg:w-[31%] lg:flex-shrink-0 lg:snap-start xl:w-[23%]"
+              // Mobile: fixed widths so the row shows a partial next card (the
+              // swipe cue), matching MakersCarousel. From `lg` up the width
+              // utilities are dropped so each card is a plain grid cell — four
+              // equal columns, no peek, no overflow.
+              className="w-[72%] flex-shrink-0 snap-start sm:w-[46%] md:w-[38%] lg:w-auto lg:flex-shrink"
             >
               <ProductCard
                 product={product}
@@ -142,6 +144,18 @@ export function ProductsCarousel({ products, makers }: ProductsCarouselProps) {
         })}
       </div>
 
+      {/* Mobile swipe hint — matches MakersCarousel: lg:hidden (arrows do this
+          on desktop), stays visible while there is more to the right and clears
+          itself at the end. Decorative icon; the text carries the meaning. */}
+      {canScrollRight && products.length > 1 && (
+        <p
+          aria-hidden="true"
+          className="mt-sm flex items-center justify-center gap-2xs text-sm text-warm-gray-400 transition-opacity duration-300 lg:hidden"
+        >
+          <MoveHorizontal className="h-4 w-4" />
+          Swipe to explore more crafts
+        </p>
+      )}
     </div>
   );
 }

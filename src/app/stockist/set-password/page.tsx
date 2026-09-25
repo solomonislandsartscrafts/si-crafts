@@ -111,7 +111,7 @@ function SetPasswordForm() {
       <div className="max-w-md mt-lg">
         <form onSubmit={handleSubmit} noValidate className="space-y-md">
           {error && (
-            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-xs" role="alert" aria-live="assertive">
+            <div className="bg-error/10 border border-error/20 text-error text-base rounded-md p-sm" role="alert" aria-live="assertive">
               {error}
             </div>
           )}

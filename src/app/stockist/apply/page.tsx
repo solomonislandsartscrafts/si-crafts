@@ -155,7 +155,7 @@ export default function StockistApplyPage() {
     return (
       <SuccessPanel
         icon={Send}
-        title="Application received"
+        title="Application Received"
         description="Thanks for applying. We'll review your application and get back to you within a few business days."
       />
     );

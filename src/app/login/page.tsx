@@ -9,7 +9,7 @@ export const metadata = {
 export default function LoginPage() {
   return (
     <PageHeader
-      title="Log in"
+      title="Log In"
       intro="Choose your account type. Stockists log in to see wholesale pricing and place order requests."
       width="narrow"
     >

@@ -79,10 +79,12 @@ export function MakersCarousel({ makers, craftNameMap }: MakersCarouselProps) {
   return (
     <div className="relative">
       {/* Desktop arrows — vertically centred on the left/right edges of the
-          track, the conventional "page the carousel" affordance. Hidden below
-          lg because the phone uses swipe, not buttons. Each is disabled (and
-          visually dimmed) at its end of the track, so a short list of makers
-          never shows a live control that does nothing.
+          track. Each is disabled and faded to `opacity-0` when the track can't
+          scroll in that direction. The desktop layout is now a fixed 4-column
+          grid with no overflow, so both stay disabled → invisible on desktop;
+          they only ever appear if the grid is later made scrollable again. On
+          mobile they are hidden outright (`hidden`, no `lg:flex` reached) since
+          the phone uses swipe.
 
           Nudged half-off the track edge and given a solid card background +
           shadow so they read as floating controls over the row rather than
@@ -122,23 +124,27 @@ export function MakersCarousel({ makers, craftNameMap }: MakersCarouselProps) {
           container snaps `snap-start` cards to the padding box edge, so the
           first card sat at 0 on a phone and the section had no left inset. It
           mirrors `px-gutter` and is reset with the padding at `lg`. */}
+      {/* Below `lg` a swipeable scroll-snap row (cards bleed to the edge,
+          thumb-swipe). From `lg` up a fixed 4-column GRID instead of a scroll
+          row: the homepage shows exactly four makers on desktop with no
+          overflow, so there is nothing to page and the arrows stay hidden.
+          `overflow-x-auto` is scoped below `lg` (`max-lg:overflow-x-auto`) so
+          the grid does not reintroduce a scrollbar. */}
       <div
         role="list"
         ref={trackRef}
         aria-label="Featured makers"
-        className="-mx-gutter flex snap-x snap-mandatory gap-grid overflow-x-auto scroll-smooth scroll-pl-gutter px-gutter pb-3xs scrollbar-hide lg:mx-0 lg:scroll-pl-0 lg:px-0"
+        className="-mx-gutter flex snap-x snap-mandatory gap-grid max-lg:overflow-x-auto scroll-smooth scroll-pl-gutter px-gutter pb-3xs scrollbar-hide lg:mx-0 lg:grid lg:grid-cols-4 lg:px-0"
       >
         {makers.map((maker) => (
           <div
             key={maker.id}
             data-carousel-item
-            // Fixed, responsive card widths so the track always shows a partial
-            // next card (the swipe affordance): ~1.4 cards on a phone, more as
-            // the screen widens, settling at 4-up on desktop — matching the old
-            // grid's densest state. The widths sit just under a clean fraction
-            // so the gap does not push the last card fully off; the browser
-            // handles the exact snap.
-            className="w-[72%] flex-shrink-0 snap-start sm:w-[46%] md:w-[38%] lg:w-[31%] xl:w-[23%]"
+            // Mobile: fixed widths so the row shows a partial next card (the
+            // swipe cue). From `lg` up the width utilities are dropped so each
+            // card is a plain grid cell — four equal columns, no peek, no
+            // overflow.
+            className="w-[72%] flex-shrink-0 snap-start sm:w-[46%] md:w-[38%] lg:w-auto lg:flex-shrink"
           >
             <MakerCard
               maker={maker}

@@ -272,10 +272,28 @@ export function Header({ logoSrc, logoAlt }: HeaderProps = {}) {
               <ThemeToggleButton className="ml-2xs" />
             </nav>
 
-            {/* Mobile utility cluster — the theme toggle sits on the bar itself
-                (not just inside the drawer) so it is reachable without opening
-                the menu, then the hamburger furthest right. */}
+            {/* Mobile utility cluster — the search toggle and theme toggle sit
+                on the bar itself (not just inside the drawer) so they are
+                reachable without opening the menu, then the hamburger furthest
+                right. */}
             <div className="flex items-center gap-3xs lg:hidden">
+              {/* Search toggle — same state as desktop; reveals the full-width
+                  search panel below the bar. */}
+              <button
+                type="button"
+                onClick={() => setSearchOpen((open) => !open)}
+                className="tap-target flex items-center justify-center p-2xs rounded-md text-warm-gray-800 transition-colors hover:bg-sand-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+                aria-label={searchOpen ? 'Close search' : 'Search the catalogue'}
+                aria-expanded={searchOpen}
+                aria-controls="header-search-panel"
+              >
+                {searchOpen ? (
+                  <X className="w-6 h-6" aria-hidden="true" />
+                ) : (
+                  <Search className="w-6 h-6" aria-hidden="true" />
+                )}
+              </button>
+
               <ThemeToggleButton className="p-2xs" />
 
               <button
@@ -298,14 +316,16 @@ export function Header({ logoSrc, logoAlt }: HeaderProps = {}) {
             </div>
           </div>
 
-          {/* Desktop search panel — revealed when the toggle is open. It drops
-              below the bar as its own full-width row rather than squeezing into
-              the row, so opening it never reflows the nav. `lg:`-only, since the
-              drawer owns search below 1024. */}
+          {/* Search panel — revealed when the toggle is open, on every width.
+              It drops below the bar as its own full-width row rather than
+              squeezing into the row, so opening it never reflows the nav. Both
+              the desktop nav toggle and the mobile utility toggle drive it. On
+              mobile it spans the full container; on desktop it centres to a
+              readable max width. */}
           {searchOpen && (
             <div
               id="header-search-panel"
-              className="hidden lg:block border-t border-sand py-sm"
+              className="border-t border-sand py-sm"
             >
               <HeaderSearch
                 inputRef={searchInputRef}

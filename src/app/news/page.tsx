@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/layout/page-header';
 import { PageCta } from '@/components/layout/page-cta';
 import { ArticleCard } from '@/components/cards/article-card';
 import { FeaturedArticleCard } from '@/components/cards/featured-article-card';
-import { articleGridClasses, centeredArticleGridClasses } from '@/components/cards/poster-card';
+import { articleGridClasses, shortArticleGridClasses } from '@/components/cards/poster-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ButtonLink } from '@/components/ui/button';
 
@@ -62,13 +62,15 @@ export default async function NewsPage() {
 
             {/* With a featured lead, the rest fill a full-width 3-up grid a
                 block-step below it. Without one (a short list), every article is
-                an equal card in the centred, capped grid so 1–2 cards stay
-                balanced rather than hugging the left edge. */}
+                an equal card in a LEFT-aligned capped grid
+                (`shortArticleGridClasses`) so 1–2 cards sit flush under the
+                left-aligned page heading rather than floating centred in the
+                page. */}
             {rest.length > 0 && (
               <div
                 role="list"
                 aria-label="News articles"
-                className={`${featured ? `${articleGridClasses} mt-block` : centeredArticleGridClasses}`}
+                className={`${featured ? `${articleGridClasses} mt-block` : shortArticleGridClasses}`}
               >
                 {rest.map((article) => (
                   // With a featured lead card, that card supplies the page's h2,
