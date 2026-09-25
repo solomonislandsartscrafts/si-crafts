@@ -12,11 +12,12 @@ import {
 /**
  * Single-icon light/dark toggle.
  *
- * Shows a Sun by default (light) and a Moon when dark is active. Clicking flips
- * to the OPPOSITE of the currently resolved theme and stores it as an explicit
- * 'light'/'dark' preference (so it overrides 'system' from then on). Writing the
- * preference dispatches THEME_CHANGE_EVENT so LayoutShell re-resolves and flips
- * `.dp-dark` on the public wrapper immediately — no reload.
+ * Shows a Sun by default (light — the site's default) and a Moon when dark is
+ * active. Clicking flips to the opposite and stores it as an explicit
+ * 'light'/'dark' preference. Writing the preference dispatches
+ * THEME_CHANGE_EVENT so LayoutShell re-resolves and flips `.dp-dark` on the
+ * public wrapper immediately — no reload. The site never follows the OS, so the
+ * only thing that ever changes the theme is this control.
  *
  * Renders a stable placeholder icon until mounted so it does not flicker or
  * mismatch during hydration (the resolved theme is only known client-side).
@@ -29,14 +30,11 @@ export function ThemeToggleButton({ className = '' }: { className?: string }) {
     const sync = () => setIsDark(resolveTheme(getStoredThemePreference()) === 'dark');
     sync();
     setMounted(true);
-    // Keep in sync if another control (the mobile-nav copy, another tab) or the
-    // OS ('system') changes the resolved theme.
+    // Keep in sync if another control (the mobile-nav copy, another tab) changes
+    // the theme. No OS listener: the site does not follow prefers-color-scheme.
     window.addEventListener(THEME_CHANGE_EVENT, sync);
-    const media = window.matchMedia('(prefers-color-scheme: dark)');
-    media.addEventListener('change', sync);
     return () => {
       window.removeEventListener(THEME_CHANGE_EVENT, sync);
-      media.removeEventListener('change', sync);
     };
   }, []);
 

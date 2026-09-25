@@ -1089,11 +1089,11 @@
      • /dark-preview route  — the wrapper hard-codes `.dp-dark` (always dark).
      • Public site          — LayoutShell renders the public wrapper, and a tiny
        blocking inline script in <head> (src/app/layout.tsx) adds `.dp-dark` to
-       it when the OS reports `prefers-color-scheme: dark`, and toggles it live
-       when the OS setting changes. That is the standard no-FOUC pattern (it runs
-       before first paint), and because it keys off the OS preference the site
-       goes dark at night wherever the user is — the OS already flips at sunset
-       per their location.
+       it ONLY when the stored preference (localStorage `si-theme`) is 'dark'.
+       The site is light by default and does NOT follow the OS
+       `prefers-color-scheme` — dark is an explicit, persisted user choice made
+       via the header toggle. The script runs before first paint, so returning
+       in dark shows no white flash (the standard no-FOUC pattern).
      • /admin               — never gets the wrapper, so it stays light.
    --------------------------------------------------------------------------- */
 :is(.dark-preview, .dp-dark) {

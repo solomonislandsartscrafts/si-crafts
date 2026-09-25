@@ -89,24 +89,28 @@ export default async function RootLayout({
     // to <html> only — children still get full hydration checking.
     <html lang="en" className={`${poppins.variable} ${dmSans.variable}`} suppressHydrationWarning>
       <head>
-        <meta name="theme-color" content="#1B3A4B" media="(prefers-color-scheme: light)" />
-        <meta name="theme-color" content="#0E1E27" media="(prefers-color-scheme: dark)" />
+        {/* Single light-theme browser-chrome tint. The site is light by default
+            and does not follow the OS, so there is no `prefers-color-scheme: dark`
+            variant here — an OS-dark visitor still opens the light site and should
+            get the light address-bar tint to match. */}
+        <meta name="theme-color" content="#1B3A4B" />
         <SiteJsonLd />
         {/*
-          No-FOUC dark activation. Runs before first paint and resolves the
-          effective theme from the STORED preference (si-theme: light|dark|
-          system), falling back to the OS for 'system'. When the result is dark
-          it sets `dp-dark-os` on <html>, which the CSS uses to paint the canvas
-          and key above-the-fold surfaces dark on the first frame — so switching
-          to Dark (or a dark OS under System) shows no white flash. LayoutShell
-          then owns the full palette after hydration via the `.dp-dark` class on
-          the public wrapper. Kept in sync with the storage key + resolution used
-          by src/lib/theme.ts. Wrapped in try/catch so it can never block paint.
+          No-FOUC dark activation. Runs before first paint and reads the STORED
+          preference (si-theme). The site is light by DEFAULT and does NOT follow
+          the OS `prefers-color-scheme` — dark is applied only when the user has
+          explicitly stored 'dark'. In that one case it sets `dp-dark-os` on
+          <html>, which the CSS uses to paint the canvas and key above-the-fold
+          surfaces dark on the first frame, so returning in dark shows no white
+          flash. LayoutShell then owns the full palette after hydration via the
+          `.dp-dark` class on the public wrapper. Kept in sync with the storage
+          key + resolution used by src/lib/theme.ts. Wrapped in try/catch so it
+          can never block paint.
         */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{var p=localStorage.getItem('si-theme');var d=p==='dark'||((p===null||p==='system')&&matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.classList.add('dp-dark-os')}}catch(e){}",
+              "try{if(localStorage.getItem('si-theme')==='dark'){document.documentElement.classList.add('dp-dark-os')}}catch(e){}",
           }}
         />
       </head>
