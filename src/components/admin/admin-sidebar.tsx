@@ -102,7 +102,7 @@ export function AdminSidebar({
           </Link>
           <p className="text-xs text-white/40 mt-3xs">Admin Panel</p>
         </div>
-        <NotificationBell tone="dark" onNavigate={onNavigate} />
+        <NotificationBell tone="dark" align="left" onNavigate={onNavigate} />
       </div>
 
       {/* Navigation — grouped with section headers */}

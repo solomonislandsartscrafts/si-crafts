@@ -20,6 +20,15 @@ interface NotificationBellProps {
    * sidebar/top bar; `light` renders a dark icon for a light surface.
    */
   tone?: 'dark' | 'light';
+  /**
+   * Horizontal anchor for the dropdown panel. `right` (default) anchors the
+   * panel's right edge to the bell (`right-0`), correct when the bell sits near
+   * the RIGHT of the viewport (mobile top bar). `left` anchors the left edge
+   * (`left-0`) so the panel opens rightward — correct when the bell sits near
+   * the LEFT edge (the deep-blue sidebar), where `right-0` would push the panel
+   * off-screen to the left.
+   */
+  align?: 'left' | 'right';
   /** Called when a notification link is followed — closes the mobile drawer. */
   onNavigate?: () => void;
 }
@@ -41,7 +50,7 @@ const SEVERITY = {
  * A badge shows the item count; the dropdown links each item straight to the
  * screen where it can be cleared.
  */
-export function NotificationBell({ tone = 'dark', onNavigate }: NotificationBellProps) {
+export function NotificationBell({ tone = 'dark', align = 'right', onNavigate }: NotificationBellProps) {
   const [items, setItems] = useState<AttentionItem[]>([]);
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -122,7 +131,9 @@ export function NotificationBell({ tone = 'dark', onNavigate }: NotificationBell
         <div
           role="dialog"
           aria-label="Notifications"
-          className="absolute right-0 z-50 mt-2xs w-[min(92vw,22rem)] max-h-[70vh] overflow-y-auto rounded-lg bg-card-bg shadow-md border border-sand"
+          className={`absolute z-50 mt-2xs w-[min(92vw,22rem)] max-h-[70vh] overflow-y-auto rounded-lg bg-card-bg shadow-md border border-sand ${
+            align === 'left' ? 'left-0' : 'right-0'
+          }`}
         >
           <div className="flex items-baseline justify-between gap-xs px-sm py-xs border-b border-sand">
             <h2 className="font-heading text-base font-semibold text-deep-blue">Notifications</h2>

@@ -101,7 +101,7 @@ export default function AdminAnnouncementPage() {
     <AdminLayout>
       <div className="max-w-3xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-md">
+        <div className="flex flex-wrap items-center justify-between gap-sm mb-md">
           <div>
             <h1 className={pageTitleClasses}>Announcement Banner</h1>
             <p className="text-base text-warm-gray-600 mt-3xs">

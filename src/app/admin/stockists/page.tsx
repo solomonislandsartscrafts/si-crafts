@@ -163,7 +163,7 @@ export default function AdminStockistsPage() {
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between mb-md">
+      <div className="flex flex-wrap items-center justify-between gap-sm mb-md">
         <div>
           <h1 className={pageTitleClasses}>Stockists</h1>
           {pendingCount > 0 && (
@@ -276,7 +276,7 @@ export default function AdminStockistsPage() {
 
                     {/* Action buttons */}
                     {isPending && (
-                      <div className="flex items-center gap-xs pt-xs border-t border-sand">
+                      <div className="flex flex-wrap items-center gap-xs pt-xs border-t border-sand">
                         <Button size="sm" onClick={() => handleApprove(s.id, s.businessName)}>
                           <CheckCircle className="w-4 h-4" />
                           Approve
@@ -289,7 +289,7 @@ export default function AdminStockistsPage() {
                     )}
 
                     {s.status === 'approved' && (
-                      <div className="flex items-center gap-xs pt-xs border-t border-sand">
+                      <div className="flex flex-wrap items-center gap-xs pt-xs border-t border-sand">
                         <Button variant="secondary" size="sm" onClick={() => handleSuspend(s.id, s.businessName)}>
                           <Pause className="w-4 h-4" />
                           Suspend Access
@@ -303,7 +303,7 @@ export default function AdminStockistsPage() {
                     )}
 
                     {s.status === 'suspended' && (
-                      <div className="flex items-center gap-xs pt-xs border-t border-sand">
+                      <div className="flex flex-wrap items-center gap-xs pt-xs border-t border-sand">
                         <Button size="sm" onClick={() => handleEnable(s.id, s.businessName)}>
                           <Play className="w-4 h-4" />
                           Re-enable Access
@@ -317,7 +317,7 @@ export default function AdminStockistsPage() {
                     )}
 
                     {s.status === 'rejected' && (
-                      <div className="flex items-center gap-xs pt-xs border-t border-sand">
+                      <div className="flex flex-wrap items-center gap-xs pt-xs border-t border-sand">
                         <Button variant="danger" size="sm" onClick={() => handleDelete(s.id, s.businessName)}>
                           <Trash2 className="w-4 h-4" />
                           Delete

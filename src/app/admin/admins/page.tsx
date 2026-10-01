@@ -89,7 +89,7 @@ export default function AdminAdminsPage() {
 
   return (
     <AdminLayout requiredRole="super_admin">
-      <div className="flex items-center justify-between mb-md">
+      <div className="flex flex-wrap items-center justify-between gap-sm mb-md">
         <h1 className={pageTitleClasses}>
           Admin Users
         </h1>
@@ -111,7 +111,7 @@ export default function AdminAdminsPage() {
           }
         />
       ) : (
-        <div className="bg-white rounded-lg shadow-card overflow-hidden">
+        <div className="bg-white rounded-lg shadow-card overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-sand-light border-b border-sand">
               <tr>

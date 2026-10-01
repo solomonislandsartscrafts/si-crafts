@@ -177,7 +177,7 @@ export default function AdminProductsPage() {
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between mb-md">
+      <div className="flex flex-wrap items-center justify-between gap-sm mb-md">
         <h1 className={pageTitleClasses}>Products</h1>
         <Button size="sm" onClick={handleAdd}>
           <Plus className="w-4 h-4" /> Add Product
