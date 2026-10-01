@@ -1411,6 +1411,11 @@ export const SITE_TEXT_GROUPS: SiteTextGroup[] = [
               'Stock is handmade and limited. Browse the full catalogue to see what else is available.',
             type: 'multiline',
           },
+          {
+            key: 'craftDetail.relatedStoryHeading',
+            label: 'Related story heading',
+            defaultValue: "Read how it's made",
+          },
         ],
       },
       {

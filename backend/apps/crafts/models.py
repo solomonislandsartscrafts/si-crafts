@@ -24,6 +24,11 @@ class CraftPage(Page):
     process_image_url = models.CharField(max_length=500, blank=True, default="")
     process_image_alt = models.CharField(max_length=300, blank=True, default="")
 
+    # Optional slug of a related news article (e.g. "how shell-money is made").
+    # Stored as a plain slug string, not a page FK; the frontend resolves it via
+    # getArticleBySlug and renders nothing if it is empty or unpublished.
+    related_article_slug = models.CharField(max_length=255, blank=True, default="")
+
     content_panels = Page.content_panels + [
         FieldPanel("description"),
         FieldPanel("material_category"),
@@ -31,6 +36,7 @@ class CraftPage(Page):
         FieldPanel("cultural_context_review_flag"),
         FieldPanel("process_image_url"),
         FieldPanel("process_image_alt"),
+        FieldPanel("related_article_slug"),
         InlinePanel("process_images", label="Process Images"),
     ]
 
@@ -41,6 +47,7 @@ class CraftPage(Page):
         APIField("material_category"),
         APIField("process_image_url"),
         APIField("process_image_alt"),
+        APIField("related_article_slug"),
     ]
 
     class Meta:

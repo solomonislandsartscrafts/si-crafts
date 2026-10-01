@@ -3,9 +3,12 @@ import { Users, Package } from 'lucide-react';
 import { getAllCrafts, getCraftBySlug } from '@/services/crafts';
 import { getPublicMakers } from '@/services/makers';
 import { getPublicProducts } from '@/services/products';
+import { getArticleBySlug } from '@/services/articles';
 import { getSiteTextSafe } from '@/services/site-text';
 import { MakerCard } from '@/components/cards/maker-card';
 import { ProductCard } from '@/components/cards/product-card';
+import { ArticleCard } from '@/components/cards/article-card';
+import { centeredArticleGridClasses } from '@/components/cards/poster-card';
 import { DetailPageLayout } from '@/components/layout/detail-page-layout';
 import { pageTitleClasses } from '@/components/layout/page-header';
 import { ButtonLink } from '@/components/ui/button';
@@ -59,10 +62,14 @@ export default async function CraftPage({ params }: CraftPageProps) {
     notFound();
   }
 
-  const [allMakers, products, text] = await Promise.all([
+  const [allMakers, products, text, relatedArticle] = await Promise.all([
     getPublicMakers(),
     getPublicProducts({ materialCategory: craft.materialCategory }),
     getSiteTextSafe(),
+    // Resolve the related news article only when a slug is set. getArticleBySlug
+    // filters to published articles, so an empty, missing, or unpublished slug
+    // returns null and the section below renders nothing — never a broken link.
+    craft.relatedArticleSlug ? getArticleBySlug(craft.relatedArticleSlug) : Promise.resolve(null),
   ]);
 
   // Derive the makers for this craft from the pieces actually on the page,
@@ -193,6 +200,19 @@ export default async function CraftPage({ params }: CraftPageProps) {
           />
         )}
       </section>
+
+      {/* Related news story — e.g. "how shell-money is made". Rendered only when
+          a published article resolves; otherwise nothing shows (no empty state). */}
+      {relatedArticle && (
+        <section className="mb-block border-t border-sand pt-block">
+          <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack">
+            {text['craftDetail.relatedStoryHeading']}
+          </h2>
+          <div role="list" aria-label="Related news story" className={centeredArticleGridClasses}>
+            <ArticleCard article={relatedArticle} titleAs="h3" />
+          </div>
+        </section>
+      )}
     </DetailPageLayout>
   );
 }

@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import type { Craft, MaterialCategory, CulturalReviewStatus } from '@/types';
 import { ImageUpload } from './image-upload';
 import { getMaterialCategories, type MaterialCategoryOption } from '@/services/categories';
+import { getPublishedArticles } from '@/services/articles';
 import { singleAltError } from '@/lib/image-alt';
 import { scrollToFirstError } from '@/lib/scroll-to-error';
 import { useToast } from '@/components/ui/toast';
@@ -28,6 +29,7 @@ export interface CraftFormData {
   culturalContextReviewFlag: CulturalReviewStatus;
   processImageUrls: string[];
   processImageAlt: string;
+  relatedArticleSlug: string;
 }
 
 export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) {
@@ -38,9 +40,16 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
   const { error: toastError } = useToast();
   const modalRef = useModalA11y(true, onClose);
   const [materialOptions, setMaterialOptions] = useState<MaterialCategoryOption[]>([]);
+  const [articleOptions, setArticleOptions] = useState<{ value: string; label: string }[]>([]);
 
   useEffect(() => {
     getMaterialCategories().then(setMaterialOptions);
+  }, []);
+
+  useEffect(() => {
+    getPublishedArticles().then((articles) =>
+      setArticleOptions(articles.map((a) => ({ value: a.slug, label: a.title })))
+    );
   }, []);
 
   const [form, setForm] = useState<CraftFormData>({
@@ -52,6 +61,7 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
     culturalContextReviewFlag: craft?.culturalContextReviewFlag ?? 'unreviewed',
     processImageUrls: craft?.processImageUrls ?? [],
     processImageAlt: craft?.processImageAlt ?? '',
+    relatedArticleSlug: craft?.relatedArticleSlug ?? '',
   });
 
   // Auto-generate slug from name
@@ -188,6 +198,23 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
               data-error={errors.description ? 'true' : undefined}
             />
           </FormField>
+
+          {/* Related News Article — optional link to one published article
+              (e.g. "how shell-money is made"), surfaced on the public craft page. */}
+          <div>
+            <label htmlFor="craft-related-article" className="block text-base font-medium text-warm-gray-800 mb-3xs">
+              Related News Article
+            </label>
+            <Select
+              id="craft-related-article"
+              value={form.relatedArticleSlug || null}
+              onChange={(val) => handleChange('relatedArticleSlug', val || '')}
+              options={articleOptions}
+              placeholder="None (no related article)"
+              label="Related news article"
+              className="w-full"
+            />
+          </div>
 
           {/* Cultural Context */}
           <FormField label="Cultural Context" htmlFor="craft-cultural">

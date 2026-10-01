@@ -13,6 +13,7 @@ interface WagtailCraftResponse {
   /** URL-based process photo (admin-uploaded, stored on R2). */
   process_image_url?: string;
   process_image_alt?: string;
+  related_article_slug?: string;
   /** Legacy Wagtail image-library entries, still supported for reads. */
   process_images?: { image: { meta: { download_url: string } }; caption: string }[];
 }
@@ -41,6 +42,7 @@ function mapCraft(raw: WagtailCraftResponse): Craft {
     culturalContext: raw.cultural_context ?? null,
     culturalContextReviewFlag: (raw.cultural_context_review_flag ?? 'unreviewed') as Craft['culturalContextReviewFlag'],
     materialCategory: raw.material_category ?? '',
+    relatedArticleSlug: raw.related_article_slug ?? '',
   };
 }
 
@@ -80,6 +82,7 @@ export async function createCraft(data: Omit<Craft, 'id'>): Promise<Craft> {
     cultural_context_review_flag: data.culturalContextReviewFlag,
     process_image_url: data.processImageUrls[0] ?? '',
     process_image_alt: data.processImageAlt ?? '',
+    related_article_slug: data.relatedArticleSlug ?? '',
   }, token);
   return mapCraft(raw);
 }
@@ -95,6 +98,7 @@ export async function updateCraft(id: string, data: Partial<Craft>): Promise<Cra
   if (data.culturalContextReviewFlag !== undefined) body.cultural_context_review_flag = data.culturalContextReviewFlag;
   if (data.processImageUrls !== undefined) body.process_image_url = data.processImageUrls[0] ?? '';
   if (data.processImageAlt !== undefined) body.process_image_alt = data.processImageAlt;
+  if (data.relatedArticleSlug !== undefined) body.related_article_slug = data.relatedArticleSlug;
 
   const raw = await apiPatch<WagtailCraftResponse>(`/api/write/crafts/${id}/`, body, token);
   return mapCraft(raw);
