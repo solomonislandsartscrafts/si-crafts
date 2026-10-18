@@ -72,6 +72,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const articleUrl = `${SITE_URL}/news/${article.slug}`;
   const articleImage = resolveImageUrl(article.coverImageUrl);
   const articleDatePublished = article.publishedAt || article.createdAt;
+  // Same `?? []` fallback the rest of this page uses for tags, so a missing or
+  // null tags array does not throw on the length check or the join below.
+  const articleTags = article.tags ?? [];
   const articleJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -86,7 +89,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       author: { '@type': 'Person', name: article.authorName },
     }),
     publisher: { '@id': `${SITE_URL}/#organization` },
-    ...(article.tags.length > 0 && { keywords: article.tags.join(', ') }),
+    ...(articleTags.length > 0 && { keywords: articleTags.join(', ') }),
   };
 
   // Other articles for the sidebar (exclude current)

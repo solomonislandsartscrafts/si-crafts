@@ -49,12 +49,20 @@ export function usePricingAccess(): PricingAccess {
 
   useEffect(() => {
     let cancelled = false;
+    // Each run() gets a unique id; only the latest invocation may apply its
+    // result or clear the stockist token. Without this, two overlapping runs
+    // (mount + a `storage` event, or two rapid events) can resolve out of
+    // order and let a stale validation win — or remove `stockist_session`
+    // based on an outdated check.
+    let runId = 0;
 
     function run() {
+      const currentRun = ++runId;
       const stockistToken = localStorage.getItem('stockist_session');
       const adminToken = localStorage.getItem('admin_session');
 
       if (!stockistToken && !adminToken) {
+        if (cancelled || currentRun !== runId) return;
         setState({ isStockist: false, isAdmin: false, loading: false });
         return;
       }
@@ -63,7 +71,7 @@ export function usePricingAccess(): PricingAccess {
         stockistToken ? check(validateStockistSession(stockistToken)) : Promise.resolve(null),
         adminToken ? check(validateAdminSession(adminToken)) : Promise.resolve(null),
       ]).then(([stockist, admin]) => {
-        if (cancelled) return;
+        if (cancelled || currentRun !== runId) return;
         if (stockist === 'invalid') localStorage.removeItem('stockist_session');
         setState({ isStockist: stockist === 'valid', isAdmin: admin === 'valid', loading: false });
       });

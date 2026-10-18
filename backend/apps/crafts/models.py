@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from wagtail.models import Page, Orderable
 from wagtail.fields import RichTextField
@@ -29,6 +30,21 @@ class CraftPage(Page):
     # ProductPage.image_urls); the frontend resolves each via getArticleBySlug
     # and renders nothing for any that is empty or unpublished.
     related_article_slugs = models.JSONField(default=list, blank=True)
+
+    def clean(self):
+        """Enforce that related_article_slugs is a list of strings.
+
+        Runs on full_clean(), which Wagtail's admin ModelForm calls on save, so
+        editing through the Wagtail admin is validated too — not only the REST
+        write views. The default (empty list) and blank behaviour is unchanged:
+        an empty list passes.
+        """
+        super().clean()
+        slugs = self.related_article_slugs
+        if not isinstance(slugs, list) or not all(isinstance(item, str) for item in slugs):
+            raise ValidationError(
+                {"related_article_slugs": "Must be a list containing only strings."}
+            )
 
     content_panels = Page.content_panels + [
         FieldPanel("description"),
