@@ -12,6 +12,9 @@ class CraftPageAPIViewSet(PagesAPIViewSet):
         "cultural_context",
         "cultural_context_review_flag",
         "material_category",
+        "process_image_url",
+        "process_image_alt",
+        "related_article_slugs",
     ]
 
     listing_default_fields = PagesAPIViewSet.listing_default_fields + [
@@ -19,6 +22,9 @@ class CraftPageAPIViewSet(PagesAPIViewSet):
         "cultural_context",
         "cultural_context_review_flag",
         "material_category",
+        "process_image_url",
+        "process_image_alt",
+        "related_article_slugs",
         "process_images",
     ]
 
