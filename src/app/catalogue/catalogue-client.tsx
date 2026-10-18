@@ -10,12 +10,12 @@ import { SearchInput } from '@/components/catalogue/search-input';
 import { ProductGrid } from '@/components/catalogue/product-grid';
 import { StockistProductGrid } from '@/components/catalogue/stockist-product-grid';
 import { Select } from '@/components/ui/select';
-import { validateStockistSession } from '@/lib/auth-client';
+import { usePricingAccess } from '@/lib/use-pricing-access';
 import type { MaterialCategoryOption } from '@/services/categories';
 
 /**
  * Sort options. Name and Maker are available to everyone; the two price sorts
- * are added only for logged-in stockists, since public visitors never see
+ * are added only for logged-in stockists and admins, since public visitors never see
  * pricing. `null` = the default order the products arrive in.
  */
 type SortKey = 'name' | 'maker' | 'price-asc' | 'price-desc';
@@ -53,7 +53,9 @@ export function CatalogueClient({
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
-  const [isStockist, setIsStockist] = useState(false);
+  // Stockists get prices + Add to Order; admins get prices only (the cart
+  // checkout is stockist-only); anonymous visitors get neither.
+  const { isStockist, canViewPricing } = usePricingAccess();
 
   // `initialQuery` seeds the field from the `?q=` param, but on client-side
   // navigation (the header search setting a new `?q=`) React keeps this
@@ -64,32 +66,6 @@ export function CatalogueClient({
   useEffect(() => {
     setSearchQuery(initialQuery);
   }, [initialQuery]);
-
-  // Confirm the session with the backend rather than trusting the presence of
-  // a localStorage key, so an expired token stops showing wholesale pricing.
-  useEffect(() => {
-    let cancelled = false;
-
-    async function checkStockistSession() {
-      const token = localStorage.getItem('stockist_session');
-      if (!token) return;
-
-      const stockist = await validateStockistSession(token);
-      if (cancelled) return;
-
-      if (stockist) {
-        setIsStockist(true);
-      } else {
-        localStorage.removeItem('stockist_session');
-        setIsStockist(false);
-      }
-    }
-
-    checkStockistSession();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   // Build a maker name lookup for search
   const makerNameMap = useMemo(() => {
@@ -149,15 +125,15 @@ export function CatalogueClient({
     return result;
   }, [products, selectedMaker, selectedMaterial, searchQuery, sortKey, makerNameMap]);
 
-  // Price sorts only exist for stockists. If a stockist sorts by price and then
-  // logs out (session expires), fall back to no sort rather than leaving a
-  // price sort active with no way to see or change it.
-  const sortOptions = isStockist ? [...PUBLIC_SORTS, ...STOCKIST_SORTS] : PUBLIC_SORTS;
+  // Price sorts only exist for visitors who can see pricing (stockists and
+  // admins). If the session expires mid-visit, fall back to no sort rather than
+  // leaving a price sort active with no way to see or change it.
+  const sortOptions = canViewPricing ? [...PUBLIC_SORTS, ...STOCKIST_SORTS] : PUBLIC_SORTS;
   useEffect(() => {
-    if (!isStockist && (sortKey === 'price-asc' || sortKey === 'price-desc')) {
+    if (!canViewPricing && (sortKey === 'price-asc' || sortKey === 'price-desc')) {
       setSortKey(null);
     }
-  }, [isStockist, sortKey]);
+  }, [canViewPricing, sortKey]);
 
   const hasActiveFilters =
     selectedMaker !== null ||
@@ -275,7 +251,12 @@ export function CatalogueClient({
       ) : isStockist ? (
         <StockistProductGrid products={filteredProducts} makers={makers} />
       ) : (
-        <ProductGrid products={filteredProducts} makers={makers} titleAs="h2" />
+        <ProductGrid
+          products={filteredProducts}
+          makers={makers}
+          titleAs="h2"
+          showPrice={canViewPricing}
+        />
       )}
     </div>
   );

@@ -74,7 +74,7 @@ const CRAFT: Craft = {
   culturalContext: null,
   culturalContextReviewFlag: 'unreviewed',
   materialCategory: 'pandanus',
-  relatedArticleSlug: '',
+  relatedArticleSlugs: [],
 };
 
 const ATTENTION_ITEMS: AttentionItem[] = [

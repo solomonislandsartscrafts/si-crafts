@@ -15,7 +15,7 @@ import { ShareButtons } from '@/components/shared/share-buttons';
 import { addToCart } from '@/lib/cart';
 import { materialLabel, productTypeLabel } from '@/lib/labels';
 import { formatPrice } from '@/lib/price';
-import { validateStockistSession } from '@/lib/auth-client';
+import { usePricingAccess } from '@/lib/use-pricing-access';
 
 /**
  * Admin-editable provenance copy, resolved on the server. `processText` is
@@ -55,7 +55,9 @@ export function PiecePageClient({
   copy,
   tradeOnlyNotice,
 }: PiecePageClientProps) {
-  const [isStockist, setIsStockist] = useState(false);
+  // Price: stockists and admins. Order controls: stockists only (the cart
+  // checkout is stockist-only, so admins get price visibility alone).
+  const { isStockist, canViewPricing } = usePricingAccess();
   const [added, setAdded] = useState(false);
   const [qty, setQty] = useState(1);
   const [showStickyBar, setShowStickyBar] = useState(false);
@@ -92,21 +94,6 @@ export function PiecePageClient({
       document.removeEventListener('keydown', handleKey);
     };
   }, [openPanel]);
-
-  useEffect(() => {
-    async function checkStockistSession() {
-      const token = localStorage.getItem('stockist_session');
-      if (!token) { setIsStockist(false); return; }
-      const stockist = await validateStockistSession(token);
-      if (stockist) {
-        setIsStockist(true);
-      } else {
-        localStorage.removeItem('stockist_session');
-        setIsStockist(false);
-      }
-    }
-    checkStockistSession();
-  }, []);
 
   useEffect(() => {
     if (!isStockist || !ctaRef.current) return;
@@ -183,15 +170,15 @@ export function PiecePageClient({
           {/* Gold accent bar under title */}
           <div className="w-16 h-1 bg-accent-gold rounded-full mb-sm" />
 
-          {/* Wholesale price — stockists only, and kept quiet and inline
+          {/* Wholesale price — stockists and admins only, and kept quiet and inline
               directly under the title rather than boxed at the foot of the
               column. The figure still dominates (it is the one commercial fact
               a buyer scans for), but it reads as a line in the record, not a
               separate panel competing with the details below. The Add to Order
               action lives lower, in the flow, once the buyer has read the
               piece. Public pricing is a business rule — this whole block is
-              gated behind `isStockist`. */}
-          {isStockist && (
+              gated behind `canViewPricing`. */}
+          {canViewPricing && (
             <div className="mb-md">
               <p className="text-xs font-semibold uppercase tracking-wider text-warm-gray-600">
                 Wholesale price
@@ -264,7 +251,8 @@ export function PiecePageClient({
           {/* Trade action — stockists only. One clean full-width action in the
               flow of the column (not a floating card): quantity + Add to Order,
               stacked on a phone and inline from `sm` up. `ctaRef` still marks it
-              for the mobile sticky bar's intersection observer. */}
+              for the mobile sticky bar's intersection observer. Stockist-only by
+              design: admins see the price but have no cart. */}
           {isStockist && (
             <div ref={ctaRef} className="mb-md flex flex-col gap-xs sm:flex-row sm:items-center">
               <QuantityStepper
@@ -300,7 +288,7 @@ export function PiecePageClient({
               control of the wording; the component only decides they render as
               buttons rather than inline links. If the copy has no links it
               falls back to the plain inline sentence. */}
-          {!isStockist && tradeOnlyNotice && (() => {
+          {!canViewPricing && tradeOnlyNotice && (() => {
             const { text, links } = extractCmsLinks(tradeOnlyNotice);
             return (
               <div className="mb-md px-sm py-sm bg-ocean/5 border border-ocean/20 rounded-lg">

@@ -38,7 +38,7 @@ export default async function CataloguePage({
         intro={text['catalogue.intro']}
       >
         {/* Stockist invite lives in the banner so it never pushes the product
-            grid down. Hidden for logged-in stockists (client-checked).
+            grid down. Hidden for logged-in stockists and admins (client-checked).
             `onLight` because the catalogue banner is the light `gold` fill. */}
         <StockistBannerPrompt prompt={text['catalogue.pricingPrompt']} onLight />
       </PageHeader>

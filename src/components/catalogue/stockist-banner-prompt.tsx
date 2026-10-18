@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Lock } from 'lucide-react';
 import { CmsInline } from '@/components/ui/cms-text';
-import { validateStockistSession } from '@/lib/auth-client';
+import { usePricingAccess } from '@/lib/use-pricing-access';
 
 interface StockistBannerPromptProps {
   /** Admin-editable invite copy, e.g. "Log in as a stockist to view pricing". */
@@ -21,7 +20,8 @@ interface StockistBannerPromptProps {
  * catalogue banner.
  *
  * It lives in the banner (not in the filter bar) so it never pushes the product
- * grid down the page. It is hidden once a valid stockist session is confirmed —
+ * grid down the page. It is hidden once a valid stockist or admin session is
+ * confirmed (both can already see pricing) —
  * that check is client-only, which is why this is its own small client
  * component rather than server-rendered banner copy.
  *
@@ -30,25 +30,9 @@ interface StockistBannerPromptProps {
  * not use warm-gray on either treatment, it disappears on both bands.
  */
 export function StockistBannerPrompt({ prompt, onLight }: StockistBannerPromptProps) {
-  const [isStockist, setIsStockist] = useState(false);
+  const { canViewPricing } = usePricingAccess();
 
-  useEffect(() => {
-    let cancelled = false;
-    const token = localStorage.getItem('stockist_session');
-    if (!token) return;
-
-    validateStockistSession(token).then((stockist) => {
-      if (cancelled) return;
-      if (stockist) setIsStockist(true);
-      else localStorage.removeItem('stockist_session');
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (isStockist || !prompt) return null;
+  if (canViewPricing || !prompt) return null;
 
   return (
     <div
