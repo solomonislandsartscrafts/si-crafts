@@ -19,6 +19,9 @@ const config = [
       'node_modules/**',
       'public/**',
       'backend/**',
+      // Generated Lighthouse audit output (also gitignored) — not source.
+      '.unlighthouse/**',
+      '.unlighthouse-run/**',
       'next-env.d.ts',
     ],
   },

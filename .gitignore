@@ -11,6 +11,9 @@
 .unlighthouse/
 .unlighthouse-run/
 
+# Agent/workflow scratch and review docs — not product code
+.agents/
+
 # next.js
 /.next/
 /out/
