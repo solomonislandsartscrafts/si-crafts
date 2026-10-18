@@ -29,7 +29,7 @@ export interface CraftFormData {
   culturalContextReviewFlag: CulturalReviewStatus;
   processImageUrls: string[];
   processImageAlt: string;
-  relatedArticleSlug: string;
+  relatedArticleSlugs: string[];
 }
 
 export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) {
@@ -61,7 +61,7 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
     culturalContextReviewFlag: craft?.culturalContextReviewFlag ?? 'unreviewed',
     processImageUrls: craft?.processImageUrls ?? [],
     processImageAlt: craft?.processImageAlt ?? '',
-    relatedArticleSlug: craft?.relatedArticleSlug ?? '',
+    relatedArticleSlugs: craft?.relatedArticleSlugs ?? [],
   });
 
   // Auto-generate slug from name
@@ -199,19 +199,55 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
             />
           </FormField>
 
-          {/* Related News Article — optional link to one published article
-              (e.g. "how shell-money is made"), surfaced on the public craft page. */}
+          {/* Related News Articles — optional ordered list of published articles
+              (e.g. "how shell-money is made"), surfaced on the public craft page.
+              Added one at a time via the Select; order is the array order. */}
           <div>
             <label htmlFor="craft-related-article" className="block text-base font-medium text-warm-gray-800 mb-3xs">
-              Related News Article
+              Related News Articles
             </label>
+
+            {/* Already-added articles, in order, each removable. */}
+            {form.relatedArticleSlugs.length > 0 && (
+              <ul className="mb-xs space-y-2xs">
+                {form.relatedArticleSlugs.map((slug) => {
+                  const label = articleOptions.find((o) => o.value === slug)?.label ?? slug;
+                  return (
+                    <li
+                      key={slug}
+                      className="flex items-center justify-between gap-xs rounded-md border border-sand-dark bg-white px-sm py-2xs"
+                    >
+                      <span className="text-base text-warm-gray-800">{label}</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleChange(
+                            'relatedArticleSlugs',
+                            form.relatedArticleSlugs.filter((s) => s !== slug)
+                          )
+                        }
+                        className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+                        aria-label={`Remove ${label}`}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+
+            {/* Add control — picks from published articles not already added,
+                appends to the end, then resets itself. */}
             <Select
               id="craft-related-article"
-              value={form.relatedArticleSlug || null}
-              onChange={(val) => handleChange('relatedArticleSlug', val || '')}
-              options={articleOptions}
-              placeholder="None (no related article)"
-              label="Related news article"
+              value={null}
+              onChange={(val) => {
+                if (val) handleChange('relatedArticleSlugs', [...form.relatedArticleSlugs, val]);
+              }}
+              options={articleOptions.filter((o) => !form.relatedArticleSlugs.includes(o.value))}
+              placeholder="Add a related article..."
+              label="Add related news article"
               className="w-full"
             />
           </div>

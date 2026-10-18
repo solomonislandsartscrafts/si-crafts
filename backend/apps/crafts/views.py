@@ -47,7 +47,7 @@ class CraftWriteViewSet(viewsets.ViewSet):
             cultural_context_review_flag=data.get("cultural_context_review_flag", "unreviewed"),
             process_image_url=data.get("process_image_url", ""),
             process_image_alt=data.get("process_image_alt", ""),
-            related_article_slug=data.get("related_article_slug", ""),
+            related_article_slugs=data.get("related_article_slugs", []) or [],
         )
         crafts_index.add_child(instance=craft)
         return Response(CraftPageSerializer(craft).data, status=status.HTTP_201_CREATED)
@@ -87,8 +87,8 @@ class CraftWriteViewSet(viewsets.ViewSet):
             craft.process_image_url = data["process_image_url"]
         if "process_image_alt" in data:
             craft.process_image_alt = data["process_image_alt"]
-        if "related_article_slug" in data:
-            craft.related_article_slug = data["related_article_slug"]
+        if "related_article_slugs" in data:
+            craft.related_article_slugs = data["related_article_slugs"] or []
 
         craft.save_revision().publish()
         return Response(CraftPageSerializer(craft).data)

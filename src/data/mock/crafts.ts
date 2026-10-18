@@ -13,7 +13,7 @@ export const mockCrafts: Craft[] = [
       'In many Solomon Islands communities, weaving knowledge is passed from mother to daughter. Specific patterns may belong to particular families or clans and carry stories of origin, place, and kinship. The fine diagonal weaving and pattern on shoulder bags originates from Rennell and Bellona Province (Renbel). Bags are often worn around the neck in Solomon Islands giving easy access to their contents.',
     culturalContextReviewFlag: 'unreviewed',
     materialCategory: 'pandanus',
-    relatedArticleSlug: '',
+    relatedArticleSlugs: [],
   },
   {
     id: 'craft-2',
@@ -27,7 +27,7 @@ export const mockCrafts: Craft[] = [
       'Carving traditions vary by island and province. In Western Province, nguzunguzu (ship prow figures) are carved as protective spirits for canoes. In Malaita, carvings may depict ancestral figures. Today, carvers from Western Province produce functional items like bowls and decorative pieces for the tourist and export market.',
     culturalContextReviewFlag: 'unreviewed',
     materialCategory: 'wood',
-    relatedArticleSlug: '',
+    relatedArticleSlugs: [],
   },
   {
     id: 'craft-3',
@@ -41,7 +41,7 @@ export const mockCrafts: Craft[] = [
       'Shell money holds deep cultural significance in Malaita and parts of Guadalcanal, particularly in the Langa Langa Lagoon area. It is used in bride price, compensation payments, and ceremonies. Its value is determined by colour, size uniformity, and length of strand. Aunty Karina has made kits for children so they can make their own shell-money jewellery, helping to pass the tradition to the next generation.',
     culturalContextReviewFlag: 'unreviewed',
     materialCategory: 'shells',
-    relatedArticleSlug: '',
+    relatedArticleSlugs: [],
   },
   {
     id: 'craft-4',
@@ -55,6 +55,6 @@ export const mockCrafts: Craft[] = [
       'Bush-twine crafts are found across multiple provinces in Solomon Islands, including Choiseul Province. The kusa (bag) is a traditional carrying bag similar to the bilum of Papua New Guinea or the dilly bag of northern Australia. It is sometimes carried across the forehead or around the neck.',
     culturalContextReviewFlag: 'unreviewed',
     materialCategory: 'bush-twine',
-    relatedArticleSlug: '',
+    relatedArticleSlugs: [],
   },
 ];

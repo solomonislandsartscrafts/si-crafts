@@ -11,6 +11,6 @@ export interface Craft {
   culturalContext: string | null;
   culturalContextReviewFlag: CulturalReviewStatus;
   materialCategory: MaterialCategory;
-  /** Slug of a related news article, or '' when none. Resolved via getArticleBySlug. */
-  relatedArticleSlug: string;
+  /** Slugs of related news articles, in order; `[]` when none. Resolved via getArticleBySlug. */
+  relatedArticleSlugs: string[];
 }
