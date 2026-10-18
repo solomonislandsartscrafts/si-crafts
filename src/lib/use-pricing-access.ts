@@ -49,25 +49,41 @@ export function usePricingAccess(): PricingAccess {
 
   useEffect(() => {
     let cancelled = false;
-    const stockistToken = localStorage.getItem('stockist_session');
-    const adminToken = localStorage.getItem('admin_session');
 
-    if (!stockistToken && !adminToken) {
-      setState({ isStockist: false, isAdmin: false, loading: false });
-      return;
+    function run() {
+      const stockistToken = localStorage.getItem('stockist_session');
+      const adminToken = localStorage.getItem('admin_session');
+
+      if (!stockistToken && !adminToken) {
+        setState({ isStockist: false, isAdmin: false, loading: false });
+        return;
+      }
+
+      Promise.all([
+        stockistToken ? check(validateStockistSession(stockistToken)) : Promise.resolve(null),
+        adminToken ? check(validateAdminSession(adminToken)) : Promise.resolve(null),
+      ]).then(([stockist, admin]) => {
+        if (cancelled) return;
+        if (stockist === 'invalid') localStorage.removeItem('stockist_session');
+        setState({ isStockist: stockist === 'valid', isAdmin: admin === 'valid', loading: false });
+      });
     }
 
-    Promise.all([
-      stockistToken ? check(validateStockistSession(stockistToken)) : Promise.resolve(null),
-      adminToken ? check(validateAdminSession(adminToken)) : Promise.resolve(null),
-    ]).then(([stockist, admin]) => {
-      if (cancelled) return;
-      if (stockist === 'invalid') localStorage.removeItem('stockist_session');
-      setState({ isStockist: stockist === 'valid', isAdmin: admin === 'valid', loading: false });
-    });
+    run();
+
+    // Re-check when the session changes. A login/logout in another tab writes
+    // the session keys in localStorage, which fires `storage` there; without
+    // this the gate would keep showing (or hiding) prices until a reload.
+    function onStorage(event: StorageEvent) {
+      if (event.key === 'stockist_session' || event.key === 'admin_session') {
+        run();
+      }
+    }
+    window.addEventListener('storage', onStorage);
 
     return () => {
       cancelled = true;
+      window.removeEventListener('storage', onStorage);
     };
   }, []);
 
