@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import type { Craft, MaterialCategory, CulturalReviewStatus } from '@/types';
 import { ImageUpload } from './image-upload';
 import { getMaterialCategories, type MaterialCategoryOption } from '@/services/categories';
+import { getPublishedArticles } from '@/services/articles';
 import { singleAltError } from '@/lib/image-alt';
 import { scrollToFirstError } from '@/lib/scroll-to-error';
 import { useToast } from '@/components/ui/toast';
@@ -28,6 +29,7 @@ export interface CraftFormData {
   culturalContextReviewFlag: CulturalReviewStatus;
   processImageUrls: string[];
   processImageAlt: string;
+  relatedArticleSlugs: string[];
 }
 
 export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) {
@@ -38,9 +40,16 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
   const { error: toastError } = useToast();
   const modalRef = useModalA11y(true, onClose);
   const [materialOptions, setMaterialOptions] = useState<MaterialCategoryOption[]>([]);
+  const [articleOptions, setArticleOptions] = useState<{ value: string; label: string }[]>([]);
 
   useEffect(() => {
     getMaterialCategories().then(setMaterialOptions);
+  }, []);
+
+  useEffect(() => {
+    getPublishedArticles().then((articles) =>
+      setArticleOptions(articles.map((a) => ({ value: a.slug, label: a.title })))
+    );
   }, []);
 
   const [form, setForm] = useState<CraftFormData>({
@@ -52,6 +61,7 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
     culturalContextReviewFlag: craft?.culturalContextReviewFlag ?? 'unreviewed',
     processImageUrls: craft?.processImageUrls ?? [],
     processImageAlt: craft?.processImageAlt ?? '',
+    relatedArticleSlugs: craft?.relatedArticleSlugs ?? [],
   });
 
   // Auto-generate slug from name
@@ -188,6 +198,59 @@ export function CraftFormModal({ craft, onClose, onSave }: CraftFormModalProps) 
               data-error={errors.description ? 'true' : undefined}
             />
           </FormField>
+
+          {/* Related News Articles — optional ordered list of published articles
+              (e.g. "how shell-money is made"), surfaced on the public craft page.
+              Added one at a time via the Select; order is the array order. */}
+          <div>
+            <label htmlFor="craft-related-article" className="block text-base font-medium text-warm-gray-800 mb-3xs">
+              Related News Articles
+            </label>
+
+            {/* Already-added articles, in order, each removable. */}
+            {form.relatedArticleSlugs.length > 0 && (
+              <ul className="mb-xs space-y-2xs">
+                {form.relatedArticleSlugs.map((slug) => {
+                  const label = articleOptions.find((o) => o.value === slug)?.label ?? slug;
+                  return (
+                    <li
+                      key={slug}
+                      className="flex items-center justify-between gap-xs rounded-md border border-sand-dark bg-white px-sm py-2xs"
+                    >
+                      <span className="text-base text-warm-gray-800">{label}</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleChange(
+                            'relatedArticleSlugs',
+                            form.relatedArticleSlugs.filter((s) => s !== slug)
+                          )
+                        }
+                        className="tap-target p-2xs text-warm-gray-400 hover:text-error transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
+                        aria-label={`Remove ${label}`}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+
+            {/* Add control — picks from published articles not already added,
+                appends to the end, then resets itself. */}
+            <Select
+              id="craft-related-article"
+              value={null}
+              onChange={(val) => {
+                if (val) handleChange('relatedArticleSlugs', [...form.relatedArticleSlugs, val]);
+              }}
+              options={articleOptions.filter((o) => !form.relatedArticleSlugs.includes(o.value))}
+              placeholder="Add a related article..."
+              label="Add related news article"
+              className="w-full"
+            />
+          </div>
 
           {/* Cultural Context */}
           <FormField label="Cultural Context" htmlFor="craft-cultural">

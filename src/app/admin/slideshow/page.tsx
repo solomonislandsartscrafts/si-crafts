@@ -153,7 +153,7 @@ export default function AdminSlideshowPage() {
     <AdminLayout>
       <div className="max-w-4xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-md">
+        <div className="flex flex-wrap items-center justify-between gap-sm mb-md">
           <div>
             <h1 className={pageTitleClasses}>Homepage Slideshow</h1>
             <p className="text-base text-warm-gray-600 mt-3xs">

@@ -102,7 +102,16 @@ export function AdminSidebar({
           </Link>
           <p className="text-xs text-white/40 mt-3xs">Admin Panel</p>
         </div>
-        <NotificationBell tone="dark" onNavigate={onNavigate} />
+        {/* The sidebar renders in two places: the desktop shell (lg+) and the
+            mobile drawer (below lg). In the drawer the sidebar is only 256px
+            wide and sits at the left of a 375px viewport, so a left-anchored
+            92vw panel would run off-screen — and the mobile TOP BAR already
+            carries its own right-anchored bell for that breakpoint. So show
+            this sidebar bell only from lg up, where the left anchor is correct
+            and the top-bar bell is hidden. */}
+        <div className="hidden lg:block">
+          <NotificationBell tone="dark" align="left" onNavigate={onNavigate} />
+        </div>
       </div>
 
       {/* Navigation — grouped with section headers */}

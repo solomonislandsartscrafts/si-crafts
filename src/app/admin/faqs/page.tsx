@@ -64,7 +64,7 @@ export default function AdminFaqsPage() {
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between mb-2xs">
+      <div className="flex flex-wrap items-center justify-between gap-sm mb-2xs">
         <h1 className={pageTitleClasses}>FAQs</h1>
         <Button size="sm" onClick={handleAdd}>
           <Plus className="w-4 h-4" /> Add FAQ
@@ -88,7 +88,7 @@ export default function AdminFaqsPage() {
           }
         />
       ) : (
-        <div className="bg-white rounded-lg shadow-card overflow-hidden">
+        <div className="bg-white rounded-lg shadow-card overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-sand-light border-b border-sand">
               <tr>

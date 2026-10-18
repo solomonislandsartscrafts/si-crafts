@@ -3,9 +3,12 @@ import { Users, Package } from 'lucide-react';
 import { getAllCrafts, getCraftBySlug } from '@/services/crafts';
 import { getPublicMakers } from '@/services/makers';
 import { getPublicProducts } from '@/services/products';
+import { getArticleBySlug } from '@/services/articles';
 import { getSiteTextSafe } from '@/services/site-text';
 import { MakerCard } from '@/components/cards/maker-card';
 import { ProductCard } from '@/components/cards/product-card';
+import { ArticleCard } from '@/components/cards/article-card';
+import { articleGridClasses } from '@/components/cards/poster-card';
 import { DetailPageLayout } from '@/components/layout/detail-page-layout';
 import { pageTitleClasses } from '@/components/layout/page-header';
 import { ButtonLink } from '@/components/ui/button';
@@ -13,6 +16,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { SafeImage } from '@/components/ui/safe-image';
 import { generatePageMetadata, toPlainDescription } from '@/lib/metadata';
 import { resolveImageUrl } from '@/lib/api-client';
+import type { Article } from '@/types';
 import type { Metadata } from 'next';
 
 /** How many products to show before linking through to the full catalogue. */
@@ -59,11 +63,24 @@ export default async function CraftPage({ params }: CraftPageProps) {
     notFound();
   }
 
-  const [allMakers, products, text] = await Promise.all([
+  const [allMakers, products, text, relatedArticles] = await Promise.all([
     getPublicMakers(),
     getPublicProducts({ materialCategory: craft.materialCategory }),
     getSiteTextSafe(),
+    // Resolve every related news slug. getArticleBySlug filters to published
+    // articles, so an empty, missing, or unpublished slug returns null and is
+    // dropped below — never a broken link. getArticleBySlug can also reject if
+    // the request itself fails, so each lookup is caught independently: one
+    // failed slug resolves as an absent article instead of failing the page.
+    Promise.all(
+      craft.relatedArticleSlugs.map((slug) =>
+        getArticleBySlug(slug).catch(() => null)
+      )
+    ),
   ]);
+
+  // Keep only articles that resolved to a published story, preserving order.
+  const publishedRelated = relatedArticles.filter((a): a is Article => a !== null);
 
   // Derive the makers for this craft from the pieces actually on the page,
   // rather than the maker's optional `craft` link (which is often unset). A
@@ -193,6 +210,22 @@ export default async function CraftPage({ params }: CraftPageProps) {
           />
         )}
       </section>
+
+      {/* Related news stories — e.g. "how shell-money is made". Rendered only
+          when at least one published article resolves; otherwise nothing shows
+          (no empty state). */}
+      {publishedRelated.length > 0 && (
+        <section className="mb-block border-t border-sand pt-block">
+          <h2 className="font-heading text-2xl md:text-3xl font-medium text-deep-blue mb-stack">
+            {text['craftDetail.relatedStoryHeading']}
+          </h2>
+          <div role="list" aria-label="Related news stories" className={articleGridClasses}>
+            {publishedRelated.map((article) => (
+              <ArticleCard key={article.id} article={article} titleAs="h3" />
+            ))}
+          </div>
+        </section>
+      )}
     </DetailPageLayout>
   );
 }

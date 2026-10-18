@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Script from 'next/script';
 import { Poppins, DM_Sans } from 'next/font/google';
 import { SkipLink } from '@/components/layout';
 import { LayoutShell } from '@/components/layout/layout-shell';
@@ -108,9 +107,18 @@ export default async function RootLayout({
           key + resolution used by src/lib/theme.ts. Wrapped in try/catch so it
           can never block paint.
         */}
-        <Script id="si-theme-no-fouc" strategy="beforeInteractive">
-          {"try{if(localStorage.getItem('si-theme')==='dark'){document.documentElement.classList.add('dp-dark-os')}}catch(e){}"}
-        </Script>
+        {/* Native inline script, not next/script. It must execute during HTML
+            parsing — before first paint — so the stored-dark check lands on the
+            first frame. In the App Router a next/script with
+            strategy="beforeInteractive" is hoisted rather than inlined in
+            document order, so it cannot guarantee that. A raw inline <script> in
+            <head> runs synchronously as the parser reaches it. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(localStorage.getItem('si-theme')==='dark'){document.documentElement.classList.add('dp-dark-os')}}catch(e){}",
+          }}
+        />
       </head>
       {/* No `bg-page-bg` here: the base canvas is painted on <html> and the
           public-site map watermark is a fixed `.map-backdrop` layer (see

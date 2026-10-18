@@ -9,6 +9,13 @@ from .models import CraftPage
 from .serializers import CraftPageSerializer, CraftPageRequestSerializer
 
 
+def _validate_related_article_slugs(value):
+    """Accept only a list of strings. Returns (ok, error_message)."""
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        return False, "related_article_slugs must be a list of strings."
+    return True, None
+
+
 class CraftWriteViewSet(viewsets.ViewSet):
     """Writable API for CraftPages (create, update, delete)."""
 
@@ -27,6 +34,11 @@ class CraftWriteViewSet(viewsets.ViewSet):
             req_serializer = CraftPageRequestSerializer(data=image_fields)
             if not req_serializer.is_valid():
                 return Response(req_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        if "related_article_slugs" in data:
+            ok, error = _validate_related_article_slugs(data["related_article_slugs"])
+            if not ok:
+                return Response({"related_article_slugs": [error]}, status=status.HTTP_400_BAD_REQUEST)
 
         crafts_index = Page.objects.filter(title="Crafts").first()
         if not crafts_index:
@@ -47,6 +59,7 @@ class CraftWriteViewSet(viewsets.ViewSet):
             cultural_context_review_flag=data.get("cultural_context_review_flag", "unreviewed"),
             process_image_url=data.get("process_image_url", ""),
             process_image_alt=data.get("process_image_alt", ""),
+            related_article_slugs=data.get("related_article_slugs", []),
         )
         crafts_index.add_child(instance=craft)
         return Response(CraftPageSerializer(craft).data, status=status.HTTP_201_CREATED)
@@ -70,6 +83,11 @@ class CraftWriteViewSet(viewsets.ViewSet):
             if not req_serializer.is_valid():
                 return Response(req_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        if "related_article_slugs" in data:
+            ok, error = _validate_related_article_slugs(data["related_article_slugs"])
+            if not ok:
+                return Response({"related_article_slugs": [error]}, status=status.HTTP_400_BAD_REQUEST)
+
         if "title" in data or "name" in data:
             craft.title = data.get("title", data.get("name", craft.title))
         if "slug" in data:
@@ -86,6 +104,8 @@ class CraftWriteViewSet(viewsets.ViewSet):
             craft.process_image_url = data["process_image_url"]
         if "process_image_alt" in data:
             craft.process_image_alt = data["process_image_alt"]
+        if "related_article_slugs" in data:
+            craft.related_article_slugs = data["related_article_slugs"]
 
         craft.save_revision().publish()
         return Response(CraftPageSerializer(craft).data)

@@ -4,8 +4,9 @@ import { notFound } from 'next/navigation';
 import { getArticleBySlug, getPublishedArticles } from '@/services/articles';
 import { getSiteTextSafe } from '@/services/site-text';
 import { renderArticleHtml } from '@/lib/article-html';
-import { generatePageMetadata, toPlainDescription } from '@/lib/metadata';
+import { generatePageMetadata, toPlainDescription, SITE_URL } from '@/lib/metadata';
 import { resolveImageUrl } from '@/lib/api-client';
+import { JsonLd } from '@/lib/json-ld';
 import type { Metadata } from 'next';
 import { ShareButtons } from '@/components/shared/share-buttons';
 import { NewsSidebar } from '@/components/news/news-sidebar';
@@ -63,6 +64,34 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     notFound();
   }
 
+  // Structured data. Emits the story as a schema.org Article so Google can
+  // treat a /news page as an article rather than a generic page. Optional
+  // fields use conditional spreads so no key is ever emitted null/empty; every
+  // URL is absolute via SITE_URL. publisher references the site-wide
+  // Organization node by @id. generateMetadata/OpenGraph above is separate.
+  const articleUrl = `${SITE_URL}/news/${article.slug}`;
+  const articleImage = resolveImageUrl(article.coverImageUrl);
+  const articleDatePublished = article.publishedAt || article.createdAt;
+  // Same `?? []` fallback the rest of this page uses for tags, so a missing or
+  // null tags array does not throw on the length check or the join below.
+  const articleTags = article.tags ?? [];
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: article.title,
+    description: toPlainDescription(article.excerpt),
+    url: articleUrl,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': articleUrl },
+    ...(articleImage && { image: articleImage }),
+    ...(articleDatePublished && { datePublished: articleDatePublished }),
+    ...(article.updatedAt && { dateModified: article.updatedAt }),
+    ...(article.authorName && {
+      author: { '@type': 'Person', name: article.authorName },
+    }),
+    publisher: { '@id': `${SITE_URL}/#organization` },
+    ...(articleTags.length > 0 && { keywords: articleTags.join(', ') }),
+  };
+
   // Other articles for the sidebar (exclude current)
   const otherArticles = allArticles.filter((a) => a.id !== article.id);
 
@@ -88,6 +117,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   return (
     <div className="site-container page-y">
+      <JsonLd data={articleJsonLd} />
+
       {/* Reading-progress bar, tracking the article body below. */}
       <ReadingProgress targetId="article-body" />
 

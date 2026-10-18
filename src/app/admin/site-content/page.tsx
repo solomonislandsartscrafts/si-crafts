@@ -289,7 +289,7 @@ export default function AdminSiteContentPage() {
     <AdminLayout>
       <div className="max-w-3xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-md">
+        <div className="flex flex-wrap items-center justify-between gap-sm mb-md">
           <div>
             <h1 className={pageTitleClasses}>Site Content</h1>
             <p className="text-base text-warm-gray-600 mt-3xs">
