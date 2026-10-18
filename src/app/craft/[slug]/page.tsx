@@ -69,8 +69,14 @@ export default async function CraftPage({ params }: CraftPageProps) {
     getSiteTextSafe(),
     // Resolve every related news slug. getArticleBySlug filters to published
     // articles, so an empty, missing, or unpublished slug returns null and is
-    // dropped below — never a broken link.
-    Promise.all(craft.relatedArticleSlugs.map((slug) => getArticleBySlug(slug))),
+    // dropped below — never a broken link. getArticleBySlug can also reject if
+    // the request itself fails, so each lookup is caught independently: one
+    // failed slug resolves as an absent article instead of failing the page.
+    Promise.all(
+      craft.relatedArticleSlugs.map((slug) =>
+        getArticleBySlug(slug).catch(() => null)
+      )
+    ),
   ]);
 
   // Keep only articles that resolved to a published story, preserving order.
