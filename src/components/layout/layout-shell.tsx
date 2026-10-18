@@ -8,12 +8,11 @@ import { RouteProgressBar } from '@/components/shared/route-progress-bar';
 import { getStoredThemePreference, resolveTheme, THEME_CHANGE_EVENT } from '@/lib/theme';
 
 /**
- * Resolves the effective theme ('light' | 'dark') from the stored preference:
- *   - 'system' follows the OS (dark at night wherever the user is), and updates
- *     live when the OS setting changes.
- *   - 'light' / 'dark' force that theme regardless of the OS.
+ * Resolves the effective theme ('light' | 'dark') from the stored preference.
+ * The site is light by default and never follows the OS — the preference is
+ * either 'light' (default) or 'dark', and only the toggle changes it.
  *
- * Also listens for THEME_CHANGE_EVENT so that when the header toggle changes the
+ * Listens for THEME_CHANGE_EVENT so that when the header toggle changes the
  * preference, this re-resolves immediately without a reload.
  *
  * Starts null (unknown) on the server / first render so SSR markup does not
@@ -30,25 +29,22 @@ function useResolvedTheme(): 'light' | 'dark' | null {
       // Keep the pre-paint flag on <html> in step with the resolved theme.
       //
       // The blocking script in layout.tsx sets `.dp-dark-os` on <html> before
-      // first paint whenever the OS prefers dark, and its CSS (globals.css) is
-      // NOT inside a media query — it applies whenever the class is present. So
-      // if a dark-OS visitor forces LIGHT with the toggle, removing `.dp-dark`
-      // from this wrapper is not enough: `.dp-dark-os` would linger on <html>
-      // and keep the canvas/header/surfaces dark, leaving a broken half-dark
-      // page. Syncing the flag here means the pre-paint layer always agrees with
-      // the post-hydration decision, in every OS/choice combination.
+      // first paint when the stored preference is 'dark', and its CSS
+      // (globals.css) is NOT inside a media query — it applies whenever the
+      // class is present. So when the user switches back to LIGHT with the
+      // toggle, removing `.dp-dark` from this wrapper is not enough:
+      // `.dp-dark-os` would linger on <html> and keep the canvas/header/surfaces
+      // dark, leaving a broken half-dark page. Syncing the flag here means the
+      // pre-paint layer always agrees with the post-hydration decision.
       document.documentElement.classList.toggle('dp-dark-os', resolved === 'dark');
     };
     apply();
 
-    // Follow the OS only matters while the preference is 'system'; resolveTheme
-    // ignores the OS otherwise, so re-resolving on every OS change is harmless.
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    mq.addEventListener('change', apply);
-    // The header toggle dispatches this after writing the new preference.
+    // The theme no longer follows the OS (light by default, dark only on an
+    // explicit choice), so there is no `prefers-color-scheme` listener. The only
+    // thing that changes the theme is the toggle, which dispatches this event.
     window.addEventListener(THEME_CHANGE_EVENT, apply);
     return () => {
-      mq.removeEventListener('change', apply);
       window.removeEventListener(THEME_CHANGE_EVENT, apply);
     };
   }, []);
@@ -101,15 +97,15 @@ export function LayoutShell({
   }
 
   return (
-    // `theme-auto` marks this subtree as opting into the auto dark theme. The
-    // blocking inline script in RootLayout adds `dp-dark` here before first
-    // paint when the OS reports prefers-color-scheme: dark (and toggles it live
-    // when the OS setting changes), which turns on the shared dark palette in
-    // globals.css. /admin returns early above and never gets this wrapper, so it
-    // stays on the light theme. In dark this wrapper paints the deep-blue canvas
-    // (the map watermark, which paints the light canvas, is hidden on dark), so
-    // it stretches to at least the viewport height. It carries no styling in the
-    // light theme, so the existing light layout is unchanged.
+    // `theme-auto` marks this subtree as eligible for the dark palette (the
+    // class name is historical — the theme is opt-in via the toggle now, not
+    // automatic). `dp-dark` is what actually turns the dark palette on in
+    // globals.css, and it is added here only when the user has chosen dark.
+    // /admin returns early above and never gets this wrapper, so it stays light.
+    // In dark this wrapper paints the deep-blue canvas (the map watermark, which
+    // paints the light canvas, is hidden on dark), so it stretches to at least
+    // the viewport height. It carries no styling in the light theme, so the
+    // existing light layout is unchanged.
     <div className={`theme-auto flex flex-col flex-1 ${resolvedTheme === 'dark' ? 'dp-dark' : ''}`}>
       {/* Faint Solomon Islands map watermark behind every public page — the
           Solomon Airlines backdrop treatment. A single fixed, decorative layer
