@@ -12,8 +12,9 @@ import { pageTitleClasses } from '@/components/layout/page-header';
 import { ButtonLink } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { SafeImage } from '@/components/ui/safe-image';
-import { generatePageMetadata, toPlainDescription } from '@/lib/metadata';
+import { generatePageMetadata, toPlainDescription, SITE_URL } from '@/lib/metadata';
 import { resolveImageUrl } from '@/lib/api-client';
+import { JsonLd } from '@/lib/json-ld';
 import type { Metadata } from 'next';
 
 export async function generateStaticParams() {
@@ -68,6 +69,33 @@ export default async function MakerPage({ params }: MakerPageProps) {
 
   const ctaPrompt = (text['makerDetail.ctaPrompt'] ?? '').replace(/\{name\}/g, maker.name);
 
+  // Structured data. Emits the maker as a schema.org Person, mirroring the
+  // creator node on the piece page, so provenance is machine-readable rather
+  // than body text only. Optional fields use conditional spreads; URLs are
+  // absolute via SITE_URL; worksFor references the site-wide Organization by
+  // @id. The render below is consent-guarded — never emit a Person node for an
+  // unpublished or unsigned maker.
+  const makerPortrait = resolveImageUrl(maker.portraitUrl);
+  const makerStory = toPlainDescription(maker.story);
+  const personJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: maker.name,
+    url: `${SITE_URL}/maker/${maker.slug}`,
+    ...(makerPortrait && { image: makerPortrait }),
+    ...(makerStory && { description: makerStory }),
+    homeLocation: {
+      '@type': 'Place',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: maker.village,
+        addressRegion: maker.province,
+        addressCountry: 'SB',
+      },
+    },
+    worksFor: { '@id': `${SITE_URL}/#organization` },
+  };
+
   // Guard against placeholder / not-yet-written stories. A maker's story is
   // their own voice and provenance is the point of the site, so a stub like
   // "Test" or a single word must NOT render as a quote — that both looks broken
@@ -84,6 +112,13 @@ export default async function MakerPage({ params }: MakerPageProps) {
         { name: maker.name },
       ]}
     >
+      {/* Consent gate: getPublicMakerBySlug already returns only signed +
+          published makers, but the explicit guard keeps the non-negotiable rule
+          visible at the emit site and survives a future refactor of the fetch. */}
+      {maker.publishedFlag && maker.consentStatus === 'Signed' && (
+        <JsonLd data={personJsonLd} />
+      )}
+
       {/* Maker profile. Portrait column is capped at 360px rather than a full
           50/50 split: at half the container width the 4/5 portrait rendered
           ~700px wide, which dwarfed the info beside it and left a large empty
