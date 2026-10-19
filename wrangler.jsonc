@@ -21,7 +21,7 @@
     // OpenNext ISR cache (see open-next.config.ts). A separate bucket so
     // cache entries never mix with uploaded media.
     {
-      "bucket_name": "si-crafts-next-cache",
+      "bucket_name": "si-crafts-inc-cache",
       "binding": "NEXT_INC_CACHE_R2_BUCKET"
     }
   ],
