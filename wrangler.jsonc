@@ -17,6 +17,36 @@
     {
       "bucket_name": "si-crafts-media",
       "binding": "si_crafts_media"
+    },
+    // OpenNext ISR cache (see open-next.config.ts). A separate bucket so
+    // cache entries never mix with uploaded media.
+    {
+      "bucket_name": "si-crafts-inc-cache",
+      "binding": "NEXT_INC_CACHE_R2_BUCKET"
+    }
+  ],
+  // Lets the revalidation queue call back into this same Worker to
+  // re-render a stale page in the background.
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "si-crafts"
+    }
+  ],
+  // Background ISR revalidation queue; DOQueueHandler is exported from
+  // .open-next/worker.js by the OpenNext build.
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "NEXT_CACHE_DO_QUEUE",
+        "class_name": "DOQueueHandler"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["DOQueueHandler"]
     }
   ]
 }
