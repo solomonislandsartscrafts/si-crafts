@@ -5,6 +5,7 @@ from .models import ProductPage
 
 
 class ProductPageAPIViewSet(PagesAPIViewSet):
+    # Public, anonymous API: never list wholesale_price here (see ProductPage.api_fields).
     model = ProductPage
 
     body_fields = PagesAPIViewSet.body_fields + [
@@ -16,7 +17,6 @@ class ProductPageAPIViewSet(PagesAPIViewSet):
         "craft",
         "dimensions",
         "care_notes",
-        "wholesale_price",
         "published_flag",
         "featured",
         "image_urls",
@@ -32,7 +32,6 @@ class ProductPageAPIViewSet(PagesAPIViewSet):
         "craft",
         "dimensions",
         "care_notes",
-        "wholesale_price",
         "published_flag",
         "featured",
         "image_urls",

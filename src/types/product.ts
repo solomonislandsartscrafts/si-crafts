@@ -15,9 +15,15 @@ export interface Product {
   imageAlts: string[];
   dimensions: string | null;
   careNotes: string | null;
-  wholesalePrice: number;
   publishedFlag: boolean;
   featured: boolean;
   createdAt: string;
   updatedAt: string;
 }
+
+/**
+ * A product with its wholesale price. Only ever built from authenticated
+ * responses (admin write API, stockist price endpoint) — the public product
+ * type above deliberately has no price, so it cannot leak into public pages.
+ */
+export type PricedProduct = Product & { wholesalePrice: number };

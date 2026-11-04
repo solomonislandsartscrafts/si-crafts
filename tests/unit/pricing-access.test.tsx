@@ -19,6 +19,13 @@ vi.mock('@/lib/auth-client', () => ({
   validateAdminSession: (token: string) => validateAdminSession(token),
 }));
 
+// Prices never ride along in the page data; they come from the authenticated
+// price endpoint via the service layer. Mock that service call here.
+const getProductPrices = vi.fn();
+vi.mock('@/services/products', () => ({
+  getProductPrices: (token: string) => getProductPrices(token),
+}));
+
 import { canViewPricing, usePricingAccess } from '@/lib/use-pricing-access';
 import { CatalogueClient } from '@/app/catalogue/catalogue-client';
 import { StockistBannerPrompt } from '@/components/catalogue/stockist-banner-prompt';
@@ -40,6 +47,10 @@ beforeEach(() => {
   localStorage.clear();
   validateStockistSession.mockReset();
   validateAdminSession.mockReset();
+  getProductPrices.mockReset();
+  getProductPrices.mockResolvedValue(
+    Object.fromEntries(mockProducts.map((p) => [p.id, p.wholesalePrice]))
+  );
 });
 
 describe('canViewPricing', () => {
@@ -106,8 +117,10 @@ describe('usePricingAccess', () => {
 });
 
 describe('CatalogueClient pricing', () => {
-  const products = mockProducts.slice(0, 2);
-  const prices = products.map((p) => formatPrice(p.wholesalePrice));
+  const priced = mockProducts.slice(0, 2);
+  const prices = priced.map((p) => formatPrice(p.wholesalePrice));
+  // Strip the price so the test proves it comes from the service, not the props.
+  const products = priced.map(({ wholesalePrice, ...rest }) => rest);
 
   function renderCatalogue() {
     return render(
@@ -128,6 +141,7 @@ describe('CatalogueClient pricing', () => {
     expect(container.textContent).not.toMatch(/A\$/);
     expect(screen.queryByRole('button', { name: /^Add .* to order$/ })).toBeNull();
     expect(screen.queryByRole('option', { name: /Price/ })).toBeNull();
+    expect(getProductPrices).not.toHaveBeenCalled();
   });
 
   it('admin → prices shown, no Add to order', async () => {
@@ -137,6 +151,7 @@ describe('CatalogueClient pricing', () => {
       expect(await screen.findByText(price)).toBeInTheDocument();
     }
     expect(screen.queryByRole('button', { name: /^Add .* to order$/ })).toBeNull();
+    expect(getProductPrices).toHaveBeenCalledWith('admin-token');
   });
 
   it('stockist → prices shown and Add to order controls', async () => {
@@ -146,6 +161,7 @@ describe('CatalogueClient pricing', () => {
       expect(await screen.findByText(price)).toBeInTheDocument();
     }
     expect(screen.getAllByRole('button', { name: /^Add .* to order$/ })).toHaveLength(2);
+    expect(getProductPrices).toHaveBeenCalledWith('stockist-token');
   });
 });
 

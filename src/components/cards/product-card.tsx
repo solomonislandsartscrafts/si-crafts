@@ -15,7 +15,11 @@ interface ProductCardProps {
    * a card with a name but no place simply shows the name.
    */
   makerLocation?: string;
-  showPrice?: boolean;
+  /**
+   * Wholesale price, passed only to signed-in stockists/admins (fetched in the
+   * browser via useWholesalePrices). Undefined shows the "Trade pricing" label.
+   */
+  price?: number;
   /**
    * Heading level for the card title. Defaults to `h3`, correct wherever the
    * grid sits under a section `h2` (homepage carousels, a maker/piece page's
@@ -35,7 +39,7 @@ interface ProductCardProps {
  * The material pill sits on the image (top-right), so the grid doubles as a
  * visual index of craft type without a separate line of meta.
  */
-export function ProductCard({ product, makerName, makerLocation, showPrice = false, titleAs: TitleTag = 'h3' }: ProductCardProps) {
+export function ProductCard({ product, makerName, makerLocation, price, titleAs: TitleTag = 'h3' }: ProductCardProps) {
   return (
     <PosterCard
       href={`/piece/${product.productCode}`}
@@ -77,9 +81,9 @@ export function ProductCard({ product, makerName, makerLocation, showPrice = fal
           `mt-xs` (12px) rather than sitting the same 8px from the maker line as
           the maker line sits from the title. Unequal spacing groups title+maker
           and sets the price apart, instead of three evenly-stacked lines. */}
-      {showPrice ? (
+      {price !== undefined ? (
         <p className="mt-2xs font-heading text-base font-semibold text-deep-blue">
-          {formatPrice(product.wholesalePrice)}
+          {formatPrice(price)}
         </p>
       ) : (
         /* A quiet status label in the spot a price would sit — not an

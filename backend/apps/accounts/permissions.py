@@ -55,3 +55,24 @@ class IsSuperAdmin(BasePermission):
             return True
         profile = getattr(user, "admin_profile", None)
         return bool(profile and profile.is_active and profile.role == "super_admin")
+
+
+class IsApprovedStockistOrAdmin(BasePermission):
+    """Allow approved stockists and active admins only.
+
+    Used for wholesale pricing: a pending, suspended or rejected stockist
+    still holds a valid JWT, so IsAuthenticated is not enough.
+    """
+
+    message = "Approved stockist or admin access required."
+
+    def has_permission(self, request, view):
+        if IsSiteAdmin().has_permission(request, view):
+            return True
+        user = getattr(request, "user", None)
+        if user is None or not user.is_authenticated:
+            return False
+        # Imported here to avoid a circular import between apps.
+        from apps.stockists.models import Stockist
+
+        return Stockist.objects.filter(user=user, status="approved").exists()

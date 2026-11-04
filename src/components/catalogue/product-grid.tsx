@@ -5,7 +5,8 @@ import { posterGridClasses } from '@/components/cards/poster-card';
 interface ProductGridProps {
   products: Product[];
   makers: Maker[];
-  showPrice?: boolean;
+  /** Price per product id — only for signed-in stockists/admins. */
+  prices?: Record<string, number>;
   /**
    * Heading level for each card title. Defaults to `h3`. The public catalogue
    * is a flat grid directly under the page `h1` (no section headings), so it
@@ -15,7 +16,7 @@ interface ProductGridProps {
   titleAs?: 'h2' | 'h3';
 }
 
-export function ProductGrid({ products, makers, showPrice = false, titleAs = 'h3' }: ProductGridProps) {
+export function ProductGrid({ products, makers, prices, titleAs = 'h3' }: ProductGridProps) {
   return (
     /* Shared poster grid — 2-up, 3-up at lg, 4-up at xl. Same constant as
        StockistProductGrid so the catalogue never reflows when a stockist logs
@@ -35,7 +36,7 @@ export function ProductGrid({ products, makers, showPrice = false, titleAs = 'h3
             product={product}
             makerName={maker?.name}
             makerLocation={maker?.province}
-            showPrice={showPrice}
+            price={prices?.[product.id]}
             titleAs={titleAs}
           />
         );
