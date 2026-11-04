@@ -28,20 +28,24 @@ import {
 interface StockistProductCardProps {
   product: Product;
   makerName?: string;
+  /** Wholesale price; undefined until it has loaded (Add stays disabled). */
+  price?: number;
 }
 
-export function StockistProductCard({ product, makerName }: StockistProductCardProps) {
+export function StockistProductCard({ product, makerName, price }: StockistProductCardProps) {
   const [showNotes, setShowNotes] = useState(false);
   const [notes, setNotes] = useState('');
   const [added, setAdded] = useState(false);
   const [qty, setQty] = useState(1);
 
   function handleAddToCart() {
+    // Never put a 0 unit price in the cart while the price is still loading.
+    if (price === undefined) return;
     addToCart({
       productId: product.id,
       productCode: product.productCode,
       productName: product.name,
-      unitPrice: product.wholesalePrice,
+      unitPrice: price,
       note: notes.trim() || undefined,
     }, qty);
     setAdded(true);
@@ -96,12 +100,16 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
         {makerName && <p className={`mt-2xs ${posterBodyClasses}`}>by {makerName}</p>}
 
         {/* Price */}
-        <p className="font-heading text-lg font-semibold text-deep-blue mt-auto pt-xs">
-          {formatPrice(product.wholesalePrice)}
-          <span className="text-xs font-body font-normal text-warm-gray-600 ml-3xs">
-            ex. GST
-          </span>
-        </p>
+        {price !== undefined ? (
+          <p className="font-heading text-lg font-semibold text-deep-blue mt-auto pt-xs">
+            {formatPrice(price)}
+            <span className="text-xs font-body font-normal text-warm-gray-600 ml-3xs">
+              ex. GST
+            </span>
+          </p>
+        ) : (
+          <p className="mt-auto pt-xs text-sm text-warm-gray-400">Trade pricing</p>
+        )}
 
         {/* Add to order + notes */}
         <div className="mt-xs space-y-xs">
@@ -141,7 +149,7 @@ export function StockistProductCard({ product, makerName }: StockistProductCardP
             />
             <Button
               onClick={handleAddToCart}
-              disabled={added}
+              disabled={added || price === undefined}
               size="sm"
               fullWidth
               aria-label={

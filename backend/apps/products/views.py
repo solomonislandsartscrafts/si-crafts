@@ -1,8 +1,10 @@
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from wagtail.models import Page
 
+from apps.accounts.permissions import IsApprovedStockistOrAdmin, IsSiteAdmin
 from apps.page_tree import repair_numchild, delete_page
 
 from .models import ProductPage
@@ -13,6 +15,18 @@ class ProductWriteViewSet(viewsets.ViewSet):
     """Writable API for ProductPages (create, update, delete)."""
 
     permission_classes = [IsAuthenticated]
+
+    @action(detail=False, methods=["get"], permission_classes=[IsApprovedStockistOrAdmin])
+    def prices(self, request):
+        """Wholesale prices (one row per product) for approved stockists and admins.
+
+        The public v2 API never carries prices, so this is the only read path.
+        Stockists see published products only; admins see everything.
+        """
+        qs = ProductPage.objects.all()
+        if not IsSiteAdmin().has_permission(request, self):
+            qs = qs.filter(published_flag=True)
+        return Response(list(qs.values("id", "product_code", "wholesale_price")))
 
     def create(self, request):
         """Create a new product page."""

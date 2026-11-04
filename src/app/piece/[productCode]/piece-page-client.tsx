@@ -16,6 +16,7 @@ import { addToCart } from '@/lib/cart';
 import { materialLabel, productTypeLabel } from '@/lib/labels';
 import { formatPrice } from '@/lib/price';
 import { usePricingAccess } from '@/lib/use-pricing-access';
+import { useWholesalePrices } from '@/lib/use-wholesale-prices';
 
 /**
  * Admin-editable provenance copy, resolved on the server. `processText` is
@@ -58,6 +59,10 @@ export function PiecePageClient({
   // Price: stockists and admins. Order controls: stockists only (the cart
   // checkout is stockist-only, so admins get price visibility alone).
   const { isStockist, canViewPricing } = usePricingAccess();
+  // The price is not in the page data; it loads in the browser, only for
+  // signed-in stockists/admins. Undefined until loaded.
+  const prices = useWholesalePrices(canViewPricing);
+  const price: number | undefined = prices[product.id];
   const [added, setAdded] = useState(false);
   const [qty, setQty] = useState(1);
   const [showStickyBar, setShowStickyBar] = useState(false);
@@ -106,11 +111,13 @@ export function PiecePageClient({
   }, [isStockist]);
 
   function handleAddToCart() {
+    // Never put a 0 unit price in the cart while the price is still loading.
+    if (price === undefined) return;
     addToCart({
       productId: product.id,
       productCode: product.productCode,
       productName: product.name,
-      unitPrice: product.wholesalePrice,
+      unitPrice: price,
     }, qty);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
@@ -178,14 +185,14 @@ export function PiecePageClient({
               action lives lower, in the flow, once the buyer has read the
               piece. Public pricing is a business rule — this whole block is
               gated behind `canViewPricing`. */}
-          {canViewPricing && (
+          {canViewPricing && price !== undefined && (
             <div className="mb-md">
               <p className="text-xs font-semibold uppercase tracking-wider text-warm-gray-600">
                 Wholesale price
               </p>
               <p className="mt-3xs flex items-baseline gap-2xs">
                 <span className="font-heading text-3xl font-semibold leading-heading text-deep-blue">
-                  {formatPrice(product.wholesalePrice)}
+                  {formatPrice(price)}
                 </span>
                 <span className="text-sm text-warm-gray-600">excl. GST</span>
               </p>
@@ -264,7 +271,7 @@ export function PiecePageClient({
               />
               <Button
                 onClick={handleAddToCart}
-                disabled={added}
+                disabled={added || price === undefined}
                 fullWidth
                 className={`sm:w-auto sm:flex-1 ${added ? 'bg-success/10 text-success' : ''}`}
               >
@@ -473,7 +480,9 @@ export function PiecePageClient({
         <div className="fixed bottom-0 inset-x-0 z-20 lg:hidden p-xs bg-white border-t border-sand shadow-md">
           <div className="max-w-site mx-auto flex items-center gap-xs">
             <div className="flex-shrink-0">
-              <p className="text-sm font-bold text-deep-blue">{formatPrice(product.wholesalePrice)}</p>
+              {price !== undefined && (
+                <p className="text-sm font-bold text-deep-blue">{formatPrice(price)}</p>
+              )}
               <p className="text-xs text-warm-gray-600 truncate max-w-[120px]">{product.name}</p>
             </div>
             {/* Same shared <Button> as the desktop Add-to-Order above, so the
@@ -481,7 +490,7 @@ export function PiecePageClient({
                 flex-1 slot; the added state reuses the desktop success class. */}
             <Button
               onClick={handleAddToCart}
-              disabled={added}
+              disabled={added || price === undefined}
               fullWidth
               className={added ? 'flex-1 bg-success/10 text-success' : 'flex-1'}
             >

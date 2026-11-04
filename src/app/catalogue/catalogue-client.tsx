@@ -11,6 +11,7 @@ import { ProductGrid } from '@/components/catalogue/product-grid';
 import { StockistProductGrid } from '@/components/catalogue/stockist-product-grid';
 import { Select } from '@/components/ui/select';
 import { usePricingAccess } from '@/lib/use-pricing-access';
+import { useWholesalePrices } from '@/lib/use-wholesale-prices';
 import type { MaterialCategoryOption } from '@/services/categories';
 
 /**
@@ -56,6 +57,9 @@ export function CatalogueClient({
   // Stockists get prices + Add to Order; admins get prices only (the cart
   // checkout is stockist-only); anonymous visitors get neither.
   const { isStockist, canViewPricing } = usePricingAccess();
+  // Prices are not in the page data; they load here, in the browser, only for
+  // signed-in stockists/admins.
+  const prices = useWholesalePrices(canViewPricing);
 
   // `initialQuery` seeds the field from the `?q=` param, but on client-side
   // navigation (the header search setting a new `?q=`) React keeps this
@@ -113,9 +117,9 @@ export function CatalogueClient({
               makerNameMap[b.makerId] || ''
             );
           case 'price-asc':
-            return a.wholesalePrice - b.wholesalePrice;
+            return (prices[a.id] ?? 0) - (prices[b.id] ?? 0);
           case 'price-desc':
-            return b.wholesalePrice - a.wholesalePrice;
+            return (prices[b.id] ?? 0) - (prices[a.id] ?? 0);
           default:
             return 0;
         }
@@ -123,7 +127,7 @@ export function CatalogueClient({
     }
 
     return result;
-  }, [products, selectedMaker, selectedMaterial, searchQuery, sortKey, makerNameMap]);
+  }, [products, selectedMaker, selectedMaterial, searchQuery, sortKey, makerNameMap, prices]);
 
   // Price sorts only exist for visitors who can see pricing (stockists and
   // admins). If the session expires mid-visit, fall back to no sort rather than
@@ -249,13 +253,13 @@ export function CatalogueClient({
           }
         />
       ) : isStockist ? (
-        <StockistProductGrid products={filteredProducts} makers={makers} />
+        <StockistProductGrid products={filteredProducts} makers={makers} prices={prices} />
       ) : (
         <ProductGrid
           products={filteredProducts}
           makers={makers}
           titleAs="h2"
-          showPrice={canViewPricing}
+          prices={canViewPricing ? prices : undefined}
         />
       )}
     </div>

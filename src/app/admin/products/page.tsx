@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Plus, Edit, Trash2, Search, Package, Eye, EyeOff } from 'lucide-react';
-import type { Product } from '@/types';
+import type { PricedProduct } from '@/types';
 import { AdminLayout } from '@/components/admin';
 import { ProductFormModal, type ProductFormData } from '@/components/admin/product-form-modal';
 import type { MaterialCategoryOption, ProductTypeOption } from '@/services/categories';
@@ -39,10 +39,10 @@ function TableSkeleton() {
 }
 
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<PricedProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [backendDown, setBackendDown] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingProduct, setEditingProduct] = useState<PricedProduct | null>(null);
   const [showForm, setShowForm] = useState(false);
   const { success: toastSuccess, error: toastError } = useToast();
 
@@ -58,8 +58,10 @@ export default function AdminProductsPage() {
   useEffect(() => { loadProducts(); loadCategories(); }, []);
 
   async function loadProducts() {
-    const { getAllProducts } = await import('@/services/products');
-    const data = await getAllProducts();
+    // getAdminProducts, not getAllProducts: the public v2 API has no prices,
+    // so the admin list merges them in from the authenticated price endpoint.
+    const { getAdminProducts } = await import('@/services/products');
+    const data = await getAdminProducts();
 
     // An unreachable backend also returns an empty list, which would otherwise
     // read as "no products yet". Check before showing that message.
@@ -121,7 +123,7 @@ export default function AdminProductsPage() {
   // Publish / suspend without opening the form. An unpublished (suspended)
   // product stays in the admin but disappears from the public catalogue and
   // provenance pages. Flips only publishedFlag, then reloads.
-  async function handleTogglePublished(product: Product) {
+  async function handleTogglePublished(product: PricedProduct) {
     const next = !product.publishedFlag;
     try {
       const { updateProduct } = await import('@/services/products');
@@ -134,7 +136,7 @@ export default function AdminProductsPage() {
     }
   }
 
-  function handleEdit(product: Product) {
+  function handleEdit(product: PricedProduct) {
     setEditingProduct(product);
     setShowForm(true);
   }

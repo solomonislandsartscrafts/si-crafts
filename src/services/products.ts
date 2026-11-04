@@ -1,5 +1,5 @@
 import { apiGet, apiGetPublic, apiPost, apiPatch, apiDelete, getAdminToken } from '@/lib/api-client';
-import type { Product, MaterialCategory, ProductType } from '@/types';
+import type { Product, PricedProduct, MaterialCategory, ProductType } from '@/types';
 
 interface WagtailProductResponse {
   id: number;
@@ -18,7 +18,8 @@ interface WagtailProductResponse {
   craft?: { id: number } | number | null;
   dimensions: string | null;
   care_notes: string | null;
-  wholesale_price: string | number;
+  // Only present on the authenticated write API. The public v2 API never sends it.
+  wholesale_price?: string | number;
   published_flag: boolean;
   featured?: boolean;
   image_urls?: string[] | null;
@@ -68,13 +69,21 @@ function mapProduct(raw: WagtailProductResponse): Product {
     imageAlts,
     dimensions: raw.dimensions ?? null,
     careNotes: raw.care_notes ?? null,
-    wholesalePrice: typeof raw.wholesale_price === 'string' ? parseFloat(raw.wholesale_price) : (raw.wholesale_price ?? 0),
     publishedFlag: raw.published_flag ?? false,
     featured: raw.featured ?? false,
     // Read API nests timestamps under `meta`; the write API returns them flat.
     createdAt: raw.meta?.first_published_at ?? raw.first_published_at ?? '',
     updatedAt: raw.meta?.last_published_at ?? raw.last_published_at ?? '',
   };
+}
+
+function parsePrice(value: string | number | null | undefined): number {
+  return typeof value === 'string' ? parseFloat(value) : (value ?? 0);
+}
+
+/** Map an authenticated write-API response, which does carry the price. */
+function mapPricedProduct(raw: WagtailProductResponse): PricedProduct {
+  return { ...mapProduct(raw), wholesalePrice: parsePrice(raw.wholesale_price) };
 }
 
 export interface ProductFilters {
@@ -234,7 +243,8 @@ export async function searchProducts(query: string): Promise<Product[]> {
 /**
  * Get products for wholesale buyers (authenticated stockists).
  * 
- * Currently delegates to getPublicProducts (wholesale pricing is visible to all).
+ * Returns the same price-free products as getPublicProducts. Prices are never
+ * part of the public API — fetch them separately with getProductPrices.
  * Kept as separate function so wholesale-specific logic (min order qty, stock
  * levels) can be added later without changing call sites.
  * 
@@ -243,6 +253,34 @@ export async function searchProducts(query: string): Promise<Product[]> {
  */
 export async function getWholesaleProducts(filters?: ProductFilters): Promise<Product[]> {
   return getPublicProducts(filters);
+}
+
+/**
+ * Get wholesale prices, keyed by product id.
+ * 
+ * Approved stockists get published products; admins get every product. Uses
+ * apiGet (never cached) with the caller's token, and must only be called on
+ * the client after the session check — never while rendering a public page.
+ * Returns {} without calling the API when there is no token.
+ * 
+ * @param token - Stockist or admin session token
+ * @returns Promise<Record<string, number>> - Price per product id
+ * 
+ * @example
+ * ```tsx
+ * const prices = await getProductPrices(getStockistToken());
+ * const price = prices[product.id]; // undefined until loaded / not visible
+ * ```
+ */
+export async function getProductPrices(token: string): Promise<Record<string, number>> {
+  if (!token) return {};
+  const rows = await apiGet<{ id: number; wholesale_price: string | number }[]>(
+    '/api/write/products/prices/',
+    token,
+  );
+  const prices: Record<string, number> = {};
+  for (const row of rows) prices[String(row.id)] = parsePrice(row.wholesale_price);
+  return prices;
 }
 
 // --- Admin ---
@@ -259,6 +297,19 @@ export async function getWholesaleProducts(filters?: ProductFilters): Promise<Pr
 export async function getAllProducts(): Promise<Product[]> {
   const data = await apiGet<WagtailListResponse>('/api/v2/products/?fields=*&limit=100');
   return data.items.map(mapProduct);
+}
+
+/**
+ * Get ALL products with their wholesale prices, for the admin products page.
+ * 
+ * Admin-only (client-side, uses the admin token). getAllProducts stays
+ * price-free because public server pages use the same v2 data.
+ * 
+ * @returns Promise<PricedProduct[]> - All products; a missing price reads as 0
+ */
+export async function getAdminProducts(): Promise<PricedProduct[]> {
+  const [products, prices] = await Promise.all([getAllProducts(), getProductPrices(getAdminToken())]);
+  return products.map((product) => ({ ...product, wholesalePrice: prices[product.id] ?? 0 }));
 }
 
 /**
@@ -304,10 +355,10 @@ export async function getProductByCode(code: string): Promise<Product | null> {
  * any field — admins control publish state explicitly via the toggle in the UI.
  * 
  * @param data - Product fields (excludes server-generated id/timestamps/publishedFlag)
- * @returns Promise<Product> - The newly created product
+ * @returns Promise<PricedProduct> - The newly created product
  * @throws {ApiError} - If creation fails (validation, network, auth)
  */
-export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'publishedFlag'>): Promise<Product> {
+export async function createProduct(data: Omit<PricedProduct, 'id' | 'createdAt' | 'updatedAt' | 'publishedFlag'>): Promise<PricedProduct> {
   const token = getAdminToken();
   const raw = await apiPost<WagtailProductResponse>('/api/write/products/', {
     title: data.name,
@@ -325,7 +376,7 @@ export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'up
     image_urls: data.imageUrls ?? [],
     image_alts: data.imageAlts ?? [],
   }, token);
-  return mapProduct(raw);
+  return mapPricedProduct(raw);
 }
 
 /**
@@ -335,10 +386,10 @@ export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'up
  * 
  * @param id - Product ID
  * @param data - Partial product fields to update
- * @returns Promise<Product | null> - Updated product, or null if not found
+ * @returns Promise<PricedProduct | null> - Updated product, or null if not found
  * @throws {ApiError} - If update fails (validation, network, auth)
  */
-export async function updateProduct(id: string, data: Partial<Product>): Promise<Product | null> {
+export async function updateProduct(id: string, data: Partial<PricedProduct>): Promise<PricedProduct | null> {
   const token = getAdminToken();
   const body: Record<string, unknown> = {};
   if (data.name !== undefined) body.title = data.name;
@@ -358,7 +409,7 @@ export async function updateProduct(id: string, data: Partial<Product>): Promise
   if (data.imageAlts !== undefined) body.image_alts = data.imageAlts;
 
   const raw = await apiPatch<WagtailProductResponse>(`/api/write/products/${id}/`, body, token);
-  return mapProduct(raw);
+  return mapPricedProduct(raw);
 }
 
 /**

@@ -1,6 +1,6 @@
-import type { Product } from '@/types';
+import type { PricedProduct } from '@/types';
 
-export const mockProducts: Product[] = [
+export const mockProducts: PricedProduct[] = [
   // === PANDANUS by Julie Mone (P-J-*) ===
   {
     id: 'prod-1', productCode: 'P-J-1', slug: 'pandanus-shoulder-bag', name: 'Shoulder Bag',

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
-import type { Product, MaterialCategory, ProductType, Maker, Craft } from '@/types';
+import type { Product, PricedProduct, MaterialCategory, ProductType, Maker, Craft } from '@/types';
 import { getAllMakers } from '@/services/makers';
 import { getAllCrafts } from '@/services/crafts';
 import { getAllProducts, validateProductCode } from '@/services/products';
@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { FormField, inputClasses } from '@/components/ui/form-field';
 
 interface ProductFormModalProps {
-  product: Product | null; // null = create mode
+  product: PricedProduct | null; // null = create mode
   onClose: () => void;
   onSave: (data: ProductFormData) => Promise<void>;
 }

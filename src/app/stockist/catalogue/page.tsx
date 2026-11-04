@@ -8,7 +8,8 @@ import { MakerFilter } from '@/components/catalogue/maker-filter';
 import { SearchInput } from '@/components/catalogue/search-input';
 import { StockistProductGrid } from '@/components/catalogue/stockist-product-grid';
 import { useRequireStockist } from '@/lib/use-require-stockist';
-import { getWholesaleProducts } from '@/services/products';
+import { getWholesaleProducts, getProductPrices } from '@/services/products';
+import { getStockistToken } from '@/lib/api-client';
 import { getPublicMakers } from '@/services/makers';
 import { pageTitleClasses } from '@/components/layout/page-header';
 import { Button, ButtonLink } from '@/components/ui/button';
@@ -22,6 +23,7 @@ export default function StockistCataloguePage() {
   const { stockist, loading: authLoading } = useRequireStockist();
   const [products, setProducts] = useState<Product[]>([]);
   const [makers, setMakers] = useState<Maker[]>([]);
+  const [prices, setPrices] = useState<Record<string, number>>({});
   const [selectedMaker, setSelectedMaker] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [dataLoading, setDataLoading] = useState(true);
@@ -30,10 +32,17 @@ export default function StockistCataloguePage() {
     if (!stockist) return;
     let cancelled = false;
     async function loadData() {
-      const [prods, mkrs] = await Promise.all([getWholesaleProducts(), getPublicMakers()]);
+      // Prices come from the authenticated endpoint, never the public API. A
+      // failed price load still shows the catalogue (Add stays disabled).
+      const [prods, mkrs, priceMap] = await Promise.all([
+        getWholesaleProducts(),
+        getPublicMakers(),
+        getProductPrices(getStockistToken()).catch(() => ({})),
+      ]);
       if (cancelled) return;
       setProducts(prods);
       setMakers(mkrs);
+      setPrices(priceMap);
       setDataLoading(false);
     }
     loadData();
@@ -142,7 +151,7 @@ export default function StockistCataloguePage() {
               <h2 className="font-heading text-xl font-medium text-deep-blue mb-sm capitalize">
                 {labels[key] || key}
               </h2>
-              <StockistProductGrid products={groupProducts} makers={makers} />
+              <StockistProductGrid products={groupProducts} makers={makers} prices={prices} />
             </section>
           ))}
         </div>

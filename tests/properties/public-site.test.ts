@@ -11,12 +11,31 @@
  * - P14: Unreviewed cultural content not rendered publicly
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import * as fc from 'fast-check';
 import { mockMakers } from '@/data/mock/makers';
 import { mockProducts } from '@/data/mock/products';
 import { mockCrafts } from '@/data/mock/crafts';
 import type { Maker, Product } from '@/types';
+
+// The public product service reads the cached public API. Return a raw item
+// that (wrongly) still carries wholesale_price, to prove the mapping drops it.
+vi.mock('@/lib/api-client', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/api-client')>();
+  return {
+    ...actual,
+    apiGetPublic: vi.fn(async () => ({
+      items: [{
+        id: 1, title: 'Pandanus basket', product_code: 'P-J-1', description: '',
+        material_category: 'pandanus', product_type: 'basket', maker: { id: 2 },
+        craft: null, dimensions: null, care_notes: null, wholesale_price: '60.00',
+        published_flag: true, meta: { slug: 'pandanus-basket' },
+      }],
+    })),
+  };
+});
+
+import { getPublicProducts as getPublicProductsService } from '@/services/products';
 
 // --- Helpers ---
 
@@ -38,16 +57,14 @@ function getPublicProducts(products: Product[], makers: Maker[]): Product[] {
 // --- Property 8: No pricing for unauthenticated users ---
 
 describe('Property 8: No pricing for unauthenticated users', () => {
-  it('public products have wholesalePrice but it must NOT be rendered without auth', () => {
-    // This tests the data contract: public product objects DO contain price data,
-    // but the UI contract says it must never be displayed to unauthenticated users.
-    // We verify the data shape supports the gating logic.
-    const publicProducts = getPublicProducts(mockProducts, mockMakers);
-    for (const product of publicProducts) {
-      // Every product has a price (validates data exists for stockists)
-      expect(product.wholesalePrice).toBeGreaterThan(0);
-      // The "showPrice" prop on ProductCard defaults to false — UI contract
-      // This test verifies the data model supports separation of concerns
+  it('the public product mapping never carries a price into page data', async () => {
+    // Public products are serialized into the page / RSC payload, so a price
+    // here would leak even if the UI hid it. Stockists get prices separately.
+    const products = await getPublicProductsService();
+    expect(products).toHaveLength(1);
+    for (const product of products) {
+      expect(product).not.toHaveProperty('wholesalePrice');
+      expect(JSON.stringify(product)).not.toMatch(/wholesale|60/);
     }
   });
 

@@ -76,7 +76,7 @@ export function saveCart(items: CartItem[]): void {
  *   productId: product.id,
  *   productCode: product.productCode,
  *   productName: product.name,
- *   unitPrice: product.wholesalePrice,
+ *   unitPrice: price,
  *   note: 'Rush order',
  * }, 5);
  * ```

@@ -56,6 +56,8 @@ class ProductPage(Page):
         InlinePanel("images", label="Product Images"),
     ]
 
+    # wholesale_price is deliberately absent: the v2 API is public and cached.
+    # Approved stockists and admins read prices from /api/write/products/prices/.
     api_fields = [
         APIField("product_code"),
         APIField("description"),
@@ -65,7 +67,6 @@ class ProductPage(Page):
         APIField("craft"),
         APIField("dimensions"),
         APIField("care_notes"),
-        APIField("wholesale_price"),
         APIField("published_flag"),
         APIField("featured"),
         APIField("image_urls"),

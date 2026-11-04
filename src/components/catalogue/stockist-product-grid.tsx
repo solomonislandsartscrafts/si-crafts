@@ -5,9 +5,11 @@ import { posterGridClasses } from '@/components/cards/poster-card';
 interface StockistProductGridProps {
   products: Product[];
   makers: Maker[];
+  /** Price per product id, from getProductPrices. */
+  prices: Record<string, number>;
 }
 
-export function StockistProductGrid({ products, makers }: StockistProductGridProps) {
+export function StockistProductGrid({ products, makers, prices }: StockistProductGridProps) {
   return (
     /* Shared poster grid — must match ProductGrid so the catalogue does not
        reflow the moment a stockist logs in, spanning the full content column. */
@@ -23,6 +25,7 @@ export function StockistProductGrid({ products, makers }: StockistProductGridPro
             key={product.id}
             product={product}
             makerName={maker?.name}
+            price={prices[product.id]}
           />
         );
       })}
