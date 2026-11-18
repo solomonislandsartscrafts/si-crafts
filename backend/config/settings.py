@@ -159,6 +159,8 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 50,
+    # Return readable JSON errors instead of HTML 500 pages (see apps/api_errors.py).
+    "EXCEPTION_HANDLER": "apps.api_errors.api_exception_handler",
 }
 
 # JWT

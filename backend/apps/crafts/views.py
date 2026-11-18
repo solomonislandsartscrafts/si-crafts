@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from wagtail.models import Page
 
-from apps.page_tree import repair_numchild, delete_page
+from apps.page_tree import repair_numchild, delete_page, unique_slug
 
 from .models import CraftPage
 from .serializers import CraftPageSerializer, CraftPageRequestSerializer
@@ -50,9 +50,10 @@ class CraftWriteViewSet(viewsets.ViewSet):
         else:
             repair_numchild(crafts_index)
 
+        title = data.get("title", data.get("name", ""))
         craft = CraftPage(
-            title=data.get("title", data.get("name", "")),
-            slug=data.get("slug", ""),
+            title=title,
+            slug=unique_slug(crafts_index, data.get("slug") or title, fallback="craft"),
             description=data.get("description", ""),
             material_category=data.get("material_category", ""),
             cultural_context=data.get("cultural_context", ""),
@@ -90,8 +91,8 @@ class CraftWriteViewSet(viewsets.ViewSet):
 
         if "title" in data or "name" in data:
             craft.title = data.get("title", data.get("name", craft.title))
-        if "slug" in data:
-            craft.slug = data["slug"]
+        if "slug" in data and data["slug"] and data["slug"] != craft.slug:
+            craft.slug = unique_slug(craft.get_parent(), data["slug"], exclude_pk=craft.pk, fallback="craft")
         if "description" in data:
             craft.description = data["description"]
         if "material_category" in data:

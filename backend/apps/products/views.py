@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-from django.utils.text import slugify
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -7,29 +6,14 @@ from rest_framework.permissions import IsAuthenticated
 from wagtail.models import Page
 
 from apps.accounts.permissions import IsApprovedStockistOrAdmin, IsSiteAdmin
-from apps.page_tree import repair_numchild, delete_page
+from apps.page_tree import repair_numchild, delete_page, unique_slug
 
 from .models import ProductPage
 from .serializers import ProductPageSerializer
 
 
 def _unique_slug(parent, wanted, exclude_pk=None):
-    """Return a slug that no sibling under `parent` is using.
-
-    Wagtail requires sibling pages to have different slugs and raises a
-    ValidationError (an HTTP 500) otherwise. Product names repeat — a maker
-    can have two "Shoulder Bag (medium)" pieces — so a clash gets -2, -3...
-    """
-    base = slugify(wanted) or "product"
-    siblings = Page.objects.child_of(parent)
-    if exclude_pk:
-        siblings = siblings.exclude(pk=exclude_pk)
-    taken = set(siblings.filter(slug__startswith=base).values_list("slug", flat=True))
-    slug, n = base, 2
-    while slug in taken:
-        slug = f"{base}-{n}"
-        n += 1
-    return slug
+    return unique_slug(parent, wanted, exclude_pk=exclude_pk, fallback="product")
 
 
 def _validation_response(err):
