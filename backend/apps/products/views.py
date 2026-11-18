@@ -1,3 +1,5 @@
+from django.core.exceptions import ValidationError
+from django.utils.text import slugify
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,6 +11,34 @@ from apps.page_tree import repair_numchild, delete_page
 
 from .models import ProductPage
 from .serializers import ProductPageSerializer
+
+
+def _unique_slug(parent, wanted, exclude_pk=None):
+    """Return a slug that no sibling under `parent` is using.
+
+    Wagtail requires sibling pages to have different slugs and raises a
+    ValidationError (an HTTP 500) otherwise. Product names repeat — a maker
+    can have two "Shoulder Bag (medium)" pieces — so a clash gets -2, -3...
+    """
+    base = slugify(wanted) or "product"
+    siblings = Page.objects.child_of(parent)
+    if exclude_pk:
+        siblings = siblings.exclude(pk=exclude_pk)
+    taken = set(siblings.filter(slug__startswith=base).values_list("slug", flat=True))
+    slug, n = base, 2
+    while slug in taken:
+        slug = f"{base}-{n}"
+        n += 1
+    return slug
+
+
+def _validation_response(err):
+    """Turn a Django ValidationError into a readable 400 instead of a 500."""
+    if hasattr(err, "message_dict"):
+        msg = "; ".join(f"{k}: {' '.join(v)}" for k, v in err.message_dict.items())
+    else:
+        msg = " ".join(err.messages)
+    return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProductWriteViewSet(viewsets.ViewSet):
@@ -47,9 +77,10 @@ class ProductWriteViewSet(viewsets.ViewSet):
         if ProductPage.objects.filter(product_code=data.get("product_code", "")).exists():
             return Response({"error": "Product code already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
+        title = data.get("title", data.get("name", ""))
         product = ProductPage(
-            title=data.get("title", data.get("name", "")),
-            slug=data.get("slug", ""),
+            title=title,
+            slug=_unique_slug(products_index, data.get("slug") or title),
             product_code=data.get("product_code", ""),
             description=data.get("description", ""),
             material_category=data.get("material_category", ""),
@@ -63,9 +94,12 @@ class ProductWriteViewSet(viewsets.ViewSet):
             image_urls=data.get("image_urls", []) or [],
             image_alts=data.get("image_alts", []) or [],
         )
-        products_index.add_child(instance=product)
-        # Publish so the page is live and gets a first_published_at timestamp.
-        product.save_revision().publish()
+        try:
+            products_index.add_child(instance=product)
+            # Publish so the page is live and gets a first_published_at timestamp.
+            product.save_revision().publish()
+        except ValidationError as err:
+            return _validation_response(err)
         return Response(ProductPageSerializer(product).data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None):
@@ -78,8 +112,8 @@ class ProductWriteViewSet(viewsets.ViewSet):
         data = request.data
         if "title" in data or "name" in data:
             product.title = data.get("title", data.get("name", product.title))
-        if "slug" in data:
-            product.slug = data["slug"]
+        if "slug" in data and data["slug"] and data["slug"] != product.slug:
+            product.slug = _unique_slug(product.get_parent(), data["slug"], exclude_pk=product.pk)
         if "product_code" in data:
             product.product_code = data["product_code"]
         if "description" in data:
@@ -105,7 +139,10 @@ class ProductWriteViewSet(viewsets.ViewSet):
         if "image_alts" in data:
             product.image_alts = data["image_alts"] or []
 
-        product.save_revision().publish()
+        try:
+            product.save_revision().publish()
+        except ValidationError as err:
+            return _validation_response(err)
         return Response(ProductPageSerializer(product).data)
 
     def destroy(self, request, pk=None):
