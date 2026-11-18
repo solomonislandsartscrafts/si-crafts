@@ -9,7 +9,28 @@ too high, and the next ``add_child()`` on that parent crashes with
 ``'NoneType' object has no attribute '_inc_path'``.
 """
 
+from django.utils.text import slugify
 from wagtail.models import Page
+
+
+def unique_slug(parent, wanted, exclude_pk=None, fallback="page"):
+    """Return a slug no sibling under ``parent`` is using.
+
+    Wagtail requires sibling pages to have different slugs and raises a
+    ValidationError otherwise. The admin forms build the slug from the name,
+    and names repeat (a maker's second "Shoulder Bag"), so a clash gets
+    -2, -3, ... instead of failing.
+    """
+    base = slugify(wanted or "") or fallback
+    siblings = Page.objects.child_of(parent)
+    if exclude_pk:
+        siblings = siblings.exclude(pk=exclude_pk)
+    taken = set(siblings.filter(slug__startswith=base).values_list("slug", flat=True))
+    slug, n = base, 2
+    while slug in taken:
+        slug = f"{base}-{n}"
+        n += 1
+    return slug
 
 
 def repair_numchild(parent):

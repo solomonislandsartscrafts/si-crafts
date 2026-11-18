@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from wagtail.models import Page
 
-from apps.page_tree import repair_numchild, delete_page
+from apps.page_tree import repair_numchild, delete_page, unique_slug
 
 from .models import ArticlePage
 from .serializers import ArticlePageSerializer
@@ -45,7 +45,7 @@ class ArticleWriteViewSet(viewsets.ViewSet):
 
         article = ArticlePage(
             title=data.get("title", ""),
-            slug=data.get("slug", ""),
+            slug=unique_slug(news_index, data.get("slug") or data.get("title"), fallback="article"),
             excerpt=data.get("excerpt", "") or "",
             standfirst=data.get("standfirst", "") or "",
             body=data.get("body", "") or "",
@@ -81,8 +81,8 @@ class ArticleWriteViewSet(viewsets.ViewSet):
         data = request.data
         if "title" in data:
             article.title = data["title"]
-        if "slug" in data:
-            article.slug = data["slug"]
+        if "slug" in data and data["slug"] and data["slug"] != article.slug:
+            article.slug = unique_slug(article.get_parent(), data["slug"], exclude_pk=article.pk, fallback="article")
         if "excerpt" in data:
             article.excerpt = data["excerpt"] or ""
         if "standfirst" in data:

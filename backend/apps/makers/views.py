@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from wagtail.models import Page
 
-from apps.page_tree import repair_numchild, delete_page
+from apps.page_tree import repair_numchild, delete_page, unique_slug
 
 from .models import MakerPage
 from .serializers import MakerPageSerializer
@@ -26,9 +26,10 @@ class MakerWriteViewSet(viewsets.ViewSet):
         else:
             repair_numchild(makers_index)
 
+        title = data.get("title", data.get("name", ""))
         maker = MakerPage(
-            title=data.get("title", data.get("name", "")),
-            slug=data.get("slug", ""),
+            title=title,
+            slug=unique_slug(makers_index, data.get("slug") or title, fallback="maker"),
             village=data.get("village", ""),
             province=data.get("province", ""),
             island=data.get("island", ""),
@@ -55,8 +56,8 @@ class MakerWriteViewSet(viewsets.ViewSet):
         data = request.data
         if "title" in data or "name" in data:
             maker.title = data.get("title", data.get("name", maker.title))
-        if "slug" in data:
-            maker.slug = data["slug"]
+        if "slug" in data and data["slug"] and data["slug"] != maker.slug:
+            maker.slug = unique_slug(maker.get_parent(), data["slug"], exclude_pk=maker.pk, fallback="maker")
         if "village" in data:
             maker.village = data["village"]
         if "province" in data:
