@@ -160,28 +160,24 @@ export const shortArticleGridClasses =
  */
 
 /**
- * Pill sitting on the image, top right. Set via PosterFrame's `pill` prop.
+ * Corner tag on the image, flush to the top-left corner. Set via PosterFrame's
+ * `pill` prop (product material, article tag).
  *
- * An OUTLINED chip: solid white fill, `ocean` border, `ocean` text. The solid
- * `deep-blue` fill it used to have read too strongly against the quiet card, so
- * it was softened to an outline that labels without shouting.
+ * A solid `deep-blue` label with white uppercase text, square on three corners
+ * and rounded only at the bottom-right, so it reads as a tab cut into the card
+ * corner (the card's own rounded corner clips the top-left). Solid, not
+ * outlined: product photos are `contain`-fit studio shots with white or
+ * near-white backgrounds, and an outlined or translucent chip loses its edge
+ * against exactly those. White on `deep-blue` is AAA.
  *
- * The fill is solid white, NOT transparent. Product photos are `contain`-fit
- * studio shots, which very often means a white or near-white background — a
- * transparent chip with only a border would lose its outline against exactly
- * those images. A solid white fill keeps the pill and its ocean border legible
- * over any photo, light or dark, without depending on what was uploaded. Ocean
- * text on white is 4.5:1 (AA).
- *
- * Kept as tight as the label allows: `px-xs` (12) not `px-sm` (16), and no
- * shadow. This is the ONLY thing now drawn over the photograph — the "View"
- * hover overlay was removed for exactly that reason — so it has to earn its
- * space. It does: material category and article tag are content a buyer scans,
- * not decoration.
+ * Always the same corner, so it sits in the same place on every card whatever
+ * the photo's shape. Long labels ("Shell Money Jewellery") truncate at 70% of
+ * the frame width rather than covering the photo. `text-xs` is permitted here
+ * (badge text). This is the ONLY thing drawn over the photograph — the "View"
+ * hover overlay was removed for that reason — so keep it tight.
  */
 export const posterPillClasses =
-  'inline-flex items-center rounded-full border border-ocean bg-white px-xs py-3xs text-xs font-medium capitalize text-ocean';
-
+  'inline-flex max-w-[70%] items-center rounded-br-lg bg-deep-blue px-xs py-3xs text-xs font-medium uppercase tracking-wider text-white';
 /**
  * Typography for the caption, exported so each card composes the same text
  * treatment instead of retyping the class strings (same reason `inputClasses`
@@ -307,9 +303,10 @@ export function PosterFrame({
         />
       )}
       {pill && (
-        <span className={`absolute right-xs top-xs ${posterPillClasses}`}>{pill}</span>
+        <span className={`absolute left-0 top-0 ${posterPillClasses}`}>
+          <span className="truncate">{pill}</span>
+        </span>
       )}
-
       {/* There is deliberately NO "View" overlay on the frame.
           ────────────────────────────────────────────────────────────────────
           One existed and went through three versions: a full-bleed

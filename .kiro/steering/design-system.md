@@ -767,8 +767,10 @@ there must not. Never substitute a stock photograph for a missing image — a gr
 of repeated identical photos reads as a broken page, and a real `alt` over a
 generic image tells a screen reader the wrong thing about a named maker.
 
-**The pill** (`posterPillClasses`, set via `PosterFrame`'s `pill` prop) is solid
-`deep-blue` with white text at `right-xs top-xs`. Never a white or translucent
+**The pill** (`posterPillClasses`, set via `PosterFrame`'s `pill` prop) is a corner
+tag: solid `deep-blue`, white uppercase `text-xs`, flush to the top-left corner
+(`left-0 top-0`), rounded only at the bottom-right, truncated at 70% of the frame
+width. Never a white or translucent
 pill: `contain`-fit product shots frequently have white backgrounds, so a light
 chip vanishes on exactly the images it is labelling.
 
